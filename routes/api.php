@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +23,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 Route::apiResource('regions', RegionController::class);
-// Route::apiResource('regions', RegionController::class)->except(['update']);
-// Route::post('regions/{region}/update', [RegionController::class, 'update']);
-
 Route::apiResource('branches', BranchController::class);
+Route::apiResource('mosques', MosqueController::class);

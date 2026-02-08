@@ -15,4 +15,9 @@ class Region extends Model
     {
         return $this->belongsTo(Branch::class);
     }
+
+    public function mosques()
+    {
+        return $this->hasMany(Mosque::class);
+    }
 }
