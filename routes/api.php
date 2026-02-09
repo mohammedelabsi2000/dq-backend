@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\MosqueController;
+use App\Http\Controllers\Api\RegionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
@@ -22,3 +25,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::apiResource('constant_type', ConstantTypeController::class);
 Route::apiResource('constant', ConstantController::class);
+
+Route::apiResource('regions', RegionController::class);
+Route::apiResource('branches', BranchController::class);
+Route::apiResource('mosques', MosqueController::class);
