@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\GradeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ConstantTypeController;
+use App\Http\Controllers\Api\ConstantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,8 +25,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::apiResource('constant_type', ConstantTypeController::class);
+Route::apiResource('constant', ConstantController::class);
 
 Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('grades', GradeController::class);
+Route::apiResource('centers', CenterController::class);
