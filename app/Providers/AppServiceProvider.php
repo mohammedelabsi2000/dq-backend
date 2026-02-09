@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\AuditObserver;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Blueprint;
 use Database\BlueprintMacros\AuditColumns;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,7 +34,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
         // Model::observe(AuditObserver::class);
         AuditColumns::register();
     }
