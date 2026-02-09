@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\MosqueController;
@@ -33,3 +33,4 @@ Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('grades', GradeController::class);
 Route::apiResource('centers', CenterController::class);
+Route::apiResource('users', UserController::class);

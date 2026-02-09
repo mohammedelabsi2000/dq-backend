@@ -12,10 +12,22 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
+        'fName',
+        'sName',
+        'thName',
+        'family',
         'name',
+        'dob',
+        'mosque_id',
+        'location',
+        'gender',
+        'marital_status_id',
+        'numChildren',
+        'identity',
+        'phone',
+        'whatsapp',
         'email',
         'password',
-
         'fName',
         'sName',
         'thName',
@@ -34,6 +46,11 @@ class User extends Authenticatable
         'job_salary',
         'image',
         'prefix_name_id',
+        'jobname',
+        'job_place',
+        'job_salary',
+        'prefix_name_id',
+        // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
 
     protected $hidden = [
@@ -53,17 +70,29 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
+
+    // =======================
+    // العلاقات (Relationships)
+    // =======================
+
+    // علاقة المستخدم بالمسجد
+
     public function mosque()
     {
         return $this->belongsTo(Mosque::class);
     }
 
+    // علاقة المستخدم بالحالة الاجتماعية
     public function maritalStatus()
     {
         return $this->belongsTo(Constant::class, 'marital_status_id');
     }
 
     public function prefixName()
+    // علاقة المستخدم بالبادئة (prefix)
+    }
+
+    public function prefix()
     {
         return $this->belongsTo(Constant::class, 'prefix_name_id');
     }
@@ -87,4 +116,12 @@ public function image()
     {
         return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
     }
+
+    // لو عندك جدول للصور وتضيف image_id لاحقًا
+    /*
+    public function image()
+    {
+        return $this->belongsTo(Image::class);
+    }
+    */
 }
