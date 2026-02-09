@@ -5,6 +5,8 @@ use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\ConstantTypeController;
+use App\Http\Controllers\Api\ConstantController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::apiResource('constant_type', ConstantTypeController::class);
+Route::apiResource('constant', ConstantController::class);
 
 Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
