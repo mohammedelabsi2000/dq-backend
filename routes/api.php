@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\GradeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,4 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
+Route::apiResource('grades', GradeController::class);
