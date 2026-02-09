@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->text('notes')->nullable();
 
             // audit columns (macro)
-            $table->auditColumns();
+            // $table->auditColumns();
         });
     }
 

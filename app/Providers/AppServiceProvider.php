@@ -40,6 +40,6 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
         // Model::observe(AuditObserver::class);
-        AuditColumns::register();
+        // AuditColumns::register();
     }
 }
