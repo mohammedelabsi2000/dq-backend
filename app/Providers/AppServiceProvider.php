@@ -3,10 +3,15 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+// use App\Observers\AuditObserver;
+use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Schema\Blueprint;
+use Database\BlueprintMacros\AuditColumns;
 use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
+
     /**
      * Register any application services.
      *
@@ -14,7 +19,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+
+        // Blueprint::macro('addAuditColumns', function () {
+        //     // $this->unsignedBigInteger('created_by')->nullable();
+        //     // $this->unsignedBigInteger('updated_by')->nullable();
+        // });
+
+        // AuditColumns::register();
+
     }
 
     /**
@@ -26,5 +38,8 @@ class AppServiceProvider extends ServiceProvider
     {
             Schema::defaultStringLength(191);
 
+        // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
+        // Model::observe(AuditObserver::class);
+        // AuditColumns::register();
     }
 }
