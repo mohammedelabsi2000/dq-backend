@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,33 +11,80 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
+
+        'fName',
+        'sName',
+        'thName',
+        'family',
+        'dob',
+        'mosque_id',
+        'location',
+        'gender',
+        'marital_status_id',
+        'numChildren',
+        'identity',
+        'phone',
+        'whatsapp',
+        'jobname',
+        'job_place',
+        'job_salary',
+        'image',
+        'prefix_name_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'dob' => 'date',
+        'job_salary' => 'decimal:2',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function mosque()
+    {
+        return $this->belongsTo(Mosque::class);
+    }
+
+    public function maritalStatus()
+    {
+        return $this->belongsTo(Constant::class, 'marital_status_id');
+    }
+
+    public function prefixName()
+    {
+        return $this->belongsTo(Constant::class, 'prefix_name_id');
+    }
+
+    public function imageData()
+    {
+        return $this->belongsTo(Image::class, 'image');
+    }
+public function image()
+{
+    return $this->belongsTo(Image::class);
+}
+
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getFullNameAttribute()
+    {
+        return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
+    }
 }
