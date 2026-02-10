@@ -41,27 +41,5 @@ class AppServiceProvider extends ServiceProvider
 
         // Model::observe(AuditObserver::class);
         // AuditColumns::register();
-        Blueprint::macro('auditColumns', function () {
-            /** @var Blueprint $this */
-
-            $this->timestamps();
-
-            $this->foreignId('created_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $this->foreignId('updated_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-
-            $this->softDeletes();
-
-            $this->foreignId('deleted_by')
-                ->nullable()
-                ->constrained('users')
-                ->nullOnDelete();
-        });
     }
 }

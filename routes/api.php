@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
+use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
 
@@ -53,4 +54,5 @@ Route::prefix('plan-levels/{plan_level}')->group(function () {
 });
 Route::apiResource('grades', GradeController::class);
 Route::apiResource('centers', CenterController::class);
+Route::apiResource('halaqas', HalaqaController::class);
 Route::apiResource('users', UserController::class);

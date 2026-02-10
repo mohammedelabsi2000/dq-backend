@@ -13,7 +13,7 @@ class StoreHalaqaRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,12 @@ class StoreHalaqaRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+
+            'center_id' => ['required', 'integer', 'exists:centers,id'],
+            'constant_id' => ['required', 'integer', 'exists:constants,id'], // غيّر constants لاسم جدول الثوابت
         ];
     }
 }

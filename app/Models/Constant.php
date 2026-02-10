@@ -29,4 +29,9 @@ class Constant extends Model
     {
         return $this->hasMany(Constant::class, 'parent_id');
     }
+
+    public function halaqat()
+    {
+        return $this->hasMany(Halaqa::class);
+    }
 }
