@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\BranchController;
+use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
+use App\Http\Controllers\Api\GradeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
@@ -32,9 +34,6 @@ Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('plans', PlanController::class);
-// Route::delete('plans/{id}/force', [PlanController::class, 'forceDelete']);
-// Route::get('plans/trashed', [PlanController::class, 'trashed']);
-// Route::post('plans/{id}/restore', [PlanController::class, 'restore']);
 
 
 // soft delete helpers
@@ -52,3 +51,5 @@ Route::prefix('plan-levels/{plan_level}')->group(function () {
     Route::post('restore', [PlanLevelController::class, 'restore']);
     Route::delete('force', [PlanLevelController::class, 'forceDelete']);
 });
+Route::apiResource('grades', GradeController::class);
+Route::apiResource('centers', CenterController::class);
