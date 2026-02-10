@@ -16,13 +16,13 @@ class PlanLevelController extends Controller
     {
         $query = PlanLevel::with(['plan', 'timeUnit', 'maxTimeUnit', 'minTimeUnit']);
 
-        if ($request->boolean('with_trashed')) {
-            $query->withTrashed();
-        }
+        // if ($request->boolean('with_trashed')) {
+        //     $query->withTrashed();
+        // }
 
-        if ($request->boolean('only_trashed')) {
-            $query->onlyTrashed();
-        }
+        // if ($request->boolean('only_trashed')) {
+        //     $query->onlyTrashed();
+        // }
 
         return $query->orderBy('level_order')->paginate(10);
     }

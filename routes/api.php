@@ -48,7 +48,7 @@ Route::apiResource('plan-levels', PlanLevelController::class);
 
 // Soft delete helpers
 Route::prefix('plan-levels/{plan_level}')->group(function () {
-    Route::post('trashed', [PlanLevelController::class, 'trashed']);
+    // Route::post('trashed', [PlanLevelController::class, 'trashed']);
     Route::post('restore', [PlanLevelController::class, 'restore']);
     Route::delete('force', [PlanLevelController::class, 'forceDelete']);
 });
