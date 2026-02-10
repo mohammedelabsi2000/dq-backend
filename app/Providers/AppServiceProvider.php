@@ -10,7 +10,7 @@ use App\Observers\AuditObserver;
 use Illuminate\Database\Eloquent\Model;
 // use Illuminate\Database\Schema\Blueprint;
 use Database\BlueprintMacros\AuditColumns;
-use Illuminate\Support\Facades\Schema;
+// use Illuminate\Support\Facades\Schema;
 
 
 class AppServiceProvider extends ServiceProvider

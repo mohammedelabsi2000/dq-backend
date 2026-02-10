@@ -88,23 +88,23 @@ class User extends Authenticatable
         return $this->belongsTo(Constant::class, 'marital_status_id');
     }
 
-    public function prefixName()
-    // علاقة المستخدم بالبادئة (prefix)
-    }
+    // public function prefixName()
+    // // علاقة المستخدم بالبادئة (prefix)
+    // }
 
     public function prefix()
     {
         return $this->belongsTo(Constant::class, 'prefix_name_id');
     }
 
-    public function imageData()
-    {
-        return $this->belongsTo(Image::class, 'image');
-    }
-public function image()
-{
-    return $this->belongsTo(Image::class);
-}
+//     public function imageData()
+//     {
+//         return $this->belongsTo(Image::class, 'image');
+//     }
+// public function image()
+// {
+//     return $this->belongsTo(Image::class);
+// }
 
     /*
     |--------------------------------------------------------------------------
