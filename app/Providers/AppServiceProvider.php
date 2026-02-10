@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+
 use App\Observers\AuditObserver;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Blueprint;
 use Database\BlueprintMacros\AuditColumns;
+use Illuminate\Database\Schema\Blueprint;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,7 +37,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
+        Schema::defaultStringLength(191);
+
         // Model::observe(AuditObserver::class);
         // AuditColumns::register();
     }
