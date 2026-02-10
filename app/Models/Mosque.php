@@ -15,4 +15,9 @@ class Mosque extends Model
     {
         return $this->belongsTo(Region::class);
     }
+
+    public function centers()
+    {
+        return $this->hasMany(Center::class);
+    }
 }
