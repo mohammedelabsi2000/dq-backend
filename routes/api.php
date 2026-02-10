@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
+use App\Http\Controllers\Api\HalaqaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +32,4 @@ Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('centers', CenterController::class);
+Route::apiResource('halaqas', HalaqaController::class);

@@ -37,6 +37,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
         // Model::observe(AuditObserver::class);
-        AuditColumns::register();
+        // AuditColumns::register();
     }
 }
