@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Observers\AuditObserver;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Schema\Blueprint;
 use Database\BlueprintMacros\AuditColumns;
+use Illuminate\Database\Schema\Blueprint;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,8 +38,30 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Schema::defaultStringLength(191);
-        // dd(class_exists(\Database\BlueprintMacros\AuditColumns::class));
+
         // Model::observe(AuditObserver::class);
         // AuditColumns::register();
+        Blueprint::macro('auditColumns', function () {
+            /** @var Blueprint $this */
+
+            $this->timestamps();
+
+            $this->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $this->foreignId('updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $this->softDeletes();
+
+            $this->foreignId('deleted_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+        });
     }
 }
