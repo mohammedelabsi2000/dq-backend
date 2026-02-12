@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AcademicQualification extends Model
 {
+        protected $appends = ['full_name']; // رح يظهر تلقائياً لو حولنا الموديل لـ JSON
+
     use HasFactory;
     use SoftDeletes;
     protected $fillable = [
@@ -28,6 +30,14 @@ class AcademicQualification extends Model
     {
         return $this->belongsTo(Constant::class, 'academic_degree_id');
     }
+ public function getPersonNameAttribute()
+{
+    if ($this->person) {
+        // مثال: إذا الشخص عنده fname و lname
+        return $this->person->fname . ' ' . $this->person->lname;
+    }
+    return $this->person_type . ' #' . $this->person_id; // fallback
+}
 
     public function major()
     {
@@ -38,4 +48,6 @@ class AcademicQualification extends Model
     {
         return $this->morphTo();
     }
+
+
 }

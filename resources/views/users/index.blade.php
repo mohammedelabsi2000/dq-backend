@@ -22,7 +22,7 @@
                     <input type="text" name="search" class="form-control" placeholder="اسم، بريد، جوال..." value="{{ request('search') }}">
                 </div>
             </div>
-            
+
             <div class="col-md-2">
                 <label class="form-label">الجنس</label>
                 <select name="gender" class="form-select">
@@ -31,7 +31,7 @@
                     <option value="female" {{ request('gender') == 'female' ? 'selected' : '' }}>أنثى</option>
                 </select>
             </div>
-            
+
             <div class="col-md-2">
                 <label class="form-label">المسجد</label>
                 <select name="mosque_id" class="form-select">
@@ -43,7 +43,7 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <div class="col-md-2">
                 <label class="form-label">الحالة الاجتماعية</label>
                 <select name="marital_status_id" class="form-select">
@@ -55,7 +55,7 @@
                     @endforeach
                 </select>
             </div>
-            
+
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="fas fa-filter me-1"></i> تصفية
@@ -87,8 +87,8 @@
                         <td>{{ $user->id }}</td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img src="https://ui-avatars.com/api/?name={{ $user->name }}&size=40&background=1e4a6b&color=fff" 
-                                     class="avatar me-2" 
+                                <img src="https://ui-avatars.com/api/?name={{ $user->name }}&size=40&background=1e4a6b&color=fff"
+                                     class="avatar me-2"
                                      style="width: 40px; height: 40px;">
                                 <div>
                                     <strong>{{ $user->name }}</strong>
@@ -147,7 +147,7 @@
             </table>
         </div>
     </div>
-    
+
     @if(isset($users) && $users->hasPages())
     <div class="card-footer">
         {{ $users->links() }}

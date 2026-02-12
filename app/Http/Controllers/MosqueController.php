@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Mosque;
-use App\Models\Branch;
 use App\Models\Region;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +13,7 @@ class MosqueController extends Controller
     // ==================== MOSQUE CONTROLLER ====================
 
     /**
-     * Display mosques list
+     * Display a listing of mosques
      */
     public function index(Request $request)
     {
@@ -24,9 +24,7 @@ class MosqueController extends Controller
         }
 
         if ($request->filled('branch_id')) {
-            $query->whereHas('region', function ($q) use ($request) {
-                $q->where('branch_id', $request->branch_id);
-            });
+            $query->whereHas('region', fn($q) => $q->where('branch_id', $request->branch_id));
         }
 
         if ($request->filled('region_id')) {
@@ -42,18 +40,18 @@ class MosqueController extends Controller
     }
 
     /**
-     * Show create mosque form
+     * Show form to create a new mosque
      */
     public function create()
     {
         $regions = Region::with('branch')->get();
-        return view('mosques.form', compact('regions'));
+        return view('mosques.create', compact('regions'));
     }
 
     /**
-     * Store new mosque
+     * Store a new mosque
      */
-    public function storeMosque(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -70,29 +68,26 @@ class MosqueController extends Controller
     /**
      * Show mosque details
      */
-    public function showMosque($id)
+    public function show(Mosque $mosque)
     {
-        $mosque = Mosque::with(['region.branch', 'centers', 'users'])->findOrFail($id);
+        $mosque->load(['region.branch', 'centers', 'users']);
         return view('mosques.show', compact('mosque'));
     }
 
     /**
-     * Show edit mosque form
+     * Show form to edit mosque
      */
-    public function editMosque($id)
+    public function edit(Mosque $mosque)
     {
-        $mosque = Mosque::findOrFail($id);
         $regions = Region::with('branch')->get();
-        return view('mosques.form', compact('mosque', 'regions'));
+        return view('mosques.edit', compact('mosque', 'regions'));
     }
 
     /**
      * Update mosque
      */
-    public function updateMosque(Request $request, $id)
+    public function update(Request $request, Mosque $mosque)
     {
-        $mosque = Mosque::findOrFail($id);
-
         $request->validate([
             'name' => 'required|string|max:255',
             'region_id' => 'required|exists:regions,id',
@@ -101,21 +96,18 @@ class MosqueController extends Controller
 
         $mosque->update($request->all());
 
-        return redirect()->route('mosques.show', $mosque->id)
+        return redirect()->route('mosques.show', $mosque)
             ->with('success', 'تم تحديث المسجد بنجاح');
     }
 
     /**
      * Delete mosque
      */
-    public function destroyMosque($id)
+    public function destroy(Mosque $mosque)
     {
-        $mosque = Mosque::findOrFail($id);
-
         DB::beginTransaction();
 
         try {
-            // Check if mosque has related data
             if ($mosque->centers()->count() > 0) {
                 return back()->with('error', 'لا يمكن حذف المسجد لوجود مراكز تابعة له');
             }
@@ -140,7 +132,7 @@ class MosqueController extends Controller
     /**
      * Get mosques by region (AJAX)
      */
-    public function getMosquesByRegion($regionId)
+    public function getByRegion($regionId)
     {
         $mosques = Mosque::where('region_id', $regionId)->get(['id', 'name']);
         return response()->json($mosques);
@@ -149,7 +141,7 @@ class MosqueController extends Controller
     /**
      * Search mosques (AJAX)
      */
-    public function searchMosques(Request $request)
+    public function search(Request $request)
     {
         $query = $request->get('q');
         $mosques = Mosque::where('name', 'like', "%{$query}%")->limit(10)->get(['id', 'name']);
