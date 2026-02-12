@@ -18,6 +18,12 @@ class Constant extends Model
         'notes',
     ];
 
+    // العلاقة مع نوع الثابت
+    public function type()
+    {
+        return $this->belongsTo(ConstantType::class, 'constant_type_id');
+    }
+
     // العلاقة مع الثابت الأب
     public function parent()
     {
