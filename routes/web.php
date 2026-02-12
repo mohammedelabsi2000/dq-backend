@@ -31,7 +31,7 @@ use App\Http\Controllers\{
 */
 
 Route::get('/', function () {
-    return view('dashboard');
+    return view('welcome');
 });
 
 Route::resource('branches', ApiBranchController::class);

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreHalaqaRequest;
+use App\Http\Requests\UpdateHalaqaRequest;
+use App\Models\Halaqa;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
@@ -12,9 +15,27 @@ class HalaqaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Halaqa::query();
+
+        if ($request->filled('center_id')) {
+            $query->where('center_id', $request->integer('center_id'));
+        }
+
+        if ($request->filled('constant_id')) {
+            $query->where('constant_id', $request->integer('constant_id'));
+        }
+
+        if ($request->boolean('with_center')) {
+            $query->with('center');
+        }
+
+        if ($request->boolean('with_constant')) {
+            $query->with('constant');
+        }
+
+        return response()->json($query->latest()->paginate(15), 200);
     }
 
     /**
@@ -23,9 +44,14 @@ class HalaqaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreHalaqaRequest $request)
     {
-        //
+        $halaqa = Halaqa::create($request->validated());
+
+        return response()->json([
+            'message' => 'Halaqa created successfully',
+            'data' => $halaqa
+        ], 201);
     }
 
     /**
@@ -34,10 +60,36 @@ class HalaqaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, Halaqa $halaqa)
     {
-        //
+        if ($request->boolean('with_center')) {
+            $halaqa->load('center');
+        }
+
+        if ($request->boolean('with_constant')) {
+            $halaqa->load('constant');
+        }
+
+
+        return response()->json($halaqa, 200);
     }
+
+    // public function show(Request $request, $id)
+    // {
+    //     $query = Halaqa::query();
+
+    //     if ($request->boolean('with_center')) {
+    //         $query->with('center');
+    //     }
+
+    //     if ($request->boolean('with_constant')) {
+    //         $query->with('constant');
+    //     }
+
+    //     $halaqa = $query->findOrFail($id);
+
+    //     return response()->json($halaqa, 200);
+    // }
 
     /**
      * Update the specified resource in storage.
@@ -46,9 +98,14 @@ class HalaqaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UpdateHalaqaRequest $request, Halaqa $halaqa)
     {
-        //
+        $halaqa->update($request->validated());
+
+        return response()->json([
+            'message' => 'Halaqa updated successfully',
+            'data' => $halaqa
+        ], 200);
     }
 
     /**
@@ -57,8 +114,10 @@ class HalaqaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Halaqa $halaqa)
     {
-        //
+        $halaqa->delete();
+
+        return response()->json(['message' => 'Halaqa deleted successfully'], 200);
     }
 }

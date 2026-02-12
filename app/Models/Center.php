@@ -15,4 +15,9 @@ class Center extends Model
     {
         return $this->belongsTo(Mosque::class);
     }
+
+    public function halaqat()
+    {
+        return $this->hasMany(Halaqa::class);
+    }
 }
