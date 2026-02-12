@@ -12,24 +12,18 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('constants', function (Blueprint $table) {
-
+        Schema::create('personal_courses', function (Blueprint $table) {
             $table->id();
-
-            $table->string('name', 150); // اسم الثابت
-            
-            $table->foreignId('constant_type_id')
-                ->constrained('constant_types')
-                ->cascadeOnDelete();
-
-            $table->foreignId('parent_id')
-                ->nullable()
-                ->constrained('constants')
-                ->nullOnDelete();
-
-            $table->boolean('is_active')->default(true);
-
+            $table->string('course_name');
             $table->text('notes')->nullable();
+            $table->integer('hours')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('place')->nullable();
+            $table->string('certificate_link')->nullable();
+            $table->foreignId('type_id')->constrained('constants')->onDelete('cascade');
+
+            // Polymorphic relation
+            $table->morphs('person');
 
             // audit columns (macro)
             $table->auditColumns();
@@ -43,6 +37,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('constants');
+        Schema::dropIfExists('personal_courses');
     }
 };

@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Controllers\Api\AcademicQualificationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CenterController;
@@ -9,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
+use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
@@ -56,3 +59,10 @@ Route::apiResource('grades', GradeController::class);
 Route::apiResource('centers', CenterController::class);
 Route::apiResource('halaqas', HalaqaController::class);
 Route::apiResource('users', UserController::class);
+
+Route::apiResource(
+    'academic-qualifications',
+    AcademicQualificationController::class
+);
+
+Route::apiResource('personal-courses', PersonalCourseController::class);

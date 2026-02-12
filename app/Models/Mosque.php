@@ -20,4 +20,12 @@ class Mosque extends Model
     {
         return $this->hasMany(Center::class);
     }
+
+    /**
+     * العلاقة مع المستخدمين
+     */
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

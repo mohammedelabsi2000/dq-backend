@@ -91,4 +91,13 @@ class User extends Authenticatable
         return $this->belongsTo(Image::class);
     }
     */
+
+    public function academicQualifications()
+    {
+        return $this->morphMany(AcademicQualification::class, 'person');
+    }
+    public function personalCourses()
+    {
+        return $this->morphMany(PersonalCourse::class, 'person');
+    }
 }
