@@ -22,8 +22,8 @@
             @foreach($branches as $branch)
                 <tr>
                     <td>{{ $branch->name }}</td>
-                    <td>{{ $branch->min_delete }}</td>
-                    <td>{{ $branch->min_replace }}</td>
+                    <td>{{ $branch->min_replacement_limit }}</td>
+                    <td>{{ $branch->max_replacement_limit }}</td>
                     <td>
                         <a href="{{ route('branches.edit', $branch->id) }}" class="btn btn-primary btn-sm">تعديل</a>
 

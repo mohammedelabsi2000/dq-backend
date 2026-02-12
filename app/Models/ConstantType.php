@@ -17,4 +17,5 @@ class ConstantType extends Model
         'updated_by',
         'deleted_by',
     ];
+
 }
