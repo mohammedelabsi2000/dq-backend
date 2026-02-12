@@ -13,7 +13,7 @@ class UpdateHalaqaRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,12 @@ class UpdateHalaqaRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'location' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'description' => ['sometimes', 'nullable', 'string'],
+
+            'center_id' => ['sometimes', 'required', 'integer', 'exists:centers,id'],
+            'constant_id' => ['sometimes', 'required', 'integer', 'exists:constants,id'], // غيّر constants
         ];
     }
 }
