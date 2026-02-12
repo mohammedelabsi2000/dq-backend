@@ -24,6 +24,12 @@ class Constant extends Model
         return $this->belongsTo(ConstantType::class, 'constant_type_id');
     }
 
+    // العلاقة مع نوع الثابت
+    public function constantType()
+    {
+        return $this->belongsTo(ConstantType::class, 'constant_type_id');
+    }
+
     // العلاقة مع الثابت الأب
     public function parent()
     {
