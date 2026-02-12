@@ -40,7 +40,6 @@ class User extends Authenticatable
         'prefix_name_id',
         // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
