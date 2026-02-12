@@ -34,6 +34,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Route::resource('branches', BranchController::class);
 Route::resource('branches', ApiBranchController::class);
 
 
