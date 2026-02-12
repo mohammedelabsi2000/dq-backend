@@ -310,7 +310,7 @@
                                                 </div>
                                                 <div class="col-md-2">
                                                     <input type="date" name="qualifications[{{ $index }}][date_graduate]" class="form-control" 
-                                                           value="{{ $qualification->date_graduate->format('Y-m-d') ?? '' }}" placeholder="تاريخ التخرج">
+                                                           value="{{ $qualification->date_graduate ?? '' }}" placeholder="تاريخ التخرج">
                                                 </div>
                                                 <div class="col-md-3">
                                                     <input type="text" name="qualifications[{{ $index }}][educational_institution]" class="form-control" 

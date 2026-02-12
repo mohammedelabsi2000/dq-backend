@@ -171,7 +171,7 @@
                             </small>
                             <br>
                             <small class="text-primary">
-                                تاريخ التخرج: {{ $qualification->date_graduate ? $qualification->date_graduate->format('Y/m/d') : '--' }}
+                                تاريخ التخرج: {{ $qualification->date_graduate ? $qualification->date_graduate : '--' }}
                             </small>
                         </div>
                     @endforeach
