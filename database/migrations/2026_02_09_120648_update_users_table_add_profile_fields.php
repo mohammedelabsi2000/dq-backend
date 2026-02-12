@@ -21,9 +21,9 @@ return new class extends Migration
             // Mosque FK
             $table->unsignedBigInteger('mosque_id')->nullable()->after('dob');
             $table->foreign('mosque_id')
-                  ->references('id')
-                  ->on('mosques')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('mosques')
+                ->nullOnDelete();
 
             $table->string('location')->nullable()->after('mosque_id');
 
@@ -32,9 +32,9 @@ return new class extends Migration
             // Marital Status FK (constants)
             $table->unsignedBigInteger('marital_status_id')->nullable()->after('gender');
             $table->foreign('marital_status_id')
-                  ->references('id')
-                  ->on('constants')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('constants')
+                ->nullOnDelete();
 
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
@@ -46,22 +46,22 @@ return new class extends Migration
             $table->string('job_place')->nullable()->after('jobname');
             $table->decimal('job_salary', 10, 2)->nullable()->after('job_place');
 
-          // Image FK
-// $table->unsignedBigInteger('image_id')->nullable()->after('job_salary');
+            // Image FK
+            // $table->unsignedBigInteger('image_id')->nullable()->after('job_salary');
 
-// $table->foreignId('image_id')
-//       ->nullable()
-//       ->constrained('images')
-//       ->nullOnDelete()
-//       ->after('job_salary');
+            // $table->foreignId('image_id')
+            //       ->nullable()
+            //       ->constrained('images')
+            //       ->nullOnDelete()
+            //       ->after('job_salary');
 
 
             // Prefix FK (constants)
             $table->unsignedBigInteger('prefix_name_id')->nullable();
             $table->foreign('prefix_name_id')
-                  ->references('id')
-                  ->on('constants')
-                  ->nullOnDelete();
+                ->references('id')
+                ->on('constants')
+                ->nullOnDelete();
         });
     }
 
