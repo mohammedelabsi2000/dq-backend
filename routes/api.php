@@ -15,6 +15,7 @@ use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
+use App\Http\Controllers\Api\StudentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,3 +67,4 @@ Route::apiResource(
 );
 
 Route::apiResource('personal-courses', PersonalCourseController::class);
+Route::apiResource('students', StudentController::class);

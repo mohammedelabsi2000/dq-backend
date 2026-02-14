@@ -40,7 +40,7 @@ return new class extends Migration {
 
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
-            $table->string('identity', 50)->nullable()->after('password');
+            $table->string('identity', 50)->nullable()->unique()->after('password');
             $table->string('phone', 50)->nullable()->after('identity');
             $table->string('whatsapp', 50)->nullable()->after('phone');
 
