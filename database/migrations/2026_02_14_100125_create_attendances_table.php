@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->morphs('attendable'); // attendable_id & attendable_type
-            $table->foreignId('halaqa_id')->constrained('halaqa')->onDelete('cascade');
+            $table->foreignId('halaqa_id')->constrained('halaqas')->onDelete('cascade');
             $table->date('date');
             $table->foreignId('status_id')->constrained('constants')->onDelete('cascade');
             $table->text('notes')->nullable();

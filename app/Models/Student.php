@@ -61,4 +61,9 @@ class Student extends Model
     {
         return $this->belongsTo(User::class, 'guardian_user_id', 'identity');
     }
+
+    public function attendances()
+    {
+        return $this->morphMany(Attendance::class, 'attendable');
+    }
 }
