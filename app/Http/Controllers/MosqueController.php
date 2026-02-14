@@ -16,7 +16,6 @@ class MosqueController extends Controller
      * Display a listing of mosques
      */
     public function index(Request $request)
-    public function index()
     {
         $query = Mosque::with(['region.branch', 'centers', 'users']);
 
