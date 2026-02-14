@@ -1,73 +1,54 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Mosque;
-use App\Models\Branch;
-use App\Models\Region;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $branches = Branch::all();
-        $mosques = Mosque::latest()->get();
-        return view('mosques.index', compact('branches', 'mosques'));
+        $mosques = Mosque::all(); // Fetch all mosques
+        return response()->json($mosques);
     }
 
-    public function getRegions(Request $request)
+    public function getRegions()
     {
-        $regions = Region::where('branch_id', $request->branch_id)->get();
-        return response()->json($regions);
+        // Implement logic to get regions
+        return response()->json([]); // Placeholder
     }
 
     public function search(Request $request)
     {
-        $mosques = Mosque::where('name', 'like', '%' . $request->q . '%')
-            ->orWhereHas('region.branch', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->q . '%');
-            })->latest()->get();
-        return view('mosques.partials.table', compact('mosques'))->render();
+        $searchTerm = $request->input('term');
+        $mosques = Mosque::where('name', 'LIKE', "%{$searchTerm}%")->get();
+        return response()->json($mosques);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name.*' => 'required|string|max:255',
-            'region_id.*' => 'required|exists:regions,id'
-        ]);
-
-        foreach ($request->name as $i => $name) {
-            Mosque::create([
-                'name' => $name,
-                'notes' => $request->notes[$i] ?? null,
-                'region_id' => $request->region_id[$i]
-            ]);
-        }
-        return response()->json(['success' => true]);
+        $mosque = Mosque::create($request->all());
+        return response()->json($mosque, 201);
     }
 
-    public function update(Request $request, Mosque $mosque)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'region_id' => 'required|exists:regions,id'
-        ]);
-        $mosque->update($request->only('name', 'notes', 'region_id'));
-        return response()->json(['success' => true]);
+        $mosque = Mosque::findOrFail($id);
+        $mosque->update($request->all());
+        return response()->json($mosque);
     }
 
-    public function destroy(Mosque $mosque)
+    public function destroy($id)
     {
+        $mosque = Mosque::findOrFail($id);
         $mosque->delete();
-        return response()->json(['success' => true]);
+        return response()->json(null, 204);
     }
 
     public function destroyMultiple(Request $request)
     {
-        Mosque::whereIn('id', $request->ids)->delete();
-        return response()->json(['success' => true]);
+        $ids = $request->input('ids');
+        Mosque::destroy($ids);
+        return response()->json(null, 204);
     }
 }
