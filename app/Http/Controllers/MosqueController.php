@@ -10,149 +10,64 @@ use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
-    // ==================== MOSQUE CONTROLLER ====================
-
-    /**
-     * Display mosques list
-     */
-    public function index(Request $request)
+    public function index()
     {
-        $query = Mosque::with(['region.branch', 'centers', 'users']);
-
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->filled('branch_id')) {
-            $query->whereHas('region', function ($q) use ($request) {
-                $q->where('branch_id', $request->branch_id);
-            });
-        }
-
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->region_id);
-        }
-
-        $mosques = $query->withCount(['centers', 'users'])->latest()->paginate(15);
-
         $branches = Branch::all();
-        $regions = Region::all();
-
-        return view('mosques.index', compact('mosques', 'branches', 'regions'));
+        $mosques = Mosque::latest()->get();
+        return view('mosques.index', compact('branches', 'mosques'));
     }
 
-    /**
-     * Show create mosque form
-     */
-    public function create()
+    public function getRegions(Request $request)
     {
-        $regions = Region::with('branch')->get();
-        return view('mosques.form', compact('regions'));
+        $regions = Region::where('branch_id', $request->branch_id)->get();
+        return response()->json($regions);
     }
 
-    /**
-     * Store new mosque
-     */
-    public function storeMosque(Request $request)
+    public function search(Request $request)
+    {
+        $mosques = Mosque::where('name', 'like', '%' . $request->q . '%')
+            ->orWhereHas('region.branch', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->q . '%');
+            })->latest()->get();
+        return view('mosques.partials.table', compact('mosques'))->render();
+    }
+
+    public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'region_id' => 'required|exists:regions,id',
-            'notes' => 'nullable|string',
+            'name.*' => 'required|string|max:255',
+            'region_id.*' => 'required|exists:regions,id'
         ]);
 
-        Mosque::create($request->all());
-
-        return redirect()->route('mosques.index')
-            ->with('success', 'تم إضافة المسجد بنجاح');
-    }
-
-    /**
-     * Show mosque details
-     */
-    public function showMosque($id)
-    {
-        $mosque = Mosque::with(['region.branch', 'centers', 'users'])->findOrFail($id);
-        return view('mosques.show', compact('mosque'));
-    }
-
-    /**
-     * Show edit mosque form
-     */
-    public function editMosque($id)
-    {
-        $mosque = Mosque::findOrFail($id);
-        $regions = Region::with('branch')->get();
-        return view('mosques.form', compact('mosque', 'regions'));
-    }
-
-    /**
-     * Update mosque
-     */
-    public function updateMosque(Request $request, $id)
-    {
-        $mosque = Mosque::findOrFail($id);
-
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'region_id' => 'required|exists:regions,id',
-            'notes' => 'nullable|string',
-        ]);
-
-        $mosque->update($request->all());
-
-        return redirect()->route('mosques.show', $mosque->id)
-            ->with('success', 'تم تحديث المسجد بنجاح');
-    }
-
-    /**
-     * Delete mosque
-     */
-    public function destroyMosque($id)
-    {
-        $mosque = Mosque::findOrFail($id);
-
-        DB::beginTransaction();
-
-        try {
-            // Check if mosque has related data
-            if ($mosque->centers()->count() > 0) {
-                return back()->with('error', 'لا يمكن حذف المسجد لوجود مراكز تابعة له');
-            }
-
-            if ($mosque->users()->count() > 0) {
-                return back()->with('error', 'لا يمكن حذف المسجد لوجود مستخدمين مرتبطين به');
-            }
-
-            $mosque->delete();
-
-            DB::commit();
-
-            return redirect()->route('mosques.index')
-                ->with('success', 'تم حذف المسجد بنجاح');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'حدث خطأ أثناء حذف المسجد: ' . $e->getMessage());
+        foreach ($request->name as $i => $name) {
+            Mosque::create([
+                'name' => $name,
+                'notes' => $request->notes[$i] ?? null,
+                'region_id' => $request->region_id[$i]
+            ]);
         }
+        return response()->json(['success' => true]);
     }
 
-    /**
-     * Get mosques by region (AJAX)
-     */
-    public function getMosquesByRegion($regionId)
+    public function update(Request $request, Mosque $mosque)
     {
-        $mosques = Mosque::where('region_id', $regionId)->get(['id', 'name']);
-        return response()->json($mosques);
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'region_id' => 'required|exists:regions,id'
+        ]);
+        $mosque->update($request->only('name', 'notes', 'region_id'));
+        return response()->json(['success' => true]);
     }
 
-    /**
-     * Search mosques (AJAX)
-     */
-    public function searchMosques(Request $request)
+    public function destroy(Mosque $mosque)
     {
-        $query = $request->get('q');
-        $mosques = Mosque::where('name', 'like', "%{$query}%")->limit(10)->get(['id', 'name']);
-        return response()->json($mosques);
+        $mosque->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function destroyMultiple(Request $request)
+    {
+        Mosque::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => true]);
     }
 }
