@@ -274,7 +274,8 @@
                     <i class="fas fa-cogs"></i>
                     الثوابت
                 </a>
-                <a class="nav-link {{ request()->routeIs('constant-types.*') ? 'active' : '' }}" href="#">
+                <a class="nav-link {{ request()->routeIs('constant-types.*') ? 'active' : '' }}"
+                      href="{{ route('constant-types.index') }}">
                     <i class="fas fa-tags"></i>
                     أنواع الثوابت
                 </a>

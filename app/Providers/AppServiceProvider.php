@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Schema;
 use App\Observers\AuditObserver;
 use Illuminate\Database\Eloquent\Model;
 
-use Database\BlueprintMacros\AuditColumns;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
 
@@ -46,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
 
 
         Schema::defaultStringLength(191);
+        Paginator::useBootstrap();
+
 
         // Model::observe(AuditObserver::class);
         // AuditColumns::register();

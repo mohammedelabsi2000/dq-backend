@@ -2,91 +2,91 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
 use App\Models\Region;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
+    /**
+     * Display a listing of regions.
+     */
     public function index()
     {
-        $regions = Region::with('branch')->latest()->get();
-        $branches = Branch::all(); // لاختيار الفرع عند الإضافة
-        return view('regions.index', compact('regions', 'branches'));
+        $regions = Region::with('branch')->latest()->paginate(15);
+        return view('regions.index', compact('regions'));
     }
 
-    public function store(Request $request)
+    /**
+     * Show the form for creating a new region.
+     */
+    public function create()
     {
-        $request->validate([
-            'name.*' => 'required|string|max:255',
-            'branch_id.*' => 'required|exists:branches,id',
-            'notes.*' => 'nullable|string',
-        ]);
-
-        $regions = [];
-
-        foreach ($request->name as $i => $name) {
-            $regions[] = Region::create([
-                'name' => $name,
-                'branch_id' => $request->branch_id[$i],
-                'notes' => $request->notes[$i] ?? ''
-            ]);
-        }
-
-        return response()->json([
-            'success' => true,
-            'regions' => view('regions.index_table', ['regions' => $regions])->render()
-        ]);
+        $branches = Branch::all();
+        return view('regions.create', compact('branches'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Store a newly created region in storage.
+     */
+    public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
-            'notes' => 'nullable|string'
+            'notes' => 'nullable|string',
         ]);
 
-        $region = Region::findOrFail($id);
-        $region->update([
-            'name' => $request->name,
-            'branch_id' => $request->branch_id,
-            'notes' => $request->notes ?? ''
+        Region::create($request->all());
+
+        return redirect()->route('regions.index')->with('success', 'تم إنشاء المنطقة بنجاح');
+    }
+
+    /**
+     * Display the specified region.
+     */
+    public function show(Region $region)
+    {
+        $region->load('branch');
+        return view('regions.show', compact('region'));
+    }
+
+    /**
+     * Show the form for editing the specified region.
+     */
+    public function edit(Region $region)
+    {
+        $branches = Branch::all();
+        return view('regions.edit', compact('region', 'branches'));
+    }
+
+    /**
+     * Update the specified region in storage.
+     */
+    public function update(Request $request, Region $region)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'branch_id' => 'required|exists:branches,id',
+            'notes' => 'nullable|string',
         ]);
 
-        return response()->json([
-            'success' => true,
-            'region' => view('regions.single_row', ['region' => $region])->render()
-        ]);
+        $region->update($request->all());
+
+        return redirect()->route('regions.index')->with('success', 'تم تحديث المنطقة بنجاح');
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified region from storage.
+     */
+    public function destroy(Region $region)
     {
-        Region::findOrFail($id)->delete();
-        return response()->json(['success' => true, 'id' => $id]);
-    }
+        // منع الحذف إذا هناك مساجد مرتبطة
+        if ($region->mosques()->count() > 0) {
+            return back()->with('error', 'لا يمكن حذف المنطقة لوجود مساجد مرتبطة بها');
+        }
 
-    public function multiDelete(Request $request)
-    {
-        Region::whereIn('id', $request->ids)->delete();
-        return response()->json(['success' => true, 'ids' => $request->ids]);
-    }
-
-    public function search(Request $request)
-    {
-        $q = $request->q;
-        $branch_id = $request->branch_id;
-
-        $regions = Region::with('branch')
-            ->when($q, function ($query) use ($q) {
-                $query->where('name', 'like', "%{$q}%");
-            })
-            ->when($branch_id, function ($query) use ($branch_id) {
-                $query->where('branch_id', $branch_id);
-            })
-            ->latest()
-            ->get();
-
-        return view('regions.index_table', compact('regions'))->render();
+        $region->delete();
+        return redirect()->route('regions.index')->with('success', 'تم حذف المنطقة بنجاح');
     }
 }

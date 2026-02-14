@@ -5,8 +5,28 @@
 
         <h2 class="page-title mb-4">الفروع</h2>
 
+<<<<<<< HEAD
         <!-- بحث مباشر -->
         <input type="text" id="search" class="form-control mb-3" placeholder="ابحث عن فرع...">
+=======
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>الاسم</th>
+                <th>الحد الأدنى للحذف</th>
+                <th>الحد الأدنى للاستبدال</th>
+                <th>العمليات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($branches as $branch)
+                <tr>
+                    <td>{{ $branch->name }}</td>
+                    <td>{{ $branch->min_replacement_limit }}</td>
+                    <td>{{ $branch->max_replacement_limit }}</td>
+                    <td>
+                        <a href="{{ route('branches.edit', $branch->id) }}" class="btn btn-primary btn-sm">تعديل</a>
+>>>>>>> 91150221189a30c086e16e29e151cc0da866bd24
 
         <!-- جدول الفروع -->
         <form id="branches-form">

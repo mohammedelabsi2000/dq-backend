@@ -10,6 +10,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+    protected $appends = ['full_name'];
 
     protected $fillable = [
         'fName',
@@ -112,10 +113,16 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
-    public function getFullNameAttribute()
-    {
-        return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
+
+
+    public function getPersonNameAttribute()
+{
+    if ($this->person) {
+        return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
     }
+    return $this->person_type . ' #' . $this->person_id;
+}
+
 
     // لو عندك جدول للصور وتضيف image_id لاحقًا
     /*

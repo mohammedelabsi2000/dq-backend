@@ -5,8 +5,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
@@ -16,7 +15,10 @@ return new class extends Migration
             $table->string('thName', 100)->nullable()->after('sName');
             $table->string('family', 100)->nullable()->after('thName');
 
-            $table->date('dob')->nullable()->after('family');
+            $table->string('full_name')
+                ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)")->after('family');
+
+            $table->date('dob')->nullable()->after('full_name');
 
             // Mosque FK
             $table->unsignedBigInteger('mosque_id')->nullable()->after('dob');
@@ -38,7 +40,7 @@ return new class extends Migration
 
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
-            $table->string('identity', 50)->nullable()->after('password');
+            $table->string('identity', 50)->nullable()->unique()->after('password');
             $table->string('phone', 50)->nullable()->after('identity');
             $table->string('whatsapp', 50)->nullable()->after('phone');
 
@@ -46,6 +48,7 @@ return new class extends Migration
             $table->string('job_place')->nullable()->after('jobname');
             $table->decimal('job_salary', 10, 2)->nullable()->after('job_place');
 
+<<<<<<< HEAD
             // Image FK
             // $table->unsignedBigInteger('image_id')->nullable()->after('job_salary');
 
@@ -56,6 +59,8 @@ return new class extends Migration
             //       ->after('job_salary');
 
 
+=======
+>>>>>>> 91150221189a30c086e16e29e151cc0da866bd24
             // Prefix FK (constants)
             $table->unsignedBigInteger('prefix_name_id')->nullable();
             $table->foreign('prefix_name_id')
