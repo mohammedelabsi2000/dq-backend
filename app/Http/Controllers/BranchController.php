@@ -2,78 +2,79 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
 use Illuminate\Http\Request;
-use App\Models\Branch; // Assuming you have a Branch model
+use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
-    /**
-     * Display a listing of the branches.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $branches = Branch::all();
-        return response()->json($branches);
+        $branches = Branch::latest()->get();
+        return view('branches.index', compact('branches'));
     }
 
-    /**
-     * Store a newly created branch.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name.*' => 'required|string|max:255',
+            'min_replacement_limit.*' => 'nullable|numeric',
+            'max_replacement_limit.*' => 'nullable|numeric',
         ]);
 
-        $branch = Branch::create($request->all());
-        return response()->json($branch, 201);
+        $branches = [];
+        foreach ($request->name as $i => $name) {
+            $branches[] = Branch::create([
+                'name' => $name,
+                'notes' => $request->notes[$i] ?? '',
+                'min_replacement_limit' => (int) ($request->min_replacement_limit[$i] ?? 0),
+                'max_replacement_limit' => (int) ($request->max_replacement_limit[$i] ?? 0),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'branches' => view('branches.index_table', ['branches' => $branches])->render()
+        ]);
     }
 
-    /**
-     * Display the specified branch.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $branch = Branch::findOrFail($id);
-        return response()->json($branch);
-    }
-
-    /**
-     * Update the specified branch in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'sometimes|required|string|max:255',
+            'name' => 'required|string|max:255',
+            'min_replacement_limit' => 'nullable|numeric',
+            'max_replacement_limit' => 'nullable|numeric',
         ]);
 
         $branch = Branch::findOrFail($id);
-        $branch->update($request->all());
-        return response()->json($branch);
+        $branch->update([
+            'name' => $request->name,
+            'notes' => $request->notes ?? '',
+            'min_replacement_limit' => (int) ($request->min_replacement_limit ?? 0),
+            'max_replacement_limit' => (int) ($request->max_replacement_limit ?? 0),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'branch' => view('branches.single_row', ['branch' => $branch])->render()
+        ]);
     }
 
-    /**
-     * Remove the specified branch from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
-        $branch = Branch::findOrFail($id);
-        $branch->delete();
-        return response()->json(null, 204);
+        Branch::findOrFail($id)->delete();
+        return response()->json(['success' => true, 'id' => $id]);
+    }
+
+    public function multiDelete(Request $request)
+    {
+        Branch::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => true, 'ids' => $request->ids]);
+    }
+
+    public function search(Request $request)
+    {
+        $branches = Branch::where('name', 'like', "%{$request->q}%")->latest()->get();
+        return view('branches.index_table', compact('branches'))->render();
     }
 }

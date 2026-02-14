@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
 
+
 class AppServiceProvider extends ServiceProvider
 {
 
@@ -39,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        Paginator::useBootstrapFive();
+
 
         Schema::defaultStringLength(191);
         Paginator::useBootstrap();

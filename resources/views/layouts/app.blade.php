@@ -8,6 +8,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'نظام إدارة المساجد') - لوحة التحكم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
 
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
@@ -352,7 +354,8 @@
                         <span class="me-2 d-none d-md-inline">{{ auth()->user()->name ?? 'Admin' }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>الملف الشخصي</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>الملف الشخصي</a>
+                        </li>
                         <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>الإعدادات</a></li>
                         <li>
                             <hr class="dropdown-divider">
@@ -384,18 +387,18 @@
 
     <script>
         // Toggle sidebar on mobile
-        document.getElementById('sidebarToggle')?.addEventListener('click', function () {
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('show');
         });
 
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
 
         // Auto hide alerts
-        setTimeout(function () {
+        setTimeout(function() {
             $('.alert').fadeOut('slow');
         }, 5000);
 
