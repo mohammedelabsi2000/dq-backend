@@ -103,6 +103,18 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'دينية', 'notes' => null, 'is_active' => true],
                 ]
             ],
+            [
+                'name' => 'guardian_type',
+                'description' => 'صلة القرابة',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'بنفسه', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أب', 'notes' => null, 'is_active' => true],
+                    ['name' => 'جد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'غم', 'notes' => null, 'is_active' => true],
+                    ['name' => 'خال', 'notes' => null, 'is_active' => true],
+                ]
+            ],
         ];
 
         foreach ($constantTypes as $typeData) {
