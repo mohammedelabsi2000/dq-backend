@@ -2,94 +2,78 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
 use Illuminate\Http\Request;
+use App\Models\Branch; // Assuming you have a Branch model
 
 class BranchController extends Controller
 {
     /**
-     * عرض كل الفروع
+     * Display a listing of the branches.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        $branches = Branch::latest()->paginate(15);
-        return view('branches.index', compact('branches'));
+        $branches = Branch::all();
+        return response()->json($branches);
     }
 
     /**
-     * صفحة الاضافة
-     */
-    public function create()
-    {
-        return view('branches.create');
-    }
-
-    /**
-     * تخزين فرع جديد
+     * Store a newly created branch.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-            'max_replacement_limit' => 'integer|min:0',
-            'min_replacement_limit' => 'integer|min:0',
         ]);
 
-        Branch::create([
-            'name' => $request->name,
-            'notes' => $request->notes,
-            'max_replacement_limit' => $request->max_replacement_limit,
-            'min_replacement_limit' => $request->min_replacement_limit,
-        ]);
-
-        return redirect()->route('branches.index')->with('success', 'تم اضافة الفرع بنجاح');
+        $branch = Branch::create($request->all());
+        return response()->json($branch, 201);
     }
 
     /**
-     * عرض فرع واحد
+     * Display the specified branch.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function show(Branch $branch)
+    public function show($id)
     {
-        return view('branches.show', compact('branch'));
+        $branch = Branch::findOrFail($id);
+        return response()->json($branch);
     }
 
     /**
-     * صفحة التعديل
+     * Update the specified branch in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function edit(Branch $branch)
-    {
-        return view('branches.edit', compact('branch'));
-    }
-
-    /**
-     * تحديث الفرع
-     */
-    public function update(Request $request, Branch $branch)
+    public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-            'max_replacement_limit' => 'required|integer|min:0',
-            'min_replacement_limit' => 'required|integer|min:0',
+            'name' => 'sometimes|required|string|max:255',
         ]);
 
-        $branch->update([
-            'name' => $request->name,
-            'notes' => $request->notes,
-            'max_replacement_limit' => $request->max_replacement_limit,
-            'min_replacement_limit' => $request->min_replacement_limit,
-        ]);
-
-        return redirect()->route('branches.index')->with('success', 'تم تحديث الفرع');
+        $branch = Branch::findOrFail($id);
+        $branch->update($request->all());
+        return response()->json($branch);
     }
 
     /**
-     * حذف الفرع
+     * Remove the specified branch from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function destroy(Branch $branch)
+    public function destroy($id)
     {
+        $branch = Branch::findOrFail($id);
         $branch->delete();
-        return redirect()->route('branches.index')->with('success', 'تم حذف الفرع');
+        return response()->json(null, 204);
     }
 }
