@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicQualificationController;
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BranchController;
 use App\Http\Controllers\Api\CenterController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
+use App\Http\Controllers\Api\StudentController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -37,6 +39,13 @@ Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('centers', CenterController::class);
+Route::apiResource('plans', PlanController::class);
+Route::prefix('attendances')->group(function () {
+    Route::get('/', [AttendanceController::class, 'index']);
+    Route::post('/', [AttendanceController::class, 'store']);
+    Route::put('/{attendance}', [AttendanceController::class, 'update']);
+    Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -92,3 +101,5 @@ Route::apiResource('halaqas', HalaqaController::class);
 Route::apiResource('users', UserController::class);
 Route::apiResource('academic-qualifications', AcademicQualificationController::class);
 Route::apiResource('personal-courses', PersonalCourseController::class);
+
+Route::apiResource('students', StudentController::class);

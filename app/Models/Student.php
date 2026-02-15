@@ -65,4 +65,10 @@ public function getNameAttribute()
     {
         return $this->belongsTo(User::class, 'guardian_user_id', 'identity');
     }
+
+    public function attendances()
+    {
+        return $this->morphMany(Attendance::class, 'attendable');
+    }
+
 }

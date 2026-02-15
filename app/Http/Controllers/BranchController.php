@@ -4,92 +4,77 @@ namespace App\Http\Controllers;
 
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
-    /**
-     * عرض كل الفروع
-     */
     public function index()
     {
-        $branches = Branch::latest()->paginate(15);
+        $branches = Branch::latest()->get();
         return view('branches.index', compact('branches'));
     }
 
-    /**
-     * صفحة الاضافة
-     */
-    public function create()
-    {
-        return view('branches.create');
-    }
-
-    /**
-     * تخزين فرع جديد
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-            'max_replacement_limit' => 'integer|min:0',
-            'min_replacement_limit' => 'integer|min:0',
+            'name.*' => 'required|string|max:255',
+            'min_replacement_limit.*' => 'nullable|numeric',
+            'max_replacement_limit.*' => 'nullable|numeric',
         ]);
 
-        Branch::create([
-            'name' => $request->name,
-            'notes' => $request->notes,
-            'max_replacement_limit' => $request->max_replacement_limit,
-            'min_replacement_limit' => $request->min_replacement_limit,
+        $branches = [];
+        foreach ($request->name as $i => $name) {
+            $branches[] = Branch::create([
+                'name' => $name,
+                'notes' => $request->notes[$i] ?? '',
+                'min_replacement_limit' => (int) ($request->min_replacement_limit[$i] ?? 0),
+                'max_replacement_limit' => (int) ($request->max_replacement_limit[$i] ?? 0),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'branches' => view('branches.index_table', ['branches' => $branches])->render()
         ]);
-
-        return redirect()->route('branches.index')->with('success', 'تم اضافة الفرع بنجاح');
     }
 
-    /**
-     * عرض فرع واحد
-     */
-    public function show(Branch $branch)
-    {
-        return view('branches.show', compact('branch'));
-    }
-
-    /**
-     * صفحة التعديل
-     */
-    public function edit(Branch $branch)
-    {
-        return view('branches.edit', compact('branch'));
-    }
-
-    /**
-     * تحديث الفرع
-     */
-    public function update(Request $request, Branch $branch)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'notes' => 'nullable|string',
-            'max_replacement_limit' => 'required|integer|min:0',
-            'min_replacement_limit' => 'required|integer|min:0',
+            'min_replacement_limit' => 'nullable|numeric',
+            'max_replacement_limit' => 'nullable|numeric',
         ]);
 
+        $branch = Branch::findOrFail($id);
         $branch->update([
             'name' => $request->name,
-            'notes' => $request->notes,
-            'max_replacement_limit' => $request->max_replacement_limit,
-            'min_replacement_limit' => $request->min_replacement_limit,
+            'notes' => $request->notes ?? '',
+            'min_replacement_limit' => (int) ($request->min_replacement_limit ?? 0),
+            'max_replacement_limit' => (int) ($request->max_replacement_limit ?? 0),
         ]);
 
-        return redirect()->route('branches.index')->with('success', 'تم تحديث الفرع');
+        return response()->json([
+            'success' => true,
+            'branch' => view('branches.single_row', ['branch' => $branch])->render()
+        ]);
     }
 
-    /**
-     * حذف الفرع
-     */
-    public function destroy(Branch $branch)
+    public function destroy($id)
     {
-        $branch->delete();
-        return redirect()->route('branches.index')->with('success', 'تم حذف الفرع');
+        Branch::findOrFail($id)->delete();
+        return response()->json(['success' => true, 'id' => $id]);
+    }
+
+    public function multiDelete(Request $request)
+    {
+        Branch::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => true, 'ids' => $request->ids]);
+    }
+
+    public function search(Request $request)
+    {
+        $branches = Branch::where('name', 'like', "%{$request->q}%")->latest()->get();
+        return view('branches.index_table', compact('branches'))->render();
     }
 }

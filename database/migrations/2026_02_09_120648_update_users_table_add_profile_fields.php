@@ -40,13 +40,23 @@ return new class extends Migration {
 
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
-            $table->string('identity', 50)->nullable()->after('password');
+            $table->string('identity', 50)->nullable()->unique()->after('password');
             $table->string('phone', 50)->nullable()->after('identity');
             $table->string('whatsapp', 50)->nullable()->after('phone');
 
             $table->string('jobname')->nullable()->after('email');
             $table->string('job_place')->nullable()->after('jobname');
             $table->decimal('job_salary', 10, 2)->nullable()->after('job_place');
+
+
+            // Image FK
+            // $table->unsignedBigInteger('image_id')->nullable()->after('job_salary');
+
+            // $table->foreignId('image_id')
+            //       ->nullable()
+            //       ->constrained('images')
+            //       ->nullOnDelete()
+            //       ->after('job_salary');
 
             // Prefix FK (constants)
             $table->unsignedBigInteger('prefix_name_id')->nullable();

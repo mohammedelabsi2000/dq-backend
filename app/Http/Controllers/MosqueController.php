@@ -34,9 +34,8 @@ class MosqueController extends Controller
         $mosques = $query->withCount(['centers', 'users'])->latest()->paginate(15);
 
         $branches = Branch::all();
-        $regions = Region::all();
-
-        return view('mosques.index', compact('mosques', 'branches', 'regions'));
+        $mosques = Mosque::latest()->get();
+        return view('mosques.index', compact('branches', 'mosques'));
     }
 
     /**
@@ -90,8 +89,7 @@ class MosqueController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'region_id' => 'required|exists:regions,id',
-            'notes' => 'nullable|string',
+            'region_id' => 'required|exists:regions,id'
         ]);
 
         $mosque->update($request->all());
@@ -143,8 +141,7 @@ class MosqueController extends Controller
      */
     public function search(Request $request)
     {
-        $query = $request->get('q');
-        $mosques = Mosque::where('name', 'like', "%{$query}%")->limit(10)->get(['id', 'name']);
-        return response()->json($mosques);
+        Mosque::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => true]);
     }
 }

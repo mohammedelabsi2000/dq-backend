@@ -35,13 +35,13 @@ return new class extends Migration {
             $table->foreignId('prefix_name_id')->nullable()->constrained('constants');
 
             // رقم هوية ولي الأمر
-            // $table->string('guardian_id'); // users.identity
+            $table->string('guardian_id'); // users.identity
 
-            // $table->foreign('guardian_id')
-            //     ->references('identity')
-            //     ->on('users');
+            $table->foreign('guardian_id')
+                ->references('identity')
+                ->on('users');
             // صلة قرابة ولي الأمر
-            // $table->foreignId('guardian_type_id')->nullable()->constrained('constants');
+            $table->foreignId('guardian_type_id')->nullable()->constrained('constants');
             $table->string('phone')->nullable();
             $table->string('whatsapp')->nullable();
 
