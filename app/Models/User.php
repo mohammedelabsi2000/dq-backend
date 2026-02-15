@@ -78,6 +78,12 @@ class User extends Authenticatable
 
     // علاقة المستخدم بالمسجد
 
+
+    public function attendances()
+    {
+        return $this->morphMany(Attendance::class, 'attendable');
+    }
+
     public function mosque()
     {
         return $this->belongsTo(Mosque::class);
@@ -98,14 +104,14 @@ class User extends Authenticatable
         return $this->belongsTo(Constant::class, 'prefix_name_id');
     }
 
-//     public function imageData()
-//     {
-//         return $this->belongsTo(Image::class, 'image');
-//     }
-// public function image()
-// {
-//     return $this->belongsTo(Image::class);
-// }
+    //     public function imageData()
+    //     {
+    //         return $this->belongsTo(Image::class, 'image');
+    //     }
+    // public function image()
+    // {
+    //     return $this->belongsTo(Image::class);
+    // }
 
     /*
     |--------------------------------------------------------------------------
@@ -116,12 +122,12 @@ class User extends Authenticatable
 
 
     public function getPersonNameAttribute()
-{
-    if ($this->person) {
-        return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
+    {
+        if ($this->person) {
+            return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
+        }
+        return $this->person_type . ' #' . $this->person_id;
     }
-    return $this->person_type . ' #' . $this->person_id;
-}
 
 
     // لو عندك جدول للصور وتضيف image_id لاحقًا

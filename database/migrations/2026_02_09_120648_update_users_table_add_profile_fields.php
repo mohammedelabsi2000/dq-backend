@@ -48,7 +48,7 @@ return new class extends Migration {
             $table->string('job_place')->nullable()->after('jobname');
             $table->decimal('job_salary', 10, 2)->nullable()->after('job_place');
 
-<<<<<<< HEAD
+
             // Image FK
             // $table->unsignedBigInteger('image_id')->nullable()->after('job_salary');
 
@@ -58,9 +58,6 @@ return new class extends Migration {
             //       ->nullOnDelete()
             //       ->after('job_salary');
 
-
-=======
->>>>>>> 91150221189a30c086e16e29e151cc0da866bd24
             // Prefix FK (constants)
             $table->unsignedBigInteger('prefix_name_id')->nullable();
             $table->foreign('prefix_name_id')
