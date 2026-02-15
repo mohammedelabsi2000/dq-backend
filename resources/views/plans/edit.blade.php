@@ -1,67 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <h2 class="mb-3">تعديل الخطة</h2>
+<h2>تعديل الخطة</h2>
 
-    @if($errors->any())
-        <div class="alert alert-danger">
-            @foreach($errors->all() as $err)
-                <div>{{ $err }}</div>
-            @endforeach
-        </div>
-    @endif
+<form method="POST" action="{{ route('plans.update',$plan->id) }}">
+@csrf
+@method('PUT')
 
-    <form action="{{ route('plans.update', $plan) }}" method="POST">
-        @csrf
-        @method('PUT')
+<input type="text" name="name" value="{{ $plan->name }}"><br><br>
 
-        <div class="mb-3">
-            <label>الاسم</label>
-            <input type="text" name="name" class="form-control" value="{{ old('name', $plan->name) }}" required>
-        </div>
+<input type="number" name="weight" value="{{ $plan->weight }}"><br><br>
 
-        <div class="mb-3">
-            <label>النوع</label>
-            <select name="type_id" class="form-control" required>
-                <option value="">اختر النوع</option>
-                @foreach($types as $type)
-                    <option value="{{ $type->id }}" {{ old('type_id', $plan->type_id) == $type->id ? 'selected' : '' }}>
-                        {{ $type->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+<input type="number" name="duration_in_days" value="{{ $plan->duration_in_days }}"><br><br>
 
-        <div class="mb-3">
-            <label>الفئة المستهدفة</label>
-            <select name="target_group_id" class="form-control" required>
-                <option value="">اختر الفئة</option>
-                @foreach($targetGroups as $group)
-                    <option value="{{ $group->id }}" {{ old('target_group_id', $plan->target_group_id) == $group->id ? 'selected' : '' }}>
-                        {{ $group->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+<input type="number" name="grace_period_days" value="{{ $plan->grace_period_days }}"><br><br>
 
-        <div class="mb-3">
-            <label>عدد المستويات</label>
-            <input type="number" name="level_numbers" class="form-control" value="{{ old('level_numbers', $plan->level_numbers) }}">
-        </div>
+<label>
+    <input type="checkbox" name="is_active" value="1"
+        {{ $plan->is_active ? 'checked' : '' }}>
+    مفعلة
+</label>
 
-        <div class="mb-3">
-            <label>الوصف</label>
-            <textarea name="description" class="form-control">{{ old('description', $plan->description) }}</textarea>
-        </div>
+<br><br>
 
-        <div class="mb-3">
-            <label>الملاحظات</label>
-            <textarea name="notes" class="form-control">{{ old('notes', $plan->notes) }}</textarea>
-        </div>
+<button type="submit">تحديث</button>
+</form>
 
-        <button class="btn btn-success">تحديث</button>
-        <a href="{{ route('plans.index') }}" class="btn btn-secondary">إلغاء</a>
-    </form>
-</div>
 @endsection

@@ -31,6 +31,10 @@ class Student extends Model
     ];
 
     // Relationships
+public function getNameAttribute()
+{
+    return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
+}
 
     public function mosque()
     {
@@ -66,4 +70,5 @@ class Student extends Model
     {
         return $this->morphMany(Attendance::class, 'attendable');
     }
+
 }
