@@ -16,8 +16,12 @@ use App\Http\Controllers\{
     PlanLevelController,
     GradeController,
     AcademicQualificationController,
+    CourseController,
     PersonalCourseController,
-    ProfileController
+    PlanAssignmentController,
+    PlanStudentController,
+    ProfileController,
+    TrackController
 };
 
 
@@ -108,18 +112,6 @@ Route::middleware(['auth'])->group(function () {
     Route::post('constants/{constant}/toggle-status', [ConstantController::class, 'toggleStatus'])->name('constants.toggle-status');
     Route::post('constants/reorder', [ConstantController::class, 'reorder'])->name('constants.reorder');
 
-    // ==================== Plans Management ====================
-    Route::resource('plans', PlanController::class);
-    Route::get('plans/{plan}/levels', [PlanController::class, 'levels'])->name('plans.levels');
-    Route::get('plans/{plan}/duplicate', [PlanController::class, 'duplicate'])->name('plans.duplicate');
-    Route::post('plans/{plan}/toggle-status', [PlanController::class, 'toggleStatus'])->name('plans.toggle-status');
-    Route::get('plans/{plan}/export', [PlanController::class, 'export'])->name('plans.export');
-
-    // Plan Levels
-    Route::resource('plan-levels', PlanLevelController::class);
-    Route::post('plan-levels/reorder', [PlanLevelController::class, 'reorder'])->name('plan-levels.reorder');
-    Route::get('plan-levels/{planLevel}/prerequisites', [PlanLevelController::class, 'prerequisites'])->name('plan-levels.prerequisites');
-
     // ==================== Grades Management ====================
     Route::resource('grades', GradeController::class);
     Route::get('grades/export/pdf', [GradeController::class, 'exportPdf'])->name('grades.export-pdf');
@@ -201,5 +193,21 @@ Route::resource('centers', CenterController::class);
 Route::resource('regions', RegionController::class);
 Route::resource('constant-types', ConstantTypeController::class);
 Route::resource('constants', ConstantController::class);
-Route::resource('plans', PlanController::class);
 // Route::resource('academic-qualifications', AcademicQualificationController::class);
+
+
+Route::resource('plans', PlanController::class);
+Route::resource('tracks', TrackController::class);
+Route::resource('courses', CourseController::class);
+Route::get('plans/{plan}/setup', [PlanController::class, 'setup'])->name('plans.setup');
+Route::post('plans/{plan}/setup', [PlanController::class, 'saveSetup'])->name('plans.setup.save');
+
+Route::get('plans/setup/show', [PlanController::class, 'showSetupIndex'])->name('plans.setup.show.index');
+Route::get('plans/setup/show/{plan}', [PlanController::class, 'showSetup'])->name('plans.setup.show');
+Route::get('plans/setup/edit/{plan}', [PlanController::class, 'editSetup'])->name('plans.setup.edit');
+Route::delete('plans/setup/delete/{plan}', [PlanController::class, 'deleteSetup'])->name('plans.setup.delete');
+
+Route::get('plans/{plan}/assign-students', [PlanAssignmentController::class, 'create'])->name('plans.assign.create');
+Route::post('plans/{plan}/assign-students', [PlanAssignmentController::class, 'store'])->name('plans.assign.store');
+// عرض طلاب الخطة
+Route::get('plans/{plan}/students', [PlanStudentController::class, 'index'])->name('plans.students.show');

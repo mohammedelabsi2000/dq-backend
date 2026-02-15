@@ -277,15 +277,42 @@
                     <i class="fas fa-tags"></i>
                     أنواع الثوابت
                 </a>
+<div class="text-white-50 small px-3 mt-3 mb-2">الخطط الدراسية</div>
 
-                <div class="text-white-50 small px-3 mt-3 mb-2">الخطط الدراسية</div>
-                <a class="nav-link {{ request()->routeIs('plans.*') ? 'active' : '' }}"
-                    href="{{ route('plans.index') }}">
-                    <i class="fas fa-layer-group"></i>
-                    الخطط
-                </a>
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('plans.*') ? 'active' : '' }}"
+        href="{{ route('plans.index') }}">
+        <i class="fas fa-layer-group"></i>
+        الخطط
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('tracks.*') ? 'active' : '' }}"
+        href="{{ route('tracks.index') }}">
+        <i class="fas fa-project-diagram"></i>
+        المسارات
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('courses.*') ? 'active' : '' }}"
+        href="{{ route('courses.index') }}">
+        <i class="fas fa-book"></i>
+        الدورات
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link {{ request()->routeIs('plans.setup.show') ? 'active' : '' }}"
+        href="{{ route('plans.setup.show.index') }}">
+        <i class="fas fa-layer-group"></i>
+        الخطط المركبة
+    </a>
+</li>
+
                 <a class="nav-link {{ request()->routeIs('plan-levels.*') ? 'active' : '' }}"
-                    href="{{ route('plan-levels.index') }}">
+                    href="">
                     <i class="fas fa-level-up-alt"></i>
                     مستويات الخطط
                 </a>
