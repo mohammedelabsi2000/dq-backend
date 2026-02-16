@@ -3,22 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    use ApiResponser;
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return response()->json(
+        /* return response()->json(
             User::with(['mosque', 'maritalStatus', 'prefix'])->latest()->paginate(15),
+            200
+        ); */
+        $users = User::get();
+
+        return $this->apiResponse(
+            UserResource::collection($users),
+            'success',
             200
         );
     }
@@ -40,7 +49,7 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male','female'])],
+            'gender' => ['nullable', Rule::in(['male', 'female'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
@@ -95,13 +104,13 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male','female'])],
+            'gender' => ['nullable', Rule::in(['male', 'female'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
             'phone' => 'nullable|string|max:50',
             'whatsapp' => 'nullable|string|max:50',
-            'email' => ['required','email',Rule::unique('users')->ignore($user->id)],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'password' => 'nullable|string|min:6',
             'jobname' => 'nullable|string|max:191',
             'job_place' => 'nullable|string|max:191',

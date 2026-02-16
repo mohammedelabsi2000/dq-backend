@@ -10,12 +10,10 @@ use Illuminate\Http\Request;
 class BranchController extends Controller
 {
     public function index()
-{
-    $branches = Branch::latest()->paginate(15);
-
-    dd($branches);
-}
-
+    {
+        $branches = Branch::latest()->paginate(15);
+        return view('branches.index', compact('branches'));
+    }
 
     public function create()
     {
@@ -54,5 +52,22 @@ class BranchController extends Controller
 
         return redirect()->route('branches.index')
             ->with('success', 'تم حذف الفرع بنجاح');
+    }
+
+    // 🔥 حذف متعدد (AJAX)
+    public function multiDelete(Request $request)
+    {
+        Branch::whereIn('id', $request->ids)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // 🔥 بحث (AJAX)
+    public function search(Request $request)
+    {
+        $branches = Branch::where('name', 'like', "%{$request->q}%")
+            ->latest()
+            ->get();
+
+        return view('branches.index_table', compact('branches'))->render();
     }
 }

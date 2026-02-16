@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-// use App\Database\BlueprintMacros\AuditColumns;
 
 return new class extends Migration {
 
@@ -21,8 +20,7 @@ return new class extends Migration {
             $table->string('name')->unique(); // اسم نوع الثابت
             $table->string('description')->nullable(); // وصف النوع
             $table->string('notes')->nullable(); // ملاحظات
-            // $table->auditColumns();
-            // $this->addAuditColumns($table);
+            $table->auditColumns();
         });
     }
 
@@ -35,6 +33,5 @@ return new class extends Migration {
     {
 
         Schema::dropIfExists('constant_types');
-
     }
 };

@@ -17,4 +17,13 @@ class ConstantType extends Model
         'updated_by',
         'deleted_by',
     ];
+    /**
+     * العلاقة مع الثوابت
+     * constant_type_id في جدول constants يشير إلى id في جدول constant_types
+     */
+    public function constants()
+    {
+        return $this->hasMany(Constant::class, 'constant_type_id');
+    }
+
 }

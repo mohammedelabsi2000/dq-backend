@@ -16,7 +16,7 @@ return new class extends Migration {
 
             $table->id();
 
-            $table->string('name', 150);
+            $table->string('name', 150); // اسم الثابت
 
             $table->foreignId('constant_type_id')
                 ->constrained('constant_types')
@@ -32,7 +32,7 @@ return new class extends Migration {
             $table->text('notes')->nullable();
 
             // audit columns (macro)
-            // $table->auditColumns();
+            $table->auditColumns();
         });
     }
 

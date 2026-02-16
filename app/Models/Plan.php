@@ -4,32 +4,34 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
 
 class Plan extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
-
-
     protected $fillable = [
         'name',
-        'type_id',
-        'description',
-        'target_group_id',
-        'level_numbers',
-        'notes',
+        'weight',
+        'duration_in_days',
+        'grace_period_days',
+        'is_active'
     ];
 
-    // العلاقات
-    public function type()
+    // علاقة: الخطة تحتوي مسارات
+    public function planTracks()
     {
-        return $this->belongsTo(Constant::class, 'type_id');
+        return $this->hasMany(PlanTrack::class);
     }
+public function assignments()
+{
+    return $this->hasMany(PlanAssignment::class);
+}
 
-    public function targetGroup()
+    // علاقة many-to-many مع المسارات
+    public function tracks()
     {
-        return $this->belongsTo(Constant::class, 'target_group_id');
+        return $this->belongsToMany(
+            Track::class,
+            'plan_tracks'
+        )->withPivot('is_required','weight')
+         ->withTimestamps();
     }
 }

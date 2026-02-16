@@ -12,24 +12,18 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('plans', function (Blueprint $table) {
+        Schema::create('personal_courses', function (Blueprint $table) {
             $table->id();
-
-            $table->string('name');
-
-            $table->foreignId('type_id')
-                ->constrained('constants')
-                ->cascadeOnDelete();
-
-            $table->text('description')->nullable();
-
-            $table->foreignId('target_group_id')
-                ->constrained('constants')
-                ->cascadeOnDelete();
-
-            $table->unsignedTinyInteger('level_numbers')->nullable();
-
+            $table->string('course_name');
             $table->text('notes')->nullable();
+            $table->integer('hours')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('place')->nullable();
+            $table->string('certificate_link')->nullable();
+            $table->foreignId('type_id')->constrained('constants')->onDelete('cascade');
+
+            // Polymorphic relation
+            $table->morphs('person');
 
             // audit columns (macro)
             $table->auditColumns();
@@ -43,6 +37,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('plans');
+        Schema::dropIfExists('personal_courses');
     }
 };
