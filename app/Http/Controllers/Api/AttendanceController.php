@@ -47,7 +47,10 @@ class AttendanceController extends Controller
             'attendance' => $attendance
         ]);
     }
-
+    public function show(Attendance $attendance)
+    {
+        return response()->json($attendance, 200);
+    }
     public function update(Request $request, Attendance $attendance)
     {
         $request->validate([
