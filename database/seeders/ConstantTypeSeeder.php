@@ -115,6 +115,29 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'خال', 'notes' => null, 'is_active' => true],
                 ]
             ],
+            [
+                'name' => 'money_status',
+                'description' => 'الحالة المادية',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'فقير', 'notes' => null, 'is_active' => true],
+                    ['name' => 'محتاج', 'notes' => null, 'is_active' => true],
+                    ['name' => 'متوسط', 'notes' => null, 'is_active' => true],
+                    ['name' => 'ميسور', 'notes' => null, 'is_active' => true],
+                ]
+            ],
+            [
+                'name' => 'name_prefix',
+                'description' => 'بادئة الاسم',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'السيد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'السيدة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'الآنسة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'الدكتور', 'notes' => null, 'is_active' => true],
+                    ['name' => 'المهندس', 'notes' => null, 'is_active' => true],
+                ]
+            ],
         ];
 
         foreach ($constantTypes as $typeData) {
