@@ -13,6 +13,10 @@ class UserController extends Controller
 {
     use ApiResponser;
 
+    /**
+     * Display a listing of the resource.
+     *
+     */
     public function index()
     {
         /* return response()->json(
@@ -21,7 +25,11 @@ class UserController extends Controller
         ); */
         $users = User::get();
 
-        return $this->apiResponse(UserResource::collection($users), 'success', 200);
+        return $this->apiResponse(
+            UserResource::collection($users),
+            'success',
+            200
+        );
     }
 
     /**

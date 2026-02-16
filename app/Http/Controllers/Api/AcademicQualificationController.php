@@ -3,14 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Http\Requests\AcademicQualification\StoreAcademicQualificationRequest;
 use App\Http\Requests\AcademicQualification\UpdateAcademicQualificationRequest;
+use App\Http\Resources\AcademicQualificationResource;
 use App\Models\AcademicQualification;
 
 class AcademicQualificationController extends Controller
 {
-    
+    use ApiResponser;
     public function index()
     {
         $data = AcademicQualification::with([
@@ -34,13 +36,20 @@ class AcademicQualificationController extends Controller
 
     public function show(AcademicQualification $academicQualification)
     {
-        return response()->json(
-            $academicQualification->load([
-                'academicDegree',
-                'major',
-                'person',
-            ])
+        $academicQualifications = $academicQualification->load([
+            'academicDegree',
+            'major',
+            'person',
+        ]);
+        /* return response()->json(
+            $academicQualifications
+        ); */
+        return $this->apiResponse(
+            new AcademicQualificationResource($academicQualifications),
+            'success',
+            200
         );
+
     }
 
     public function update(
