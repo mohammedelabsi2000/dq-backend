@@ -32,12 +32,12 @@ trait ApiResponser
         ]);
     }
 
-    protected function apiResponse($data, $msg, $code = 200)
+    protected function apiResponse($data, $msg, $code = 200, $success = true)
     {
         return response()->json([
             'message' => $msg,
             'code' => $code,
-            'success' => true,
+            'success' => $success,
             'data' => $data,
         ]);
     }
