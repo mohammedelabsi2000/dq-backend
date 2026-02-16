@@ -4,20 +4,32 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ConstantTypeResource;
+use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Models\ConstantType;
 
 
 class ConstantTypeController extends Controller
 {
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
      */
     public function index()
     {
-        return response()->json(
+        /* return response()->json(
             ConstantType::get()
+        ); */
+
+
+        $constantTypes = ConstantType::with('constants')->get();
+
+        return $this->apiResponse(
+            ConstantTypeResource::collection($constantTypes),
+            'success',
+            200
         );
     }
 
