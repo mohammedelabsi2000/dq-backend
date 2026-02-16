@@ -40,12 +40,15 @@ Route::apiResource('regions', RegionController::class);
 Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('plans', PlanController::class);
-Route::prefix('attendances')->group(function () {
-    Route::get('/', [AttendanceController::class, 'index']);
-    Route::post('/', [AttendanceController::class, 'store']);
-    Route::put('/{attendance}', [AttendanceController::class, 'update']);
-    Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
-});
+Route::apiResource('attendances', AttendanceController::class);
+
+// Route::prefix('attendances')->group(function () {
+//     Route::get('/', [AttendanceController::class, 'index']);
+//     Route::post('/', [AttendanceController::class, 'store']);
+//     Route::put('/{attendance}', [AttendanceController::class, 'show']);
+//     Route::put('/{attendance}', [AttendanceController::class, 'update']);
+//     Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
+// });
 
 
 // soft delete helpers
