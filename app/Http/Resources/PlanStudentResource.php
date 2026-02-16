@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PlanAssignmentResource extends JsonResource
+class PlanStudentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,11 +16,12 @@ class PlanAssignmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'student_id' => $this->student_id,
             'plan_id' => $this->plan_id,
+            'student_id' => $this->student_id,
             'assignment_type' => $this->assignment_type,
             'criteria' => $this->criteria,
 
+            // بيانات الطالب المرتبط
             'student' => $this->whenLoaded('student', function () {
                 return [
                     'id' => $this->student->id,
@@ -32,9 +33,11 @@ class PlanAssignmentResource extends JsonResource
                 ];
             }),
 
+            // التواريخ
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
 
+            // روابط مفيدة
             'links' => [
                 'self' => url("/api/plan-assignments/{$this->id}"),
                 'plan' => url("/api/plans/{$this->plan_id}"),

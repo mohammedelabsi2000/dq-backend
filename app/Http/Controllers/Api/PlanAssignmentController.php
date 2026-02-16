@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PlanAssignmentResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\Student;
 use App\Models\PlanAssignment;
@@ -10,6 +12,8 @@ use Illuminate\Http\Request;
 
 class PlanAssignmentController extends Controller
 {
+    use ApiResponser;
+
     /**
      * عرض الطلاب مع الفلاتر لإسنادهم لخطة
      */
@@ -17,17 +21,14 @@ class PlanAssignmentController extends Controller
     {
         $students = Student::query();
 
-        // فلترة حسب الفرع
         if ($request->branch_id) {
             $students->where('branch_id', $request->branch_id);
         }
 
-        // فلترة حسب المنطقة
         if ($request->region_id) {
             $students->where('region_id', $request->region_id);
         }
 
-        // فلترة حسب العمر
         if ($request->min_age || $request->max_age) {
             $today = now();
 
@@ -40,12 +41,10 @@ class PlanAssignmentController extends Controller
             }
         }
 
-        // فلترة حسب آخر إنجاز
         if ($request->last_memorized) {
             $students->where('last_memorized', '>=', $request->last_memorized);
         }
 
-        // بحث عام
         if ($request->search) {
             $students->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -55,10 +54,14 @@ class PlanAssignmentController extends Controller
 
         $students = $students->paginate(50);
 
-        return response()->json([
-            'plan_id' => $plan->id,
-            'students' => $students
-        ], 200);
+        return $this->apiResponse(
+            [
+                'plan_id' => $plan->id,
+                'students' => $students
+            ],
+            'تم جلب الطلاب بنجاح',
+            200
+        );
     }
 
     /**
@@ -71,8 +74,9 @@ class PlanAssignmentController extends Controller
             'students.*' => 'exists:students,id'
         ]);
 
+        $assigned = [];
         foreach ($request->students as $studentId) {
-            PlanAssignment::updateOrCreate(
+            $assignment = PlanAssignment::updateOrCreate(
                 [
                     'plan_id' => $plan->id,
                     'student_id' => $studentId
@@ -82,10 +86,14 @@ class PlanAssignmentController extends Controller
                     'criteria' => null
                 ]
             );
+
+            $assigned[] = $assignment;
         }
 
-        return response()->json([
-            'message' => 'تم إسناد الطلاب للخطة بنجاح'
-        ], 200);
+        return $this->apiResponse(
+            PlanAssignmentResource::collection(collect($assigned)->load('student')),
+            'تم إسناد الطلاب للخطة بنجاح',
+            200
+        );
     }
 }
