@@ -6,27 +6,37 @@ use App\Models\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Http\Requests\Student\UpdateStudentRequest;
+use App\Http\Resources\StudentResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\User;
 use App\Services\StudentService;
-use Illuminate\Support\Facades\Hash;
 
 class StudentController extends Controller
 {
+    use ApiResponser;
     private StudentService $studentService;
 
     public function __construct(StudentService $studentService)
     {
         $this->studentService = $studentService;
     }
+
     public function index()
     {
-        return Student::with([
+        $students =  Student::with([
             'mosque',
             'maritalStatus',
             'moneyStatus',
             'guardianType',
             'prefixName'
-        ])->paginate();
+        ])->get();
+
+
+        return $this->apiResponse(
+            StudentResource::collection($students),
+            'success',
+            200
+        );
     }
 
     public function store(StoreStudentRequest $request)
@@ -38,13 +48,20 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
-        return $student->load([
+        $student = $student->load([
             'mosque',
             'maritalStatus',
             'moneyStatus',
             'guardianType',
-            'prefixName'
+            'prefixName',
+            'guardian',
         ]);
+
+        return $this->apiResponse(
+            new StudentResource($student),
+            'success',
+            200
+        );
     }
 
     public function update(UpdateStudentRequest $request, Student $student)

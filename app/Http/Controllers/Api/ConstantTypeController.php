@@ -15,7 +15,7 @@ class ConstantTypeController extends Controller
     use ApiResponser;
     /**
      * Display a listing of the resource.
-     *
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -48,11 +48,19 @@ class ConstantTypeController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(ConstantType $constantType)
     {
-        //
+        $constantType = $constantType->load([
+            'constants'
+        ]);
+
+        return $this->apiResponse(
+            new ConstantTypeResource($constantType),
+            'success',
+            200
+        );
     }
 
     /**
