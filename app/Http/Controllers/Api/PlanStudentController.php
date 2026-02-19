@@ -40,6 +40,7 @@ class PlanStudentController extends Controller
 
         $plan = Plan::findOrFail($plan_id);
 
+        // تحقق إذا الطالب مسند بالفعل
         $exists = PlanAssignment::where('plan_id', $plan->id)
             ->where('student_id', $request->student_id)
             ->exists();

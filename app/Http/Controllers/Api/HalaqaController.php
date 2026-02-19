@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreHalaqaRequest;
 use App\Http\Requests\UpdateHalaqaRequest;
+use App\Http\Resources\HalaqaResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Halaqa;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
 {
+    use ApiResponser;
+
     /**
      * Display a listing of the resource.
      *
@@ -35,7 +39,16 @@ class HalaqaController extends Controller
             $query->with('constant');
         }
 
-        return response()->json($query->latest()->paginate(15), 200);
+        $perPage = $request->integer('per_page', 15);
+        $halaqas = $query->latest()->paginate($perPage);
+
+        return $this->success(
+            [
+                'items' => HalaqaResource::collection($halaqas),
+                'pagination' => $this->paginate($halaqas),
+            ],
+            'قائمة الحلقات'
+        );
     }
 
     /**
@@ -48,10 +61,20 @@ class HalaqaController extends Controller
     {
         $halaqa = Halaqa::create($request->validated());
 
-        return response()->json([
-            'message' => 'Halaqa created successfully',
-            'data' => $halaqa
-        ], 201);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_center')) {
+            $halaqa->load('center');
+        }
+
+        if ($request->boolean('with_constant')) {
+            $halaqa->load('constant');
+        }
+
+        return $this->success(
+            new HalaqaResource($halaqa),
+            'تم إنشاء الحلقة بنجاح',
+            201
+        );
     }
 
     /**
@@ -71,25 +94,11 @@ class HalaqaController extends Controller
         }
 
 
-        return response()->json($halaqa, 200);
+        return $this->success(
+            new HalaqaResource($halaqa),
+            'بيانات الحلقة'
+        );
     }
-
-    // public function show(Request $request, $id)
-    // {
-    //     $query = Halaqa::query();
-
-    //     if ($request->boolean('with_center')) {
-    //         $query->with('center');
-    //     }
-
-    //     if ($request->boolean('with_constant')) {
-    //         $query->with('constant');
-    //     }
-
-    //     $halaqa = $query->findOrFail($id);
-
-    //     return response()->json($halaqa, 200);
-    // }
 
     /**
      * Update the specified resource in storage.
@@ -102,10 +111,19 @@ class HalaqaController extends Controller
     {
         $halaqa->update($request->validated());
 
-        return response()->json([
-            'message' => 'Halaqa updated successfully',
-            'data' => $halaqa
-        ], 200);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_center')) {
+            $halaqa->load('center');
+        }
+
+        if ($request->boolean('with_constant')) {
+            $halaqa->load('constant');
+        }
+
+        return $this->success(
+            new HalaqaResource($halaqa),
+            'تم تحديث بيانات الحلقة بنجاح'
+        );
     }
 
     /**
@@ -118,6 +136,9 @@ class HalaqaController extends Controller
     {
         $halaqa->delete();
 
-        return response()->json(['message' => 'Halaqa deleted successfully'], 200);
+        return $this->success(
+            null,
+            'تم حذف الحلقة بنجاح'
+        );
     }
 }

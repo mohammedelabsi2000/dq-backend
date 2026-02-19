@@ -110,7 +110,16 @@ class PlanController extends Controller
             'tracks' => 'required|array'
         ]);
 
-        $plan->planTracks()->delete();
+    $plan->planTracks()->delete();
+
+    foreach ($data['tracks'] as $trackId => $trackData) {
+
+        $planTrack = PlanTrack::create([
+            'plan_id' => $plan->id,
+            'track_id' => $trackId,
+            'is_required' => isset($trackData['is_required']),
+            'weight' => $trackData['weight'] ?? 1
+        ]);
 
         foreach ($data['tracks'] as $trackId => $trackData) {
             $planTrack = PlanTrack::create([
@@ -132,6 +141,38 @@ class PlanController extends Controller
             }
         }
 
+        if (isset($trackData['courses'])) {
+            foreach ($trackData['courses'] as $courseId => $courseData) {
+                PlanTrackCourse::create([
+                    'plan_track_id' => $planTrack->id,
+                    'course_id' => $courseId,
+                    'is_required' => isset($courseData['is_required']),
+                    'order' => $courseData['order'] ?? 1
+                ]);
+            }
+        }
+    }
+
+    // تحميل العلاقات بعد الحفظ
+    $plan->load('planTracks.courses.track');
+
+    return response()->json([
+        'message' => 'Plan setup saved successfully',
+        'data' => $plan
+    ], 200);
+}
+
+    // عرض كل الخطط المركبة
+    public function setupIndex()
+    {
+        $plans = Plan::with('planTracks.courses')->get();
+
+        return response()->json($plans, 200);
+    }
+
+    // عرض خطة مركبة واحدة
+    public function showSetup(Plan $plan)
+    {
         $plan->load('planTracks.courses.track');
 
         return $this->apiResponse(

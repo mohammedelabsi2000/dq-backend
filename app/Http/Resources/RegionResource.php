@@ -14,6 +14,33 @@ class RegionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        $data = [
+            'id' => $this->id,
+            'name' => $this->name,
+            'notes' => $this->notes,
+            'branch_id' => $this->branch_id,
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+        ];
+
+        // إضافة بيانات الفرع فقط إذا كانت محملة
+        if ($this->relationLoaded('branch') && $this->branch) {
+            $data['branch'] = [
+                'id' => $this->branch->id,
+                'name' => $this->branch->name,
+            ];
+        }
+
+        // إضافة عدد المساجد (إذا طلب)
+        if ($request->boolean('with_mosques_count')) {
+            $data['mosques_count'] = $this->when($this->mosques_count !== null, $this->mosques_count);
+        }
+
+        // إضافة المساجد (إذا طلب)
+        if ($request->boolean('with_mosques') && $this->relationLoaded('mosques')) {
+            $data['mosques'] = MosqueResource::collection($this->whenLoaded('mosques'));
+        }
+
+        return $data;
     }
 }

@@ -21,14 +21,17 @@ class PlanAssignmentController extends Controller
     {
         $students = Student::query();
 
+        // فلترة حسب الفرع
         if ($request->branch_id) {
             $students->where('branch_id', $request->branch_id);
         }
 
+        // فلترة حسب المنطقة
         if ($request->region_id) {
             $students->where('region_id', $request->region_id);
         }
 
+        // فلترة حسب العمر
         if ($request->min_age || $request->max_age) {
             $today = now();
 
@@ -41,10 +44,12 @@ class PlanAssignmentController extends Controller
             }
         }
 
+        // فلترة حسب آخر إنجاز
         if ($request->last_memorized) {
             $students->where('last_memorized', '>=', $request->last_memorized);
         }
 
+        // بحث عام
         if ($request->search) {
             $students->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')

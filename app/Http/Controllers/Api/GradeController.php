@@ -7,18 +7,24 @@ use App\Models\Grade;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreGradeRequest;
 use App\Http\Requests\UpdateGradeRequest;
+use App\Http\Resources\GradeResource;
+use App\Http\Traits\ApiResponser;
 
 class GradeController extends Controller
 {
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        return response()->json(
-            Grade::latest()->paginate(15),
+        $data = Grade::get();
+
+        return $this->apiResponse(
+            GradeResource::collection($data),
+            'success',
             200
         );
     }
@@ -27,7 +33,7 @@ class GradeController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreGradeRequest $request)
     {
@@ -44,11 +50,15 @@ class GradeController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Models\Grade  $grade
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Grade $grade)
     {
-        return response()->json($grade, 200);
+        return $this->apiResponse(
+            new GradeResource($grade),
+            'success',
+            200
+        );
     }
 
     /**
@@ -56,7 +66,7 @@ class GradeController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Grade  $grade
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateGradeRequest $request, Grade $grade)
     {
@@ -71,7 +81,7 @@ class GradeController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\Grade  $grade
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Grade $grade)
     {

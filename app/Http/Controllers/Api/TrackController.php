@@ -61,6 +61,10 @@ class TrackController extends Controller
         );
     }
 
+
+    /**
+     * Remove the specified track.
+     */
     public function destroy(Track $track)
     {
         $track->delete();

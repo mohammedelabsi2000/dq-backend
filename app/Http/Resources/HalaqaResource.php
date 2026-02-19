@@ -14,6 +14,34 @@ class HalaqaResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        $data = [
+            'id' => $this->id,
+            'name' => $this->name,
+            'location' => $this->location,
+            'description' => $this->description,
+            'center_id' => $this->center_id,
+            'constant_id' => $this->constant_id,
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+        ];
+
+        // إضافة بيانات المركز فقط إذا كانت محملة
+        if ($this->relationLoaded('center') && $this->center) {
+            $data['center'] = [
+                'id' => $this->center->id,
+                'name' => $this->center->name,
+            ];
+        }
+
+        // إضافة بيانات الثابت (Constant) فقط إذا كانت محملة
+        if ($this->relationLoaded('constant') && $this->constant) {
+            $data['constant'] = [
+                'id' => $this->constant->id,
+                'name' => $this->constant->name, // افترض أن لديه حقل name
+                // أضف حقول الثابت الأخرى حسب الحاجة
+            ];
+        }
+
+        return $data;
     }
 }

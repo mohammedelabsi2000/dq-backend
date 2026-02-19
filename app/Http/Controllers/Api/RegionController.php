@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRegionRequest;
 use App\Http\Requests\UpdateRegionRequest;
+use App\Http\Resources\RegionResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Region;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
+    use ApiResponser;
+
     /**
      * Display a listing of the resource.
      *
@@ -18,19 +22,40 @@ class RegionController extends Controller
     {
         $query = Region::query();
 
+        // فلترة حسب الفرع
         if ($request->filled('branch_id')) {
             $query->where('branch_id', $request->integer('branch_id'));
         }
 
+        // بحث في الاسم
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // تحميل العلاقات
         if ($request->boolean('with_branch')) {
             $query->with('branch');
         }
 
-        $perPage = $request->integer('per_page', 15);
+        if ($request->boolean('with_mosques')) {
+            $query->with('mosques');
+        }
 
+        // إضافة عدد المساجد
+        if ($request->boolean('with_mosques_count')) {
+            $query->withCount('mosques');
+        }
+
+        $perPage = $request->integer('per_page', 15);
         $regions = $query->latest()->paginate($perPage);
 
-        return response()->json($regions, 200);
+        return $this->success(
+            [
+                'items' => RegionResource::collection($regions),
+                'pagination' => $this->paginate($regions),
+            ],
+            'قائمة المناطق'
+        );
     }
 
     /**
@@ -42,10 +67,16 @@ class RegionController extends Controller
     {
         $region = Region::create($request->validated());
 
-        return response()->json([
-            'message' => 'Region created successfully',
-            'data' => $region
-        ], 201);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_branch')) {
+            $region->load('branch');
+        }
+
+        return $this->success(
+            new RegionResource($region),
+            'تم إنشاء المنطقة بنجاح',
+            201
+        );
     }
 
     /**
@@ -55,11 +86,23 @@ class RegionController extends Controller
      */
     public function show(Request $request, Region $region)
     {
+        // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_branch')) {
             $region->load('branch');
         }
 
-        return response()->json($region, 200);
+        if ($request->boolean('with_mosques')) {
+            $region->load('mosques');
+        }
+
+        if ($request->boolean('with_mosques_count')) {
+            $region->loadCount('mosques');
+        }
+
+        return $this->success(
+            new RegionResource($region),
+            'بيانات المنطقة'
+        );
     }
 
     /**
@@ -72,10 +115,15 @@ class RegionController extends Controller
     {
         $region->update($request->validated());
 
-        return response()->json([
-            'message' => 'Region updated successfully',
-            'data' => $region->fresh()
-        ], 200);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_branch')) {
+            $region->load('branch');
+        }
+
+        return $this->success(
+            new RegionResource($region),
+            'تم تحديث بيانات المنطقة بنجاح'
+        );
     }
 
     /**
@@ -85,10 +133,19 @@ class RegionController extends Controller
      */
     public function destroy(Region $region)
     {
+        // تحقق من وجود مساجد تابعة قبل الحذف
+        if ($region->mosques()->exists()) {
+            return $this->error(
+                'لا يمكن حذف المنطقة لأنها تحتوي على مساجد تابعة',
+                400
+            );
+        }
+
         $region->delete();
 
-        return response()->json([
-            'message' => 'Region deleted successfully'
-        ], 200);
+        return $this->success(
+            null,
+            'تم حذف المنطقة بنجاح'
+        );
     }
 }
