@@ -5,11 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMosqueRequest;
 use App\Http\Requests\UpdateMosqueRequest;
+use App\Http\Resources\MosqueResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Mosque;
 use Illuminate\Http\Request;
 
 class MosqueController extends Controller
 {
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
@@ -18,18 +21,51 @@ class MosqueController extends Controller
     {
         $query = Mosque::query();
 
+        // فلترة حسب المنطقة
         if ($request->filled('region_id')) {
             $query->where('region_id', $request->integer('region_id'));
         }
 
+        // بحث في الاسم
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // تحميل العلاقات
         if ($request->boolean('with_region')) {
             $query->with('region');
         }
 
-        $perPage = $request->integer('per_page', 15);
+        if ($request->boolean('with_centers')) {
+            $query->with('centers');
+        }
 
-        return response()->json($query->latest()->paginate($perPage), 200);
+        if ($request->boolean('with_users')) {
+            $query->with('users');
+        }
+
+        // إضافة عدد العلاقات
+        if ($request->boolean('with_centers_count')) {
+            $query->withCount('centers');
+        }
+
+        if ($request->boolean('with_users_count')) {
+            $query->withCount('users');
+        }
+
+        $perPage = $request->integer('per_page', 15);
+        $mosques = $query->latest()->paginate($perPage);
+
+        return $this->success(
+            [
+                'items' => MosqueResource::collection($mosques),
+                'pagination' => $this->paginate($mosques),
+            ],
+            'قائمة المساجد'
+        );
     }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -40,10 +76,18 @@ class MosqueController extends Controller
     {
         $mosque = Mosque::create($request->validated());
 
-        return response()->json([
-            'message' => 'Mosque created successfully',
-            'data' => $mosque
-        ], 201);
+        if ($request->boolean('with_region')) {
+            $mosque->load('region');
+        }
+        // return response()->json([
+        //     'message' => 'Mosque created successfully',
+        //     'data' => $mosque
+        // ], 201);
+        return $this->success(
+            new MosqueResource($mosque),
+            'تم إنشاء المسجد بنجاح',
+            201
+        );
     }
 
     /**
@@ -53,11 +97,31 @@ class MosqueController extends Controller
      */
     public function show(Request $request, Mosque $mosque)
     {
+        // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_region')) {
             $mosque->load('region');
         }
 
-        return response()->json($mosque, 200);
+        if ($request->boolean('with_centers')) {
+            $mosque->load('centers');
+        }
+
+        if ($request->boolean('with_users')) {
+            $mosque->load('users');
+        }
+
+        if ($request->boolean('with_centers_count')) {
+            $mosque->loadCount('centers');
+        }
+
+        if ($request->boolean('with_users_count')) {
+            $mosque->loadCount('users');
+        }
+
+        return $this->success(
+            new MosqueResource($mosque),
+            'بيانات المسجد'
+        );
     }
 
     /**
@@ -70,10 +134,15 @@ class MosqueController extends Controller
     {
         $mosque->update($request->validated());
 
-        return response()->json([
-            'message' => 'Mosque updated successfully',
-            'data' => $mosque->fresh()
-        ], 200);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_region')) {
+            $mosque->load('region');
+        }
+
+        return $this->success(
+            new MosqueResource($mosque),
+            'تم تحديث بيانات المسجد بنجاح'
+        );
     }
 
     /**
@@ -83,10 +152,27 @@ class MosqueController extends Controller
      */
     public function destroy(Mosque $mosque)
     {
+        // تحقق من وجود مراكز تابعة قبل الحذف
+        if ($mosque->centers()->exists()) {
+            return $this->error(
+                'لا يمكن حذف المسجد لأنه يحتوي على مراكز تابعة',
+                400
+            );
+        }
+
+        // تحقق من وجود مستخدمين تابعين قبل الحذف
+        if ($mosque->users()->exists()) {
+            return $this->error(
+                'لا يمكن حذف المسجد لأنه يحتوي على مستخدمين تابعين',
+                400
+            );
+        }
+
         $mosque->delete();
 
-        return response()->json([
-            'message' => 'Mosque deleted successfully'
-        ], 200);
+        return $this->success(
+            null,
+            'تم حذف المسجد بنجاح'
+        );
     }
 }

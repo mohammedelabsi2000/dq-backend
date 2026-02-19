@@ -52,7 +52,6 @@ class AcademicQualificationController extends Controller
             'success',
             200
         );
-
     }
 
     public function update(

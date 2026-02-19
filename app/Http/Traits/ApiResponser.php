@@ -5,6 +5,43 @@ namespace App\Http\Traits;
 trait ApiResponser
 {
 
+    //***************************************mohammed************************* */
+    protected function success($data, string $message = '', int $code = 200)
+    {
+        return response()->json([
+            'status'  => true,
+            'message' => $message,
+            'data'    => $data,
+        ], $code);
+    }
+
+
+    protected function error($message = 'حدث خطأ', $code = 400, $errors = null)
+    {
+        return response()->json([
+            'status'  => false,
+            'message' => $message,
+            'errors'  => $errors
+        ], $code);
+    }
+
+    protected function validationError($errors)
+    {
+        return response()->json([
+            'status'  => false,
+            'message' => 'خطأ في التحقق من البيانات',
+            'errors'  => $errors
+        ], 422);
+    }
+
+    protected function notFound($message = 'العنصر غير موجود')
+    {
+        return response()->json([
+            'status'  => false,
+            'message' => $message
+        ], 404);
+    }
+    // ****************************** mohammed *******************************
     protected function successMessage($msg, $code = 200)
     {
         return response()->json([
