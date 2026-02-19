@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
-    public function index()
+    use ApiResponser;
+
+    public function index(Request $request)
     {
         $branches = Branch::latest()->get();
         return view('branches.index', compact('branches'));

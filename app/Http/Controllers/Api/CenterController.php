@@ -5,11 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCenterRequest;
 use App\Http\Requests\UpdateCenterRequest;
+use App\Http\Resources\CenterResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
+    use ApiResponser; // استخدم الـ Trait
+
     /**
      * Display a listing of the resource.
      *
@@ -27,10 +31,21 @@ class CenterController extends Controller
             $query->with('mosque');
         }
 
-        return response()->json(
-            $query->latest()->paginate(15),
-            200
+        $perPage = $request->integer('per_page', 15);
+        $centers = $query->latest()->paginate($perPage);
+
+        return $this->success(
+            [
+                'items' => CenterResource::collection($centers),
+                'pagination' => $this->paginate($centers),
+            ],
+            'قائمة المراكز'
         );
+
+        // return response()->json(
+        //     $query->latest()->paginate(15),
+        //     200
+        // );
     }
 
     /**
@@ -43,10 +58,17 @@ class CenterController extends Controller
     {
         $center = Center::create($request->validated());
 
-        return response()->json([
-            'message' => 'Center created successfully',
-            'data' => $center
-        ], 201);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_mosque')) {
+            $center->load('mosque');
+        }
+
+        // ✅ استخدام success مع البيانات والرسالة وكود 201
+        return $this->success(
+            new CenterResource($center),
+            'تم إنشاء المركز بنجاح',
+            201
+        );
     }
 
     /**
@@ -61,7 +83,11 @@ class CenterController extends Controller
             $center->load('mosque');
         }
 
-        return response()->json($center, 200);
+        // ✅ استخدام success
+        return $this->success(
+            new CenterResource($center),
+            'بيانات المركز'
+        );
     }
 
     /**
@@ -74,11 +100,16 @@ class CenterController extends Controller
     public function update(UpdateCenterRequest $request, Center $center)
     {
         $center->update($request->validated());
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_mosque')) {
+            $center->load('mosque');
+        }
 
-        return response()->json([
-            'message' => 'Center updated successfully',
-            'data' => $center->fresh()
-        ], 200);
+        // ✅ استخدام success
+        return $this->success(
+            new CenterResource($center),
+            'تم تحديث بيانات المركز بنجاح'
+        );
     }
 
     /**
@@ -89,10 +120,21 @@ class CenterController extends Controller
      */
     public function destroy(Center $center)
     {
+        // تحقق من وجود حلقات تابعة قبل الحذف
+        if ($center->halaqat()->exists()) {
+            // ✅ استخدام error
+            return $this->error(
+                'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
+                400
+            );
+        }
+
         $center->delete();
 
-        return response()->json([
-            'message' => 'Center deleted successfully'
-        ], 200);
+        // ✅ استخدام success مع null
+        return $this->success(
+            null,
+            'تم حذف المركز بنجاح'
+        );
     }
 }
