@@ -5,13 +5,21 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PersonalCourse\StorePersonalCourseRequest;
 use App\Http\Requests\PersonalCourse\UpdatePersonalCourseRequest;
+use App\Http\Resources\PersonalCourseResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\PersonalCourse;
 
 class PersonalCourseController extends Controller
 {
+    use ApiResponser;
     public function index()
     {
-        return PersonalCourse::with(['person', 'type'])->get();
+        $personalCourse = PersonalCourse::with(['person', 'type'])->get();
+        return $this->apiResponse(
+            PersonalCourseResource::collection($personalCourse),
+            'success',
+            200
+        );
     }
 
     public function store(StorePersonalCourseRequest $request)
@@ -45,7 +53,13 @@ class PersonalCourseController extends Controller
 
     public function show(PersonalCourse $personalCourse)
     {
-        return $personalCourse->load(['person', 'type']);
+        $personalCourse = $personalCourse->load(['person', 'type']);
+        
+        return $this->apiResponse(
+            new PersonalCourseResource($personalCourse),
+            'success',
+            200
+        );
     }
 
     public function update(UpdatePersonalCourseRequest $request, PersonalCourse $personalCourse)

@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             BranchRegionMosqueSeeder::class,
             UserSeeder::class,
             GradeSeeder::class,
-            PlanSeeder::class,
+            // PlanSeeder::class,
+            StudentSeeder::class,
         ]);
     }
 }

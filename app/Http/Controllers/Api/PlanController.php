@@ -90,39 +90,43 @@ return response()->json($query->latest()->get());
     }
 
     // حفظ تركيب الخطة
-    public function saveSetup(Request $request, Plan $plan)
-    {
-        $data = $request->validate([
-            'tracks' => 'required|array'
+public function saveSetup(Request $request, Plan $plan)
+{
+    $data = $request->validate([
+        'tracks' => 'required|array'
+    ]);
+
+    $plan->planTracks()->delete();
+
+    foreach ($data['tracks'] as $trackId => $trackData) {
+
+        $planTrack = PlanTrack::create([
+            'plan_id' => $plan->id,
+            'track_id' => $trackId,
+            'is_required' => isset($trackData['is_required']),
+            'weight' => $trackData['weight'] ?? 1
         ]);
 
-        $plan->planTracks()->delete();
-
-        foreach ($data['tracks'] as $trackId => $trackData) {
-
-            $planTrack = PlanTrack::create([
-                'plan_id' => $plan->id,
-                'track_id' => $trackId,
-                'is_required' => isset($trackData['is_required']),
-                'weight' => $trackData['weight'] ?? 1
-            ]);
-
-            if (isset($trackData['courses'])) {
-                foreach ($trackData['courses'] as $courseId => $courseData) {
-                    PlanTrackCourse::create([
-                        'plan_track_id' => $planTrack->id,
-                        'course_id' => $courseId,
-                        'is_required' => isset($courseData['is_required']),
-                        'order' => $courseData['order'] ?? 1
-                    ]);
-                }
+        if (isset($trackData['courses'])) {
+            foreach ($trackData['courses'] as $courseId => $courseData) {
+                PlanTrackCourse::create([
+                    'plan_track_id' => $planTrack->id,
+                    'course_id' => $courseId,
+                    'is_required' => isset($courseData['is_required']),
+                    'order' => $courseData['order'] ?? 1
+                ]);
             }
         }
-
-        return response()->json([
-            'message' => 'Plan setup saved successfully'
-        ], 200);
     }
+
+    // تحميل العلاقات بعد الحفظ
+    $plan->load('planTracks.courses.track');
+
+    return response()->json([
+        'message' => 'Plan setup saved successfully',
+        'data' => $plan
+    ], 200);
+}
 
     // عرض كل الخطط المركبة
     public function setupIndex()

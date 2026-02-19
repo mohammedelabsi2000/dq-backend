@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponser;
-use Illuminate\Http\Request;
 use App\Http\Requests\AcademicQualification\StoreAcademicQualificationRequest;
 use App\Http\Requests\AcademicQualification\UpdateAcademicQualificationRequest;
 use App\Http\Resources\AcademicQualificationResource;
@@ -19,9 +18,13 @@ class AcademicQualificationController extends Controller
             'academicDegree',
             'major',
             'person',
-        ])->paginate();
+        ])->get();
 
-        return response()->json($data);
+        return $this->apiResponse(
+            AcademicQualificationResource::collection($data),
+            'success',
+            200
+        );
     }
 
     public function store(StoreAcademicQualificationRequest $request)
@@ -36,7 +39,7 @@ class AcademicQualificationController extends Controller
 
     public function show(AcademicQualification $academicQualification)
     {
-        $academicQualifications = $academicQualification->load([
+        $academicQualification = $academicQualification->load([
             'academicDegree',
             'major',
             'person',
@@ -45,7 +48,7 @@ class AcademicQualificationController extends Controller
             $academicQualifications
         ); */
         return $this->apiResponse(
-            new AcademicQualificationResource($academicQualifications),
+            new AcademicQualificationResource($academicQualification),
             'success',
             200
         );

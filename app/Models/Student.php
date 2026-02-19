@@ -63,7 +63,7 @@ public function getNameAttribute()
 
     public function guardian()
     {
-        return $this->belongsTo(User::class, 'guardian_user_id', 'identity');
+        return $this->belongsTo(User::class, 'guardian_id', 'identity');
     }
 
     public function attendances()
