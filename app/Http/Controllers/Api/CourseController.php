@@ -3,11 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CourseResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
+    use ApiResponser;
+
     /**
      * Display a listing of courses.
      */
@@ -15,11 +19,13 @@ class CourseController extends Controller
     {
         $perPage = $request->integer('per_page', 15);
 
-        $courses = Course::with('track')
-            ->latest()
-            ->paginate($perPage);
+        $courses = Course::with('track')->latest()->paginate($perPage);
 
-        return response()->json($courses, 200);
+        return $this->apiResponse(
+            CourseResource::collection($courses),
+            'تم جلب الدورات بنجاح',
+            200
+        );
     }
 
     /**
@@ -37,10 +43,11 @@ class CourseController extends Controller
 
         $course = Course::create($request->all());
 
-        return response()->json([
-            'message' => 'تم إنشاء الدورة',
-            'data' => $course
-        ], 201);
+        return $this->apiResponse(
+            new CourseResource($course),
+            'تم إنشاء الدورة',
+            201
+        );
     }
 
     /**
@@ -50,7 +57,11 @@ class CourseController extends Controller
     {
         $course->load('track');
 
-        return response()->json($course, 200);
+        return $this->apiResponse(
+            new CourseResource($course),
+            'تم جلب الدورة',
+            200
+        );
     }
 
     /**
@@ -67,10 +78,11 @@ class CourseController extends Controller
 
         $course->update($request->all());
 
-        return response()->json([
-            'message' => 'تم التعديل',
-            'data' => $course->fresh()
-        ], 200);
+        return $this->apiResponse(
+            new CourseResource($course->fresh()),
+            'تم التعديل',
+            200
+        );
     }
 
     /**
@@ -80,8 +92,10 @@ class CourseController extends Controller
     {
         $course->delete();
 
-        return response()->json([
-            'message' => 'تم الحذف'
-        ], 200);
+        return $this->apiResponse(
+            null,
+            'تم الحذف',
+            200
+        );
     }
 }

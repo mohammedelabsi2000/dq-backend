@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PlanResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\PlanTrack;
 use App\Models\PlanTrackCourse;
@@ -11,17 +13,23 @@ use Illuminate\Http\Request;
 
 class PlanController extends Controller
 {
+    use ApiResponser;
+
     public function index(Request $request)
     {
         $query = Plan::query();
 
         if ($request->boolean('with_setup')) {
-            $query->with('planTracks.courses');
+            $query->with('planTracks.courses.track');
         }
 
-        $perPage = $request->integer('per_page', 15);
+        $plans = $query->latest()->get();
 
-return response()->json($query->latest()->get());
+        return $this->apiResponse(
+            PlanResource::collection($plans),
+            'Plans retrieved successfully',
+            200
+        );
     }
 
     public function store(Request $request)
@@ -35,10 +43,11 @@ return response()->json($query->latest()->get());
 
         $plan = Plan::create($data);
 
-        return response()->json([
-            'message' => 'Plan created successfully',
-            'data' => $plan
-        ], 201);
+        return $this->apiResponse(
+            new PlanResource($plan),
+            'Plan created successfully',
+            201
+        );
     }
 
     public function show(Request $request, Plan $plan)
@@ -47,7 +56,11 @@ return response()->json($query->latest()->get());
             $plan->load('planTracks.courses.track');
         }
 
-        return response()->json($plan, 200);
+        return $this->apiResponse(
+            new PlanResource($plan),
+            'Plan retrieved successfully',
+            200
+        );
     }
 
     public function update(Request $request, Plan $plan)
@@ -61,40 +74,41 @@ return response()->json($query->latest()->get());
 
         $plan->update($data);
 
-        return response()->json([
-            'message' => 'Plan updated successfully',
-            'data' => $plan->fresh()
-        ], 200);
+        return $this->apiResponse(
+            new PlanResource($plan->fresh()),
+            'Plan updated successfully',
+            200
+        );
     }
 
     public function destroy(Plan $plan)
     {
         $plan->delete();
 
-        return response()->json([
-            'message' => 'Plan deleted successfully'
-        ], 200);
+        return $this->apiResponse(null, 'Plan deleted successfully', 200);
     }
 
-    // جلب صفحة setup (المسارات + الدورات + إعدادات الخطة)
+    // ================================
+    // Setup routes
+    // ================================
+
     public function setup(Plan $plan)
     {
         $tracks = Track::with('courses')->get();
-        $planTracks = $plan->planTracks()->with('courses')->get();
+        $planTracks = $plan->planTracks()->with('courses.track')->get();
 
-        return response()->json([
-            'plan' => $plan,
+        return $this->apiResponse([
+            'plan' => new PlanResource($plan->load('planTracks.courses.track')),
             'tracks' => $tracks,
             'plan_tracks' => $planTracks
-        ], 200);
+        ], 'Plan setup retrieved successfully', 200);
     }
 
-    // حفظ تركيب الخطة
-public function saveSetup(Request $request, Plan $plan)
-{
-    $data = $request->validate([
-        'tracks' => 'required|array'
-    ]);
+    public function saveSetup(Request $request, Plan $plan)
+    {
+        $data = $request->validate([
+            'tracks' => 'required|array'
+        ]);
 
     $plan->planTracks()->delete();
 
@@ -106,6 +120,26 @@ public function saveSetup(Request $request, Plan $plan)
             'is_required' => isset($trackData['is_required']),
             'weight' => $trackData['weight'] ?? 1
         ]);
+
+        foreach ($data['tracks'] as $trackId => $trackData) {
+            $planTrack = PlanTrack::create([
+                'plan_id' => $plan->id,
+                'track_id' => $trackId,
+                'is_required' => isset($trackData['is_required']),
+                'weight' => $trackData['weight'] ?? 1
+            ]);
+
+            if (!empty($trackData['courses'])) {
+                foreach ($trackData['courses'] as $courseId => $courseData) {
+                    PlanTrackCourse::create([
+                        'plan_track_id' => $planTrack->id,
+                        'course_id' => $courseId,
+                        'is_required' => isset($courseData['is_required']),
+                        'order' => $courseData['order'] ?? 1
+                    ]);
+                }
+            }
+        }
 
         if (isset($trackData['courses'])) {
             foreach ($trackData['courses'] as $courseId => $courseData) {
@@ -141,16 +175,17 @@ public function saveSetup(Request $request, Plan $plan)
     {
         $plan->load('planTracks.courses.track');
 
-        return response()->json($plan, 200);
+        return $this->apiResponse(
+            new PlanResource($plan),
+            'Plan setup saved successfully',
+            200
+        );
     }
 
-    // حذف التركيب
     public function deleteSetup(Plan $plan)
     {
         $plan->planTracks()->delete();
 
-        return response()->json([
-            'message' => 'Plan setup deleted successfully'
-        ], 200);
+        return $this->apiResponse(null, 'Plan setup deleted successfully', 200);
     }
 }

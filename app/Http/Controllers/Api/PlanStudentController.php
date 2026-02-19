@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PlanStudentResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\PlanAssignment;
 use Illuminate\Http\Request;
 
 class PlanStudentController extends Controller
 {
+    use ApiResponser;
+
     // GET: عرض الطلاب المسندين للخطة
     public function index($plan_id)
     {
@@ -16,17 +20,22 @@ class PlanStudentController extends Controller
 
         $students = $plan->assignments()->with('student')->paginate(50);
 
-        return response()->json([
-            'plan' => $plan,
-            'students' => $students
-        ]);
+        return $this->apiResponse(
+            [
+                'plan' => $plan,
+                'students' => PlanStudentResource::collection($students)
+            ],
+            'تم جلب الطلاب المسندين بنجاح',
+            200
+        );
     }
 
-    // POST: اضافة/اسناد طالب لخطة
+    // POST: إضافة/إسناد طالب للخطة
     public function assignStudent(Request $request, $plan_id)
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
+            'assignment_type' => 'nullable|string'
         ]);
 
         $plan = Plan::findOrFail($plan_id);
@@ -37,21 +46,25 @@ class PlanStudentController extends Controller
             ->exists();
 
         if ($exists) {
-            return response()->json([
-                'message' => 'Student already assigned to this plan.'
-            ], 409);
+            return $this->apiResponse(
+                null,
+                'الطالب مسند مسبقاً لهذه الخطة',
+                409
+            );
         }
 
         $assignment = PlanAssignment::create([
             'plan_id' => $plan->id,
             'student_id' => $request->student_id,
-            'assignment_type' => $request->input('assignment_type', 'manual'), // قيمة افتراضية
-
+            'assignment_type' => $request->input('assignment_type', 'manual'),
         ]);
 
-        return response()->json([
-            'message' => 'Student assigned successfully.',
-            'assignment' => $assignment
-        ], 201);
+        $assignment->load('student');
+
+        return $this->apiResponse(
+            new PlanStudentResource($assignment),
+            'تم إسناد الطالب بنجاح',
+            201
+        );
     }
 }

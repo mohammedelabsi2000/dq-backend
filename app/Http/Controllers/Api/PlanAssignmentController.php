@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PlanAssignmentResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\Student;
 use App\Models\PlanAssignment;
@@ -10,6 +12,8 @@ use Illuminate\Http\Request;
 
 class PlanAssignmentController extends Controller
 {
+    use ApiResponser;
+
     /**
      * عرض الطلاب مع الفلاتر لإسنادهم لخطة
      */
@@ -55,10 +59,14 @@ class PlanAssignmentController extends Controller
 
         $students = $students->paginate(50);
 
-        return response()->json([
-            'plan_id' => $plan->id,
-            'students' => $students
-        ], 200);
+        return $this->apiResponse(
+            [
+                'plan_id' => $plan->id,
+                'students' => $students
+            ],
+            'تم جلب الطلاب بنجاح',
+            200
+        );
     }
 
     /**
@@ -71,8 +79,9 @@ class PlanAssignmentController extends Controller
             'students.*' => 'exists:students,id'
         ]);
 
+        $assigned = [];
         foreach ($request->students as $studentId) {
-            PlanAssignment::updateOrCreate(
+            $assignment = PlanAssignment::updateOrCreate(
                 [
                     'plan_id' => $plan->id,
                     'student_id' => $studentId
@@ -82,10 +91,14 @@ class PlanAssignmentController extends Controller
                     'criteria' => null
                 ]
             );
+
+            $assigned[] = $assignment;
         }
 
-        return response()->json([
-            'message' => 'تم إسناد الطلاب للخطة بنجاح'
-        ], 200);
+        return $this->apiResponse(
+            PlanAssignmentResource::collection(collect($assigned)->load('student')),
+            'تم إسناد الطلاب للخطة بنجاح',
+            200
+        );
     }
 }

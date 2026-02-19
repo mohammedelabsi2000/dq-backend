@@ -6,14 +6,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PlanTrackCourseResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
-     */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->id,
+            'course_id' => $this->id,
+            'course_name' => $this->name,
+            'is_required' => $this->pivot?->is_required ?? false,
+            'order' => $this->pivot?->order ?? 1,
+        ];
     }
 }
