@@ -1,24 +1,52 @@
 @extends('layouts.app')
 @section('title', 'الفروع')
 @section('content')
+<<<<<<< HEAD
+<div class="container">
+
+    <h2>الفروع</h2>
+
+    <a href="{{ route('branches.create') }}" class="btn btn-primary mb-3">إضافة فرع</a>
+
     <div class="container">
 
         <h2 class="page-title mb-4">الفروع</h2>
 
-<<<<<<< HEAD
         <!-- بحث مباشر -->
         <input type="text" id="search" class="form-control mb-3" placeholder="ابحث عن فرع...">
-=======
+
     <table class="table table-bordered">
         <thead>
             <tr>
+                <th>#</th>
                 <th>الاسم</th>
-                <th>الحد الأدنى للحذف</th>
-                <th>الحد الأدنى للاستبدال</th>
-                <th>العمليات</th>
+                <th width="200">التحكم</th>
             </tr>
         </thead>
         <tbody>
+        @foreach($branches as $branch)
+            <tr>
+                <td>{{ $branch->id }}</td>
+                <td>{{ $branch->name ?? '-' }}</td>
+                <td>
+                    <a href="{{ route('branches.show', $branch) }}" class="btn btn-info btn-sm">عرض</a>
+                    <a href="{{ route('branches.edit', $branch) }}" class="btn btn-warning btn-sm">تعديل</a>
+
+                    <form action="{{ route('branches.destroy', $branch) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-danger btn-sm">حذف</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
+    </table>
+
+    {{ $branches->links() }}
+
+</div>
+=======
             @foreach($branches as $branch)
                 <tr>
                     <td>{{ $branch->name }}</td>
@@ -26,7 +54,6 @@
                     <td>{{ $branch->max_replacement_limit }}</td>
                     <td>
                         <a href="{{ route('branches.edit', $branch->id) }}" class="btn btn-primary btn-sm">تعديل</a>
->>>>>>> 91150221189a30c086e16e29e151cc0da866bd24
 
         <!-- جدول الفروع -->
         <form id="branches-form">

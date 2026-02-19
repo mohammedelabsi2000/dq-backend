@@ -12,12 +12,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
+use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TrackController;
+use App\Http\Controllers\Api\PlanAssignmentController;
+use App\Http\Controllers\Api\PlanStudentController;
 
 /* Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -49,19 +53,25 @@ Route::apiResource('branches', BranchController::class);
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('centers', CenterController::class);
 Route::apiResource('plans', PlanController::class);
-Route::prefix('attendances')->group(function () {
-    Route::get('/', [AttendanceController::class, 'index']);
-    Route::post('/', [AttendanceController::class, 'store']);
-    Route::put('/{attendance}', [AttendanceController::class, 'update']);
-    Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
-});
+Route::apiResource('attendances', AttendanceController::class);
+
+// Route::prefix('attendances')->group(function () {
+//     Route::get('/', [AttendanceController::class, 'index']);
+//     Route::post('/', [AttendanceController::class, 'store']);
+//     Route::put('/{attendance}', [AttendanceController::class, 'show']);
+//     Route::put('/{attendance}', [AttendanceController::class, 'update']);
+//     Route::delete('/{attendance}', [AttendanceController::class, 'destroy']);
+// });
 
 /*
 |--------------------------------------------------------------------------
-| Plans
+| Plans & tracks & courses
 |--------------------------------------------------------------------------
 */
 Route::apiResource('plans', PlanController::class);
+Route::apiResource('tracks', TrackController::class);
+Route::apiResource('courses', CourseController::class);
+
 
 /*
 | Plan Setup (التركيب)
@@ -80,6 +90,11 @@ Route::prefix('plans/{plan}')->group(function () {
     // delete setup
     Route::delete('setup', [PlanController::class, 'deleteSetup']);
 
+     // عرض الطلاب مع الفلاتر
+    Route::get('students', [PlanAssignmentController::class, 'students']);
+
+    // إسناد الطلاب
+    Route::post('assign', [PlanAssignmentController::class, 'assign']);
     /*
     | Soft Delete helpers
     */
@@ -88,6 +103,15 @@ Route::prefix('plans/{plan}')->group(function () {
     Route::delete('force', [PlanController::class, 'forceDelete']);
 });
 
+
+Route::prefix('plans')->group(function () {
+    // GET all students assigned to a plan
+    Route::get('{plan_id}/students', [PlanStudentController::class, 'index']);
+
+    // POST: assign student to plan
+    Route::post('{plan_id}/students', [PlanStudentController::class, 'assignStudent']);
+
+    });
 /*
 | Show all setups
 */

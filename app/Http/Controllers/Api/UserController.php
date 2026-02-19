@@ -144,8 +144,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        return response()->json([
-            'message' => 'User deleted successfully'
-        ], 200);
+        $this->apiSucceess('Item deleted successfuly');
     }
 }
