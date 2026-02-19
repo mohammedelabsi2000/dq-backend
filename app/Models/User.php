@@ -134,6 +134,14 @@ class User extends Authenticatable
         return $this->person_type . ' #' . $this->person_id;
     }
 
+    public function getFullNameAttribute()
+    {
+        if ($this->person) {
+            return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
+        }
+        return $this->person_type . ' #' . $this->person_id;
+    }
+
 
     // لو عندك جدول للصور وتضيف image_id لاحقًا
     /*
@@ -150,5 +158,41 @@ class User extends Authenticatable
     public function personalCourses()
     {
         return $this->morphMany(PersonalCourse::class, 'person');
+    }
+
+    public function currentHalaqa()
+    {
+        return $this->hasOne(UserRole::class)
+            ->where('relation_type', Halaqa::class)
+            ->where('role', 'teacher')
+            ->whereNull('end_date');
+
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(UserRole::class);
+    }
+
+    // الأدوار النشطة فقط
+    public function activeRoles()
+    {
+        return $this->roles()->active();
+    }
+
+    // أدوار ضمن كيان معين (مثلاً حلقة)
+    public function rolesIn($model)
+    {
+        return $this->activeRoles()->forModel($model);
+    }
+
+    // هل عنده دور معين داخل كيان؟
+    public function hasRoleIn(string $roleName, $model): bool
+    {
+        return $this->roles()
+            ->active()
+            ->forRole($roleName)
+            ->forModel($model)
+            ->exists();
     }
 }
