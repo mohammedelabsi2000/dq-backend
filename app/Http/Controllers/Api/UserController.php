@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponser;
 use App\Models\User;
+use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, QueryFilterTrait;
+
 
     /**
      * Display a listing of the resource.
@@ -23,14 +25,35 @@ class UserController extends Controller
             User::with(['mosque', 'maritalStatus', 'prefix'])->latest()->paginate(15),
             200
         ); */
-        $users = User::get();
+        // $users = User::get();
 
-        return $this->apiResponse(
-            UserResource::collection($users),
-            'success',
-            200
-        );
+        // return $this->apiResponse(
+        //     UserResource::collection($users),
+        //     'success',
+        //     200
+        // );
+
+        $query = User::query();
+
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['full_name', 'identity'],
+            'orderColumn' => 'created_at',
+        ]);
+
+        $query = $q['query'];
+        $total = $query->count(); // مهم لحساب العدد الكلي
+        $users = $query->get();
+
+
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => UserResource::collection($users),
+        ], 'success', 200);
     }
+
+    // /users?limit=10&skip=0&search=&order_by=asec
 
     /**
      * Store a newly created resource in storage.
@@ -144,6 +167,6 @@ class UserController extends Controller
     {
         $user->delete();
 
-        $this->apiSucceess('Item deleted successfuly');
+        $this->successMessage('Item deleted successfuly');
     }
 }

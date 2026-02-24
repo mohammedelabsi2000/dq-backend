@@ -71,12 +71,13 @@ trait ApiResponser
 
     protected function apiResponse($data, $msg, $code = 200, $success = true)
     {
-        return response()->json([
+        $resp = array_merge([
             'message' => $msg,
             'code' => $code,
             'success' => $success,
-            'data' => $data,
-        ]);
+            // 'data' => $data,
+        ], $data);
+        return response()->json($resp);
     }
 
     protected function paginate($object)
@@ -92,6 +93,9 @@ trait ApiResponser
             'to' => $object->lastItem(),
             'per_page' => $object->perPage(),
             'total' => $object->total(),
+            'skip' => $object->firstItem() - 1,
+            'limit' => $object->perPage(),
+
         ];
     }
 }

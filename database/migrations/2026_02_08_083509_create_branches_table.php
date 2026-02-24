@@ -17,9 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('notes')->nullable();
-            $table->integer('max_replacement_limit')->default(0);
-            $table->text('min_replacement_limit')->default(0);
-            $table->timestamps();
+
+            // $table->integer('max_replacement_limit')->default(0);
+            // $table->text('min_replacement_limit')->default(0);
+
+            // audit columns (macro)
+            $table->auditColumns();
         });
     }
 

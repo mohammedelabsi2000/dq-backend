@@ -21,7 +21,8 @@ return new class extends Migration
             $table->foreignId('region_id')
                 ->constrained('regions')
                 ->cascadeOnDelete();
-            $table->timestamps();
+            // audit columns (macro)
+            $table->auditColumns();
         });
     }
 
