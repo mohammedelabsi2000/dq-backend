@@ -47,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         Schema::defaultStringLength(191);
         Paginator::useBootstrap();
 
+        \Maatwebsite\Excel\Imports\HeadingRowFormatter::default(
+            \Maatwebsite\Excel\Imports\HeadingRowFormatter::FORMATTER_NONE
+        );
+
 
         // Model::observe(AuditObserver::class);
         // AuditColumns::register();

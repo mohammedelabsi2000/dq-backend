@@ -20,7 +20,6 @@ use App\Http\Controllers\{
     PersonalCourseController,
     PlanAssignmentController,
     PlanStudentController,
-    ProfileController,
     TrackController
 };
 
@@ -62,12 +61,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-
-    // User Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
 
     // ==================== Users Management ====================
@@ -159,30 +152,30 @@ Route::middleware(['auth'])->group(function () {
 
 
     // Plan Levels
-    Route::resource('plan-levels', PlanLevelController::class);
-    Route::post('plan-levels/reorder', [PlanLevelController::class, 'reorder'])->name('plan-levels.reorder');
-    Route::get('plan-levels/{planLevel}/prerequisites', [PlanLevelController::class, 'prerequisites'])->name('plan-levels.prerequisites');
+    // Route::resource('plan-levels', PlanLevelController::class);
+    // Route::post('plan-levels/reorder', [PlanLevelController::class, 'reorder'])->name('plan-levels.reorder');
+    // Route::get('plan-levels/{planLevel}/prerequisites', [PlanLevelController::class, 'prerequisites'])->name('plan-levels.prerequisites');
 
 
     // ==================== Grades Management ====================
-    Route::resource('grades', GradeController::class);
+    /* Route::resource('grades', GradeController::class);
     Route::get('grades/export/pdf', [GradeController::class, 'exportPdf'])->name('grades.export-pdf');
     Route::get('grades/export/excel', [GradeController::class, 'exportExcel'])->name('grades.export-excel');
-
+ */
 
     // ==================== Academic Qualifications ====================
     Route::resource('academic-qualifications', AcademicQualificationController::class)->except(['create', 'edit']);
     Route::get('academic-qualifications/person/{personType}/{personId}', [AcademicQualificationController::class, 'byPerson'])->name('academic-qualifications.by-person');
 
     // ==================== Personal Courses ====================
-    Route::resource('personal-courses', PersonalCourseController::class)->except(['create', 'edit']);
-    Route::get('personal-courses/person/{personType}/{personId}', [PersonalCourseController::class, 'byPerson'])->name('personal-courses.by-person');
+    // Route::resource('personal-courses', PersonalCourseController::class)->except(['create', 'edit']);
+    // Route::get('personal-courses/person/{personType}/{personId}', [PersonalCourseController::class, 'byPerson'])->name('personal-courses.by-person');
 
 
     // ==================== Reports ====================
     Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('users', [App\Http\Controllers\ReportController::class, 'users'])->name('users');
-        Route::get('users/export', [App\Http\Controllers\ReportController::class, 'exportUsers'])->name('users.export');
+        // Route::get('users', [App\Http\Controllers\ReportController::class, 'users'])->name('users');
+        // Route::get('users/export', [App\Http\Controllers\ReportController::class, 'exportUsers'])->name('users.export');
 
         // Route::get('mosques', [App\Http\Controllers\ReportController::class, 'mosques'])->name('mosques');
         // Route::get('mosques/export', [App\Http\Controllers\ReportController::class, 'exportMosques'])->name('mosques.export');
@@ -195,19 +188,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/mosques/update/{mosque}', [MosqueController::class, 'update'])->name('mosques.update');
         Route::delete('/mosques/destroy/{mosque}', [MosqueController::class, 'destroy'])->name('mosques.destroy');
         Route::post('/mosques/delete-multiple', [MosqueController::class, 'destroyMultiple'])->name('mosques.deleteMultiple');
-        Route::get('plans', [App\Http\Controllers\ReportController::class, 'plans'])->name('plans');
-        Route::get('plans/export', [App\Http\Controllers\ReportController::class, 'exportPlans'])->name('plans.export');
+        // Route::get('plans', [App\Http\Controllers\ReportController::class, 'plans'])->name('plans');
+        // Route::get('plans/export', [App\Http\Controllers\ReportController::class, 'exportPlans'])->name('plans.export');
 
 
-        Route::get('centers', [App\Http\Controllers\ReportController::class, 'centers'])->name('centers');
-        Route::get('centers/export', [App\Http\Controllers\ReportController::class, 'exportCenters'])->name('centers.export');
+        // Route::get('centers', [App\Http\Controllers\ReportController::class, 'centers'])->name('centers');
+        // Route::get('centers/export', [App\Http\Controllers\ReportController::class, 'exportCenters'])->name('centers.export');
 
 
-        Route::get('constants', [App\Http\Controllers\ReportController::class, 'constants'])->name('constants');
-        Route::get('constants/export', [App\Http\Controllers\ReportController::class, 'exportConstants'])->name('constants.export');
+        // Route::get('constants', [App\Http\Controllers\ReportController::class, 'constants'])->name('constants');
+        // Route::get('constants/export', [App\Http\Controllers\ReportController::class, 'exportConstants'])->name('constants.export');
 
 
-        Route::get('dashboard', [App\Http\Controllers\ReportController::class, 'dashboard'])->name('dashboard');
+        // Route::get('dashboard', [App\Http\Controllers\ReportController::class, 'dashboard'])->name('dashboard');
     });
 
 
@@ -234,25 +227,25 @@ Route::middleware(['auth'])->group(function () {
 // Admin Routes
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     // System Settings
-    Route::get('settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
-    Route::post('settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    // Route::get('settings', [App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings');
+    // Route::post('settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
 
     // Backup
-    Route::get('backup', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup');
-    Route::post('backup/create', [App\Http\Controllers\Admin\BackupController::class, 'create'])->name('backup.create');
-    Route::get('backup/download/{fileName}', [App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backup.download');
-    Route::delete('backup/delete/{fileName}', [App\Http\Controllers\Admin\BackupController::class, 'delete'])->name('backup.delete');
+    // Route::get('backup', [App\Http\Controllers\Admin\BackupController::class, 'index'])->name('backup');
+    // Route::post('backup/create', [App\Http\Controllers\Admin\BackupController::class, 'create'])->name('backup.create');
+    // Route::get('backup/download/{fileName}', [App\Http\Controllers\Admin\BackupController::class, 'download'])->name('backup.download');
+    // Route::delete('backup/delete/{fileName}', [App\Http\Controllers\Admin\BackupController::class, 'delete'])->name('backup.delete');
 
 
     // Activity Log
-    Route::get('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-log');
-    Route::get('activity-log/{log}', [App\Http\Controllers\Admin\ActivityLogController::class, 'show'])->name('activity-log.show');
-    Route::delete('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'clear'])->name('activity-log.clear');
+    // Route::get('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-log');
+    // Route::get('activity-log/{log}', [App\Http\Controllers\Admin\ActivityLogController::class, 'show'])->name('activity-log.show');
+    // Route::delete('activity-log', [App\Http\Controllers\Admin\ActivityLogController::class, 'clear'])->name('activity-log.clear');
 
 
     // System Info
-    Route::get('system-info', [App\Http\Controllers\Admin\SystemInfoController::class, 'index'])->name('system-info');
+    // Route::get('system-info', [App\Http\Controllers\Admin\SystemInfoController::class, 'index'])->name('system-info');
 });
 
 // Fallback Route

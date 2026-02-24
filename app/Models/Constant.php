@@ -46,4 +46,12 @@ class Constant extends Model
     {
         return $this->hasMany(Halaqa::class);
     }
+
+    /**
+     * Get the halaqa student enrollments with this status.
+     */
+    public function halaqaStudentEnrollments()
+    {
+        return $this->hasMany(HalaqaStudent::class, 'status_id');
+    }
 }

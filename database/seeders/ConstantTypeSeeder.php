@@ -108,11 +108,11 @@ class ConstantTypeSeeder extends Seeder
                 'description' => 'صلة القرابة',
                 'notes' => '',
                 'constants' => [
-                    ['name' => 'بنفسه', 'notes' => null, 'is_active' => true],
-                    ['name' => 'أب', 'notes' => null, 'is_active' => true],
-                    ['name' => 'جد', 'notes' => null, 'is_active' => true],
-                    ['name' => 'غم', 'notes' => null, 'is_active' => true],
-                    ['name' => 'خال', 'notes' => null, 'is_active' => true],
+                    // ['name' => 'بنفسه', 'notes' => null, 'is_active' => true],
+                    // ['name' => 'أب', 'notes' => null, 'is_active' => true],
+                    // ['name' => 'جد', 'notes' => null, 'is_active' => true],
+                    // ['name' => 'غم', 'notes' => null, 'is_active' => true],
+                    // ['name' => 'خال', 'notes' => null, 'is_active' => true],
                 ]
             ],
             [
@@ -136,6 +136,17 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'الآنسة', 'notes' => null, 'is_active' => true],
                     ['name' => 'الدكتور', 'notes' => null, 'is_active' => true],
                     ['name' => 'المهندس', 'notes' => null, 'is_active' => true],
+                ]
+            ],
+            [
+                'name' => 'enrollment_status',
+                'description' => 'حالة تسجيل الطالب في الحلقة',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'منتظم', 'notes' => null, 'is_active' => true],
+                    ['name' => 'مفصول', 'notes' => null, 'is_active' => true],
+                    ['name' => 'منقطع', 'notes' => null, 'is_active' => true],
+                    ['name' => 'ثانوية', 'notes' => null, 'is_active' => true],
                 ]
             ],
         ];
