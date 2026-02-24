@@ -21,10 +21,10 @@ return new class extends Migration {
             $table->date('dob')->nullable()->after('full_name');
 
             // Mosque FK
-            $table->unsignedBigInteger('mosque_id')->nullable()->after('dob');
-            $table->foreign('mosque_id')
-                ->references('id')
-                ->on('mosques')
+
+
+            $table->foreignId('mosque_id')->nullable()->after('dob')
+                ->constrained('mosques')
                 ->nullOnDelete();
 
             $table->string('location')->nullable()->after('mosque_id');
@@ -32,17 +32,16 @@ return new class extends Migration {
             $table->enum('gender', ['male', 'female'])->nullable()->after('location');
 
             // Marital Status FK (constants)
-            $table->unsignedBigInteger('marital_status_id')->nullable()->after('gender');
-            $table->foreign('marital_status_id')
-                ->references('id')
-                ->on('constants')
+
+            $table->foreignId('marital_status_id')->nullable()->after('gender')
+                ->constrained('constants')
                 ->nullOnDelete();
 
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
-            $table->string('identity', 50)->nullable()->unique()->after('password');
-            $table->string('phone', 50)->nullable()->after('identity');
-            $table->string('whatsapp', 50)->nullable()->after('phone');
+            $table->string('identity', 9)->nullable()->unique()->after('password');
+            $table->string('phone', 15)->nullable()->after('identity');
+            $table->string('whatsapp', 15)->nullable()->after('phone');
 
             $table->string('jobname')->nullable()->after('email');
             $table->string('job_place')->nullable()->after('jobname');
@@ -59,10 +58,9 @@ return new class extends Migration {
             //       ->after('job_salary');
 
             // Prefix FK (constants)
-            $table->unsignedBigInteger('prefix_name_id')->nullable();
-            $table->foreign('prefix_name_id')
-                ->references('id')
-                ->on('constants')
+
+            $table->foreignId('prefix_name_id')->nullable()->after('job_place')
+                ->constrained('constants')
                 ->nullOnDelete();
         });
     }

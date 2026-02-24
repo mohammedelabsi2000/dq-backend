@@ -15,9 +15,10 @@ return new class extends Migration {
         Schema::create('grades', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100);
-            $table->string('DQ_range_from', 50);
-            $table->string('DQ_range_to', 50);
-            $table->timestamps();
+            $table->integer('DQ_range_from');
+            $table->integer('DQ_range_to');
+            // audit columns (macro)
+            $table->auditColumns();
         });
     }
 

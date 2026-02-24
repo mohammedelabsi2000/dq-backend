@@ -19,16 +19,17 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->text('description')->nullable();
 
-            // FK -> centers
-            $table->foreignId('center_id')
-                ->constrained('centers')
-                ->cascadeOnDelete();
 
-            // FK -> constants (غيّر 'constants' لاسم جدول الثوابت الحقيقي عندك)
-            $table->foreignId('constant_id')
+            $table->morphs('reference'); // reference_type + reference_id
+            // FK -> constants
+
+            $table->foreignId('type_id')
                 ->constrained('constants')
                 ->restrictOnDelete();
-            $table->timestamps();
+            // audit columns (macro)
+            $table->auditColumns();
+
+            $table->index(['reference_id', 'reference_type']);
         });
     }
 

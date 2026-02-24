@@ -13,16 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('centers', function (Blueprint $table) {
+        Schema::create('replacement_limits', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('notes')->nullable();
-            $table->foreignId('region_id')
-                ->constrained('regions')
-                ->cascadeOnDelete();
-            $table->foreignId('mosque_id')
-                ->constrained('mosques')
-                ->cascadeOnDelete()->nullable();
+            $table->integer('max_replacement_limit')->default(0);
+            $table->text('min_replacement_limit')->default(0);
+            $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
+            $table->date('from_date');
+            $table->date('to_date')->nullable();
+
             // audit columns (macro)
             $table->auditColumns();
         });
@@ -35,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('centers');
+        Schema::dropIfExists('replacement_limits');
     }
 };

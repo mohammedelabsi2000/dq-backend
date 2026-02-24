@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
             $table->text('notes')->nullable();
-            $table->timestamps();
+            // audit columns (macro)
+            $table->auditColumns();
         });
     }
 
