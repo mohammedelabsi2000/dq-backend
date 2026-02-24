@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Student;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Student\ImportStudentRequest;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Http\Requests\Student\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Http\Traits\ApiResponser;
+use App\Imports\StudentsImport;
 use App\Models\User;
 use App\Services\StudentService;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -23,7 +26,7 @@ class StudentController extends Controller
 
     public function index()
     {
-        $students =  Student::with([
+        $students = Student::with([
             'mosque',
             'maritalStatus',
             'moneyStatus',
@@ -75,5 +78,19 @@ class StudentController extends Controller
     {
         $student->delete();
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    public function import(ImportStudentRequest $request)
+    {
+
+        Excel::import(
+
+            new StudentsImport(
+                $request->except('file')
+            ),
+            $request->file
+        );
+
+        return response()->json(['message' => 'Imported successfully']);
     }
 }

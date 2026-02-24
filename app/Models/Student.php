@@ -15,6 +15,7 @@ class Student extends Model
     use Auditable;
 
     protected $fillable = [
+        'identity',
         'fName',
         'sName',
         'thName',
@@ -33,10 +34,10 @@ class Student extends Model
     ];
 
     // Relationships
-public function getNameAttribute()
-{
-    return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
-}
+    public function getNameAttribute()
+    {
+        return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
+    }
 
     public function mosque()
     {
@@ -73,4 +74,22 @@ public function getNameAttribute()
         return $this->morphMany(Attendance::class, 'attendable');
     }
 
+    /**
+     * Get the halaqa enrollments for this student.
+     */
+    public function halaqaEnrollments()
+    {
+        return $this->hasMany(HalaqaStudent::class);
+    }
+
+    /**
+     * Get the halaqas this student is enrolled in.
+     */
+    public function halaqas()
+    {
+        return $this->belongsToMany(Halaqa::class, 'halaqa_students')
+            ->withPivot(['from_date', 'to_date', 'status_id'])
+            ->withTimestamps()
+            ->using(HalaqaStudent::class);
+    }
 }

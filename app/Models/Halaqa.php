@@ -29,4 +29,23 @@ class Halaqa extends Model
     {
         return $this->belongsTo(Constant::class);
     }
+
+    /**
+     * Get the student enrollments for this halaqa.
+     */
+    public function studentEnrollments()
+    {
+        return $this->hasMany(HalaqaStudent::class);
+    }
+
+    /**
+     * Get the students enrolled in this halaqa.
+     */
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'halaqa_students')
+            ->withPivot(['from_date', 'to_date', 'status_id'])
+            ->withTimestamps()
+            ->using(HalaqaStudent::class);
+    }
 }

@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\Mosque;
 use App\Models\Constant;
+use App\Models\ConstantType;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
@@ -71,7 +72,7 @@ class StudentSeeder extends Seeder
                 $this->command->info("جاري إنشاء ثوابت {$type}...");
                 foreach ($values as $value) {
                     Constant::create([
-                        'constant_type_id' => $type,
+                        'constant_type_id' => ConstantType::where('name', 'like', $type)->value('id'),
                         'name' => $value,
                         // 'order' => array_search($value, $values) + 1,
                     ]);

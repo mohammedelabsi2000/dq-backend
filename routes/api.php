@@ -90,7 +90,7 @@ Route::prefix('plans/{plan}')->group(function () {
     // delete setup
     Route::delete('setup', [PlanController::class, 'deleteSetup']);
 
-     // عرض الطلاب مع الفلاتر
+    // عرض الطلاب مع الفلاتر
     Route::get('students', [PlanAssignmentController::class, 'students']);
 
     // إسناد الطلاب
@@ -111,7 +111,7 @@ Route::prefix('plans')->group(function () {
     // POST: assign student to plan
     Route::post('{plan_id}/students', [PlanStudentController::class, 'assignStudent']);
 
-    });
+});
 /*
 | Show all setups
 */
@@ -135,4 +135,32 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('academic-qualifications', AcademicQualificationController::class);
 Route::apiResource('personal-courses', PersonalCourseController::class);
 
-Route::apiResource('students', StudentController::class);
+
+/*
+|--------------------------------------------------------------------------
+| Student Module Routes
+|--------------------------------------------------------------------------
+|
+| Base URL: /api/students
+|
+| 1) Route::apiResource('', StudentController::class)
+|    Generates the following RESTful API endpoints:
+|
+|    GET      /api/students              -> index   (List all students)
+|    POST     /api/students              -> store   (Create new student)
+|    GET      /api/students/{student}    -> show    (Get single student)
+|    PUT      /api/students/{student}    -> update  (Update student)
+|    PATCH    /api/students/{student}    -> update
+|    DELETE   /api/students/{student}    -> destroy (Delete student)
+|
+| 2) POST /api/students/import
+|    Import students from Excel file
+|    Required form-data:
+|        - file (xlsx, xls)
+|        - halaqa_id
+|
+*/
+Route::prefix('students')->group(function () {
+    Route::apiResource('', StudentController::class);
+    Route::post('import', [StudentController::class, 'import']);
+});
