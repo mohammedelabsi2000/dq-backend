@@ -15,11 +15,12 @@ return new class extends Migration {
         Schema::create('academic_qualifications', function (Blueprint $table) {
             $table->id();
 
-            // العلاقات مع constants
+            //الدرجة العلمية العلاقات مع constants
             $table->foreignId('academic_degree_id')
                 ->constrained('constants')
                 ->cascadeOnDelete();
 
+            // التخصص
             $table->foreignId('major_id')
                 ->constrained('constants')
                 ->cascadeOnDelete();
@@ -30,7 +31,8 @@ return new class extends Migration {
             $table->string('detail')->nullable();
             $table->date('date_graduate')->nullable();
             $table->string('certificate_link')->nullable();
-            $table->string('educational_institution')->nullable();
+            $table->string('educational_institution')->nullable()
+                ->comment('المؤسسة التعليمية');
             $table->text('notes')->nullable();
 
             // audit columns (macro)

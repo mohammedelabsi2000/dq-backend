@@ -16,7 +16,9 @@ return new class extends Migration {
             $table->string('family', 100)->nullable()->after('thName');
 
             $table->string('full_name')
-                ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)")->after('family');
+                // ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)")
+                ->virtualAs("CONCAT_WS(' ',fName, sName, thName, family)")
+                ->after('family');
 
             $table->date('dob')->nullable()->after('full_name');
 
@@ -29,10 +31,9 @@ return new class extends Migration {
 
             $table->string('location')->nullable()->after('mosque_id');
 
-            $table->enum('gender', ['male', 'female'])->nullable()->after('location');
+            $table->enum('gender', ['ذكر', 'أنثى'])->nullable()->after('location');
 
             // Marital Status FK (constants)
-
             $table->foreignId('marital_status_id')->nullable()->after('gender')
                 ->constrained('constants')
                 ->nullOnDelete();
@@ -40,8 +41,8 @@ return new class extends Migration {
             $table->integer('numChildren')->nullable()->after('marital_status_id');
 
             $table->string('identity', 9)->nullable()->unique()->after('password');
-            $table->string('phone', 15)->nullable()->after('identity');
-            $table->string('whatsapp', 15)->nullable()->after('phone');
+            $table->string('phone', 25)->nullable()->after('identity');
+            $table->string('whatsapp', 25)->nullable()->after('phone');
 
             $table->string('jobname')->nullable()->after('email');
             $table->string('job_place')->nullable()->after('jobname');

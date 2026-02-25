@@ -17,10 +17,11 @@ return new class extends Migration {
             $table->string('course_name');
             $table->text('notes')->nullable();
             $table->integer('hours')->nullable();
-            $table->string('provider')->nullable();
+            $table->string('provider')->nullable()
+                ->comment('الجهة المشرفة');
             $table->string('place')->nullable();
             $table->string('certificate_link')->nullable();
-            $table->foreignId('type_id')->constrained('constants')->onDelete('cascade');
+            $table->foreignId('type_id')->constrained('constants');
 
             // Polymorphic relation
             $table->morphs('person');

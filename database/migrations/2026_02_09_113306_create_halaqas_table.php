@@ -21,15 +21,13 @@ return new class extends Migration
 
 
             $table->morphs('reference'); // reference_type + reference_id
+            
             // FK -> constants
-
             $table->foreignId('type_id')
                 ->constrained('constants')
                 ->restrictOnDelete();
             // audit columns (macro)
             $table->auditColumns();
-
-            $table->index(['reference_id', 'reference_type']);
         });
     }
 

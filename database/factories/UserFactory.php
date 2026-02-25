@@ -40,12 +40,12 @@ class UserFactory extends Factory
             'dob' => $this->faker->dateTimeBetween('-60 years', '-18 years'),
             'mosque_id' => Mosque::inRandomOrder()->first()->id ?? null,
             'location' => $this->faker->address(),
-            'gender' => $this->faker->randomElement(['male', 'female']),
+            'gender' => $this->faker->randomElement(['ذكر', 'أنثى']),
             'marital_status_id' => Constant::where('constant_type_id', function ($q) {
                 $q->select('id')->from('constant_types')->where('name', 'marital_status');
             })->inRandomOrder()->first()->id ?? null,
             'numChildren' => $this->faker->numberBetween(0, 8),
-            'identity' => $this->faker->unique()->numerify('##########'),
+            'identity' => $this->faker->unique()->numerify('#########'),
             'phone' => $this->faker->unique()->phoneNumber(),
             'whatsapp' => $this->faker->optional()->phoneNumber(),
             'jobname' => $this->faker->jobTitle(),

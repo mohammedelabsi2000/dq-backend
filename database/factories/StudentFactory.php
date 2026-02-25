@@ -41,7 +41,7 @@ class StudentFactory extends Factory
             'dob' => fake()->optional(0.8)->dateTimeBetween('-18 years', '-6 years'),
             'mosque_id' => \App\Models\Mosque::inRandomOrder()->first()?->id ?? 1,
             'location' => fake()->optional(0.7)->address(),
-            'gender' => fake()->randomElement(['male', 'female']),
+            'gender' => fake()->randomElement(['ذكر', 'أنثى']),
             'marital_status_id' => $maritalStatusId,
             'money_status_id' => $moneyStatusId,
             'prefix_name_id' => $prefixNameId,
@@ -70,7 +70,7 @@ class StudentFactory extends Factory
     public function male(): static
     {
         return $this->state(fn (array $attributes) => [
-            'gender' => 'male',
+            'gender' => 'ذكر',
         ]);
     }
 
@@ -80,7 +80,7 @@ class StudentFactory extends Factory
     public function female(): static
     {
         return $this->state(fn (array $attributes) => [
-            'gender' => 'female',
+            'gender' => 'أنثى',
         ]);
     }
 

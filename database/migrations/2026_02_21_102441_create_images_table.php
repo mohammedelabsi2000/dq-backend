@@ -32,12 +32,6 @@ return new class extends Migration
             $table->integer('sort_order')->default(0);
             $table->boolean('is_main')->default(false);
 
-            // User tracking
-            $table->foreignId('uploaded_by')
-                ->nullable()
-                ->constrained('users')
-                ->onDelete('set null');
-
             // Additional notes
             $table->text('notes')->nullable();
 

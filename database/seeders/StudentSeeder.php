@@ -60,7 +60,7 @@ class StudentSeeder extends Seeder
     private function ensureConstantsExist(): void
     {
         $requiredTypes = [
-            'marital_status' => ['أعزب', 'متزوج', 'مطلق', 'أرمل'],
+            // 'marital_status' => ['أعزب', 'متزوج', 'مطلق', 'أرمل'],
             'money_status' => ['ميسور', 'متوسط', 'محتاج', 'فقير'],
             'name_prefix' => ['السيد', 'السيدة', 'الآنسة', 'الدكتور', 'المهندس'],
             'guardian_type' => ['أب', 'أم', 'جد', 'جدة', 'أخ', 'أخت', 'عم', 'خال'],
