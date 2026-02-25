@@ -2,12 +2,8 @@
 
 namespace App\Models\Quran;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Surah extends Model
+class Surah extends QuranModel
 {
-    use HasFactory;
-    protected $connection = 'quran';
     protected $guarded = [];
 }

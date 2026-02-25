@@ -23,8 +23,6 @@ return new class extends Migration {
             $table->date('dob')->nullable()->after('full_name');
 
             // Mosque FK
-
-
             $table->foreignId('mosque_id')->nullable()->after('dob')
                 ->constrained('mosques')
                 ->nullOnDelete();

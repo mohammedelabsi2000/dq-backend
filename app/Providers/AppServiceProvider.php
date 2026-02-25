@@ -3,14 +3,15 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-// use App\Observers\AuditObserver;
 use Illuminate\Support\Facades\Schema;
 
 use App\Observers\AuditObserver;
-use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
+
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -23,13 +24,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
-        // Blueprint::macro('addAuditColumns', function () {
-        //     // $this->unsignedBigInteger('created_by')->nullable();
-        //     // $this->unsignedBigInteger('updated_by')->nullable();
-        // });
-
-        // AuditColumns::register();
 
     }
 
@@ -52,8 +46,12 @@ class AppServiceProvider extends ServiceProvider
         );
 
 
-        // Model::observe(AuditObserver::class);
-        // AuditColumns::register();
+
+        /*
+        |--------------------------------------------------------------------------
+        | دالة لاستخدامها داخل migration تقوم بإضافة هذه الأعمدة
+        |--------------------------------------------------------------------------
+        */
 
         Blueprint::macro('auditColumns', function () {
             /** @var Blueprint $this */
@@ -77,5 +75,20 @@ class AppServiceProvider extends ServiceProvider
                 ->constrained('users')
                 ->nullOnDelete();
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | جلب كل ملفات الموديلات داخل App\Models
+        | تسجيل AuditObserver لهذه الموديلات
+        |--------------------------------------------------------------------------
+        */
+
+        $modelPath = app_path('Models');
+        foreach (File::allFiles($modelPath) as $file) {
+            $class = 'App\\Models\\' . Str::replaceLast('.php', '', $file->getFilename());
+            if (class_exists($class) && property_exists($class, 'usesAudit') && $class::$usesAudit) {
+                $class::observe(AuditObserver::class);
+            }
+        }
     }
 }

@@ -15,15 +15,16 @@ trait QueryFilterTrait
      *      - 'orderColumn' => string
      *      - 'skip' => int
      *      - 'limit' => int
+     * @return array
      */
     public function applyFilters($query, array $options = [])
     {
         // Pagination
-        $skip  = $options['skip'] ?? request()->get('skip', 0);
+        $skip = $options['skip'] ?? request()->get('skip', 0);
         $limit = $options['limit'] ?? request()->get('limit', 10);
 
-        $total = $query->count(); // مهم لحساب العدد الكلي
-        
+        $count = $query->count(); // مهم لحساب العدد الكلي
+
         $query = $query->skip($skip)->take($limit);
 
         // Order
@@ -51,7 +52,7 @@ trait QueryFilterTrait
             'query' => $query,
             'skip' => $skip,
             'limit' => $limit,
-            'count' => $total,
+            'count' => $count,
         ];
     }
 }
