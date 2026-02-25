@@ -134,12 +134,24 @@ class User extends Authenticatable
         return $this->person_type . ' #' . $this->person_id;
     }
 
-    public function getFullNameAttribute()
+    /* public function getFullNameAttribute()
     {
-        if ($this->person) {
-            return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
-        }
-        return $this->person_type . ' #' . $this->person_id;
+        return trim(preg_replace('/\s+/', ' ', "{$this->fName} {$this->sName} {$this->thName} {$this->family}"));
+
+        // if ($this->person) {
+        //     return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
+        // }
+        // return $this->person_type . ' #' . $this->person_id;
+    } */
+
+    public function getGenderTextAttribute()
+    {
+        return $this->gender ?? 'غير محدد';
+        /* return match ($this->gender) {
+            'male' => 'ذكر',
+            'female' => 'أنثى',
+            default => 'غير محدد',
+        }; */
     }
 
 

@@ -17,8 +17,7 @@ return new class extends Migration {
 
             // المستخدم
             $table->foreignId('user_id')
-                ->constrained()
-                ->cascadeOnDelete();
+                ->constrained();
 
             // الدور
             $table->foreignId('role_id')
@@ -26,10 +25,10 @@ return new class extends Migration {
                 ->cascadeOnDelete();
 
             // polymorphic relation (halaqa, branch, etc...)
-            $table->morphs('relation');
             // ينشئ:
             // relation_id (unsignedBigInteger)
             // relation_type (string + index)
+            $table->morphs('relation');
 
             // فترة الصلاحية
             $table->date('from_date');

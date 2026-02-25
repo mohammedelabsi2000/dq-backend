@@ -12,7 +12,7 @@ class UserResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-   public function toArray($request)
+   public function toArray($request): array
 {
     return [
         'id' => $this->id,
@@ -20,13 +20,15 @@ class UserResource extends JsonResource
         'sName' => $this->sName,
         'thName' => $this->thName,
         'family' => $this->family,
-        'full_name' => $this->full_name,
+        'full_name' => trim(preg_replace('/\s+/', ' ',$this->full_name)),
         'dob' => $this->dob,
         'gender' => $this->gender,
+        'genderText' => $this->gender_text,
         'numChildren' => $this->numChildren,
         'identity' => $this->identity,
         'phone' => $this->phone,
         'whatsapp' => $this->whatsapp,
+        'email' => $this->email,
         'jobname' => $this->jobname,
         'job_place' => $this->job_place,
         'job_salary' => $this->job_salary,

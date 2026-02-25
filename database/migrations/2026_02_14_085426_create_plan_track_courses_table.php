@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,27 +12,28 @@ return new class extends Migration
      */
     public function up()
     {
-       Schema::create('plan_track_courses', function (Blueprint $table) {
-    $table->id(); // id - المعرف
+        Schema::create('plan_track_courses', function (Blueprint $table) {
+            $table->id(); // id - المعرف
 
-    $table->foreignId('plan_track_id')
-          ->constrained()
-          ->onDelete('cascade');
-    // plan_track_id - معرف مسار الخطة
+            $table->foreignId('plan_track_id')
+                ->constrained()
+                ->restrictOnDelete();
+            // plan_track_id - معرف مسار الخطة
 
-    $table->foreignId('course_id')
-          ->constrained()
-          ->onDelete('cascade');
-    // course_id - معرف الدورة
+            $table->foreignId('course_id')
+                ->constrained()
+                ->restrictOnDelete();
+            // course_id - معرف الدورة
 
-    $table->integer('order')->default(1);
-    // order - ترتيب الدورة
+            $table->integer('order')->default(1)
+                ->comment('ترتيب الدورة');
 
-    $table->boolean('is_required')->default(true);
-    // is_required - هل الدورة إجبارية
+            $table->boolean('is_required')->default(true)
+                ->comment('هل الدورة إجبارية');
 
-    $table->timestamps();
-});
+            // audit columns (macro)
+            $table->auditColumns();
+        });
 
     }
 

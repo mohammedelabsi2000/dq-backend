@@ -12,8 +12,6 @@ class Branch extends Model
     protected $fillable = [
         'name',
         'notes',
-        'max_replacement_limit',
-        'min_replacement_limit',
     ];
 
     public function regions()

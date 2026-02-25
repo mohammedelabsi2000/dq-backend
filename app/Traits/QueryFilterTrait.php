@@ -22,6 +22,8 @@ trait QueryFilterTrait
         $skip  = $options['skip'] ?? request()->get('skip', 0);
         $limit = $options['limit'] ?? request()->get('limit', 10);
 
+        $total = $query->count(); // مهم لحساب العدد الكلي
+        
         $query = $query->skip($skip)->take($limit);
 
         // Order
@@ -49,6 +51,7 @@ trait QueryFilterTrait
             'query' => $query,
             'skip' => $skip,
             'limit' => $limit,
+            'count' => $total,
         ];
     }
 }

@@ -14,11 +14,11 @@ return new class extends Migration {
     {
         Schema::create('halaqa_students', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('halaqa_id')->constrained('halaqas')->cascadeOnDelete(); // افتراض وجود جدول halaqas
-            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete(); // افتراض وجود جدول students
+            $table->foreignId('halaqa_id')->constrained('halaqas');
+            $table->foreignId('student_id')->constrained('students');
             $table->date('from_date');
             $table->date('to_date')->nullable(); // اذا ممكن يكون فارغ
-            $table->foreignId('status_id')->constrained('constants'); // افتراض وجود جدول statuses
+            $table->foreignId('status_id')->constrained('constants');
 
             // audit columns (macro)
             $table->auditColumns();

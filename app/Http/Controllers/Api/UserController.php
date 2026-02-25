@@ -41,8 +41,9 @@ class UserController extends Controller
         ]);
 
         $query = $q['query'];
-        $total = $query->count(); // مهم لحساب العدد الكلي
-        $users = $query->get();
+        $total = $q['count'];
+        // $total = $query->count();
+        $users = $query->with(['mosque', 'mosque.region', 'maritalStatus', 'prefix'])->get();
 
 
         return $this->apiResponse([

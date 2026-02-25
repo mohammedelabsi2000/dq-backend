@@ -37,9 +37,9 @@ class BranchRegionMosqueSeeder extends Seeder
 
                 foreach ($mosques as $mosque) {
                     // كل مسجد له 2-5 مراكز
-                    Center::factory()
-                        ->count(fake()->numberBetween(2, 5))
-                        ->create(['mosque_id' => $mosque->id]);
+                    // Center::factory()
+                    //     ->count(fake()->numberBetween(2, 5))
+                    //     ->create(['mosque_id' => $mosque->id]);
                 }
             }
         }

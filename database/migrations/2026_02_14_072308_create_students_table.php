@@ -20,30 +20,34 @@ return new class extends Migration {
             $table->string('family');
 
             $table->string('full_name')
-                ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)");
+                ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)")
+                ->comment('الاسم كامل (عمود ظاهري)');
 
             $table->date('dob')->nullable();
 
-            $table->foreignId('mosque_id')->constrained('mosques')->cascadeOnDelete();
+            $table->foreignId('mosque_id')->constrained('mosques');
 
             $table->text('location')->nullable();
 
-            $table->enum('gender', ['male', 'female']);
+            $table->enum('gender', ['ذكر', 'أنثى']);
 
-            $table->foreignId('marital_status_id')->nullable()->constrained('constants');
-            $table->foreignId('money_status_id')->nullable()->constrained('constants');
-            $table->foreignId('prefix_name_id')->nullable()->constrained('constants');
+            $table->foreignId('marital_status_id')->nullable()->comment('الحالة الاجتماعية')
+                ->constrained('constants');
+            $table->foreignId('money_status_id')->nullable()->comment('الحالة المادية')
+                ->constrained('constants');
+            $table->foreignId('prefix_name_id')->nullable()->comment('بادئة الاسم (م، د، إلخ)')
+                ->constrained('constants');
 
-            // رقم هوية ولي الأمر
-            $table->string('guardian_id'); // users.identity
+            $table->string('guardian_id', 9)->comment('رقم هوية ولي الأمر'); // users.identity
 
             $table->foreign('guardian_id')
                 ->references('identity')
                 ->on('users');
-            // صلة قرابة ولي الأمر
-            $table->foreignId('guardian_type_id')->nullable()->constrained('constants');
-            $table->string('phone')->nullable();
-            $table->string('whatsapp')->nullable();
+
+            $table->foreignId('guardian_type_id')->nullable()->comment('صلة قرابة ولي الأمر')
+                ->constrained('constants');
+            $table->string('phone', 25)->nullable();
+            $table->string('whatsapp', 25)->nullable();
 
             // audit columns (macro)
             $table->auditColumns();
