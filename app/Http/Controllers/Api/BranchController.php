@@ -9,30 +9,29 @@ use App\Http\Resources\BranchResource;
 use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
+use App\Traits\QueryFilterTrait;
 
 class BranchController extends Controller
 {
-    use ApiResponser;
+   use ApiResponser, QueryFilterTrait;
 
-    /**
-     * Display a listing of the resource.
-     *
-     */
     public function index(Request $request)
     {
         $query = Branch::query();
 
-        // بحث في الاسم
-        if ($request->filled('search')) {
-            $query->where('name', 'LIKE', '%' . $request->search . '%');
-        }
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+        ]);
 
-        // فلترة حسب الحد الأقصى
+        $query = $q['query'];
+        $total = $q['count'];
+
+        // فلاتر إضافية خاصة بالفروع
         if ($request->filled('max_replacement_limit')) {
             $query->where('max_replacement_limit', '<=', $request->integer('max_replacement_limit'));
         }
 
-        // فلترة حسب الحد الأدنى
         if ($request->filled('min_replacement_limit')) {
             $query->where('min_replacement_limit', '>=', $request->integer('min_replacement_limit'));
         }
@@ -42,22 +41,20 @@ class BranchController extends Controller
             $query->with('regions');
         }
 
-        // إضافة عدد المناطق
         if ($request->boolean('with_regions_count')) {
             $query->withCount('regions');
         }
 
-        $perPage = $request->integer('per_page', 15);
-        $branches = $query->latest()->paginate($perPage);
+        $branches = $query->get();
 
-        return $this->success(
-            [
-                'items' => BranchResource::collection($branches),
-                'pagination' => $this->paginate($branches),
-            ],
-            'قائمة الفروع'
-        );
+        return $this->apiResponse([
+            'total' => $total,
+            'skip'  => $q['skip'],
+            'limit' => $q['limit'],
+            'data'  => BranchResource::collection($branches),
+        ], 'success', 200);
     }
+
 
     /**
      * Store a newly created resource in storage.

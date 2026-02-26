@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('full_name')
                 // ->virtualAs("CONCAT(fName, ' ', sName, ' ', thName, ' ', family)")
                 ->virtualAs("CONCAT_WS(' ',fName, sName, thName, family)")
+                ->comment('الاسم كامل (عمود ظاهري)')
                 ->after('family');
 
             $table->date('dob')->nullable()->after('full_name');
