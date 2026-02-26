@@ -16,7 +16,7 @@ class Halaqa extends Model
         'location',
         'description',
         'center_id',
-        'constant_id',
+        'type_id',
     ];
 
     public function center()
