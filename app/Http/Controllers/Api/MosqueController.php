@@ -30,6 +30,7 @@ class MosqueController extends Controller
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
+            'limit' => '*',
         ]);
 
         $query = $q['query'];
@@ -76,10 +77,7 @@ class MosqueController extends Controller
         if ($request->boolean('with_region')) {
             $mosque->load('region');
         }
-        // return response()->json([
-        //     'message' => 'Mosque created successfully',
-        //     'data' => $mosque
-        // ], 201);
+        
         return $this->success(
             new MosqueResource($mosque),
             'تم إنشاء المسجد بنجاح',

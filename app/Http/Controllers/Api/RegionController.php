@@ -8,11 +8,12 @@ use App\Http\Requests\UpdateRegionRequest;
 use App\Http\Resources\RegionResource;
 use App\Http\Traits\ApiResponser;
 use App\Models\Region;
+use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, QueryFilterTrait;
 
     /**
      * Display a listing of the resource.
@@ -28,34 +29,43 @@ class RegionController extends Controller
         }
 
         // بحث في الاسم
-        if ($request->filled('search')) {
+        /* if ($request->filled('search')) {
             $query->where('name', 'LIKE', '%' . $request->search . '%');
-        }
+        } */
 
         // تحميل العلاقات
-        if ($request->boolean('with_branch')) {
+        /* if ($request->boolean('with_branch')) {
             $query->with('branch');
-        }
+        } */
 
-        if ($request->boolean('with_mosques')) {
+        /* if ($request->boolean('with_mosques')) {
             $query->with('mosques');
-        }
+        } */
 
         // إضافة عدد المساجد
-        if ($request->boolean('with_mosques_count')) {
+        /* if ($request->boolean('with_mosques_count')) {
             $query->withCount('mosques');
-        }
+        } */
 
-        $perPage = $request->integer('per_page', 15);
-        $regions = $query->latest()->paginate($perPage);
+        // $perPage = $request->integer('per_page', 15);
+        // $regions = $query->latest()->paginate($perPage);
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'limit' => '*',
+        ]);
 
-        return $this->success(
-            [
-                'items' => RegionResource::collection($regions),
-                'pagination' => $this->paginate($regions),
-            ],
-            'قائمة المناطق'
-        );
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $regions = $query->with(['branch'])->get();
+
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => RegionResource::collection($regions),
+        ], 'success', 200);
     }
 
     /**

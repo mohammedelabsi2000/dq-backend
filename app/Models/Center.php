@@ -9,7 +9,7 @@ class Center extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'notes', 'mosque_id'];
+    protected $fillable = ['name', 'notes', 'region_id', 'mosque_id'];
 
     public function mosque()
     {
