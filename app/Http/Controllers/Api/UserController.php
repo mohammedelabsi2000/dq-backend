@@ -8,6 +8,7 @@ use App\Http\Traits\ApiResponser;
 use App\Models\User;
 use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -21,18 +22,6 @@ class UserController extends Controller
      */
     public function index()
     {
-        /* return response()->json(
-            User::with(['mosque', 'maritalStatus', 'prefix'])->latest()->paginate(15),
-            200
-        ); */
-        // $users = User::get();
-
-        // return $this->apiResponse(
-        //     UserResource::collection($users),
-        //     'success',
-        //     200
-        // );
-
         $query = User::query();
 
         $q = $this->applyFilters($query, [
@@ -43,8 +32,7 @@ class UserController extends Controller
         $query = $q['query'];
         $total = $q['count'];
         // $total = $query->count();
-        $users = $query->with(['mosque', 'mosque.region', 'maritalStatus', 'prefix'])->get();
-
+        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -53,8 +41,6 @@ class UserController extends Controller
             'data' => UserResource::collection($users),
         ], 'success', 200);
     }
-
-    // /users?limit=10&skip=0&search=&order_by=asec
 
     /**
      * Store a newly created resource in storage.
@@ -72,7 +58,7 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male', 'female'])],
+            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
@@ -84,11 +70,10 @@ class UserController extends Controller
             'job_place' => 'nullable|string|max:191',
             'job_salary' => 'nullable|numeric',
             'prefix_name_id' => 'nullable|exists:constants,id',
-            // 'image_id' => 'nullable|exists:images,id', // لو رح تضيف لاحقًا
         ]);
 
         // تشفير الباسوورد
-        $data['password'] = bcrypt($data['password']);
+        $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
 
@@ -129,7 +114,7 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male', 'female'])],
+            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
@@ -146,7 +131,7 @@ class UserController extends Controller
 
         // تشفير الباسوورد لو تم تغييره
         if (!empty($data['password'])) {
-            $data['password'] = bcrypt($data['password']);
+            $data['password'] = Hash::make($data['password']);
         } else {
             unset($data['password']);
         }

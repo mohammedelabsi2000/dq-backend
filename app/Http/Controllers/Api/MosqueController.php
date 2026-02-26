@@ -8,11 +8,12 @@ use App\Http\Requests\UpdateMosqueRequest;
 use App\Http\Resources\MosqueResource;
 use App\Http\Traits\ApiResponser;
 use App\Models\Mosque;
+use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 
 class MosqueController extends Controller
 {
-    use ApiResponser;
+    use ApiResponser, QueryFilterTrait;
     /**
      * Display a listing of the resource.
      *
@@ -26,15 +27,13 @@ class MosqueController extends Controller
             $query->where('region_id', $request->integer('region_id'));
         }
 
-        // بحث في الاسم
-        if ($request->filled('search')) {
-            $query->where('name', 'LIKE', '%' . $request->search . '%');
-        }
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+        ]);
 
-        // تحميل العلاقات
-        if ($request->boolean('with_region')) {
-            $query->with('region');
-        }
+        $query = $q['query'];
+        $total = $q['count'];
 
         if ($request->boolean('with_centers')) {
             $query->with('centers');
@@ -53,16 +52,14 @@ class MosqueController extends Controller
             $query->withCount('users');
         }
 
-        $perPage = $request->integer('per_page', 15);
-        $mosques = $query->latest()->paginate($perPage);
+        $mosques = $query->with(['region', 'region.branch'])->get();
 
-        return $this->success(
-            [
-                'items' => MosqueResource::collection($mosques),
-                'pagination' => $this->paginate($mosques),
-            ],
-            'قائمة المساجد'
-        );
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => MosqueResource::collection($mosques),
+        ], 'success', 200);
     }
 
 

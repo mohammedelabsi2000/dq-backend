@@ -25,10 +25,7 @@ class MosqueResource extends JsonResource
 
         // إضافة بيانات المنطقة فقط إذا كانت محملة
         if ($this->relationLoaded('region') && $this->region) {
-            $data['region'] = [
-                'id' => $this->region->id,
-                'name' => $this->region->name,
-            ];
+            $data['region'] = new RegionResource($this->whenLoaded('region'));
         }
 
         // إضافة عدد المراكز (إذا طلب)

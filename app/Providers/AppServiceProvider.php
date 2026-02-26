@@ -34,25 +34,52 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->configurePagination();
+        $this->configureSchema();
+        $this->configureExcel();
+        $this->registerAuditMacro();
+        $this->registerAuditObservers();
+    }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pagination
+    |--------------------------------------------------------------------------
+    */
+    protected function configurePagination(): void
+    {
         Paginator::useBootstrapFive();
+    }
 
-
+    /*
+    |--------------------------------------------------------------------------
+    | Schema Defaults
+    |--------------------------------------------------------------------------
+    */
+    protected function configureSchema(): void
+    {
         Schema::defaultStringLength(191);
-        Paginator::useBootstrap();
+    }
 
+    /*
+    |--------------------------------------------------------------------------
+    | Excel Configuration
+    |--------------------------------------------------------------------------
+    */
+    protected function configureExcel(): void
+    {
         \Maatwebsite\Excel\Imports\HeadingRowFormatter::default(
             \Maatwebsite\Excel\Imports\HeadingRowFormatter::FORMATTER_NONE
         );
+    }
 
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | دالة لاستخدامها داخل migration تقوم بإضافة هذه الأعمدة
-        |--------------------------------------------------------------------------
-        */
-
+    /*
+    |--------------------------------------------------------------------------
+    | Audit Columns Macro
+    |--------------------------------------------------------------------------
+    */
+    protected function registerAuditMacro(): void
+    {
         Blueprint::macro('auditColumns', function () {
             /** @var Blueprint $this */
 
@@ -75,18 +102,25 @@ class AppServiceProvider extends ServiceProvider
                 ->constrained('users')
                 ->nullOnDelete();
         });
+    }
 
-        /*
-        |--------------------------------------------------------------------------
-        | جلب كل ملفات الموديلات داخل App\Models
-        | تسجيل AuditObserver لهذه الموديلات
-        |--------------------------------------------------------------------------
-        */
-
+    /*
+    |--------------------------------------------------------------------------
+    | Register Audit Observers Automatically
+    |--------------------------------------------------------------------------
+    */
+    protected function registerAuditObservers(): void
+    {
         $modelPath = app_path('Models');
+
         foreach (File::allFiles($modelPath) as $file) {
             $class = 'App\\Models\\' . Str::replaceLast('.php', '', $file->getFilename());
-            if (class_exists($class) && property_exists($class, 'usesAudit') && $class::$usesAudit) {
+
+            if (
+                class_exists($class) &&
+                property_exists($class, 'usesAudit') &&
+                    $class::$usesAudit
+            ) {
                 $class::observe(AuditObserver::class);
             }
         }
