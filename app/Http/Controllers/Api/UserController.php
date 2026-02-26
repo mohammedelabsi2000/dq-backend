@@ -72,7 +72,7 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male', 'female'])],
+            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
@@ -92,10 +92,11 @@ class UserController extends Controller
 
         $user = User::create($data);
 
-        return response()->json([
-            'message' => 'User created successfully',
-            'data' => $user
-        ], 201);
+        return $this->success(
+            new UserResource($user),
+            'تم إنشاء مستخدم بنجاح',
+            201
+        );
     }
 
     /**
@@ -129,7 +130,7 @@ class UserController extends Controller
             'dob' => 'nullable|date',
             'mosque_id' => 'nullable|exists:mosques,id',
             'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['male', 'female'])],
+            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
             'marital_status_id' => 'nullable|exists:constants,id',
             'numChildren' => 'nullable|integer',
             'identity' => 'nullable|string|max:50',
@@ -153,10 +154,10 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return response()->json([
-            'message' => 'User updated successfully',
-            'data' => $user
-        ], 200);
+        return $this->success(
+            new UserResource($user),
+            'تم تحديث بيانات المسخدم بنجاح'
+        );
     }
 
     /**
@@ -168,6 +169,9 @@ class UserController extends Controller
     {
         $user->delete();
 
-        $this->successMessage('Item deleted successfuly');
+        return $this->success(
+            null,
+            'تم حذف المسخدم بنجاح'
+        );
     }
 }
