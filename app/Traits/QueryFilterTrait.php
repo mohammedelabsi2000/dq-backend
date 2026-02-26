@@ -21,11 +21,19 @@ trait QueryFilterTrait
     {
         // Pagination
         $skip = $options['skip'] ?? request()->get('skip', 0);
-        $limit = $options['limit'] ?? request()->get('limit', 10);
+
 
         $count = $query->count(); // مهم لحساب العدد الكلي
 
-        $query = $query->skip($skip)->take($limit);
+        $limit = request()->get('limit');
+
+        if ($limit === null || $limit === '') {
+            $limit = $options['limit'] ?? 10;
+        }
+
+        if ($limit != '*') {
+            $query = $query->skip($skip)->take($limit);
+        }
 
         // Order
         $orderBy = $options['orderBy'] ?? request()->get('order_by');
