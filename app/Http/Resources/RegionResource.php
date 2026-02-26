@@ -19,16 +19,14 @@ class RegionResource extends JsonResource
             'name' => $this->name,
             'notes' => $this->notes,
             'branch_id' => $this->branch_id,
+            // 'branch' =>  new BranchResource($this->whenLoaded('branch')),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
 
         // إضافة بيانات الفرع فقط إذا كانت محملة
         if ($this->relationLoaded('branch') && $this->branch) {
-            $data['branch'] = [
-                'id' => $this->branch->id,
-                'name' => $this->branch->name,
-            ];
+            $data['branch'] = new BranchResource($this->whenLoaded('branch'));
         }
 
         // إضافة عدد المساجد (إذا طلب)

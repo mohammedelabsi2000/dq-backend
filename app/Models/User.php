@@ -10,12 +10,12 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     // مميز الموديلات اللي تستخدم audit يتم قرائته داخل AppServiceProvider.php
     public static $usesAudit = true;
 
-    protected $appends = ['full_name'];
+    // protected $appends = ['full_name'];
 
     protected $fillable = [
         'fName',
