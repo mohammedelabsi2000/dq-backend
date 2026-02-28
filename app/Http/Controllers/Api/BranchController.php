@@ -21,7 +21,8 @@ class BranchController extends Controller
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
-            'orderColumn' => 'created_at',
+            'orderColumn'   => 'created_at',
+            'limit'         => '*',
         ]);
 
         $query = $q['query'];
@@ -33,11 +34,10 @@ class BranchController extends Controller
             $query->with('regions');
         }
 
-        if ($request->boolean('with_regions_count')) {
-            $query->withCount('regions');
-        }
+        $perPage  = $request->integer('per_page', 15);
+        $branches = $query->withCount('regions')->latest()->paginate($perPage);
 
-        $branches = $query->get();
+        // $branches = $query->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -56,11 +56,6 @@ class BranchController extends Controller
     public function store(StoreBranchRequest $request)
     {
         $branch = Branch::create($request->validated());
-
-        // تحميل العلاقات إذا طلب
-        if ($request->boolean('with_regions')) {
-            $branch->load('regions');
-        }
 
         return $this->success(
             new BranchResource($branch),
@@ -81,12 +76,8 @@ class BranchController extends Controller
             $branch->load('regions');
         }
 
-        if ($request->boolean('with_regions_count')) {
-            $branch->loadCount('regions');
-        }
-
         return $this->success(
-            new BranchResource($branch),
+            new BranchResource($branch->loadCount('regions')),
             'بيانات الفرع'
         );
     }
@@ -100,11 +91,6 @@ class BranchController extends Controller
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
         $branch->update($request->validated());
-
-        // تحميل العلاقات إذا طلب
-        if ($request->boolean('with_regions')) {
-            $branch->load('regions');
-        }
 
         return $this->success(
             new BranchResource($branch),
