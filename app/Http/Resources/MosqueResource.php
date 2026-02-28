@@ -28,6 +28,7 @@ class MosqueResource extends JsonResource
             $data['region'] = new RegionResource($this->whenLoaded('region'));
         }
 
+
         // إضافة عدد المراكز (إذا طلب)
         if ($request->boolean('with_centers_count')) {
             $data['centers_count'] = $this->when($this->centers_count !== null, $this->centers_count);

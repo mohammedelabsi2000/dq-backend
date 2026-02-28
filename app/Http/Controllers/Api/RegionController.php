@@ -23,32 +23,6 @@ class RegionController extends Controller
     {
         $query = Region::query();
 
-        // فلترة حسب الفرع
-        if ($request->filled('branch_id')) {
-            $query->where('branch_id', $request->integer('branch_id'));
-        }
-
-        // بحث في الاسم
-        /* if ($request->filled('search')) {
-            $query->where('name', 'LIKE', '%' . $request->search . '%');
-        } */
-
-        // تحميل العلاقات
-        /* if ($request->boolean('with_branch')) {
-            $query->with('branch');
-        } */
-
-        /* if ($request->boolean('with_mosques')) {
-            $query->with('mosques');
-        } */
-
-        // إضافة عدد المساجد
-        /* if ($request->boolean('with_mosques_count')) {
-            $query->withCount('mosques');
-        } */
-
-        // $perPage = $request->integer('per_page', 15);
-        // $regions = $query->latest()->paginate($perPage);
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -57,6 +31,11 @@ class RegionController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
+
+        // فلترة حسب الفرع
+        if ($request->filled('branch_id')) {
+            $query->where('branch_id', $request->integer('branch_id'));
+        }
 
         $regions = $query->with(['branch'])->get();
 

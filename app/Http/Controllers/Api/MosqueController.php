@@ -77,7 +77,11 @@ class MosqueController extends Controller
         if ($request->boolean('with_region')) {
             $mosque->load('region');
         }
-        
+
+        if ($request->boolean('with_region_and_branch')) {
+            $mosque->load('region.branch');
+        }
+
         return $this->success(
             new MosqueResource($mosque),
             'تم إنشاء المسجد بنجاح',

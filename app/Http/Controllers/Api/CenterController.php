@@ -23,9 +23,20 @@ class CenterController extends Controller
     {
         $query = Center::query();
 
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'limit' => '*',
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+
+
         if ($request->filled('mosque_id')) {
             $query->where('mosque_id', $request->integer('mosque_id'));
         }
+
 
         if ($request->boolean('with_mosque')) {
             $query->with('mosque');
@@ -34,13 +45,20 @@ class CenterController extends Controller
         $perPage = $request->integer('per_page', 15);
         $centers = $query->latest()->paginate($perPage);
 
-        return $this->success(
-            [
-                'items' => CenterResource::collection($centers),
-                'pagination' => $this->paginate($centers),
-            ],
-            'قائمة المراكز'
-        );
+        // return $this->success(
+        //     [
+        //         'items' => CenterResource::collection($centers),
+        //         'pagination' => $this->paginate($centers),
+        //     ],
+        //     'قائمة المراكز'
+        // );
+
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => CenterResource::collection($centers),
+        ], 'success', 200);
 
         // return response()->json(
         //     $query->latest()->paginate(15),

@@ -14,30 +14,14 @@ class BranchResource extends JsonResource
      */
     public function toArray($request)
     {
-        $data = [
-            'id' => $this->id,
-            'name' => $this->name,
-            'notes' => $this->notes,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+        return [
+            'id'                    => $this->id,
+            'name'                  => $this->name,
+            'notes'                 => $this->notes,
+            'regions_count'         => $this->whenCounted('regions'),
+            'regions'               => RegionResource::collection($this->whenLoaded('regions')),
+            'created_at'            => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at'            => $this->updated_at->format('Y-m-d H:i:s'),
         ];
-
-        // إضافة المناطق فقط إذا كانت محملة
-        if ($this->relationLoaded('regions') && $this->regions->isNotEmpty()) {
-            $data['regions'] = $this->regions->map(function ($region) {
-                return [
-                    'id' => $region->id,
-                    'name' => $region->name,
-                    // أضف حقول المنطقة الأخرى حسب الحاجة
-                ];
-            });
-        }
-
-        // إضافة عدد المناطق (إذا طلب)
-        if ($request->boolean('with_regions_count')) {
-            $data['regions_count'] = $this->when($this->regions_count !== null, $this->regions_count);
-        }
-
-        return $data;
     }
 }
