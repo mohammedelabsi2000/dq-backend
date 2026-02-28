@@ -26,8 +26,6 @@ class UpdateBranchRequest extends FormRequest
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'notes' => ['sometimes', 'nullable', 'string'],
-            'max_replacement_limit' => ['sometimes', 'required', 'integer', 'min:0'],
-            'min_replacement_limit' => ['sometimes', 'required', 'integer', 'min:0', 'lte:max_replacement_limit'],
         ];
     }
 }

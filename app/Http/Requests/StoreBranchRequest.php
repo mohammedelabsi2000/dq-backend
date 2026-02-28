@@ -26,8 +26,6 @@ class StoreBranchRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'max_replacement_limit' => ['required', 'integer', 'min:0'],
-            'min_replacement_limit' => ['required', 'integer', 'min:0', 'lte:max_replacement_limit'],
         ];
     }
 }

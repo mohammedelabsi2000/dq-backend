@@ -18,8 +18,6 @@ class BranchResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'notes' => $this->notes,
-            'max_replacement_limit' => $this->max_replacement_limit,
-            'min_replacement_limit' => $this->min_replacement_limit,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
