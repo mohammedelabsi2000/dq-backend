@@ -27,8 +27,8 @@ class HalaqaController extends Controller
             $query->where('center_id', $request->integer('center_id'));
         }
 
-        if ($request->filled('constant_id')) {
-            $query->where('constant_id', $request->integer('constant_id'));
+        if ($request->filled('type_id')) {
+            $query->where('type_id', $request->integer('type_id'));
         }
 
         if ($request->boolean('with_center')) {

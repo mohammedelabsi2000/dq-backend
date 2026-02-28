@@ -20,7 +20,7 @@ class HalaqaResource extends JsonResource
             'location' => $this->location,
             'description' => $this->description,
             'center_id' => $this->center_id,
-            'constant_id' => $this->constant_id,
+            'type_id' => $this->type_id,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
         ];

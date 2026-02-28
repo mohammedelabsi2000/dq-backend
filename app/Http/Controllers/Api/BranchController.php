@@ -13,7 +13,7 @@ use App\Traits\QueryFilterTrait;
 
 class BranchController extends Controller
 {
-   use ApiResponser, QueryFilterTrait;
+    use ApiResponser, QueryFilterTrait;
 
     public function index(Request $request)
     {
@@ -27,14 +27,6 @@ class BranchController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-        // فلاتر إضافية خاصة بالفروع
-        if ($request->filled('max_replacement_limit')) {
-            $query->where('max_replacement_limit', '<=', $request->integer('max_replacement_limit'));
-        }
-
-        if ($request->filled('min_replacement_limit')) {
-            $query->where('min_replacement_limit', '>=', $request->integer('min_replacement_limit'));
-        }
 
         // تحميل العلاقات
         if ($request->boolean('with_regions')) {
