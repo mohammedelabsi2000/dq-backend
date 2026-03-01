@@ -53,7 +53,8 @@ class CenterController extends Controller
         // }
 
         $perPage = $request->integer('per_page', 15);
-        $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
+        $centers = $query->latest()->paginate($perPage);
+        // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,
@@ -80,6 +81,10 @@ class CenterController extends Controller
 
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
+        }
+
+        if ($request->boolean('with_region')) {
+            $center->load('region');
         }
         // // تحميل العلاقات إذا طلب
         // if ($request->boolean('with_mosque')) {
@@ -109,8 +114,12 @@ class CenterController extends Controller
             $center->load('mosque.region.branch');
         }
 
+        if ($request->boolean('with_region')) {
+            $center->load('region.branch');
+        }
+
         return $this->success(
-            new CenterResource($center->loadCount('halaqat')),
+            new CenterResource($center),
             'بيانات المركز'
         );
     }
@@ -134,6 +143,10 @@ class CenterController extends Controller
             $center->load('mosque.region.branch');
         }
 
+        if ($request->boolean('with_region')) {
+            $center->load('region.branch');
+        }
+
         return $this->success(
             new CenterResource($center),
             'تم تحديث بيانات المركز بنجاح'
@@ -148,12 +161,12 @@ class CenterController extends Controller
      */
     public function destroy(Center $center)
     {
-        if ($center->halaqat()->exists()) {
-            return $this->error(
-                'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
-                400
-            );
-        }
+        // if ($center->halaqat()->exists()) {
+        //     return $this->errorMessage(
+        //         'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
+        //         400
+        //     );
+        // }
 
         $center->delete();
 

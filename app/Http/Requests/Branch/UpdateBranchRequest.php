@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests\Branch;
 
+use App\Http\Traits\ApiResponser;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateBranchRequest extends FormRequest
 {
+    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -41,10 +43,10 @@ class UpdateBranchRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json([
-            'status'  => false,
-            'message' => 'خطأ في البيانات المدخلة',
+        throw new HttpResponseException($this->validationError([
+            // 'status'  => false,
+            // 'message' => 'خطأ في البيانات المدخلة',
             'errors'  => $validator->errors(),
-        ], 422));
+        ]));
     }
 }

@@ -36,9 +36,9 @@ class MosqueController extends Controller
             $query->where('region_id', $request->integer('region_id'));
         }
 
-        if ($request->boolean('with_region')) {
-            $query->with('region.branch');
-        }
+        // if ($request->boolean('with_region')) {
+        //     $query->with('region.branch');
+        // }
 
         // $mosques = $query->with(['region', 'region.branch'])->get();
         $perPage = $request->integer('per_page', 15);
@@ -152,7 +152,7 @@ class MosqueController extends Controller
     {
         // تحقق من وجود مراكز تابعة قبل الحذف
         if ($mosque->centers()->exists()) {
-            return $this->error(
+            return $this->errorMessage(
                 'لا يمكن حذف المسجد لأنه يحتوي على مراكز تابعة',
                 400
             );
