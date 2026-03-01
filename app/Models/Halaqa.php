@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Halaqa extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'halaqas';
 
@@ -15,19 +16,31 @@ class Halaqa extends Model
         'name',
         'location',
         'description',
-        'center_id',
+        'reference_type',
+        'reference_id',
         'type_id',
     ];
 
-    public function center()
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Polymorphic relation (reference)
+     */
+    public function reference()
     {
-        return $this->belongsTo(Center::class);
+        return $this->morphTo();
     }
 
-    // غيّر Constant إلى اسم موديل الثوابت الحقيقي عندك (مثلاً Thabit)
-    public function constant()
+    /**
+     * Type relation (constants table)
+     */
+    public function type()
     {
-        return $this->belongsTo(Constant::class);
+        return $this->belongsTo(Constant::class, 'type_id');
     }
 
     /**
@@ -45,7 +58,7 @@ class Halaqa extends Model
     {
         return $this->belongsToMany(Student::class, 'halaqa_students')
             ->withPivot(['from_date', 'to_date', 'status_id'])
-            ->withTimestamps()
-            ->using(HalaqaStudent::class);
+            ->withTimestamps();
+            // ->using(HalaqaStudent::class);
     }
 }

@@ -3,71 +3,87 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreHalaqaRequest;
-use App\Http\Requests\UpdateHalaqaRequest;
+use App\Http\Requests\Halaqa\StoreHalaqaRequest;
+use App\Http\Requests\Halaqa\UpdateHalaqaRequest;
 use App\Http\Resources\HalaqaResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Halaqa;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
 {
-    use ApiResponser;
 
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
+
+        /* Relation::morphMap([
+            'Center' => \App\Models\Center::class,
+            'Region' => \App\Models\Region::class,
+        ]); */
+
         $query = Halaqa::query();
 
-        if ($request->filled('center_id')) {
-            $query->where('center_id', $request->integer('center_id'));
+        if ($request->filled('reference_type') && $request->filled('reference_id')) {
+
+            // 1️⃣ نوع المرجع من request (مثلاً "user" أو "school")
+            $typeKey = $request->input('reference_type');
+
+            if (!class_exists($typeKey)) {
+                return $this->validationError([$typeKey . ' مرجع غير صالح']);
+            }
+
+            $referenceId = request()->integer('reference_id');
+
+            $query->whereHasMorph(
+                'reference',
+                [$typeKey],
+                function ($query) use ($referenceId) {
+                    $query->where('id', $referenceId);
+                }
+            );
         }
 
         if ($request->filled('type_id')) {
             $query->where('type_id', $request->integer('type_id'));
         }
 
-        if ($request->boolean('with_center')) {
-            $query->with('center');
+        if ($request->boolean('with_students')) {
+            $query->with('students');
         }
 
-        if ($request->boolean('with_constant')) {
-            $query->with('constant');
-        }
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+        ]);
 
-        $perPage = $request->integer('per_page', 15);
-        $halaqas = $query->latest()->paginate($perPage);
+        $query = $q['query'];
+        $total = $q['count'];
+        $halaqas = $query->with(['reference', 'type'])->get();
 
-        return $this->success(
-            [
-                'items' => HalaqaResource::collection($halaqas),
-                'pagination' => $this->paginate($halaqas),
-            ],
-            'قائمة الحلقات'
-        );
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => HalaqaResource::collection($halaqas),
+        ], 'success', 200);
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreHalaqaRequest $request)
     {
         $halaqa = Halaqa::create($request->validated());
 
-        // تحميل العلاقات إذا طلب
-        if ($request->boolean('with_center')) {
-            $halaqa->load('center');
-        }
-
-        if ($request->boolean('with_constant')) {
-            $halaqa->load('constant');
+        if ($request->boolean('with_type')) {
+            $halaqa->load('type');
         }
 
         return $this->success(
@@ -81,19 +97,17 @@ class HalaqaController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Halaqa $halaqa)
     {
-        if ($request->boolean('with_center')) {
-            $halaqa->load('center');
+
+        $halaqa->load(['type', 'reference']);
+        
+        if ($request->boolean(key: 'with_students')) {
+            $halaqa->load('students');
         }
-
-        if ($request->boolean('with_constant')) {
-            $halaqa->load('constant');
-        }
-
-
+        
         return $this->success(
             new HalaqaResource($halaqa),
             'بيانات الحلقة'
@@ -105,20 +119,13 @@ class HalaqaController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateHalaqaRequest $request, Halaqa $halaqa)
     {
         $halaqa->update($request->validated());
 
-        // تحميل العلاقات إذا طلب
-        if ($request->boolean('with_center')) {
-            $halaqa->load('center');
-        }
-
-        if ($request->boolean('with_constant')) {
-            $halaqa->load('constant');
-        }
+        $halaqa->load(['type', 'reference']);
 
         return $this->success(
             new HalaqaResource($halaqa),
@@ -130,10 +137,17 @@ class HalaqaController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Halaqa $halaqa)
     {
+        if ($halaqa->students()->exists()) {
+            return $this->errorMessage(
+                'لا يمكن حذف الحلقة لأنها تحتوي على طلاب',
+                400
+            );
+        }
+
         $halaqa->delete();
 
         return $this->success(

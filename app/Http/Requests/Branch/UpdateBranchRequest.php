@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Branch;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreBranchRequest extends FormRequest
+class UpdateBranchRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class StoreBranchRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'                  => 'required|string|max:255',
+            'name'                  => 'sometimes|required|string|max:255',
             'notes'                 => 'nullable|string',
         ];
     }

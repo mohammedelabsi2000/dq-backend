@@ -16,7 +16,6 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
-    use ApiResponser;
     private StudentService $studentService;
 
     public function __construct(StudentService $studentService)

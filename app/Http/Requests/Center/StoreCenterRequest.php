@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Center;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UpdateCenterRequest extends FormRequest
+class StoreCenterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,13 +26,13 @@ class UpdateCenterRequest extends FormRequest
     public function rules()
     {
         // return [
-        //     'name' => ['sometimes', 'required', 'string', 'max:255'],
-        //     'notes' => ['sometimes', 'nullable', 'string'],
-        //     'mosque_id' => ['sometimes', 'required', 'integer', 'exists:mosques,id'],
+        //     'name' => ['required', 'string', 'max:255'],
+        //     'notes' => ['nullable', 'string'],
+        //     'mosque_id' => ['required', 'integer', 'exists:mosques,id'],
         // ];
         return [
-            'name'      => 'sometimes|required|string|max:255',
-            'region_id' => 'sometimes|required|exists:regions,id',
+            'name'      => 'required|string|max:255',
+            'region_id' => 'required|exists:regions,id',
             'mosque_id' => 'nullable|exists:mosques,id',
             'notes'     => 'nullable|string',
         ];

@@ -4,17 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\User;
-use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
-
 
     /**
      * Display a listing of the resource.
