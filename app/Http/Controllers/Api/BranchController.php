@@ -107,7 +107,7 @@ class BranchController extends Controller
     {
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
-            return $this->error(
+            return $this->errorMessage(
                 'لا يمكن حذف الفرع لأنه يحتوي على مناطق تابعة',
                 400
             );
