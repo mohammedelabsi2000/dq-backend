@@ -19,21 +19,36 @@ class CenterResource extends JsonResource
             'name'           => $this->name,
             'notes'          => $this->notes,
 
-            // ✅ region مباشر على الـ center
-            'region'         => $this->whenLoaded('region', fn() => [
-                'id'     => $this->region->id,
-                'name'   => $this->region->name,
-                'branch' => $this->region->relationLoaded('branch') ? [
+            'region' => [
+                'id'   => $this->region->id,
+                'name' => $this->region->name,
+                'branch' => $this->region->branch ? [
                     'id'   => $this->region->branch->id,
                     'name' => $this->region->branch->name,
                 ] : null,
-            ]),
+            ],
 
-            // ✅ mosque اختياري (nullable)
-            'mosque'         => $this->whenLoaded('mosque', fn() => $this->mosque ? [
+            'mosque' => $this->mosque ? [
                 'id'   => $this->mosque->id,
                 'name' => $this->mosque->name,
-            ] : null),
+            ] : null,
+
+
+            // ✅ region مباشر على الـ center
+            // 'region'         => $this->whenLoaded('region', fn() => [
+            //     'id'     => $this->region->id,
+            //     'name'   => $this->region->name,
+            //     'branch' => $this->region->relationLoaded('branch') ? [
+            //         'id'   => $this->region->branch->id,
+            //         'name' => $this->region->branch->name,
+            //     ] : null,
+            // ]),
+
+            // // ✅ mosque اختياري (nullable)
+            // 'mosque'         => $this->whenLoaded('mosque', fn() => $this->mosque ? [
+            //     'id'   => $this->mosque->id,
+            //     'name' => $this->mosque->name,
+            // ] : null),
 
             // 'halaqas_count'  => $this->whenCounted('halaqat'),
             'created_at'     => $this->created_at->format('Y-m-d H:i:s'),

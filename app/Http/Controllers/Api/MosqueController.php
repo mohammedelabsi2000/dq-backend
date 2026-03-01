@@ -38,9 +38,9 @@ class MosqueController extends Controller
         //     $query->with('region.branch');
         // }
 
-        // $mosques = $query->with(['region', 'region.branch'])->get();
-        $perPage = $request->integer('per_page', 15);
-        $mosques = $query->withCount('centers')->latest()->paginate($perPage);
+        $mosques = $query->withCount('centers')->get();
+        // $perPage = $request->integer('per_page', 15);
+        // $mosques = $query->withCount('centers')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,

@@ -34,8 +34,10 @@ class BranchController extends Controller
             $query->with('regions');
         }
 
-        $perPage  = $request->integer('per_page', 15);
-        $branches = $query->withCount('regions')->latest()->paginate($perPage);
+        $branches = $query->withCount('regions')->get();
+
+        // $perPage  = $request->integer('per_page', 15);
+        // $branches = $query->withCount('regions')->latest()->paginate($perPage);
 
         // $branches = $query->get();
 
