@@ -1,5 +1,4 @@
 <?php
-// app/Models/Student.php
 
 namespace App\Models;
 
@@ -10,33 +9,38 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Student extends Model
 {
-    use HasFactory;
-    use SoftDeletes;
-    use Auditable;
+    use HasFactory, SoftDeletes, Auditable;
 
-    protected $fillable = [
-        'identity',
-        'fName',
-        'sName',
-        'thName',
-        'family',
-        'dob',
-        'mosque_id',
-        'location',
-        'gender',
-        'marital_status_id',
-        'money_status_id',
-        'guardian_id',
-        'guardian_type_id',
-        'phone',
-        'whatsapp',
-        'prefix_name_id'
-    ];
+   protected $fillable = [
+    'identity',
+    'fName',
+    'sName',
+    'thName',
+    'family',
+    'dob',
+    'mosque_id',
+    'location',
+    'gender',
+    'marital_status_id',
+    'money_status_id',
+    'prefix_name_id',
+    'guardian_id',
+    'guardian_type_id',
+    'phone',
+    'whatsapp',
+];
 
-    // Relationships
-    public function getNameAttribute()
+    protected $appends = ['full_name'];
+
+    // full_name عمود ظاهري في DB لكن نضيفه هنا كاحتياط
+    public function getFullNameAttribute()
     {
-        return "{$this->fName} {$this->sName} {$this->thName} {$this->family}";
+        return implode(' ', array_filter([
+            $this->fName,
+            $this->sName,
+            $this->thName,
+            $this->family,
+        ]));
     }
 
     public function mosque()
@@ -74,17 +78,11 @@ class Student extends Model
         return $this->morphMany(Attendance::class, 'attendable');
     }
 
-    /**
-     * Get the halaqa enrollments for this student.
-     */
     public function halaqaEnrollments()
     {
         return $this->hasMany(HalaqaStudent::class);
     }
 
-    /**
-     * Get the halaqas this student is enrolled in.
-     */
     public function halaqas()
     {
         return $this->belongsToMany(Halaqa::class, 'halaqa_students')

@@ -160,7 +160,12 @@ Route::apiResource('personal-courses', PersonalCourseController::class);
 |        - halaqa_id
 |
 */
-Route::prefix('students')->group(function () {
-    Route::apiResource('', StudentController::class);
-    Route::post('import', [StudentController::class, 'import']);
-});
+// Route::prefix('students')->group(function () {
+//     Route::apiResource('', StudentController::class);
+//     Route::post('import', [StudentController::class, 'import']);
+// });
+
+
+    Route::apiResource('students', StudentController::class);
+    Route::post('students/import', [StudentController::class, 'import']);
+
