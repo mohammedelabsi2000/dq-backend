@@ -152,7 +152,7 @@ class MosqueController extends Controller
     {
         // تحقق من وجود مراكز تابعة قبل الحذف
         if ($mosque->centers()->exists()) {
-            return $this->error(
+            return $this->errorMessage(
                 'لا يمكن حذف المسجد لأنه يحتوي على مراكز تابعة',
                 400
             );
