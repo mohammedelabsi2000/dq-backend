@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Branch;
 
 use App\Http\Traits\ApiResponser;
 use Illuminate\Foundation\Http\FormRequest;

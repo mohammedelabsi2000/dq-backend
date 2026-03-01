@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Center;
 
 use App\Http\Traits\ApiResponser;
 use Illuminate\Contracts\Validation\Validator;

@@ -12,36 +12,71 @@ class HalaqaResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
+
     public function toArray($request)
     {
-        $data = [
+        return [
             'id' => $this->id,
+
             'name' => $this->name,
             'location' => $this->location,
             'description' => $this->description,
-            'center_id' => $this->center_id,
-            'type_id' => $this->type_id,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Type (Constant)
+            |--------------------------------------------------------------------------
+            */
+            'type' => new ConstantResource($this->whenLoaded('type')),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Polymorphic Reference
+            |--------------------------------------------------------------------------
+            */
+            'reference' => $this->whenLoaded('reference', function () {
+
+                return [
+                    'type' => class_basename($this->reference_type),
+
+                    'data' => $this->formatReference(),
+                ];
+            }),
+            'students' => StudentResource::collection(
+                $this->whenLoaded('students')
+            ),
+
+            /*
+            |--------------------------------------------------------------------------
+            | Meta
+            |--------------------------------------------------------------------------
+            */
+            'created_at' => $this->created_at?->toDateTimeString(),
+            'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
+    }
 
-        // إضافة بيانات المركز فقط إذا كانت محملة
-        if ($this->relationLoaded('center') && $this->center) {
-            $data['center'] = [
-                'id' => $this->center->id,
-                'name' => $this->center->name,
-            ];
+    /**
+     * Summary of formatReference
+     * @return CenterResource|RegionResource|null
+     */
+    private function formatReference()
+    {
+        if (!$this->reference) {
+            return null;
         }
 
-        // إضافة بيانات الثابت (Constant) فقط إذا كانت محملة
-        if ($this->relationLoaded('constant') && $this->constant) {
-            $data['constant'] = [
-                'id' => $this->constant->id,
-                'name' => $this->constant->name, // افترض أن لديه حقل name
-                // أضف حقول الثابت الأخرى حسب الحاجة
-            ];
+        // لو مرتبط بـ Center
+        if ($this->reference instanceof \App\Models\Center) {
+
+            return new CenterResource($this->reference->load(['region', 'region.branch']));
         }
 
-        return $data;
+        // لو مرتبط بـ Region
+        if ($this->reference instanceof \App\Models\Region) {
+            return new RegionResource($this->reference->branch);
+        }
+
+        return null;
     }
 }

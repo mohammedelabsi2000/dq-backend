@@ -149,18 +149,24 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'ثانوية', 'notes' => null, 'is_active' => true],
                 ]
             ],
+            [
+                'name' => 'halaqa_types',
+                'description' => 'أنواع الحلقات',
+                'notes' => '',
+                'constants' => []
+            ],
         ];
 
         foreach ($constantTypes as $typeData) {
             $constants = $typeData['constants'];
             unset($typeData['constants']);
-            
+
             $constantType = ConstantType::create([
                 ...$typeData,
                 // 'created_by' => 1,
                 // 'updated_by' => 1,
             ]);
-            
+
             foreach ($constants as $constant) {
                 Constant::create([
                     ...$constant,

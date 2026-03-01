@@ -39,9 +39,9 @@ class RegionController extends Controller
             $query->with('branch');
         }
 
-        // $regions = $query->with(['branch'])->get();
-        $perPage = $request->integer('per_page', 15);
-        $regions = $query->withCount('mosques')->latest()->paginate($perPage);
+        $regions = $query->withCount('mosques')->get();
+        // $perPage = $request->integer('per_page', 15);
+        // $regions = $query->withCount('mosques')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,

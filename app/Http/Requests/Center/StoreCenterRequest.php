@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Center;
 
 use App\Http\Traits\ApiResponser;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UpdateBranchRequest extends FormRequest
+class StoreCenterRequest extends FormRequest
 {
     use ApiResponser;
     /**
@@ -27,17 +27,26 @@ class UpdateBranchRequest extends FormRequest
      */
     public function rules()
     {
+        // return [
+        //     'name' => ['required', 'string', 'max:255'],
+        //     'notes' => ['nullable', 'string'],
+        //     'mosque_id' => ['required', 'integer', 'exists:mosques,id'],
+        // ];
         return [
-            'name'                  => 'sometimes|required|string|max:255',
-            'notes'                 => 'nullable|string',
+            'name'      => 'required|string|max:255',
+            'region_id' => 'required|exists:regions,id',
+            'mosque_id' => 'nullable|exists:mosques,id',
+            'notes'     => 'nullable|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'اسم الفرع مطلوب',
-            'name.max'      => 'اسم الفرع يجب ألا يتجاوز 255 حرف',
+            'name.required'      => 'اسم المركز مطلوب',
+            'region_id.required' => 'يجب اختيار المنطقة',
+            'region_id.exists'   => 'المنطقة المحددة غير موجودة',
+            'mosque_id.exists'   => 'المسجد المحدد غير موجود',
         ];
     }
 
