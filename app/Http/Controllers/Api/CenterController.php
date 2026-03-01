@@ -81,6 +81,10 @@ class CenterController extends Controller
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
         }
+
+        if ($request->boolean('with_region')) {
+            $center->load('region');
+        }
         // // تحميل العلاقات إذا طلب
         // if ($request->boolean('with_mosque')) {
         //     $center->load('mosque');
@@ -149,7 +153,7 @@ class CenterController extends Controller
     public function destroy(Center $center)
     {
         if ($center->halaqat()->exists()) {
-            return $this->error(
+            return $this->errorMessage(
                 'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
                 400
             );
