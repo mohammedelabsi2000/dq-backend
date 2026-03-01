@@ -11,6 +11,11 @@ class Center extends Model
 
     protected $fillable = ['name', 'notes', 'region_id', 'mosque_id'];
 
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
     public function mosque()
     {
         return $this->belongsTo(Mosque::class);

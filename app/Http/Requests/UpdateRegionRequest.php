@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateRegionRequest extends FormRequest
 {
@@ -24,9 +26,27 @@ class UpdateRegionRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'branch_id' => ['sometimes', 'required', 'integer', 'exists:branches,id'],
-            'notes' => ['nullable']
+            'name'      => 'sometimes|required|string|max:255',
+            'branch_id' => 'sometimes|required|exists:branches,id',
+            'notes'     => 'nullable|string',
         ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required'      => 'اسم المنطقة مطلوب',
+            'branch_id.required' => 'يجب اختيار الفرع',
+            'branch_id.exists'   => 'الفرع المحدد غير موجود',
+        ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'status'  => false,
+            'message' => 'خطأ في البيانات المدخلة',
+            'errors'  => $validator->errors(),
+        ], 422));
     }
 }

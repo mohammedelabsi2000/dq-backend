@@ -37,21 +37,23 @@ class CenterController extends Controller
             $query->where('mosque_id', $request->integer('mosque_id'));
         }
 
-
-        if ($request->boolean('with_mosque')) {
-            $query->with('mosque');
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->integer('region_id'));
         }
 
-        $perPage = $request->integer('per_page', 15);
-        $centers = $query->latest()->paginate($perPage);
+        // if ($request->boolean('with_mosque')) {
+        //     $query->with('mosque.region.branch');
+        // }
+        if ($request->boolean('with_relations')) {
+            $query->with(['region.branch', 'mosque']);
+        }
 
-        // return $this->success(
-        //     [
-        //         'items' => CenterResource::collection($centers),
-        //         'pagination' => $this->paginate($centers),
-        //     ],
-        //     'قائمة المراكز'
-        // );
+        // if ($request->boolean('with_mosque')) {
+        //     $query->with('mosque');
+        // }
+
+        $perPage = $request->integer('per_page', 15);
+        $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,
@@ -76,12 +78,14 @@ class CenterController extends Controller
     {
         $center = Center::create($request->validated());
 
-        // تحميل العلاقات إذا طلب
         if ($request->boolean('with_mosque')) {
-            $center->load('mosque');
+            $center->load('mosque.region.branch');
         }
+        // // تحميل العلاقات إذا طلب
+        // if ($request->boolean('with_mosque')) {
+        //     $center->load('mosque');
+        // }
 
-        // ✅ استخدام success مع البيانات والرسالة وكود 201
         return $this->success(
             new CenterResource($center),
             'تم إنشاء المركز بنجاح',
@@ -97,13 +101,16 @@ class CenterController extends Controller
      */
     public function show(Request $request, Center $center)
     {
+        // if ($request->boolean('with_mosque')) {
+        //     $center->load('mosque');
+        // }
+
         if ($request->boolean('with_mosque')) {
-            $center->load('mosque');
+            $center->load('mosque.region.branch');
         }
 
-        // ✅ استخدام success
         return $this->success(
-            new CenterResource($center),
+            new CenterResource($center->loadCount('halaqat')),
             'بيانات المركز'
         );
     }
@@ -118,12 +125,15 @@ class CenterController extends Controller
     public function update(UpdateCenterRequest $request, Center $center)
     {
         $center->update($request->validated());
-        // تحميل العلاقات إذا طلب
+        // // تحميل العلاقات إذا طلب
+        // if ($request->boolean('with_mosque')) {
+        //     $center->load('mosque');
+        // }
+
         if ($request->boolean('with_mosque')) {
-            $center->load('mosque');
+            $center->load('mosque.region.branch');
         }
 
-        // ✅ استخدام success
         return $this->success(
             new CenterResource($center),
             'تم تحديث بيانات المركز بنجاح'
@@ -138,9 +148,7 @@ class CenterController extends Controller
      */
     public function destroy(Center $center)
     {
-        // تحقق من وجود حلقات تابعة قبل الحذف
         if ($center->halaqat()->exists()) {
-            // ✅ استخدام error
             return $this->error(
                 'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
                 400
@@ -149,10 +157,6 @@ class CenterController extends Controller
 
         $center->delete();
 
-        // ✅ استخدام success مع null
-        return $this->success(
-            null,
-            'تم حذف المركز بنجاح'
-        );
+        return $this->success(null, 'تم حذف المركز بنجاح');
     }
 }
