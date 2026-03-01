@@ -15,7 +15,7 @@ class Halaqa extends Model
         'name',
         'location',
         'description',
-        'center_id',
+        // 'center_id',
         'type_id',
     ];
 
