@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
+    // use ApiResponser, QueryFilterTrait;
 
     /**
      * Display a listing of the resource.
@@ -37,7 +37,13 @@ class RegionController extends Controller
             $query->where('branch_id', $request->integer('branch_id'));
         }
 
-        $regions = $query->with(['branch'])->get();
+        if ($request->boolean('with_branch')) {
+            $query->with('branch');
+        }
+
+        // $regions = $query->with(['branch'])->get();
+        $perPage = $request->integer('per_page', 15);
+        $regions = $query->withCount('mosques')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,
@@ -80,16 +86,8 @@ class RegionController extends Controller
             $region->load('branch');
         }
 
-        if ($request->boolean('with_mosques')) {
-            $region->load('mosques');
-        }
-
-        if ($request->boolean('with_mosques_count')) {
-            $region->loadCount('mosques');
-        }
-
         return $this->success(
-            new RegionResource($region),
+            new RegionResource($region->loadCount('mosques')),
             'بيانات المنطقة'
         );
     }

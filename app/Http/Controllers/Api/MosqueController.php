@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 
 class MosqueController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
+    // use ApiResponser, QueryFilterTrait;
     /**
      * Display a listing of the resource.
      *
@@ -21,11 +21,6 @@ class MosqueController extends Controller
     public function index(Request $request)
     {
         $query = Mosque::query();
-
-        // فلترة حسب المنطقة
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->integer('region_id'));
-        }
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
@@ -36,24 +31,18 @@ class MosqueController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-        if ($request->boolean('with_centers')) {
-            $query->with('centers');
+        // فلترة حسب المنطقة
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->integer('region_id'));
         }
 
-        if ($request->boolean('with_users')) {
-            $query->with('users');
+        if ($request->boolean('with_region')) {
+            $query->with('region.branch');
         }
 
-        // إضافة عدد العلاقات
-        if ($request->boolean('with_centers_count')) {
-            $query->withCount('centers');
-        }
-
-        if ($request->boolean('with_users_count')) {
-            $query->withCount('users');
-        }
-
-        $mosques = $query->with(['region', 'region.branch'])->get();
+        // $mosques = $query->with(['region', 'region.branch'])->get();
+        $perPage = $request->integer('per_page', 15);
+        $mosques = $query->withCount('centers')->latest()->paginate($perPage);
 
         return $this->apiResponse([
             'total' => $total,
@@ -75,12 +64,16 @@ class MosqueController extends Controller
         $mosque = Mosque::create($request->validated());
 
         if ($request->boolean('with_region')) {
-            $mosque->load('region');
-        }
-
-        if ($request->boolean('with_region_and_branch')) {
             $mosque->load('region.branch');
         }
+
+        // if ($request->boolean('with_region')) {
+        //     $mosque->load('region');
+        // }
+
+        // if ($request->boolean('with_region_and_branch')) {
+        //     $mosque->load('region.branch');
+        // }
 
         return $this->success(
             new MosqueResource($mosque),
@@ -97,24 +90,27 @@ class MosqueController extends Controller
     public function show(Request $request, Mosque $mosque)
     {
         // تحميل العلاقات حسب الطلب
+        // if ($request->boolean('with_region')) {
+        //     $mosque->load('region');
+        // }
+
+        // if ($request->boolean('with_centers')) {
+        //     $mosque->load('centers');
+        // }
+
+        // if ($request->boolean('with_users')) {
+        //     $mosque->load('users');
+        // }
+
+        // if ($request->boolean('with_centers_count')) {
+        //     $mosque->loadCount('centers');
+        // }
+
+        // if ($request->boolean('with_users_count')) {
+        //     $mosque->loadCount('users');
+        // }
         if ($request->boolean('with_region')) {
-            $mosque->load('region');
-        }
-
-        if ($request->boolean('with_centers')) {
-            $mosque->load('centers');
-        }
-
-        if ($request->boolean('with_users')) {
-            $mosque->load('users');
-        }
-
-        if ($request->boolean('with_centers_count')) {
-            $mosque->loadCount('centers');
-        }
-
-        if ($request->boolean('with_users_count')) {
-            $mosque->loadCount('users');
+            $mosque->load('region.branch');
         }
 
         return $this->success(
@@ -133,9 +129,12 @@ class MosqueController extends Controller
     {
         $mosque->update($request->validated());
 
-        // تحميل العلاقات إذا طلب
+        // // تحميل العلاقات إذا طلب
+        // if ($request->boolean('with_region')) {
+        //     $mosque->load('region');
+        // }
         if ($request->boolean('with_region')) {
-            $mosque->load('region');
+            $mosque->load('region.branch');
         }
 
         return $this->success(
@@ -159,13 +158,13 @@ class MosqueController extends Controller
             );
         }
 
-        // تحقق من وجود مستخدمين تابعين قبل الحذف
-        if ($mosque->users()->exists()) {
-            return $this->error(
-                'لا يمكن حذف المسجد لأنه يحتوي على مستخدمين تابعين',
-                400
-            );
-        }
+        // // تحقق من وجود مستخدمين تابعين قبل الحذف
+        // if ($mosque->users()->exists()) {
+        //     return $this->error(
+        //         'لا يمكن حذف المسجد لأنه يحتوي على مستخدمين تابعين',
+        //         400
+        //     );
+        // }
 
         $mosque->delete();
 
