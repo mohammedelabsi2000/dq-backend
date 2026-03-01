@@ -36,9 +36,9 @@ class MosqueController extends Controller
             $query->where('region_id', $request->integer('region_id'));
         }
 
-        if ($request->boolean('with_region')) {
-            $query->with('region.branch');
-        }
+        // if ($request->boolean('with_region')) {
+        //     $query->with('region.branch');
+        // }
 
         // $mosques = $query->with(['region', 'region.branch'])->get();
         $perPage = $request->integer('per_page', 15);
