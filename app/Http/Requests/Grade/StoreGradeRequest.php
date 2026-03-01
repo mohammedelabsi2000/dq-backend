@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Grade;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateGradeRequest extends FormRequest
+class StoreGradeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,12 +21,12 @@ class UpdateGradeRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+      public function rules()
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:100'],
-            'DQ_range_from' => ['sometimes', 'required', 'string', 'max:50'],
-            'DQ_range_to' => ['sometimes', 'required', 'string', 'max:50'],
+            'name' => ['required', 'string', 'max:255'],
+            'DQ_range_from' => ['nullable', 'string'],
+            'DQ_range_to' => ['nullable', 'string'],
         ];
     }
 }
