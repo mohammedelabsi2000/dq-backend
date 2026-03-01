@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Grade;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreGradeRequest;
-use App\Http\Requests\UpdateGradeRequest;
+use App\Http\Requests\Grade\StoreGradeRequest;
+use App\Http\Requests\Grade\UpdateGradeRequest;
 use App\Http\Resources\GradeResource;
 use App\Http\Traits\ApiResponser;
 

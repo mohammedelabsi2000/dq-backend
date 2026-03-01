@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreRegionRequest;
-use App\Http\Requests\UpdateRegionRequest;
+use App\Http\Requests\Region\StoreRegionRequest;
+use App\Http\Requests\Region\UpdateRegionRequest;
 use App\Http\Resources\RegionResource;
 use App\Models\Region;
 use Illuminate\Http\Request;

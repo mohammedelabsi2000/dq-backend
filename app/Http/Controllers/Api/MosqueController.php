@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreMosqueRequest;
-use App\Http\Requests\UpdateMosqueRequest;
+use App\Http\Requests\Mosque\StoreMosqueRequest;
+use App\Http\Requests\Mosque\UpdateMosqueRequest;
 use App\Http\Resources\MosqueResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Mosque;
-use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 
 class MosqueController extends Controller
