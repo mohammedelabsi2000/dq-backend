@@ -30,6 +30,7 @@ trait ApiResponser
     {
         return response()->json([
             'status'  => false,
+            'code' => "422",
             'message' => 'خطأ في التحقق من البيانات',
             'errors'  => $errors
         ], 422);

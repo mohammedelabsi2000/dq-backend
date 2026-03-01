@@ -20,9 +20,9 @@ return new class extends Migration
             $table->foreignId('region_id')
                 ->constrained('regions')
                 ->cascadeOnDelete();
-            $table->foreignId('mosque_id')
+            $table->foreignId('mosque_id')->nullable()
                 ->constrained('mosques')
-                ->cascadeOnDelete()->nullable();
+                ->cascadeOnDelete();
             // audit columns (macro)
             $table->auditColumns();
         });
