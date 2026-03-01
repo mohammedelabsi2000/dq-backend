@@ -55,10 +55,10 @@ class UpdateHalaqaRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException(response()->json([
-            'status'  => false,
-            'message' => 'خطأ في البيانات المدخلة',
-            'errors'  => $validator->errors(),
-        ], 422));
+        throw new HttpResponseException($this->validationError([
+            // 'status'  => false,
+            // 'message' => 'خطأ في البيانات المدخلة',
+            $validator->errors(),
+        ]));
     }
 }

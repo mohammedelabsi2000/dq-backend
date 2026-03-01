@@ -55,7 +55,7 @@ class StoreCenterRequest extends FormRequest
         throw new HttpResponseException($this->validationError([
             // 'status'  => false,
             // 'message' => 'خطأ في البيانات المدخلة',
-            'errors'  => $validator->errors(),
+            $validator->errors(),
         ]));
     }
 }
