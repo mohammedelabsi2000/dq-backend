@@ -51,6 +51,7 @@ class CenterController extends Controller
         // if ($request->boolean('with_mosque')) {
         //     $query->with('mosque');
         // }
+        $centers = $query->get();
 
         $perPage = $request->integer('per_page', 15);
         $centers = $query->latest()->paginate($perPage);
