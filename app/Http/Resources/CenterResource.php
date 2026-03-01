@@ -19,38 +19,11 @@ class CenterResource extends JsonResource
             'name'           => $this->name,
             'notes'          => $this->notes,
 
-            'region' => [
-                'id'   => $this->region->id,
-                'name' => $this->region->name,
-                'branch' => $this->region->branch ? [
-                    'id'   => $this->region->branch->id,
-                    'name' => $this->region->branch->name,
-                ] : null,
-            ],
+            'region' => new RegionResource($this->region),
 
-            'mosque' => $this->mosque ? [
-                'id'   => $this->mosque->id,
-                'name' => $this->mosque->name,
-            ] : null,
-
-
-            // ✅ region مباشر على الـ center
-            // 'region'         => $this->whenLoaded('region', fn() => [
-            //     'id'     => $this->region->id,
-            //     'name'   => $this->region->name,
-            //     'branch' => $this->region->relationLoaded('branch') ? [
-            //         'id'   => $this->region->branch->id,
-            //         'name' => $this->region->branch->name,
-            //     ] : null,
-            // ]),
-
-            // // ✅ mosque اختياري (nullable)
-            // 'mosque'         => $this->whenLoaded('mosque', fn() => $this->mosque ? [
-            //     'id'   => $this->mosque->id,
-            //     'name' => $this->mosque->name,
-            // ] : null),
-
-            // 'halaqas_count'  => $this->whenCounted('halaqat'),
+            'mosque' => $this->mosque
+                ? new MosqueResource($this->mosque)
+                : null,
             'created_at'     => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at'     => $this->updated_at->format('Y-m-d H:i:s'),
         ];

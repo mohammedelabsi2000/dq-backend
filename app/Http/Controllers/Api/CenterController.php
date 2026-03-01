@@ -52,9 +52,7 @@ class CenterController extends Controller
         //     $query->with('mosque');
         // }
         $centers = $query->get();
-
-        $perPage = $request->integer('per_page', 15);
-        $centers = $query->latest()->paginate($perPage);
+        // dd($centers);
         // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
         return $this->apiResponse([
