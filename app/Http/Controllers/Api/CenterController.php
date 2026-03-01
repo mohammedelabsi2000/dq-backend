@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
-    use ApiResponser; // استخدم الـ Trait
+    // use ApiResponser; // استخدم الـ Trait
 
     /**
      * Display a listing of the resource.

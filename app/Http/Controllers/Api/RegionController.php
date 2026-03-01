@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRegionRequest;
 use App\Http\Requests\UpdateRegionRequest;
 use App\Http\Resources\RegionResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Region;
-use App\Traits\QueryFilterTrait;
 use Illuminate\Http\Request;
 
 class RegionController extends Controller
@@ -122,7 +120,7 @@ class RegionController extends Controller
     {
         // تحقق من وجود مساجد تابعة قبل الحذف
         if ($region->mosques()->exists()) {
-            return $this->error(
+            return $this->errorMessage(
                 'لا يمكن حذف المنطقة لأنها تحتوي على مساجد تابعة',
                 400
             );
