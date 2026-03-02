@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\Halaqa;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Helpers\ConstantHelper;
+use App\Http\Requests\DQFormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateHalaqaRequest extends FormRequest
+class UpdateHalaqaRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -93,14 +91,5 @@ class UpdateHalaqaRequest extends FormRequest
             'type_id.required' => 'نوع الحلقة مطلوب.',
             'type_id.in' => 'نوع الحلقة غير موجود في النظام.',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => false,
-            'message' => 'خطأ في البيانات المدخلة',
-            'errors' => $validator->errors(),
-        ], 422));
     }
 }

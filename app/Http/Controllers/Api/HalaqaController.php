@@ -103,11 +103,11 @@ class HalaqaController extends Controller
     {
 
         $halaqa->load(['type', 'reference']);
-        
+
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');
         }
-        
+
         return $this->success(
             new HalaqaResource($halaqa),
             'بيانات الحلقة'
