@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Center;
+namespace App\Http\Requests;
 
 use App\Http\Traits\ApiResponser;
 use Illuminate\Contracts\Validation\Validator;
@@ -33,20 +33,20 @@ class StoreCenterRequest extends FormRequest
         //     'mosque_id' => ['required', 'integer', 'exists:mosques,id'],
         // ];
         return [
-            'name' => 'required|string|max:255',
+            'name'      => 'required|string|max:255',
             'region_id' => 'required|exists:regions,id',
             'mosque_id' => 'nullable|exists:mosques,id',
-            'notes' => 'nullable|string',
+            'notes'     => 'nullable|string',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'اسم المركز مطلوب',
+            'name.required'      => 'اسم المركز مطلوب',
             'region_id.required' => 'يجب اختيار المنطقة',
-            'region_id.exists' => 'المنطقة المحددة غير موجودة',
-            'mosque_id.exists' => 'المسجد المحدد غير موجود',
+            'region_id.exists'   => 'المنطقة المحددة غير موجودة',
+            'mosque_id.exists'   => 'المسجد المحدد غير موجود',
         ];
     }
 
@@ -55,7 +55,7 @@ class StoreCenterRequest extends FormRequest
         throw new HttpResponseException($this->validationError([
             // 'status'  => false,
             // 'message' => 'خطأ في البيانات المدخلة',
-            $validator->errors()
+            $validator->errors(),
         ]));
     }
 }
