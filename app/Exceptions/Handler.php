@@ -2,11 +2,14 @@
 
 namespace App\Exceptions;
 
+use App\Http\Traits\ApiResponser;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use ApiResponser;
     /**
      * A list of the exception types that are not reported.
      *
@@ -36,6 +39,17 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+
+        $this->renderable(function (QueryException $e, $request) {
+            if ($request->expectsJson()) {
+                return $this->error(
+                    $e->getMessage(),
+                    500,
+                    ['حدث خطأ في قاعدة البيانات'],
+                );
+            }
         });
     }
 }

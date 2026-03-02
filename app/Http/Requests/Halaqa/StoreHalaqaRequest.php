@@ -3,12 +3,10 @@
 namespace App\Http\Requests\Halaqa;
 
 use App\Helpers\ConstantHelper;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\DQFormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreHalaqaRequest extends FormRequest
+class StoreHalaqaRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,6 +25,18 @@ class StoreHalaqaRequest extends FormRequest
      */
     public function rules()
     {
+        if ($this->center_id == null) {
+            $this->merge([
+                'reference_type' => 'App\\Models\\Region',
+                'reference_id' => $this->region_id,
+            ]);
+        } else {
+            $this->merge([
+                'reference_type' => 'App\\Models\\Center',
+                'reference_id' => $this->center_id,
+            ]);
+        }
+
         return [
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -90,14 +100,5 @@ class StoreHalaqaRequest extends FormRequest
             'type_id.required' => 'نوع الحلقة مطلوب.',
             'type_id.in' => 'نوع الحلقة المحدد غير صالح.',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => false,
-            'message' => 'خطأ في البيانات المدخلة',
-            'errors' => $validator->errors(),
-        ], 422));
     }
 }

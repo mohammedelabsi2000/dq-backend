@@ -15,17 +15,17 @@ class CenterResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'             => $this->id,
-            'name'           => $this->name,
-            'notes'          => $this->notes,
+            'id' => $this->id,
+            'name' => $this->name,
+            'notes' => $this->notes,
 
             'region' => new RegionResource($this->region),
 
             'mosque' => $this->mosque
                 ? new MosqueResource($this->mosque)
                 : null,
-            'created_at'     => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at'     => $this->updated_at->format('Y-m-d H:i:s'),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }
