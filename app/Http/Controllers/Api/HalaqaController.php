@@ -115,10 +115,9 @@ class HalaqaController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * Summary of update
+     * @param UpdateHalaqaRequest $request
+     * @param Halaqa $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateHalaqaRequest $request, Halaqa $halaqa)
