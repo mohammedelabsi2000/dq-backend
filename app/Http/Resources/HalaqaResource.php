@@ -68,13 +68,12 @@ class HalaqaResource extends JsonResource
 
         // لو مرتبط بـ Center
         if ($this->reference instanceof \App\Models\Center) {
-
-            return new CenterResource($this->reference->load(['region', 'region.branch']));
+            return new CenterResource($this->reference);
         }
 
         // لو مرتبط بـ Region
         if ($this->reference instanceof \App\Models\Region) {
-            return new RegionResource($this->reference->branch);
+            return new RegionResource($this->reference);
         }
 
         return null;
