@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -58,7 +59,7 @@ class User extends Authenticatable
         'prefix_name_id',
         // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
-    
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -130,6 +131,31 @@ class User extends Authenticatable
     |--------------------------------------------------------------------------
     */
 
+    public function images()
+{
+    return $this->morphMany(\App\Models\Image::class, 'imageable');
+}
+
+public function mainImage()
+{
+    return $this->morphOne(\App\Models\Image::class, 'imageable')
+                ->where('is_main', true);
+}
+
+protected static function booted()
+{
+    static::deleting(function ($user) {
+
+        foreach ($user->images as $image) {
+
+            // حذف من التخزين
+            Storage::disk($image->disk)->delete($image->file_path);
+
+            // حذف من قاعدة البيانات
+            $image->delete();
+        }
+    });
+}
 
 
     public function getPersonNameAttribute()

@@ -6,6 +6,7 @@ use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Student extends Model
 {
@@ -32,6 +33,31 @@ class Student extends Model
 
     protected $appends = ['full_name'];
 
+
+    public function images()
+{
+    return $this->morphMany(\App\Models\Image::class, 'imageable');
+}
+
+public function mainImage()
+{
+    return $this->morphOne(\App\Models\Image::class, 'imageable')
+                ->where('is_main', true);
+}
+
+
+protected static function booted()
+{
+    static::deleting(function ($student) {
+
+        foreach ($student->images as $image) {
+
+            Storage::disk($image->disk)->delete($image->file_path);
+
+            $image->delete();
+        }
+    });
+}
     // full_name عمود ظاهري في DB لكن نضيفه هنا كاحتياط
     public function getFullNameAttribute()
     {
