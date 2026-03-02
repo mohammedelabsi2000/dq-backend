@@ -37,7 +37,6 @@ class StoreHalaqaRequest extends DQFormRequest
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }
-        // dd($this);
 
         return [
             'name' => 'required|string|max:255',

@@ -7,21 +7,45 @@ use App\Http\Resources\ConstantResource;
 use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Models\Constant;
+use App\Models\ConstantType;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ConstantController extends Controller
 {
     use ApiResponser;
 
-    // GET /api/v1/constants
-    public function index()
+    /**
+     * Summary of index
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
     {
-        $constants = Constant::with('parent')->get();
+        $query = Constant::query();
+        // لإرجاع قائمة بالثوابت من نوع مخصص
+        if ($request->filled('with_type_name')) {
+            try {
+                $constType = ConstantType::where(
+                    'name',
+                    'like',
+                    request()->get('with_type_name')
+                )->firstOrFail();
+            } catch (ModelNotFoundException $th) {
+                return $this->error('نوع الثوابت هذا غير موجود في النظام');
+            }
+            $query->where('constant_type_id', '=', intval($constType['id']));
+            $constants = $query->get(['id', 'name']);
+            return $this->apiResponse([
+                'data' => $constants,
+            ], 'success', 200);
+        }
+        
+        // لإرجاع جميع ثوابت النظام
+        $constants = $query->with('parent')->get();
 
-        return $this->apiResponse(
-            ConstantResource::collection($constants),
-            'success',
-            200
-        );
+        return $this->apiResponse([
+            'data' => ConstantResource::collection($constants),
+        ], 'success', 200);
     }
 
     // GET /api/v1/constants/{id}
@@ -31,11 +55,9 @@ class ConstantController extends Controller
             'parent'
         ]);
 
-        return $this->apiResponse(
-            new ConstantResource($constant),
-            'success',
-            200
-        );
+        return $this->apiResponse([
+            'data' => new ConstantResource($constant),
+        ], 'success', 200);
     }
 
     // POST /api/v1/constants
