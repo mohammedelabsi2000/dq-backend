@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanLevelController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
 use App\Http\Controllers\Api\PlanStudentController;
@@ -169,3 +170,8 @@ Route::apiResource('personal-courses', PersonalCourseController::class);
     Route::apiResource('students', StudentController::class);
     Route::post('students/import', [StudentController::class, 'import']);
 
+
+Route::apiResource('images', ImageController::class)
+      ->only(['store', 'destroy', 'index', 'show']);
+Route::get('users/{user}/images', [ImageController::class, 'userImages']);
+Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
