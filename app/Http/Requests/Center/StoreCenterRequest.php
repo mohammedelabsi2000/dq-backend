@@ -52,10 +52,10 @@ class StoreCenterRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->validationError(
+        throw new HttpResponseException($this->validationError([
             // 'status'  => false,
             // 'message' => 'خطأ في البيانات المدخلة',
             $validator->errors()
-        ));
+        ]));
     }
 }
