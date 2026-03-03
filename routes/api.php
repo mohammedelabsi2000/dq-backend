@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicQualificationController;
+use App\Http\Controllers\Api\AccessTokensController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\BranchController;
@@ -23,10 +24,19 @@ use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
 use App\Http\Controllers\Api\PlanStudentController;
+use Illuminate\Support\Facades\Auth;
 
-/* Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-}); */
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return Auth::guard('sanctum')->user();
+});
+
+
+Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
+    ->middleware('guest:sanctum');
+Route::post('change-password', [AccessTokensController::class, 'updatePassword'])->middleware('auth:sanctum');
+Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
+    ->middleware('auth:sanctum');
+
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
@@ -50,7 +60,7 @@ Route::apiResource('constants', ConstantController::class);
 |--------------------------------------------------------------------------
 */
 Route::apiResource('regions', RegionController::class);
-Route::apiResource('branches', BranchController::class);
+Route::apiResource('branches', BranchController::class)->middleware('auth:sanctum');
 Route::apiResource('mosques', MosqueController::class);
 Route::apiResource('centers', CenterController::class);
 Route::apiResource('plans', PlanController::class);
@@ -111,7 +121,6 @@ Route::prefix('plans')->group(function () {
 
     // POST: assign student to plan
     Route::post('{plan_id}/students', [PlanStudentController::class, 'assignStudent']);
-
 });
 /*
 | Show all setups
@@ -167,6 +176,10 @@ Route::apiResource('personal-courses', PersonalCourseController::class);
 // });
 
 
+<<<<<<< HEAD
+Route::apiResource('students', StudentController::class);
+Route::post('students/import', [StudentController::class, 'import']);
+=======
     Route::apiResource('students', StudentController::class);
     Route::post('students/import', [StudentController::class, 'import']);
 
@@ -175,3 +188,4 @@ Route::apiResource('images', ImageController::class)
       ->only(['store', 'destroy', 'index', 'show']);
 Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
+>>>>>>> b1d7a8520541c2a596df06096c7198d45523b60c
