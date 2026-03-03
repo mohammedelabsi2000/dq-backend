@@ -19,7 +19,6 @@ class ConstantTypeController extends Controller
      */
     public function index()
     {
-
         $constantTypes = ConstantType::with('constants')->get();
 
         return $this->apiResponse([
