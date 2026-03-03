@@ -34,13 +34,19 @@ class HalaqaResource extends JsonResource
             | Polymorphic Reference
             |--------------------------------------------------------------------------
             */
-            'reference' => $this->whenLoaded('reference', function () {
+            /* 'reference' => $this->whenLoaded('reference', function () {
 
                 return [
                     'type' => class_basename($this->reference_type),
 
                     'data' => $this->formatReference(),
                 ];
+            }), */
+            'region' => $this->whenLoaded('reference', function () {
+                return $this->reference instanceof \App\Models\Region ? new RegionResource($this->reference) : null;
+            }),
+            'center' => $this->whenLoaded('reference', function () {
+                return $this->reference instanceof \App\Models\Center ? new CenterResource($this->reference) : null;
             }),
             'students' => StudentResource::collection(
                 $this->whenLoaded('students')
@@ -68,13 +74,12 @@ class HalaqaResource extends JsonResource
 
         // لو مرتبط بـ Center
         if ($this->reference instanceof \App\Models\Center) {
-
-            return new CenterResource($this->reference->load(['region', 'region.branch']));
+            return new CenterResource($this->reference);
         }
 
         // لو مرتبط بـ Region
         if ($this->reference instanceof \App\Models\Region) {
-            return new RegionResource($this->reference->branch);
+            return new RegionResource($this->reference);
         }
 
         return null;

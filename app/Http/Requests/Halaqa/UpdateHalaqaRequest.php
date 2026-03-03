@@ -8,23 +8,26 @@ use Illuminate\Validation\Rule;
 
 class UpdateHalaqaRequest extends DQFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorize()
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
+
     public function rules()
     {
+        if (!$this->input('center_id')) {
+            $this->merge([
+                'reference_type' => \App\Models\Region::class,
+                'reference_id' => intval($this->input('region_id')),
+            ]);
+        } else {
+            $this->merge([
+                'reference_type' => \App\Models\Center::class,
+                'reference_id' => intval($this->input('center_id')),
+            ]);
+        }
+
         return [
             'name' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -38,12 +41,13 @@ class UpdateHalaqaRequest extends DQFormRequest
                     \App\Models\Region::class,
                 ])
             ],
+
             'reference_id' => [
                 'sometimes',
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $type = request('reference_type');
+                    $type = $this->input('reference_type');
 
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');
@@ -67,27 +71,21 @@ class UpdateHalaqaRequest extends DQFormRequest
     public function messages(): array
     {
         return [
-            // name
             'name.required' => 'اسم الحلقة مطلوب.',
             'name.string' => 'اسم الحلقة يجب أن يكون نص.',
             'name.max' => 'اسم الحلقة يجب ألا يتجاوز 255 حرف.',
 
-            // location
             'location.string' => 'الموقع يجب أن يكون نص.',
             'location.max' => 'الموقع يجب ألا يتجاوز 255 حرف.',
 
-            // description
             'description.string' => 'الوصف يجب أن يكون نص.',
 
-            // reference_type
             'reference_type.required' => 'نوع المرجع مطلوب.',
             'reference_type.in' => 'نوع المرجع غير صالح.',
 
-            // reference_id
             'reference_id.required' => 'معرف المرجع مطلوب.',
             'reference_id.integer' => 'معرف المرجع يجب أن يكون رقم صحيح.',
 
-            // type_id
             'type_id.required' => 'نوع الحلقة مطلوب.',
             'type_id.in' => 'نوع الحلقة غير موجود في النظام.',
         ];

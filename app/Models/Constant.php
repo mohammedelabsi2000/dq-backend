@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Constant extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
 
     protected $fillable = [
@@ -53,5 +55,30 @@ class Constant extends Model
     public function halaqaStudentEnrollments()
     {
         return $this->hasMany(HalaqaStudent::class, 'status_id');
+    }
+
+    // تحقق من إذا هذا الثابت مستخدم في أي جدول
+    public function isUsed()
+    {
+        // أولاً: تحقق إذا هو parent لثوابت أخرى
+        if ($this->children()->exists()) {
+            return true;
+        }
+
+        // ثانياً: تحقق في جداول أخرى (اضف الجداول اللي عندك هنا)
+        $foreignTables = [
+            'records' => 'constant_id', // مثال جدول records والعمود constant_id
+            'invoices' => 'constant_id', // جدول invoices كمثال
+            // أضف أي جدول آخر هنا بنفس الصيغة
+        ];
+
+        foreach ($foreignTables as $table => $column) {
+            $exists = DB::table($table)->where($column, $this->id)->exists();
+            if ($exists) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

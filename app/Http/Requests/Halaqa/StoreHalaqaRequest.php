@@ -4,6 +4,7 @@ namespace App\Http\Requests\Halaqa;
 
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
+use App\Models\Audit;
 use Illuminate\Validation\Rule;
 
 class StoreHalaqaRequest extends DQFormRequest
@@ -25,15 +26,15 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function rules()
     {
-        if ($this->center_id == null) {
+        if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => 'App\\Models\\Region',
-                'reference_id' => $this->region_id,
+                'reference_type' => \App\Models\Region::class,
+                'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => 'App\\Models\\Center',
-                'reference_id' => $this->center_id,
+                'reference_type' => \App\Models\Center::class,
+                'reference_id' => intval($this->input('center_id')),
             ]);
         }
 
@@ -53,8 +54,7 @@ class StoreHalaqaRequest extends DQFormRequest
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $type = request('reference_type');
-
+                    $type = $this->reference_type;
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');
                         return;

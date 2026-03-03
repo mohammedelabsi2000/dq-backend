@@ -32,6 +32,9 @@ class Halaqa extends Model
      */
     public function reference()
     {
+        if ($this->reference_type == \App\Models\Center::class) {
+            // $this->reference;
+        }
         return $this->morphTo();
     }
 
@@ -59,6 +62,6 @@ class Halaqa extends Model
         return $this->belongsToMany(Student::class, 'halaqa_students')
             ->withPivot(['from_date', 'to_date', 'status_id'])
             ->withTimestamps();
-            // ->using(HalaqaStudent::class);
+        // ->using(HalaqaStudent::class);
     }
 }
