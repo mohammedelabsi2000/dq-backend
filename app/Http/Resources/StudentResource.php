@@ -9,12 +9,12 @@ class StudentResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'       => $this->id,
+            'id' => $this->id,
             'identity' => $this->identity,
 
             // الاسم الشخصي
-            'fName'  => $this->fName,
-            'sName'  => $this->sName,
+            'fName' => $this->fName,
+            'sName' => $this->sName,
             'thName' => $this->thName,
             'family' => $this->family,
 
@@ -33,7 +33,7 @@ class StudentResource extends JsonResource
             'dob' => $this->dob,
 
             // الجنس
-            'gender'     => $this->gender,
+            'gender' => $this->gender,
             'genderText' => $this->gender_text ?? null,
 
             // المسجد
@@ -52,11 +52,9 @@ class StudentResource extends JsonResource
             'guardian_relation' => new ConstantResource($this->whenLoaded('guardianType')),
 
             // معلومات الاتصال
-            'contact' => [
-                'phone'        => $this->phone,
-                'whatsapp'     => $this->whatsapp,
-                'has_whatsapp' => !is_null($this->whatsapp),
-            ],
+            'phone' => $this->phone,
+            'whatsapp' => $this->whatsapp,
+            'has_whatsapp' => !is_null($this->whatsapp),
 
             // الموقع
             'location' => $this->location,
@@ -71,9 +69,9 @@ class StudentResource extends JsonResource
 
             // روابط
             'links' => [
-                'self'        => url("/api/students/{$this->id}"),
-                'mosque'      => url("/api/mosques/{$this->mosque_id}"),
-                'guardian'    => url("/api/users/identity/{$this->guardian_id}"),
+                'self' => url("/api/students/{$this->id}"),
+                'mosque' => url("/api/mosques/{$this->mosque_id}"),
+                'guardian' => url("/api/users/identity/{$this->guardian_id}"),
                 'enrollments' => url("/api/enrollments?student_id={$this->id}"),
                 'attendances' => url("/api/attendances?attendable_id={$this->id}&attendable_type=student"),
             ],

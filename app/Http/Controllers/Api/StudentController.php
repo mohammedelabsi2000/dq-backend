@@ -28,7 +28,7 @@ class StudentController extends Controller
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['full_name', 'identity'],
-            'orderColumn'   => 'created_at',
+            'orderColumn' => 'created_at',
         ]);
 
         $query = $q['query'];
@@ -38,21 +38,52 @@ class StudentController extends Controller
             'mosque',
             'maritalStatus',
             'moneyStatus',
+            'guardian',
             'guardianType',
             'prefixName',
         ])->get();
 
         return $this->apiResponse([
             'total' => $total,
-            'skip'  => $q['skip'],
+            'skip' => $q['skip'],
             'limit' => $q['limit'],
-            'data'  => StudentResource::collection($students),
+            'data' => StudentResource::collection($students),
         ], 'success', 200);
     }
 
     public function store(StoreStudentRequest $request)
     {
+        $data = $request->validated();
+
+        $student = Student::withTrashed()
+            ->where('identity', $data['identity'])
+            ->first();
+
+        if ($student) {
+            // إذا كان محذوف نرجعه
+            if ($student->trashed()) {
+                $student->restore();
+            }
+
+            // نحدث البيانات
+            $student->update($data);
+
+            return $this->success(
+                new StudentResource($student),
+                'تم استعادة الطالب بنجاح',
+                201
+            );
+        }
+
         $student = $this->studentService->create($request->validated());
+        $student->load([
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+        ]);
 
         return $this->success(
             new StudentResource($student),
@@ -61,30 +92,39 @@ class StudentController extends Controller
         );
     }
 
-   public function show(Student $student)
-{
-    $student = $student->load([
-        'mosque',
-        'maritalStatus',
-        'moneyStatus',
-        'guardianType',
-        'prefixName',
-        'guardian',
-    ]);
+    public function show(Student $student)
+    {
+        $student = $student->load([
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+            'guardian',
+        ]);
 
-    return $this->success(
-        new StudentResource($student),
-        'success',
-        200
-    );
-}
+        return $this->success(
+            new StudentResource($student),
+            'success',
+            200
+        );
+    }
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
         $student = $this->studentService->update($student, $request->validated());
 
         return $this->success(
-            new StudentResource($student),
+            new StudentResource($student->load([
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+            'guardian',
+        ])),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }

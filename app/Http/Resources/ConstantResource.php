@@ -19,12 +19,8 @@ class ConstantResource extends JsonResource
             'name' => $this->name,
 
             // نوع الثابت (علاقة مباشرة)
-            'constant_type' => [
-                'id' => $this->constant_type_id,
-                'name' => $this->whenLoaded('constantType', function () {
-                    return $this->constantType->name ?? null;
-                }),
-            ],
+            'constant_type_id' => $this->constant_type_id,
+            'constant_type' => new ConstantTypeResource($this->whenLoaded('constantType')),
 
             // الثابت الأب (إذا وجد)
             'parent' => $this->when($this->parent_id, function () {
