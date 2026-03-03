@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -43,35 +45,35 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $data = $request->validate([
-            'fName' => 'nullable|string|max:100',
-            'name' => 'nullable|string|max:100',
-            'sName' => 'nullable|string|max:100',
-            'thName' => 'nullable|string|max:100',
-            'family' => 'nullable|string|max:100',
-            'dob' => 'required|date',
-            'mosque_id' => 'nullable|exists:mosques,id',
-            'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
-            'marital_status_id' => 'nullable|exists:constants,id',
-            'numChildren' => 'nullable|integer',
-            'identity' => 'nullable|string|max:9',
-            'phone' => 'nullable|string|max:25',
-            'whatsapp' => 'nullable|string|max:25',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'jobname' => 'nullable|string|max:191',
-            'job_place' => 'nullable|string|max:191',
-            'job_salary' => 'nullable|numeric',
-            'prefix_name_id' => 'nullable|exists:constants,id',
-        ]);
+        /*         $data = $request->validate([
+                    'fName' => 'nullable|string|max:100',
+                    'name' => 'nullable|string|max:100',
+                    'sName' => 'nullable|string|max:100',
+                    'thName' => 'nullable|string|max:100',
+                    'family' => 'nullable|string|max:100',
+                    'dob' => 'required|date',
+                    'mosque_id' => 'nullable|exists:mosques,id',
+                    'location' => 'nullable|string|max:191',
+                    'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
+                    'marital_status_id' => 'nullable|exists:constants,id',
+                    'numChildren' => 'nullable|integer',
+                    'identity' => 'nullable|string|max:9',
+                    'phone' => 'nullable|string|max:25',
+                    'whatsapp' => 'nullable|string|max:25',
+                    'email' => 'required|email|unique:users,email',
+                    'password' => 'required|string|min:6',
+                    'jobname' => 'nullable|string|max:191',
+                    'job_place' => 'nullable|string|max:191',
+                    'job_salary' => 'nullable|numeric',
+                    'prefix_name_id' => 'nullable|exists:constants,id',
+                ]);*/
 
-        // تشفير الباسوورد
-        $data['password'] = Hash::make($data['password']);
+        // تشفير الباسوورد 
+        $request['password'] = Hash::make($request['password']);
 
-        $user = User::create($data);
+        $user = User::create($request->validated());
 
         return $this->success(
             new UserResource($user),
@@ -101,9 +103,9 @@ class UserController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\User  $user
      */
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        $data = $request->validate([
+        /* $data = $request->validate([
             'fName' => 'nullable|string|max:100',
             'sName' => 'nullable|string|max:100',
             'thName' => 'nullable|string|max:100',
@@ -124,16 +126,16 @@ class UserController extends Controller
             'job_salary' => 'nullable|numeric',
             'prefix_name_id' => 'nullable|exists:constants,id',
             // 'image_id' => 'nullable|exists:images,id',
-        ]);
+        ]);*/
 
         // تشفير الباسوورد لو تم تغييره
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
+        if (!empty($request['password'])) {
+            $request['password'] = Hash::make($request['password']);
         } else {
-            unset($data['password']);
+            unset($request['password']);
         }
 
-        $user->update($data);
+        $user->update($request->validated());
 
         return $this->success(
             new UserResource($user),

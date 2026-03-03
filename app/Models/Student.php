@@ -12,52 +12,52 @@ class Student extends Model
 {
     use HasFactory, SoftDeletes, Auditable;
 
-   protected $fillable = [
-    'identity',
-    'fName',
-    'sName',
-    'thName',
-    'family',
-    'dob',
-    'mosque_id',
-    'location',
-    'gender',
-    'marital_status_id',
-    'money_status_id',
-    'prefix_name_id',
-    'guardian_id',
-    'guardian_type_id',
-    'phone',
-    'whatsapp',
-];
+    protected $fillable = [
+        'identity',
+        'fName',
+        'sName',
+        'thName',
+        'family',
+        'dob',
+        'mosque_id',
+        'location',
+        'gender',
+        'marital_status_id',
+        'money_status_id',
+        'prefix_name_id',
+        'guardian_id',
+        'guardian_type_id',
+        'phone',
+        'whatsapp',
+    ];
 
     protected $appends = ['full_name'];
 
 
     public function images()
-{
-    return $this->morphMany(\App\Models\Image::class, 'imageable');
-}
+    {
+        return $this->morphMany(\App\Models\Image::class, 'imageable');
+    }
 
-public function mainImage()
-{
-    return $this->morphOne(\App\Models\Image::class, 'imageable')
-                ->where('is_main', true);
-}
+    public function mainImage()
+    {
+        return $this->morphOne(\App\Models\Image::class, 'imageable')
+            ->where('is_main', true);
+    }
 
 
-protected static function booted()
-{
-    static::deleting(function ($student) {
+    protected static function booted()
+    {
+        static::deleting(function ($student) {
 
-        foreach ($student->images as $image) {
+            foreach ($student->images as $image) {
 
-            Storage::disk($image->disk)->delete($image->file_path);
+                Storage::disk($image->disk)->delete($image->file_path);
 
-            $image->delete();
-        }
-    });
-}
+                $image->delete();
+            }
+        });
+    }
     // full_name عمود ظاهري في DB لكن نضيفه هنا كاحتياط
     public function getFullNameAttribute()
     {
