@@ -42,7 +42,6 @@ class IdQueryController extends Controller
         }
 
         return $this->apiResponse([
-            'data' => [
                 // 'data' => $data,
                 'identity ' => $data['CI_ID_NUM'],
                 'fName' => $data['CI_FIRST_ARB'],
@@ -52,7 +51,6 @@ class IdQueryController extends Controller
                 'dob' => $data['CI_BIRTH_DT'],
                 'gender' => $data['SEX'],
                 // 'marital_status_id' => Constant::where('name', 'LIKE', $data['SOCIAL_STATUS'])->get('id'),
-            ],
         ], 'success', 200);
     }
 }
