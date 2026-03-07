@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
 use App\Http\Controllers\Api\PlanStudentController;
+use App\Http\Controllers\Api\RolesController;
 use Illuminate\Support\Facades\Auth;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -176,16 +177,13 @@ Route::apiResource('personal-courses', PersonalCourseController::class);
 // });
 
 
-<<<<<<< HEAD
 Route::apiResource('students', StudentController::class);
 Route::post('students/import', [StudentController::class, 'import']);
-=======
-    Route::apiResource('students', StudentController::class);
-    Route::post('students/import', [StudentController::class, 'import']);
 
 
 Route::apiResource('images', ImageController::class)
-      ->only(['store', 'destroy', 'index', 'show']);
+    ->only(['store', 'destroy', 'index', 'show']);
 Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
->>>>>>> b1d7a8520541c2a596df06096c7198d45523b60c
+
+Route::apiResource('roles', RolesController::class);

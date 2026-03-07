@@ -25,6 +25,26 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        //
+        foreach (config('abilities') as $code => $lable) {
+            Gate::define($code, function ($user) use ($code) {
+                return $user->hasAbility($code);
+            });
+        }
+
+        // Gate::define('branches.view', function () {
+        //     return true;
+        // });
+
+        // Gate::define('branches.create', function () {
+        //     return true;
+        // });
+
+        // Gate::define('branches.update', function () {
+        //     return false;
+        // });
+
+        // Gate::define('branches.delete', function () {
+        //     return false;
+        // });
     }
 }
