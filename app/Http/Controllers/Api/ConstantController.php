@@ -16,7 +16,6 @@ use function PHPSTORM_META\type;
 
 class ConstantController extends Controller
 {
-    use ApiResponser;
 
     /**
      * Summary of index
@@ -26,10 +25,9 @@ class ConstantController extends Controller
     public function index(Request $request)
     {
         $query = Constant::query();
-
         // لإرجاع الثوابت الفعالة فقط إلا عند الطلب
-        if (!$request->boolean('with_inactive')) {
-            $query->where(column: 'is_active', value: 1);
+        if ($request->isNotFilled('with_inactive')) {
+            $query->where('is_active', 1);
         }
 
         // لإرجاع قائمة بالثوابت من نوع مخصص
@@ -72,7 +70,7 @@ class ConstantController extends Controller
         $query = $q['query'];
         $total = $q['count'];
         // لإرجاع جميع ثوابت النظام
-        $constants = $query->with('parent')->get();
+        $constants = $query->with(['constantType','parent'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -91,7 +89,7 @@ class ConstantController extends Controller
     {
         $constant = $constant->load([
             'parent',
-            'type'
+            'constantType'
         ]);
 
         return $this->apiResponse([
@@ -108,7 +106,10 @@ class ConstantController extends Controller
     {
         $constant = Constant::create($request->validated());
         return $this->success(
-            new ConstantResource($constant),
+            new ConstantResource($constant->load([
+            'parent',
+            'constantType'
+        ])),
             'تم إنشاء الثابت بنجاح',
             201
         );
@@ -125,7 +126,7 @@ class ConstantController extends Controller
         $constant->update($request->validated());
         $constant = $constant->load([
             'parent',
-            'type'
+            'constantType'
         ]);
         return $this->success(
             new ConstantResource($constant),

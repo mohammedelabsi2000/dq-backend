@@ -2,12 +2,13 @@
 
 namespace App\Http\Requests\Student;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Helpers\ConstantHelper;
+use App\Http\Requests\DQFormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class StoreStudentRequest extends FormRequest
+class StoreStudentRequest extends DQFormRequest
 {
     public function authorize()
     {
@@ -17,48 +18,91 @@ class StoreStudentRequest extends FormRequest
     public function rules()
     {
         return [
-            'fName'             => 'required|string|max:255',
-            'sName'             => 'nullable|string|max:255',
-            'thName'            => 'nullable|string|max:255',
-            'family'            => 'required|string|max:255',
-            'dob'               => 'nullable|date',
-            'mosque_id'         => 'required|exists:mosques,id',
-            'location'          => 'nullable|string',
-            'gender'            => ['required', Rule::in(['ذكر', 'أنثى'])],
-            'marital_status_id' => 'nullable|exists:constants,id',
-            'money_status_id'   => 'nullable|exists:constants,id',
-            'prefix_name_id'    => 'nullable|exists:constants,id',
-            'guardian_id'       => 'required|string|max:9|exists:users,identity',
-            'guardian_type_id'  => 'nullable|exists:constants,id',
-            'phone'             => 'nullable|string|max:25',
-            'whatsapp'          => 'nullable|string|max:25',
+            'identity' => ['nullable', 'string', 'max:9'],//, Rule::unique('students', 'identity')],
+            'fName' => 'required|string|max:255',
+            'sName' => 'nullable|string|max:255',
+            'thName' => 'nullable|string|max:255',
+            'family' => 'required|string|max:255',
+            'dob' => 'nullable|date',
+            'mosque_id' => 'required|exists:mosques,id',
+            'location' => 'nullable|string',
+            'gender' => ['required', Rule::in(['ذكر', 'أنثى'])],
+            'marital_status_id' => [
+                'nullable',
+                Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),
+            ],
+            'money_status_id' => [
+                'nullable',
+                Rule::in(ConstantHelper::getConstantIdsByType('money_status')),
+            ],
+            'prefix_name_id' => [
+                'nullable',
+                Rule::in(ConstantHelper::getConstantIdsByType('prefix_name')),
+            ],
+            // مراجعة سيناريو إنشاء ولي الأمر
+            // |exists:users,identity
+            'guardian_id' => 'required|string|max:9',
+            'guardian_type_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('guardian_type')),
+            ],
+            'phone' => 'nullable|string|max:25',
+            'whatsapp' => 'nullable|string|max:25',
         ];
     }
 
-    public function messages(): array
+    public function messages()
     {
         return [
-            'fName.required'       => 'الاسم الأول مطلوب',
-            'fName.max'            => 'الاسم الأول يجب ألا يتجاوز 255 حرف',
-            'family.required'      => 'اسم العائلة مطلوب',
-            'family.max'           => 'اسم العائلة يجب ألا يتجاوز 255 حرف',
-            'mosque_id.required'   => 'المسجد مطلوب',
-            'mosque_id.exists'     => 'المسجد المحدد غير موجود',
-            'gender.required'      => 'الجنس مطلوب',
-            'gender.in'            => 'الجنس يجب أن يكون ذكر أو أنثى',
-            'guardian_id.required' => 'رقم هوية ولي الأمر مطلوب',
-            'guardian_id.max'      => 'رقم الهوية يجب ألا يتجاوز 9 أحرف',
-            'guardian_id.exists'   => 'ولي الأمر غير موجود في النظام',
-            'dob.date'             => 'تاريخ الميلاد غير صالح',
+            'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
+            'identity.max' => 'رقم الهوية يجب ألا يتجاوز 9 أحرف.',
+            'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
+
+            'fName.required' => 'الاسم الأول مطلوب.',
+            'fName.string' => 'الاسم الأول يجب أن يكون نصاً.',
+            'fName.max' => 'الاسم الأول يجب ألا يتجاوز 255 حرفاً.',
+
+            'sName.string' => 'الاسم الثاني يجب أن يكون نصاً.',
+            'sName.max' => 'الاسم الثاني يجب ألا يتجاوز 255 حرفاً.',
+
+            'thName.string' => 'الاسم الثالث يجب أن يكون نصاً.',
+            'thName.max' => 'الاسم الثالث يجب ألا يتجاوز 255 حرفاً.',
+
+            'family.required' => 'اسم العائلة مطلوب.',
+            'family.string' => 'اسم العائلة يجب أن يكون نصاً.',
+            'family.max' => 'اسم العائلة يجب ألا يتجاوز 255 حرفاً.',
+
+            'dob.date' => 'تاريخ الميلاد يجب أن يكون تاريخاً صحيحاً.',
+
+            'mosque_id.required' => 'المسجد مطلوب.',
+            'mosque_id.exists' => 'المسجد المحدد غير موجود في النظام.',
+
+            'location.string' => 'الموقع يجب أن يكون نصاً.',
+
+            'gender.required' => 'الجنس مطلوب.',
+            'gender.in' => 'قيمة الجنس غير صحيحة، يجب أن تكون ذكر أو أنثى.',
+
+            'marital_status_id.in' => 'الحالة الاجتماعية المحددة غير صحيحة.',
+
+            'money_status_id.in' => 'الحالة المادية المحددة غير صحيحة.',
+
+            'prefix_name_id.in' => 'اللقب المحدد غير صحيح.',
+
+            'guardian_id.required' => 'رقم هوية ولي الأمر مطلوب.',
+            'guardian_id.string' => 'رقم هوية ولي الأمر يجب أن يكون نصاً.',
+            'guardian_id.max' => 'رقم هوية ولي الأمر يجب ألا يتجاوز 9 أرقام.',
+            // 'guardian_id.exists' => 'رقم هوية ولي الأمر غير موجود في النظام.',
+
+            'guardian_type_id.required' => 'صلة القرابة مطلوبة.',
+            'guardian_type_id.in' => 'صلة القرابة المحددة غير صحيحة.',
+
+            'phone.string' => 'رقم الهاتف يجب أن يكون نصاً.',
+            'phone.max' => 'رقم الهاتف يجب ألا يتجاوز 25 حرفاً.',
+
+            'whatsapp.string' => 'رقم الواتساب يجب أن يكون نصاً.',
+            'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
         ];
     }
 
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'status'  => false,
-            'message' => 'خطأ في البيانات المدخلة',
-            'errors'  => $validator->errors(),
-        ], 422));
-    }
+
 }
