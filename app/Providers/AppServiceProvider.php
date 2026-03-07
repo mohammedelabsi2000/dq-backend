@@ -12,6 +12,7 @@ use Illuminate\Pagination\Paginator;
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -39,6 +40,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configureExcel();
         $this->registerAuditMacro();
         $this->registerAuditObservers();
+
+        Relation::morphMap([
+        'user' => \App\Models\User::class,
+        'student' => \App\Models\Student::class,
+    ]);
     }
 
     /*

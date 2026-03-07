@@ -52,4 +52,22 @@ class Handler extends ExceptionHandler
             }
         });
     }
+
+    public function render($request, Throwable $exception)
+    {
+        if ($request->is('api/*')) {
+
+            // NotFoundHttpException → أي Route غير موجود
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                return $this->notFound();
+            }
+
+            // ModelNotFoundException → لو استخدمت Route Model Binding ولم يجد السجل
+            if ($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                return $this->notFound();
+            }
+        }
+
+        return parent::render($request, $exception);
+    }
 }

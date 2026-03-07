@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AcademicQualificationController;
 use App\Http\Controllers\Api\AccessTokensController;
 use App\Http\Controllers\Api\AttendanceController;
@@ -9,17 +11,15 @@ use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\GradeController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
-use App\Http\Controllers\Api\PlanLevelController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\IdQueryController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
@@ -188,7 +188,11 @@ Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
 
 Route::apiResource('roles', RolesController::class);
+<<<<<<< HEAD
 
 Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
 Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
 Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
+=======
+Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+>>>>>>> b7058c703198dc28b5b75b1cc5141538254d78d8

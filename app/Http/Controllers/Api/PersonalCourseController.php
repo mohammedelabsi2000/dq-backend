@@ -12,11 +12,13 @@ use App\Models\PersonalCourse;
 class PersonalCourseController extends Controller
 {
     use ApiResponser;
+
     public function index()
     {
-        $personalCourse = PersonalCourse::with(['person', 'type'])->get();
+        $data = PersonalCourse::with(['person'])->get();
+
         return $this->apiResponse(
-            PersonalCourseResource::collection($personalCourse),
+            PersonalCourseResource::collection($data),
             'success',
             200
         );
@@ -24,37 +26,26 @@ class PersonalCourseController extends Controller
 
     public function store(StorePersonalCourseRequest $request)
     {
-        //$course = PersonalCourse::create($request->validated());
-
-        // attach polymorphic person
-        /*$course->person()->associate([
-            'id' => $request->person_id,
-            'type' => $request->person_type,
-        ]);
-        $course->save();
-
-        return response()->json($course, 201);*/
-
         $course = new PersonalCourse($request->validated());
 
-        // الحصول على الـ person instance polymorphic
-        $personType = $request->person_type; // مثال: App\Models\User
+        $personType = $request->person_type;
         $personId = $request->person_id;
 
         $person = $personType::findOrFail($personId);
 
-        // ربط polymorphic relation
         $course->person()->associate($person);
-
         $course->save();
 
-        return response()->json($course->load(['person', 'type']), 201);
+        return response()->json([
+            'message' => 'Personal course created successfully',
+            'data' => $course->load(['person']),
+        ], 201);
     }
 
     public function show(PersonalCourse $personalCourse)
     {
-        $personalCourse = $personalCourse->load(['person', 'type']);
-        
+        $personalCourse = $personalCourse->load(['person']);
+
         return $this->apiResponse(
             new PersonalCourseResource($personalCourse),
             'success',
@@ -65,12 +56,19 @@ class PersonalCourseController extends Controller
     public function update(UpdatePersonalCourseRequest $request, PersonalCourse $personalCourse)
     {
         $personalCourse->update($request->validated());
-        return response()->json($personalCourse);
+
+        return response()->json([
+            'message' => 'Personal course updated successfully',
+            'data' => $personalCourse->load(['person']),
+        ]);
     }
 
     public function destroy(PersonalCourse $personalCourse)
     {
         $personalCourse->delete();
-        return response()->noContent();
+
+        return response()->json([
+            'message' => 'Personal course deleted successfully',
+        ], 204);
     }
 }

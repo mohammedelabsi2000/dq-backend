@@ -12,7 +12,7 @@ class AcademicQualificationResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -50,7 +50,6 @@ class AcademicQualificationResource extends JsonResource
                 'type' => $this->person_type,
                 'name' => $this->whenLoaded('person', function () {
                     if ($this->person) {
-                        // افترض أن لديك اسم أو طريقة لعرض اسم الشخص
                         return $this->person->name ??
                             $this->person->full_name ??
                             $this->person->title ?? null;
@@ -58,7 +57,6 @@ class AcademicQualificationResource extends JsonResource
                     return null;
                 }),
                 'data' => $this->whenLoaded('person', function () {
-                    // إذا أردت إرجاع كامل بيانات الشخص حسب نوعه
                     return $this->getPersonData();
                 }),
             ],
@@ -71,7 +69,11 @@ class AcademicQualificationResource extends JsonResource
             'educational_institution' => $this->educational_institution,
             'notes' => $this->notes,
 
-            // روابط إضافية
+            // معلومات إضافية
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+
+            // روابط إضافية (اختياري)
             /* 'links' => [
                 'self' => route('api.academic-qualifications.show', $this->id),
                 'certificate' => $this->certificate_link ? asset('storage/' . $this->certificate_link) : null,
@@ -88,13 +90,12 @@ class AcademicQualificationResource extends JsonResource
             return null;
         }
 
-        switch (class_basename($this->person)) {
-            case 'Student':
-                return new StudentResource($this->person);
-            case 'User':
-                return new UserResource($this->person);
-            default:
-                return $this->person->toArray();
-        }
+        $className = class_basename($this->person);
+
+        return match ($className) {
+            'student' => new StudentResource($this->person),
+            'user' => new UserResource($this->person),
+            default => $this->person->toArray(),
+        };
     }
 }
