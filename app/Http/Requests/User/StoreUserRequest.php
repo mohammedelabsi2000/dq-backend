@@ -28,9 +28,9 @@ class StoreUserRequest extends FormRequest
         return [
 
             // Basic
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
 
             // Names
             'fName' => 'nullable|string|max:100',
@@ -75,7 +75,7 @@ class StoreUserRequest extends FormRequest
             | Basic
             |--------------------------------------------------------------------------
             */
-            'name.required' => 'الاسم مطلوب.',
+            // 'name.required' => 'الاسم مطلوب.',
             'name.string' => 'الاسم يجب أن يكون نصاً.',
             'name.max' => 'الاسم يجب ألا يتجاوز 255 حرفاً.',
 
@@ -87,7 +87,6 @@ class StoreUserRequest extends FormRequest
             'password.required' => 'كلمة المرور مطلوبة.',
             'password.string' => 'كلمة المرور يجب أن تكون نصاً.',
             'password.min' => 'كلمة المرور يجب ألا تقل عن 6 أحرف.',
-            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
 
 
             /*
