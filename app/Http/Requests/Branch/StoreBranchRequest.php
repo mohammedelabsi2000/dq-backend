@@ -18,7 +18,8 @@ class StoreBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        return Gate::allows('branches.create');
+        // return Gate::allows('branches.create');
+
     }
 
     /**

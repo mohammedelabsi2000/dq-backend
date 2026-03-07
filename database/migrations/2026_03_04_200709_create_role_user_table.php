@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('role_user', function (Blueprint $table) {
             $table->morphs('authorizable');
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
+            $table->nullableMorphs('scope');
 
-            $table->primary(['authorizable_id', 'authorizable_type', 'role_id']);
+            $table->primary(['authorizable_id', 'authorizable_type', 'role_id'], 'role_user_primary');
         });
     }
 

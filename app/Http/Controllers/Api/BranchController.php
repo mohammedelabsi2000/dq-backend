@@ -18,11 +18,24 @@ class BranchController extends Controller
 
     public function index(Request $request)
     {
-        if (Gate::denies('branches.view')) {
-            abort(403, 'غير مسموح لك');
+        // if (Gate::denies('branches.view')) {
+        //     abort(403, 'غير مسموح لك');
+        // }
+        // $this->authorize('viewAny', Branch::class);
+        $user = auth()->user();
+        $user->loadMissing('roles');
+        $query = Branch::query();
+
+        $isAdmin = $user->roles->every(fn($role) => $role->pivot->scope_id === null);
+
+        if (!$isAdmin) {
+            $branchIds = $user->roles
+                ->where('pivot.scope_type', Branch::class)
+                ->pluck('pivot.scope_id');
+
+            $query->whereIn('id', $branchIds);
         }
         // Gate::authorize('branches.view');
-        $query = Branch::query();
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
@@ -65,6 +78,7 @@ class BranchController extends Controller
         // if (!Gate::allows('branches.create')) {
         //     abort(403);
         // }
+        $this->authorize('create', Branch::class);
         $branch = Branch::create($request->validated());
 
         return $this->success(
@@ -81,7 +95,8 @@ class BranchController extends Controller
      */
     public function show(Request $request, Branch $branch)
     {
-        Gate::authorize('branches.view');
+        // Gate::authorize('branches.view');
+        $this->authorize('view', $branch);
         // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_regions')) {
             $branch->load('regions');
@@ -104,6 +119,7 @@ class BranchController extends Controller
         // if (Gate::denies('branches.update')) {
         //     abort(403, 'غير مسموح لك');
         // }
+        $this->authorize('update', $branch);
         $branch->update($request->validated());
 
         return $this->success(
@@ -119,9 +135,10 @@ class BranchController extends Controller
      */
     public function destroy(Branch $branch)
     {
-        if (Gate::denies('branches.delete')) {
-            abort(403);
-        }
+        // if (Gate::denies('branches.delete')) {
+        //     abort(403);
+        // }
+        $this->authorize('delete', $branch);
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
             return $this->errorMessage(

@@ -21,6 +21,7 @@ class CenterController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Center::class);
         $query = Center::query();
 
         $q = $this->applyFilters($query, [
@@ -76,6 +77,7 @@ class CenterController extends Controller
      */
     public function store(StoreCenterRequest $request)
     {
+        $this->authorize('create', Center::class);
         $center = Center::create($request->validated());
 
         if ($request->boolean('with_mosque')) {
@@ -105,6 +107,7 @@ class CenterController extends Controller
      */
     public function show(Request $request, Center $center)
     {
+        $this->authorize('view', $center);
         // if ($request->boolean('with_mosque')) {
         //     $center->load('mosque');
         // }
@@ -132,6 +135,7 @@ class CenterController extends Controller
      */
     public function update(UpdateCenterRequest $request, Center $center)
     {
+        $this->authorize('update', $center);
         $center->update($request->validated());
         // // تحميل العلاقات إذا طلب
         // if ($request->boolean('with_mosque')) {
@@ -166,6 +170,7 @@ class CenterController extends Controller
         //         400
         //     );
         // }
+        $this->authorize('delete', $center);
 
         $center->delete();
 
