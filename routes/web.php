@@ -16,6 +16,7 @@ use App\Http\Controllers\{
     PlanLevelController,
     GradeController,
     AcademicQualificationController,
+    ApiTestController,
     CourseController,
     PersonalCourseController,
     PlanAssignmentController,
@@ -38,6 +39,8 @@ use App\Http\Controllers\{
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/test-api', [ApiTestController::class, 'test']);
 
 // Route::resource('branches', BranchController::class);
 // Route::resource('branches', ApiBranchController::class);

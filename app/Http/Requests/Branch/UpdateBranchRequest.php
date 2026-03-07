@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponser;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Gate;
 
 class UpdateBranchRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class UpdateBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Gate::allows('branches.update');
     }
 
     /**

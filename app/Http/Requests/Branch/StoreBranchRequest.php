@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponser;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Gate;
 
 class StoreBranchRequest extends FormRequest
 {
@@ -17,7 +18,7 @@ class StoreBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return Gate::allows('branches.create');
     }
 
     /**

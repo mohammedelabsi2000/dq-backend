@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Traits\ApiResponser;
-use App\Http\Requests\StoreBranchRequest;
-use App\Http\Requests\UpdateBranchRequest;
+use App\Http\Requests\Branch\StoreBranchRequest;
+use App\Http\Requests\Branch\UpdateBranchRequest;
 use App\Models\Branch;
 use Illuminate\Http\Request;
 

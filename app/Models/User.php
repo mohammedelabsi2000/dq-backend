@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasRoles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
 
     // مميز الموديلات اللي تستخدم audit يتم قرائته داخل AppServiceProvider.php
     public static $usesAudit = true;
@@ -132,30 +133,30 @@ class User extends Authenticatable
     */
 
     public function images()
-{
-    return $this->morphMany(\App\Models\Image::class, 'imageable');
-}
+    {
+        return $this->morphMany(\App\Models\Image::class, 'imageable');
+    }
 
-public function mainImage()
-{
-    return $this->morphOne(\App\Models\Image::class, 'imageable')
-                ->where('is_main', true);
-}
+    public function mainImage()
+    {
+        return $this->morphOne(\App\Models\Image::class, 'imageable')
+            ->where('is_main', true);
+    }
 
-protected static function booted()
-{
-    static::deleting(function ($user) {
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
 
-        foreach ($user->images as $image) {
+            foreach ($user->images as $image) {
 
-            // حذف من التخزين
-            Storage::disk($image->disk)->delete($image->file_path);
+                // حذف من التخزين
+                Storage::disk($image->disk)->delete($image->file_path);
 
-            // حذف من قاعدة البيانات
-            $image->delete();
-        }
-    });
-}
+                // حذف من قاعدة البيانات
+                $image->delete();
+            }
+        });
+    }
 
 
     public function getPersonNameAttribute()
@@ -204,19 +205,18 @@ protected static function booted()
         return $this->morphMany(PersonalCourse::class, 'person');
     }
 
-    public function currentHalaqa()
-    {
-        return $this->hasOne(UserRole::class)
-            ->where('relation_type', Halaqa::class)
-            ->where('role', 'teacher')
-            ->whereNull('end_date');
+    // public function currentHalaqa()
+    // {
+    //     return $this->hasOne(UserRole::class)
+    //         ->where('relation_type', Halaqa::class)
+    //         ->where('role', 'teacher')
+    //         ->whereNull('end_date');
+    // }
 
-    }
-
-    public function roles()
-    {
-        return $this->hasMany(UserRole::class);
-    }
+    // public function roles()
+    // {
+    //     return $this->hasMany(UserRole::class);
+    // }
 
     // الأدوار النشطة فقط
     public function activeRoles()
