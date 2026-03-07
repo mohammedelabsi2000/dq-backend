@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AcademicQualificationController;
 use App\Http\Controllers\Api\AccessTokensController;
 use App\Http\Controllers\Api\AttendanceController;
@@ -9,15 +11,12 @@ use App\Http\Controllers\Api\CenterController;
 use App\Http\Controllers\Api\MosqueController;
 use App\Http\Controllers\Api\RegionController;
 use App\Http\Controllers\Api\GradeController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\API\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
-use App\Http\Controllers\Api\PlanLevelController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ImageController;
