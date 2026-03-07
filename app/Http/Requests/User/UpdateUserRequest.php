@@ -29,7 +29,7 @@ class UpdateUserRequest extends FormRequest
 
         return [
 
-            'name' => 'sometimes|required|string|max:255',
+            'name' => 'nullable|string|max:255',
 
             'email' => [
                 'sometimes',
@@ -39,7 +39,7 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore($userId),
             ],
 
-            'password' => 'nullable|string|min:6|confirmed',
+            'password' => 'nullable|string|min:6',
 
             'fName' => 'nullable|string|max:100',
             'sName' => 'nullable|string|max:100',
@@ -83,7 +83,6 @@ class UpdateUserRequest extends FormRequest
         return [
 
             // name
-            'name.required' => 'الاسم مطلوب.',
             'name.string' => 'الاسم يجب أن يكون نصاً.',
             'name.max' => 'الاسم يجب ألا يتجاوز 255 حرفاً.',
 
@@ -96,7 +95,6 @@ class UpdateUserRequest extends FormRequest
             // password
             'password.string' => 'كلمة المرور يجب أن تكون نصاً.',
             'password.min' => 'كلمة المرور يجب ألا تقل عن 6 أحرف.',
-            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق.',
 
             // fName, sName, thName, family
             'fName.string' => 'الاسم الأول يجب أن يكون نصاً.',

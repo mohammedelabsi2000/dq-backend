@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\IdQueryController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
@@ -186,3 +187,4 @@ Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
 
 Route::apiResource('roles', RolesController::class);
+Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
