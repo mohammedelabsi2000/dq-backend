@@ -14,22 +14,23 @@ class AcademicQualificationController extends Controller
     use ApiResponser;
 
     public function getPersonQualifications($person_type, $person_id)
-{
-    $data = AcademicQualification::with([
-        'academicDegree',
-        'major',
-        'person',
-    ])
-    ->where('person_type', $person_type)
-    ->where('person_id', $person_id)
-    ->get();
+    {
+        $data = AcademicQualification::with([
+    'academicDegree',
+    'major',
+    'person',
+    'images'
+])
+            ->where('person_type', $person_type)
+            ->where('person_id', $person_id)
+            ->get();
 
-    return $this->success(
-        AcademicQualificationResource::collection($data),
-        'success',
-        200
-    );
-}
+        return $this->success(
+            AcademicQualificationResource::collection($data),
+            'success',
+            200
+        );
+    }
 
     public function index()
     {
@@ -37,6 +38,7 @@ class AcademicQualificationController extends Controller
             'academicDegree',
             'major',
             'person',
+            'images',
         ])->get();
 
         return $this->success(
@@ -63,6 +65,8 @@ class AcademicQualificationController extends Controller
             'academicDegree',
             'major',
             'person',
+            'images',
+
         ]);
 
         return $this->success(

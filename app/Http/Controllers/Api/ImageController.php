@@ -61,8 +61,11 @@ class ImageController extends Controller
      * Show all images for a User
      */
     public function userImages(User $user)
-    {
-        $images = $user->images()->get()->map(function($img) {
+{
+    $images = $user->images()
+        ->latest() // آخر إضافة أولاً
+        ->get()
+        ->map(function($img) {
             return [
                 'id' => $img->id,
                 'file_name' => $img->file_name,
@@ -72,15 +75,18 @@ class ImageController extends Controller
             ];
         });
 
-        return response()->json($images);
-    }
+    return response()->json($images);
+}
 
     /**
      * Show all images for a Student
      */
-    public function studentImages(Student $student)
-    {
-        $images = $student->images()->get()->map(function($img) {
+   public function studentImages(Student $student)
+{
+    $images = $student->images()
+        ->latest() // آخر إضافة أولاً
+        ->get()
+        ->map(function($img) {
             return [
                 'id' => $img->id,
                 'file_name' => $img->file_name,
@@ -90,6 +96,6 @@ class ImageController extends Controller
             ];
         });
 
-        return response()->json($images);
-    }
+    return response()->json($images);
+}
 }
