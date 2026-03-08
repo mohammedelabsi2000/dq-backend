@@ -33,4 +33,10 @@ class PersonalCourse extends Model
     {
         return $this->belongsTo(Constant::class, 'type_id');
     }
+
+      // علاقة Polymorphic مع الصور (يمكن أكثر من صورة لكل مؤهل)
+    public function images()
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
 }

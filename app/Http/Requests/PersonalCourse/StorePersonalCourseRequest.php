@@ -33,6 +33,9 @@ class StorePersonalCourseRequest extends FormRequest
             'type_id' => 'required|exists:constants,id',
             'person_id' => 'required',
             'person_type' => 'required|string',
+            // Validation للملفات المتعددة
+            'images' => 'nullable|array',
+            'images.*' => 'file|mimes:pdf|max:5120'
         ];
     }
 }
