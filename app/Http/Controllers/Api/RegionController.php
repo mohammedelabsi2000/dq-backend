@@ -19,6 +19,7 @@ class RegionController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Region::class);
         $query = Region::query();
 
         $q = $this->applyFilters($query, [
@@ -58,6 +59,7 @@ class RegionController extends Controller
      */
     public function store(StoreRegionRequest $request)
     {
+        $this->authorize('create', Region::class);
         $region = Region::create($request->validated());
 
         // تحميل العلاقات إذا طلب
@@ -79,6 +81,7 @@ class RegionController extends Controller
      */
     public function show(Request $request, Region $region)
     {
+        $this->authorize('view', $region);
         // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_branch')) {
             $region->load('branch');
@@ -98,6 +101,7 @@ class RegionController extends Controller
      */
     public function update(UpdateRegionRequest $request, Region $region)
     {
+        $this->authorize('update', $region);
         $region->update($request->validated());
 
         // تحميل العلاقات إذا طلب
@@ -118,6 +122,7 @@ class RegionController extends Controller
      */
     public function destroy(Region $region)
     {
+        $this->authorize('delete', $region);
         // تحقق من وجود مساجد تابعة قبل الحذف
         if ($region->mosques()->exists()) {
             return $this->errorMessage(

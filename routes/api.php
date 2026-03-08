@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
 use App\Http\Controllers\Api\PlanStudentController;
 use App\Http\Controllers\Api\RolesController;
+use App\Http\Controllers\Api\UserRolesController;
 use Illuminate\Support\Facades\Auth;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -194,4 +195,8 @@ Route::get(
     [AcademicQualificationController::class, 'getPersonQualifications']
 );
 Route::apiResource('roles', RolesController::class);
+
+Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
+Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
+Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
 Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
