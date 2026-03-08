@@ -16,7 +16,7 @@ class BranchPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user)
+    public function viewAny($user)
     {
         return $user->hasAbility('branches.view');
     }
@@ -28,9 +28,8 @@ class BranchPolicy
      * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Branch $branch)
+    public function view($user, Branch $branch)
     {
-        // اذا اليوزر ماه صلاحية على هاد البرانش 
         return $user->hasAbility('branches.view', $branch);
     }
 
@@ -40,7 +39,7 @@ class BranchPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user)
+    public function create($user)
     {
         return $user->hasAbility('branches.create');
     }
@@ -52,7 +51,7 @@ class BranchPolicy
      * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Branch $branch)
+    public function update($user, Branch $branch)
     {
         return $user->hasAbility('branches.update', $branch);
     }
@@ -64,7 +63,7 @@ class BranchPolicy
      * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Branch $branch)
+    public function delete($user, Branch $branch)
     {
         return $user->hasAbility('branches.delete', $branch);
     }
@@ -76,7 +75,7 @@ class BranchPolicy
      * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Branch $branch)
+    public function restore($user, Branch $branch)
     {
         //
     }
@@ -88,7 +87,7 @@ class BranchPolicy
      * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Branch $branch)
+    public function forceDelete($user, Branch $branch)
     {
         //
     }

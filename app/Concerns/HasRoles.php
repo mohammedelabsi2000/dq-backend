@@ -7,43 +7,15 @@ use App\Models\Role;
 
 trait HasRoles
 {
-    // public function roles()
-    // {
-    //     return $this->morphToMany(Role::class, 'authorizable', 'role_user');
-    // }
-
-    // // public function hasAbility($ability)
-    // // {
-    // //     return $this->roles()->whereHas('roleAbilities', function ($query) use ($ability) {
-    // //         $query->where('ability', $ability)
-    // //             ->where('type', '=', 'allow');
-    // //     })->exists();
-    // // }
-    // public function hasAbility(string $ability): bool
-    // {
-    //     $this->loadMissing('roles.roleAbilities');
-
-    //     $abilities = $this->roles
-    //         ->flatMap(fn($role) => $role->roleAbilities)
-    //         ->where('ability', $ability);
-
-    //     // إذا وُجد deny في أي role يُرفض فوراً
-    //     if ($abilities->where('type', 'deny')->isNotEmpty()) {
-    //         return false;
-    //     }
-
-    //     // يجب وجود allow واحد على الأقل
-    //     return $abilities->where('type', 'allow')->isNotEmpty();
-    // }
-
     public function roles()
     {
         return $this->morphToMany(Role::class, 'authorizable', 'role_user')
             ->withPivot('scope_id', 'scope_type');
     }
-
     public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
     {
+        // dd($resource);
+        // return true; // دائمًا يسمح
         $this->loadMissing('roles.roleAbilities');
 
         $roles = $this->roles->filter(function ($role) use ($resource) {
@@ -61,7 +33,8 @@ trait HasRoles
             return collect($resource->getHierarchyIds())
                 ->contains(
                     fn($level) =>
-                    $level['id']   == $role->pivot->scope_id &&
+                    $level['id']   == $role->pivot->scope_id
+                        &&
                         $level['type'] == $role->pivot->scope_type
                 );
         });
@@ -70,7 +43,7 @@ trait HasRoles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
 
-        // deny يتغلب على allow دائماً
+        // // deny يتغلب على allow دائماً
         if ($abilities->where('type', 'deny')->isNotEmpty()) {
             return false;
         }
