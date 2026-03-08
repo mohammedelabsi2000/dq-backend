@@ -13,11 +13,24 @@ class PersonalCourseController extends Controller
 {
     use ApiResponser;
 
+    public function getPersonCourses($person_type, $person_id)
+{
+    $data = PersonalCourse::with(['person'])
+        ->where('person_type', $person_type)
+        ->where('person_id', $person_id)
+        ->get();
+
+    return $this->success(
+        PersonalCourseResource::collection($data),
+        'success',
+        200
+    );
+}
     public function index()
     {
         $data = PersonalCourse::with(['person'])->get();
 
-        return $this->apiResponse(
+        return $this->success(
             PersonalCourseResource::collection($data),
             'success',
             200
@@ -36,17 +49,18 @@ class PersonalCourseController extends Controller
         $course->person()->associate($person);
         $course->save();
 
-        return response()->json([
-            'message' => 'Personal course created successfully',
-            'data' => $course->load(['person']),
-        ], 201);
+        return $this->success(
+            new PersonalCourseResource($course->load(['person'])),
+            'Personal course created successfully',
+            201
+        );
     }
 
     public function show(PersonalCourse $personalCourse)
     {
         $personalCourse = $personalCourse->load(['person']);
 
-        return $this->apiResponse(
+        return $this->success(
             new PersonalCourseResource($personalCourse),
             'success',
             200
@@ -57,18 +71,21 @@ class PersonalCourseController extends Controller
     {
         $personalCourse->update($request->validated());
 
-        return response()->json([
-            'message' => 'Personal course updated successfully',
-            'data' => $personalCourse->load(['person']),
-        ]);
+        return $this->success(
+            new PersonalCourseResource($personalCourse->load(['person'])),
+            'Personal course updated successfully',
+            200
+        );
     }
 
     public function destroy(PersonalCourse $personalCourse)
     {
         $personalCourse->delete();
 
-        return response()->json([
-            'message' => 'Personal course deleted successfully',
-        ], 204);
+        return $this->success(
+            null,
+            'Personal course deleted successfully',
+            204
+        );
     }
 }
