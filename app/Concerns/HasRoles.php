@@ -38,6 +38,9 @@ trait HasRoles
 
     public function roles()
     {
+        dd(response()->json(
+            $this->morphToMany(Role::class, 'authorizable', 'role_user')
+        ));
         return $this->morphToMany(Role::class, 'authorizable', 'role_user')
             ->withPivot('scope_id', 'scope_type');
     }
@@ -61,8 +64,8 @@ trait HasRoles
             return collect($resource->getHierarchyIds())
                 ->contains(
                     fn($level) =>
-                    $level['id']   == $role->pivot->scope_id &&
-                        $level['type'] == $role->pivot->scope_type
+                    $level['id'] == $role->pivot->scope_id &&
+                    $level['type'] == $role->pivot->scope_type
                 );
         });
 
