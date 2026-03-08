@@ -20,28 +20,16 @@ class AcademicQualificationResource extends JsonResource
             // العلاقات مع constants
             'academic_degree' => [
                 'id' => $this->academic_degree_id,
-                'name' => $this->whenLoaded('academicDegree', function () {
-                    return $this->academicDegree->name ?? null;
-                }),
-                'value' => $this->whenLoaded('academicDegree', function () {
-                    return $this->academicDegree->value ?? null;
-                }),
-                'type' => $this->whenLoaded('academicDegree', function () {
-                    return $this->academicDegree->type ?? 'academic_degree';
-                }),
+                'name' => $this->whenLoaded('academicDegree', fn() => $this->academicDegree->name ?? null),
+                'value' => $this->whenLoaded('academicDegree', fn() => $this->academicDegree->value ?? null),
+                'type' => $this->whenLoaded('academicDegree', fn() => $this->academicDegree->type ?? 'academic_degree'),
             ],
 
             'major' => [
                 'id' => $this->major_id,
-                'name' => $this->whenLoaded('major', function () {
-                    return $this->major->name ?? null;
-                }),
-                'value' => $this->whenLoaded('major', function () {
-                    return $this->major->value ?? null;
-                }),
-                'type' => $this->whenLoaded('major', function () {
-                    return $this->major->type ?? 'major';
-                }),
+                'name' => $this->whenLoaded('major', fn() => $this->major->name ?? null),
+                'value' => $this->whenLoaded('major', fn() => $this->major->value ?? null),
+                'type' => $this->whenLoaded('major', fn() => $this->major->type ?? 'major'),
             ],
 
             // معلومات الشخص (morph relation)
@@ -50,34 +38,39 @@ class AcademicQualificationResource extends JsonResource
                 'type' => $this->person_type,
                 'name' => $this->whenLoaded('person', function () {
                     if ($this->person) {
-                        return $this->person->name ??
-                            $this->person->full_name ??
-                            $this->person->title ?? null;
+                        return $this->person->name ?? $this->person->full_name ?? $this->person->title ?? null;
                     }
                     return null;
                 }),
-                'data' => $this->whenLoaded('person', function () {
-                    return $this->getPersonData();
-                }),
+                'data' => $this->whenLoaded('person', fn() => $this->getPersonData()),
             ],
 
             // الحقول الأساسية
             'detail' => $this->detail,
-            'date_graduate' => $this->date_graduate ? $this->date_graduate->format('Y-m-d') : null,
-            'date_graduate_formatted' => $this->date_graduate ? $this->date_graduate->format('d/m/Y') : null,
+            'date_graduate' => $this->date_graduate?->format('Y'),
+            'date_graduate_formatted' => $this->date_graduate?->format('Y'),
             'certificate_link' => $this->certificate_link,
             'educational_institution' => $this->educational_institution,
             'notes' => $this->notes,
 
+            // روابط الصور المرتبطة بالمؤهل
+            'images' => $this->whenLoaded('images', function () {
+                return $this->images->map(function ($img) {
+                    return [
+                        'id' => $img->id,
+                        'name' => $img->file_name,
+                        'url' => asset('storage/' . $img->file_path),
+                        'type' => $img->image_type,
+                        'is_main' => $img->is_main,
+                        'size' => $img->file_size,
+                        'mime_type' => $img->mime_type,
+                    ];
+                });
+            }),
+
             // معلومات إضافية
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
-
-            // روابط إضافية (اختياري)
-            /* 'links' => [
-                'self' => route('api.academic-qualifications.show', $this->id),
-                'certificate' => $this->certificate_link ? asset('storage/' . $this->certificate_link) : null,
-            ], */
         ];
     }
 

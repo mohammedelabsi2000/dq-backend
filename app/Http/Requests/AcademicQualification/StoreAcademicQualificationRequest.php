@@ -35,6 +35,10 @@ class StoreAcademicQualificationRequest extends FormRequest
             'certificate_link' => 'nullable|url',
             'educational_institution' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
+
+            // Validation للملفات المتعددة
+            'images' => 'nullable|array',
+            'images.*' => 'file|mimes:pdf|max:5120'
         ];
     }
 }

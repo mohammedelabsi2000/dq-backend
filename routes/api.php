@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
 use App\Http\Controllers\Api\CourseController;
-use App\Http\Controllers\API\PersonalCourseController;
+use App\Http\Controllers\Api\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentController;
@@ -187,6 +187,13 @@ Route::apiResource('images', ImageController::class)
 Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
 
+// راوت احضار شهادات اليوزر person-courses
+Route::get('person-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+// راوت احضار شهادات اليوزر academic-qualifications
+Route::get(
+    'academic-qualifications/{person_type}/{person_id}',
+    [AcademicQualificationController::class, 'getPersonQualifications']
+);
 Route::apiResource('roles', RolesController::class);
 
 Route::get('users/{user}/roles', [UserRolesController::class, 'index']);

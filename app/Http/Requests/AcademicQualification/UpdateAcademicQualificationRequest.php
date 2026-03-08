@@ -28,8 +28,8 @@ class UpdateAcademicQualificationRequest extends FormRequest
             'major_id' => 'sometimes|exists:constants,id',
 
             // عادةً ما نمنع تغيير صاحب العلاقة
-            'person_type' => 'prohibited',
-            'person_id' => 'prohibited',
+            'person_type' => 'string',
+            'person_id' => 'string',
 
             'detail' => 'sometimes|nullable|string|max:255',
             'date_graduate' => 'sometimes|nullable|date',

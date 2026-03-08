@@ -47,33 +47,31 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        /*         $data = $request->validate([
-                    'fName' => 'nullable|string|max:100',
-                    'name' => 'nullable|string|max:100',
-                    'sName' => 'nullable|string|max:100',
-                    'thName' => 'nullable|string|max:100',
-                    'family' => 'nullable|string|max:100',
-                    'dob' => 'required|date',
-                    'mosque_id' => 'nullable|exists:mosques,id',
-                    'location' => 'nullable|string|max:191',
-                    'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
-                    'marital_status_id' => 'nullable|exists:constants,id',
-                    'numChildren' => 'nullable|integer',
-                    'identity' => 'nullable|string|max:9',
-                    'phone' => 'nullable|string|max:25',
-                    'whatsapp' => 'nullable|string|max:25',
-                    'email' => 'required|email|unique:users,email',
-                    'password' => 'required|string|min:6',
-                    'jobname' => 'nullable|string|max:191',
-                    'job_place' => 'nullable|string|max:191',
-                    'job_salary' => 'nullable|numeric',
-                    'prefix_name_id' => 'nullable|exists:constants,id',
-                ]);*/
-
-        // تشفير الباسوورد 
         $request['password'] = Hash::make($request['password']);
+        $data = $request->validated();
 
-        $user = User::create($request->validated());
+        $user = User::withTrashed()
+            ->where('identity', $data['identity'])
+            ->first();
+
+        if ($user) {
+            // إذا كان محذوف نرجعه
+            if ($user->trashed()) {
+                $user->restore();
+            }
+
+            // نحدث البيانات
+            $user->update($data);
+
+            return $this->success(
+                new UserResource($user),
+                'تم استعادة المستخدم بنجاح',
+                201
+            );
+        }
+        // تشفير الباسوورد 
+
+        $user = User::create($data);
 
         return $this->success(
             new UserResource($user),
@@ -105,37 +103,19 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        /* $data = $request->validate([
-            'fName' => 'nullable|string|max:100',
-            'sName' => 'nullable|string|max:100',
-            'thName' => 'nullable|string|max:100',
-            'family' => 'nullable|string|max:100',
-            'dob' => 'required|date',
-            'mosque_id' => 'nullable|exists:mosques,id',
-            'location' => 'nullable|string|max:191',
-            'gender' => ['nullable', Rule::in(['ذكر', 'أنثى'])],
-            'marital_status_id' => 'nullable|exists:constants,id',
-            'numChildren' => 'nullable|integer',
-            'identity' => 'nullable|string|max:9',
-            'phone' => 'nullable|string|max:25',
-            'whatsapp' => 'nullable|string|max:25',
-            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
-            'password' => 'nullable|string|min:6',
-            'jobname' => 'nullable|string|max:191',
-            'job_place' => 'nullable|string|max:191',
-            'job_salary' => 'nullable|numeric',
-            'prefix_name_id' => 'nullable|exists:constants,id',
-            // 'image_id' => 'nullable|exists:images,id',
-        ]);*/
 
+        $my_request = $request->validated();
         // تشفير الباسوورد لو تم تغييره
-        if (!empty($request['password'])) {
+        if ($request->input('password')) {
             $request['password'] = Hash::make($request['password']);
         } else {
-            unset($request['password']);
+            unset($my_request['password']);
         }
 
-        $user->update($request->validated());
+        $user->updateOrCreate(
+            ['identity' => $request['identity']],
+            $my_request
+        );
 
         return $this->success(
             new UserResource($user),
