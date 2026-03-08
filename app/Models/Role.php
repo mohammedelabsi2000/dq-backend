@@ -17,6 +17,7 @@ class Role extends Model
 
     public function roleAbilities()
     {
+        dd(54);
         return $this->hasMany(RoleAbility::class);
     }
 

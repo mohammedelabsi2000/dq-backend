@@ -21,7 +21,7 @@ class BranchController extends Controller
         // if (Gate::denies('branches.view')) {
         //     abort(403, 'غير مسموح لك');
         // }
-        $this->authorize('viewAny', Branch::class);
+        // $this->authorize('viewAny', Branch::class);
         // $user = auth()->user();
         // $user->loadMissing('roles');
         $query = Branch::query();
@@ -35,7 +35,7 @@ class BranchController extends Controller
 
         //     $query->whereIn('id', $branchIds);
         // }
-        // Gate::authorize('branches.view');
+        Gate::authorize('branches.view');
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],

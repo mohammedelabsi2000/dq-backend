@@ -14,7 +14,7 @@ use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\ConstantTypeController;
 use App\Http\Controllers\Api\ConstantController;
 use App\Http\Controllers\Api\CourseController;
-use App\Http\Controllers\API\PersonalCourseController;
+use App\Http\Controllers\Api\PersonalCourseController;
 use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentController;
