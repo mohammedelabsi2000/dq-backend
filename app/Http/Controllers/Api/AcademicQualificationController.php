@@ -12,6 +12,25 @@ use App\Models\AcademicQualification;
 class AcademicQualificationController extends Controller
 {
     use ApiResponser;
+
+    public function getPersonQualifications($person_type, $person_id)
+{
+    $data = AcademicQualification::with([
+        'academicDegree',
+        'major',
+        'person',
+    ])
+    ->where('person_type', $person_type)
+    ->where('person_id', $person_id)
+    ->get();
+
+    return $this->success(
+        AcademicQualificationResource::collection($data),
+        'success',
+        200
+    );
+}
+
     public function index()
     {
         $data = AcademicQualification::with([
@@ -20,7 +39,7 @@ class AcademicQualificationController extends Controller
             'person',
         ])->get();
 
-        return $this->apiResponse(
+        return $this->success(
             AcademicQualificationResource::collection($data),
             'success',
             200
@@ -31,10 +50,11 @@ class AcademicQualificationController extends Controller
     {
         $qualification = AcademicQualification::create($request->validated());
 
-        return response()->json([
-            'message' => 'Academic qualification created successfully',
-            'data' => $qualification->load(['academicDegree', 'major', 'person']),
-        ], 201);
+        return $this->success(
+            new AcademicQualificationResource($qualification->load(['academicDegree', 'major', 'person'])),
+            'Academic qualification created successfully',
+            201
+        );
     }
 
     public function show(AcademicQualification $academicQualification)
@@ -44,10 +64,8 @@ class AcademicQualificationController extends Controller
             'major',
             'person',
         ]);
-        /* return response()->json(
-            $academicQualifications
-        ); */
-        return $this->apiResponse(
+
+        return $this->success(
             new AcademicQualificationResource($academicQualification),
             'success',
             200
@@ -60,18 +78,21 @@ class AcademicQualificationController extends Controller
     ) {
         $academicQualification->update($request->validated());
 
-        return response()->json([
-            'message' => 'Academic qualification updated successfully',
-            'data' => $academicQualification->load(['academicDegree', 'major', 'person']),
-        ]);
+        return $this->success(
+            new AcademicQualificationResource($academicQualification->load(['academicDegree', 'major', 'person'])),
+            'Academic qualification updated successfully',
+            200
+        );
     }
 
     public function destroy(AcademicQualification $academicQualification)
     {
         $academicQualification->delete();
 
-        return response()->json([
-            'message' => 'Academic qualification deleted successfully',
-        ], 204);
+        return $this->success(
+            null,
+            'Academic qualification deleted successfully',
+            204
+        );
     }
 }
