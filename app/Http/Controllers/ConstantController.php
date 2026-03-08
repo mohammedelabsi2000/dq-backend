@@ -13,7 +13,7 @@ class ConstantController extends Controller
      */
     public function index()
     {
-$constants = Constant::with('type', 'parent')->latest()->paginate(15);
+        $constants = Constant::with('type', 'parent')->latest()->paginate(15);
         return view('constants.index', compact('constants'));
     }
 

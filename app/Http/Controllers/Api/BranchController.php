@@ -10,6 +10,7 @@ use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
 use App\Traits\QueryFilterTrait;
+use Illuminate\Support\Facades\Gate;
 
 class BranchController extends Controller
 {
@@ -17,6 +18,10 @@ class BranchController extends Controller
 
     public function index(Request $request)
     {
+        if (Gate::denies('branches.view')) {
+            abort(403, 'غير مسموح لك');
+        }
+        // Gate::authorize('branches.view');
         $query = Branch::query();
 
         $q = $this->applyFilters($query, [
@@ -57,6 +62,9 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {
+        // if (!Gate::allows('branches.create')) {
+        //     abort(403);
+        // }
         $branch = Branch::create($request->validated());
 
         return $this->success(
@@ -73,6 +81,7 @@ class BranchController extends Controller
      */
     public function show(Request $request, Branch $branch)
     {
+        Gate::authorize('branches.view');
         // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_regions')) {
             $branch->load('regions');
@@ -92,6 +101,9 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
+        // if (Gate::denies('branches.update')) {
+        //     abort(403, 'غير مسموح لك');
+        // }
         $branch->update($request->validated());
 
         return $this->success(
@@ -107,6 +119,9 @@ class BranchController extends Controller
      */
     public function destroy(Branch $branch)
     {
+        if (Gate::denies('branches.delete')) {
+            abort(403);
+        }
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
             return $this->errorMessage(
