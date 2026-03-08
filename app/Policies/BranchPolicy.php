@@ -30,6 +30,7 @@ class BranchPolicy
      */
     public function view(User $user, Branch $branch)
     {
+        // اذا اليوزر ماه صلاحية على هاد البرانش 
         return $user->hasAbility('branches.view', $branch);
     }
 

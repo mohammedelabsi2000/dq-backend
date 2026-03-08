@@ -40,10 +40,10 @@ class AuthServiceProvider extends ServiceProvider
         //     });
         // }
 
-        // foreach (config('abilities') as $ability => $description) {
-        //     Gate::define($ability, function ($user) use ($ability) {
-        //         return $user->hasAbility($ability);
-        //     });
-        // }
+        foreach (config('abilities') as $ability => $description) {
+            Gate::define($ability, function ($user) use ($ability) {
+                return $user->hasAbility($ability);
+            });
+        }
     }
 }

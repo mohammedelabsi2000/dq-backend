@@ -21,20 +21,20 @@ class BranchController extends Controller
         // if (Gate::denies('branches.view')) {
         //     abort(403, 'غير مسموح لك');
         // }
-        // $this->authorize('viewAny', Branch::class);
-        $user = auth()->user();
-        $user->loadMissing('roles');
+        $this->authorize('viewAny', Branch::class);
+        // $user = auth()->user();
+        // $user->loadMissing('roles');
         $query = Branch::query();
 
-        $isAdmin = $user->roles->every(fn($role) => $role->pivot->scope_id === null);
+        // $isAdmin = $user->roles->every(fn($role) => $role->pivot->scope_id === null);
 
-        if (!$isAdmin) {
-            $branchIds = $user->roles
-                ->where('pivot.scope_type', Branch::class)
-                ->pluck('pivot.scope_id');
+        // if (!$isAdmin) {
+        //     $branchIds = $user->roles
+        //         ->where('pivot.scope_type', Branch::class)
+        //         ->pluck('pivot.scope_id');
 
-            $query->whereIn('id', $branchIds);
-        }
+        //     $query->whereIn('id', $branchIds);
+        // }
         // Gate::authorize('branches.view');
 
         $q = $this->applyFilters($query, [

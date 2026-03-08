@@ -188,11 +188,8 @@ Route::get('users/{user}/images', [ImageController::class, 'userImages']);
 Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
 
 Route::apiResource('roles', RolesController::class);
-<<<<<<< HEAD
 
 Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
 Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
 Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
-=======
 Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
->>>>>>> b7058c703198dc28b5b75b1cc5141538254d78d8
