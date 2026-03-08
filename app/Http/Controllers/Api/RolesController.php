@@ -28,30 +28,44 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'abilities' => 'required|array',
-            'give_all' => 'nullable|boolean'
-        ]);
-
-        $role = Role::createWithAbilities($request);
-
-        // $role = Role::create([
-        //     'name' => $request->post('name'),
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'abilities' => 'required|array',
+        //     'give_all' => 'nullable|boolean'
         // ]);
 
-        // foreach ($request->post('abilities') as $ability) {
-        //     RoleAbility::create([
-        //         'role_id' => $role->id,
-        //         'ability_id' => $ability,
-        //         'type' => 'allow',
-        //     ]);
-        // }
+        // $role = Role::createWithAbilities($request);
 
-        return response()->json([
-            'message' => 'Role created successfully',
-            'role' => $role
-        ], 201);
+        // // $role = Role::create([
+        // //     'name' => $request->post('name'),
+        // // ]);
+
+        // // foreach ($request->post('abilities') as $ability) {
+        // //     RoleAbility::create([
+        // //         'role_id' => $role->id,
+        // //         'ability_id' => $ability,
+        // //         'type' => 'allow',
+        // //     ]);
+        // // }
+
+        // return response()->json([
+        //     'message' => 'Role created successfully',
+        //     'role' => $role
+        // ], 201);
+
+        $request->validate([
+            'name'        => 'required|string|unique:roles,name',
+            'give_all'    => 'boolean',
+            'abilities'   => 'array',
+            'abilities.*' => 'string|in:' . implode(',', array_keys(config('abilities'))),
+        ]);
+
+        $role = Role::createWithAbilities(
+            $request->name,
+            $this->resolveAbilities($request)
+        );
+
+        return response()->json($role->load('roleAbilities'), 201);
     }
 
     /**
@@ -60,9 +74,9 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Role $role)
     {
-        //
+        return response()->json($role->load('roleAbilities'));
     }
 
     /**
@@ -74,26 +88,40 @@ class RolesController extends Controller
      */
     public function update(Request $request, Role $role)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'abilities' => 'required|array',
-        ]);
-
-        $role->updateWithAbilities($request);
-
-        // $role = Role::create([
-        //     'name' => $request->post('name'),
+        // $request->validate([
+        //     'name' => 'required|string|max:255',
+        //     'abilities' => 'required|array',
         // ]);
 
-        // foreach ($request->post('abilities') as $ability) {
-        //     RoleAbility::create([
-        //         'role_id' => $role->id,
-        //         'ability_id' => $ability,
-        //         'type' => 'allow',
-        //     ]);
-        // }
+        // $role->updateWithAbilities($request);
 
-        return response()->json('success update');
+        // // $role = Role::create([
+        // //     'name' => $request->post('name'),
+        // // ]);
+
+        // // foreach ($request->post('abilities') as $ability) {
+        // //     RoleAbility::create([
+        // //         'role_id' => $role->id,
+        // //         'ability_id' => $ability,
+        // //         'type' => 'allow',
+        // //     ]);
+        // // }
+
+        // return response()->json('success update');
+
+        $request->validate([
+            'name'        => 'required|string|unique:roles,name,' . $role->id,
+            'give_all'    => 'boolean',
+            'abilities'   => 'array',
+            'abilities.*' => 'string|in:' . implode(',', array_keys(config('abilities'))),
+        ]);
+
+        $role->updateWithAbilities(
+            $request->name,
+            $this->resolveAbilities($request)
+        );
+
+        return response()->json($role->load('roleAbilities'));
     }
 
     /**
@@ -102,9 +130,23 @@ class RolesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Role $role)
     {
-        Role::destroy($id);
-        return response()->json('success delete');
+        // Role::destroy($id);
+        // return response()->json('success delete');
+
+        $role->delete();
+
+        return response()->json(null, 204);
+    }
+
+    private function resolveAbilities(Request $request): array
+    {
+        if ($request->boolean('give_all')) {
+            return array_fill_keys(array_keys(config('abilities')), 'allow');
+        }
+
+        // المتوقع: abilities = ['branches.view', 'users.create']
+        return array_fill_keys($request->abilities ?? [], 'allow');
     }
 }

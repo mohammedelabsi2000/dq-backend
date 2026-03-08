@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Center extends Model
+class Center extends Model implements BelongsToHierarchy
 {
     use HasFactory;
 
@@ -24,5 +25,16 @@ class Center extends Model
     public function halaqat()
     {
         return $this->hasMany(Halaqa::class);
+    }
+
+    public function getHierarchyIds(): array
+    {
+        $this->loadMissing('region');
+
+        return [
+            ['id' => $this->region->branch_id, 'type' => Branch::class],
+            ['id' => $this->region_id,          'type' => Region::class],
+            ['id' => $this->id,                 'type' => self::class],
+        ];
     }
 }

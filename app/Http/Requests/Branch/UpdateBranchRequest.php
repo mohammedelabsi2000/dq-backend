@@ -18,7 +18,7 @@ class UpdateBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        return Gate::allows('branches.update');
+        // return Gate::allows('branches.update');
     }
 
     /**
