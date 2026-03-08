@@ -38,7 +38,7 @@ class StoreUserRequest extends FormRequest
             'thName' => 'nullable|string|max:100',
             'family' => 'nullable|string|max:100',
 
-            'dob' => 'nullable|date',
+            'dob' => 'required|date',
 
             // Foreign Keys
             'mosque_id' => 'nullable|exists:mosques,id',
@@ -56,7 +56,7 @@ class StoreUserRequest extends FormRequest
             'gender' => 'nullable|in:ذكر,أنثى',
             'numChildren' => 'nullable|integer|min:0',
 
-            'identity' => 'nullable|string|size:9|unique:users,identity',
+            'identity' => ['nullable', 'string', 'max:9'],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
 
