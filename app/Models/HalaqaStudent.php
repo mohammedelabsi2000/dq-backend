@@ -11,6 +11,11 @@ class HalaqaStudent extends Model
     use HasFactory;
     use SoftDeletes;
 
+    protected $casts = [
+    'from_date' => 'date',
+    'to_date' => 'date',
+];
+
     protected $table = 'halaqa_students';
 
     /**

@@ -3,6 +3,8 @@
 namespace App\Http\Requests\PersonalCourse;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Helpers\ConstantHelper;
+use Illuminate\Validation\Rule;
 
 class StorePersonalCourseRequest extends FormRequest
 {
@@ -30,7 +32,10 @@ class StorePersonalCourseRequest extends FormRequest
             'provider' => 'nullable|string|max:255',
             'place' => 'nullable|string|max:255',
             'certificate_link' => 'nullable|url|max:255',
-            'type_id' => 'required|exists:constants,id',
+            'type_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('type')),
+            ],
             'person_id' => 'required',
             'person_type' => 'required|string',
             // Validation للملفات المتعددة

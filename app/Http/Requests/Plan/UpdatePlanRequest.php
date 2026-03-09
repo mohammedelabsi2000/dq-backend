@@ -24,12 +24,10 @@ class UpdatePlanRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'sometimes|required|string|max:255',
-            'type_id' => 'sometimes|required|exists:constants,id',
-            'description' => 'nullable|string',
-            'target_group_id' => 'sometimes|required|exists:constants,id',
-            'level_numbers' => 'nullable|integer',
-            'notes' => 'nullable|string',
+            'name' => 'required|string|max:255',
+            'duration_in_days' => 'required|integer',
+            'grace_period_days' => 'nullable|integer',
+            'is_active' => 'nullable|boolean',
         ];
     }
 }

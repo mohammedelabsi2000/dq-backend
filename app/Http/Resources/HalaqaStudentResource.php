@@ -31,8 +31,8 @@ class HalaqaStudentResource extends JsonResource
             ],
             'from_date' => $this->from_date,
             'to_date' => $this->to_date,
-            'created_at' => $this->created_at->toDateTimeString(),
-            'updated_at' => $this->updated_at->toDateTimeString(),
+            'created_at' => optional($this->created_at)->toDateTimeString(),
+            'updated_at' => optional($this->updated_at)->toDateTimeString(),
         ];
 
     }
