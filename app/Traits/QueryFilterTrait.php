@@ -63,4 +63,15 @@ trait QueryFilterTrait
             'count' => $count,
         ];
     }
+
+    public function applyFiltersA($query, array $options = [])
+    {
+        $data = $this->applyFilters($query, $options);
+        return [
+            $data['query'],
+            $data['skip'],
+            $data['limit'],
+            $data['count'],
+        ];
+    }
 }

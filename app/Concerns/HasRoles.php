@@ -36,14 +36,9 @@ trait HasRoles
             return collect($resource->getHierarchyIds())
                 ->contains(
                     fn($level) =>
-<<<<<<< HEAD
                     $level['id']   == $role->pivot->scope_id
                         &&
                         $level['type'] == $role->pivot->scope_type
-=======
-                    $level['id'] == $role->pivot->scope_id &&
-                    $level['type'] == $role->pivot->scope_type
->>>>>>> 10af43513f8c857882db09284cb027241097b001
                 );
         });
 
