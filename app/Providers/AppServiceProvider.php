@@ -42,9 +42,9 @@ class AppServiceProvider extends ServiceProvider
         $this->registerAuditObservers();
 
         Relation::morphMap([
-        'user' => \App\Models\User::class,
-        'student' => \App\Models\Student::class,
-    ]);
+            'user' => \App\Models\User::class,
+            'student' => \App\Models\Student::class,
+        ]);
     }
 
     /*

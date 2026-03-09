@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AcademicQualificationResource extends JsonResource
@@ -47,25 +46,16 @@ class AcademicQualificationResource extends JsonResource
 
             // الحقول الأساسية
             'detail' => $this->detail,
-            'date_graduate' => $this->date_graduate?->format('Y'),
-            'date_graduate_formatted' => $this->date_graduate?->format('Y'),
+            'date_graduate' => $this->date_graduate,
+            // 'date_graduate_formatted' => $this->date_graduate?->format('Y'),
             'certificate_link' => $this->certificate_link,
             'educational_institution' => $this->educational_institution,
             'notes' => $this->notes,
 
             // روابط الصور المرتبطة بالمؤهل
+            'certificate_file' => 'certificate_file',
             'images' => $this->whenLoaded('images', function () {
-                return $this->images->map(function ($img) {
-                    return [
-                        'id' => $img->id,
-                        'name' => $img->file_name,
-                        'url' => asset('storage/' . $img->file_path),
-                        'type' => $img->image_type,
-                        'is_main' => $img->is_main,
-                        'size' => $img->file_size,
-                        'mime_type' => $img->mime_type,
-                    ];
-                });
+                return new ImageResource($this->images);
             }),
 
             // معلومات إضافية

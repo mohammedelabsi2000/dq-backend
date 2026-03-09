@@ -19,6 +19,8 @@ class PersonalCourse extends Model
         'provider',
         'place',
         'certificate_link',
+        'person_type',
+        'person_id',
         'type_id',
     ];
 
@@ -37,6 +39,6 @@ class PersonalCourse extends Model
       // علاقة Polymorphic مع الصور (يمكن أكثر من صورة لكل مؤهل)
     public function images()
     {
-        return $this->morphMany(Image::class, 'imageable');
+        return $this->morphOne(Image::class, 'imageable');
     }
 }

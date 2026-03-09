@@ -10,9 +10,7 @@ class AcademicQualification extends Model
 {
     protected $appends = ['full_name']; // رح يظهر تلقائياً لو حولنا الموديل لـ JSON
 
-    protected $casts = [
-    'date_graduate' => 'datetime',
-];
+  
     use HasFactory;
     use SoftDeletes;
     protected $fillable = [
@@ -28,9 +26,9 @@ class AcademicQualification extends Model
     ];
 
     public function getFullNameAttribute()
-{
-    return $this->first_name . ' ' . $this->last_name;
-}
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
     /* ================= Relations ================= */
 
     public function academicDegree()
@@ -59,7 +57,7 @@ class AcademicQualification extends Model
     // علاقة Polymorphic مع الصور (يمكن أكثر من صورة لكل مؤهل)
     public function images()
     {
-        return $this->morphMany(Image::class, 'imageable');
+        return $this->morphOne(Image::class, 'imageable');
     }
 
 
