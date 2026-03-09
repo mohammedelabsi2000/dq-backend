@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Mosque extends Model
+class Mosque extends Model implements BelongsToHierarchy
 {
     use HasFactory;
 
@@ -27,5 +28,16 @@ class Mosque extends Model
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function getHierarchyIds(): array
+    {
+        $this->loadMissing('region');
+
+        return [
+            ['id' => $this->region->branch_id, 'type' => Branch::class],
+            ['id' => $this->region_id,          'type' => Region::class],
+            ['id' => $this->id,                 'type' => self::class],
+        ];
     }
 }

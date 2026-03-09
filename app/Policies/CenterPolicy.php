@@ -16,7 +16,7 @@ class CenterPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user)
+    public function viewAny($user)
     {
         return $user->hasAbility('centers.view');
     }
@@ -28,7 +28,7 @@ class CenterPolicy
      * @param  \App\Models\Center  $center
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Center $center)
+    public function view($user, Center $center)
     {
         return $user->hasAbility('centers.view', $center);
     }
@@ -39,7 +39,7 @@ class CenterPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user)
+    public function create($user)
     {
         return $user->hasAbility('centers.create');
     }
@@ -51,7 +51,7 @@ class CenterPolicy
      * @param  \App\Models\Center  $center
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Center $center)
+    public function update($user, Center $center)
     {
         return $user->hasAbility('centers.update', $center);
     }
@@ -63,7 +63,7 @@ class CenterPolicy
      * @param  \App\Models\Center  $center
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Center $center)
+    public function delete($user, Center $center)
     {
         return $user->hasAbility('centers.delete', $center);
     }
@@ -75,7 +75,7 @@ class CenterPolicy
      * @param  \App\Models\Center  $center
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Center $center)
+    public function restore($user, Center $center)
     {
         //
     }
@@ -87,7 +87,7 @@ class CenterPolicy
      * @param  \App\Models\Center  $center
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Center $center)
+    public function forceDelete($user, Center $center)
     {
         //
     }

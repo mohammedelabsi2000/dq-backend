@@ -15,6 +15,11 @@ return [
     'centers.update' => 'Update centers',
     'centers.delete' => 'Delete centers',
 
+    'mosques.view' => 'View mosques',
+    'mosques.create' => 'Create mosques',
+    'mosques.update' => 'Update mosques',
+    'mosques.delete' => 'Delete mosques',
+
     'users.view' => 'View users',
     'users.create' => 'Create users',
     'users.update' => 'Update users',

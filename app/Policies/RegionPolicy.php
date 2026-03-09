@@ -16,7 +16,7 @@ class RegionPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user)
+    public function viewAny($user)
     {
         return $user->hasAbility('regions.view');
     }
@@ -28,7 +28,7 @@ class RegionPolicy
      * @param  \App\Models\Region  $region
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Region $region)
+    public function view($user, Region $region)
     {
         return $user->hasAbility('regions.view', $region);
     }
@@ -39,7 +39,7 @@ class RegionPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user)
+    public function create($user)
     {
         return $user->hasAbility('regions.create');
     }
@@ -51,7 +51,7 @@ class RegionPolicy
      * @param  \App\Models\Region  $region
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Region $region)
+    public function update($user, Region $region)
     {
         return $user->hasAbility('regions.update', $region);
     }
@@ -63,7 +63,7 @@ class RegionPolicy
      * @param  \App\Models\Region  $region
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Region $region)
+    public function delete($user, Region $region)
     {
         return $user->hasAbility('regions.delete', $region);
     }
@@ -75,7 +75,7 @@ class RegionPolicy
      * @param  \App\Models\Region  $region
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Region $region)
+    public function restore($user, Region $region)
     {
         //
     }
@@ -87,7 +87,7 @@ class RegionPolicy
      * @param  \App\Models\Region  $region
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Region $region)
+    public function forceDelete($user, Region $region)
     {
         //
     }
