@@ -18,7 +18,9 @@ class UpdateBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        // return Gate::allows('branches.update');
+        $branch = $this->route('branch'); // الحصول على الفرع من الرابط
+
+        return $this->user()->can('update', $branch);
     }
 
     /**

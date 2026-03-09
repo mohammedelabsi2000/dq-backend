@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Mosque;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Mosque;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,7 +18,7 @@ class StoreMosqueRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', Mosque::class);
     }
 
     /**

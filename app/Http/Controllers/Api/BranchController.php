@@ -22,25 +22,6 @@ class BranchController extends Controller
 
         $query = Branch::query();
 
-        // if (Gate::denies('branches.view')) {
-        //     abort(403, 'غير مسموح لك');
-        // }
-        // $this->authorize('viewAny', Branch::class);
-        // $user = auth()->user();
-        // $user->loadMissing('roles');
-        $query = Branch::query();
-
-        // $isAdmin = $user->roles->every(fn($role) => $role->pivot->scope_id === null);
-
-        // if (!$isAdmin) {
-        //     $branchIds = $user->roles
-        //         ->where('pivot.scope_type', Branch::class)
-        //         ->pluck('pivot.scope_id');
-
-        //     $query->whereIn('id', $branchIds);
-        // }
-        Gate::authorize('branches.view');
-
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
@@ -79,8 +60,6 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {
-        $this->authorize('create', Branch::class);
-
         $branch = Branch::create($request->validated());
 
         return $this->success(
@@ -117,7 +96,8 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        $this->authorize('update', $branch);
+        // $this->authorize('update', $branch);
+
         $branch->update($request->validated());
 
         return $this->success(

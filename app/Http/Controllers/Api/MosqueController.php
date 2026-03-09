@@ -18,6 +18,8 @@ class MosqueController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Mosque::class);
+
         $query = Mosque::query();
 
         $q = $this->applyFilters($query, [
@@ -59,6 +61,8 @@ class MosqueController extends Controller
      */
     public function store(StoreMosqueRequest $request)
     {
+        // $this->authorize('create', Mosque::class);
+
         $mosque = Mosque::create($request->validated());
 
         if ($request->boolean('with_region')) {
@@ -87,6 +91,8 @@ class MosqueController extends Controller
      */
     public function show(Request $request, Mosque $mosque)
     {
+        $this->authorize('view', $mosque);
+
         // تحميل العلاقات حسب الطلب
         // if ($request->boolean('with_region')) {
         //     $mosque->load('region');
@@ -125,6 +131,9 @@ class MosqueController extends Controller
      */
     public function update(UpdateMosqueRequest $request, Mosque $mosque)
     {
+
+        $this->authorize('update', $mosque);
+
         $mosque->update($request->validated());
 
         // // تحميل العلاقات إذا طلب
@@ -148,6 +157,8 @@ class MosqueController extends Controller
      */
     public function destroy(Mosque $mosque)
     {
+        $this->authorize('delete', $mosque);
+
         // تحقق من وجود مراكز تابعة قبل الحذف
         if ($mosque->centers()->exists()) {
             return $this->errorMessage(

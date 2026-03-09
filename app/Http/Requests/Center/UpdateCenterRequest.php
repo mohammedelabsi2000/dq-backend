@@ -18,7 +18,9 @@ class UpdateCenterRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $center = $this->route('center'); // الحصول على الفرع من الرابط
+
+        return $this->user()->can('update', $center);
     }
 
     /**

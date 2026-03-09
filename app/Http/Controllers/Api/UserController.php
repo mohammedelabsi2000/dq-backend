@@ -21,21 +21,26 @@ class UserController extends Controller
     public function index()
     {
         $query = User::query();
-
-        $q = $this->applyFilters($query, [
+        [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
+            'searchColumns' => ['full_name', 'identity'],
+            'orderColumn' => 'created_at',
+        ]);
+        /* $q = $this->applyFilters($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
         ]);
 
         $query = $q['query'];
         $total = $q['count'];
+        $skip = $q['skip'];
+        $limit = $q['limit']; */
         // $total = $query->count();
         $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix'])->get();
 
         return $this->apiResponse([
             'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
+            'skip' => $skip,
+            'limit' => $limit,
             'data' => UserResource::collection($users),
         ], 'success', 200);
     }
@@ -47,7 +52,32 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $request['password'] = Hash::make($request['password']);
+        $user = User::where('identity', $request['identity'])
+            ->first();
+
+        if ($user) {
+            return $this->error(
+                'المستخدم موجود مسبقاً',
+                409
+            );
+        } else {
+            $data = $request->validated();
+            $data['password'] = Hash::make($request['password']);
+
+            $user = User::withTrashed()->updateOrCreate([
+                'identity' => $data['identity']
+            ], $data);
+
+            return $this->success(
+                new UserResource($user),
+                'تم إنشاء المستخدم بنجاح',
+                201
+            );
+        }
+
+
+        /////////////////////////////////////
+        /* $request['password'] = Hash::make($request['password']);
         $data = $request->validated();
 
         $user = User::withTrashed()
@@ -71,13 +101,7 @@ class UserController extends Controller
         }
         // تشفير الباسوورد 
 
-        $user = User::create($data);
-
-        return $this->success(
-            new UserResource($user),
-            'تم إنشاء مستخدم بنجاح',
-            201
-        );
+        $user = User::create($data); */
     }
 
     /**

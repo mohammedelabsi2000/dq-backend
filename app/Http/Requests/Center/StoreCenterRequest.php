@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Center;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Center;
+use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,7 +19,9 @@ class StoreCenterRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $region = Region::findOrFail($this->input('region_id'));
+
+        return $this->user()->can('create', [Center::class, $region]);
     }
 
     /**

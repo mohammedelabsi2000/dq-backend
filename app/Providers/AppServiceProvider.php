@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Branch;
+use App\Models\Center;
+use App\Models\Region;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
@@ -39,8 +44,11 @@ class AppServiceProvider extends ServiceProvider
         $this->registerAuditObservers();
 
         Relation::morphMap([
-            'user' => \App\Models\User::class,
-            'student' => \App\Models\Student::class,
+            'user'   => User::class,
+            'branch' => Branch::class,
+            'region' => Region::class,
+            'center' => Center::class,
+            'student' => Student::class,
         ]);
     }
 

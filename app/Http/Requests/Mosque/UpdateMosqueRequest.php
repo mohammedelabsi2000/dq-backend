@@ -17,7 +17,9 @@ class UpdateMosqueRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $mosque = $this->route('mosque'); // الحصول على الفرع من الرابط
+
+        return $this->user()->can('update', $mosque);
     }
 
     /**
