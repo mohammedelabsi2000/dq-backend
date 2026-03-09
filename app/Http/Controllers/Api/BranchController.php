@@ -18,6 +18,12 @@ class BranchController extends Controller
 
     public function index(Request $request)
     {
+<<<<<<< HEAD
+        $this->authorize('viewAny', Branch::class);
+
+        $query = Branch::query();
+
+=======
         // if (Gate::denies('branches.view')) {
         //     abort(403, 'غير مسموح لك');
         // }
@@ -37,6 +43,7 @@ class BranchController extends Controller
         // }
         Gate::authorize('branches.view');
 
+>>>>>>> 10af43513f8c857882db09284cb027241097b001
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
@@ -75,10 +82,8 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {
-        // if (!Gate::allows('branches.create')) {
-        //     abort(403);
-        // }
         $this->authorize('create', Branch::class);
+
         $branch = Branch::create($request->validated());
 
         return $this->success(
@@ -95,7 +100,6 @@ class BranchController extends Controller
      */
     public function show(Request $request, Branch $branch)
     {
-        // Gate::authorize('branches.view');
         $this->authorize('view', $branch);
         // تحميل العلاقات حسب الطلب
         if ($request->boolean('with_regions')) {
@@ -116,9 +120,6 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        // if (Gate::denies('branches.update')) {
-        //     abort(403, 'غير مسموح لك');
-        // }
         $this->authorize('update', $branch);
         $branch->update($request->validated());
 
@@ -135,9 +136,6 @@ class BranchController extends Controller
      */
     public function destroy(Branch $branch)
     {
-        // if (Gate::denies('branches.delete')) {
-        //     abort(403);
-        // }
         $this->authorize('delete', $branch);
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {

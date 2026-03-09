@@ -23,10 +23,7 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
-    {
-
-    }
+    public function register() {}
 
     /**
      * Bootstrap any application services.
@@ -125,7 +122,7 @@ class AppServiceProvider extends ServiceProvider
             if (
                 class_exists($class) &&
                 property_exists($class, 'usesAudit') &&
-                    $class::$usesAudit
+                $class::$usesAudit
             ) {
                 $class::observe(AuditObserver::class);
             }

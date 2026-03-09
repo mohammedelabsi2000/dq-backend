@@ -19,7 +19,7 @@ class StoreBranchRequest extends FormRequest
     public function authorize()
     {
         // return Gate::allows('branches.create');
-
+        return $this->user()->can('create', \App\Models\Branch::class);
     }
 
     /**

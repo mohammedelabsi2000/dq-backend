@@ -19,10 +19,10 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
-        Branch::class => BranchPolicy::class,
-        Region::class => RegionPolicy::class,
-        Center::class => CenterPolicy::class,
+        // // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        // Branch::class => BranchPolicy::class,
+        // Region::class => RegionPolicy::class,
+        // Center::class => CenterPolicy::class,
     ];
 
     /**
@@ -33,17 +33,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
-        // foreach (config('abilities') as $code => $lable) {
-        //     Gate::define($code, function ($user) use ($code) {
-        //         return $user->hasAbility($code);
-        //     });
-        // }
-
-        foreach (config('abilities') as $ability => $description) {
-            Gate::define($ability, function ($user) use ($ability) {
-                return $user->hasAbility($ability);
-            });
-        }
     }
 }
