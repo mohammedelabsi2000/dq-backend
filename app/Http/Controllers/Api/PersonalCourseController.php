@@ -7,28 +7,18 @@ use App\Http\Requests\PersonalCourse\StorePersonalCourseRequest;
 use App\Http\Requests\PersonalCourse\UpdatePersonalCourseRequest;
 use App\Http\Resources\PersonalCourseResource;
 use App\Http\Traits\ApiResponser;
+use App\Models\Image;
 use App\Models\PersonalCourse;
 
 class PersonalCourseController extends Controller
 {
-    use ApiResponser;
 
     public function getPersonCourses($person_type, $person_id)
-{
-    $data = PersonalCourse::with(['person'])
-        ->where('person_type', $person_type)
-        ->where('person_id', $person_id)
-        ->get();
-
-    return $this->success(
-        PersonalCourseResource::collection($data),
-        'success',
-        200
-    );
-}
-    public function index()
     {
-        $data = PersonalCourse::with(['person'])->get();
+        $data = PersonalCourse::with(['person', 'type', 'images'])
+            ->where('person_type', $person_type)
+            ->where('person_id', $person_id)
+            ->get();
 
         return $this->success(
             PersonalCourseResource::collection($data),
@@ -36,21 +26,61 @@ class PersonalCourseController extends Controller
             200
         );
     }
+    public function index()
+    {
+
+        $query = PersonalCourse::query();
+
+        $q = $this->applyFilters($query, [
+            'searchColumns' => [],
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc'
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+        // $total = $query->count();
+        $users = $query->with(['person', 'type', 'images'])->get();
+
+        return $this->apiResponse([
+            'total' => $total,
+            'skip' => $q['skip'],
+            'limit' => $q['limit'],
+            'data' => PersonalCourseResource::collection($users),
+        ], 'success', 200);
+    }
 
     public function store(StorePersonalCourseRequest $request)
     {
-        $course = new PersonalCourse($request->validated());
+        // $course = new PersonalCourse($request->validated());
 
-        $personType = $request->person_type;
-        $personId = $request->person_id;
+        // $personType = $request->person_type;
+        // $personId = $request->person_id;
 
-        $person = $personType::findOrFail($personId);
+        // $person = $personType::findOrFail($personId);
 
-        $course->person()->associate($person);
-        $course->save();
+        // $course->person()->associate($person);
+        // $course->save();
 
+        $course = PersonalCourse::create($request->validated());
+
+        if ($request->hasFile('certificate_file')) {
+            $file = $request->file('certificate_file');
+            $path = $file->store('uploads/certificates', 'public');
+
+            $image = Image::create([
+                'imageable_id' => $course->id,
+                'imageable_type' => PersonalCourse::class,
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'disk' => 'public',
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                // 'image_type' => $validated['image_type'] ?? null,
+            ]);
+        }
         return $this->success(
-            new PersonalCourseResource($course->load(['person'])),
+            new PersonalCourseResource($course->load(['person', 'images', 'type'])),
             'Personal course created successfully',
             201
         );
@@ -58,7 +88,7 @@ class PersonalCourseController extends Controller
 
     public function show(PersonalCourse $personalCourse)
     {
-        $personalCourse = $personalCourse->load(['person']);
+        $personalCourse = $personalCourse->load(['person', 'type']);
 
         return $this->success(
             new PersonalCourseResource($personalCourse),
@@ -71,8 +101,26 @@ class PersonalCourseController extends Controller
     {
         $personalCourse->update($request->validated());
 
+        if ($request->hasFile('certificate_file')) {
+            $file = $request->file('certificate_file');
+            $path = $file->store('uploads/certificates', 'public');
+
+            $image = Image::updateOrCreate([
+                'imageable_id' => $personalCourse->id,
+                'imageable_type' => PersonalCourse::class
+            ], [
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'disk' => 'public',
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                // 'image_type' => $validated['image_type'] ?? null,
+            ]);
+        }
+
+
         return $this->success(
-            new PersonalCourseResource($personalCourse->load(['person'])),
+            new PersonalCourseResource($personalCourse->load(['person', 'images', 'type'])),
             'Personal course updated successfully',
             200
         );

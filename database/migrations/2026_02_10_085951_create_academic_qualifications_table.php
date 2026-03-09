@@ -29,7 +29,7 @@ return new class extends Migration {
             $table->morphs('person'); // person_type + person_id
 
             $table->string('detail')->nullable();
-            $table->date('date_graduate')->nullable();
+            $table->year('date_graduate')->nullable();
             $table->string('certificate_link')->nullable();
             $table->string('educational_institution')->nullable()
                 ->comment('المؤسسة التعليمية');

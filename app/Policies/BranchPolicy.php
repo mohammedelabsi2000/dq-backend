@@ -18,8 +18,7 @@ class BranchPolicy
      */
     public function viewAny(User $user)
     {
-        return false;
-        // return $user->hasAbility('branches.view');
+        return $user->hasAbility('branches.view');
     }
 
     /**
