@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Region;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Branch;
 use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,7 +19,10 @@ class StoreRegionRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('create', Region::class);
+
+        $branch = Branch::findOrFail($this->input('branch_id'));
+
+        return $this->user()->can('create', [Region::class, $branch]);
     }
 
     /**

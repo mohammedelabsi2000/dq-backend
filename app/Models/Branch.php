@@ -23,7 +23,7 @@ class Branch extends Model implements BelongsToHierarchy
     public function getHierarchyIds(): array
     {
         return [
-            ['id' => $this->id, 'type' => self::class],
+            ['id' => $this->id, 'type' => 'branch'],
         ];
     }
 }

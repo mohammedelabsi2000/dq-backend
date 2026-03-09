@@ -24,9 +24,10 @@ class Region extends Model implements BelongsToHierarchy
 
     public function getHierarchyIds(): array
     {
+
         return [
-            ['id' => $this->branch_id, 'type' => Branch::class],
-            ['id' => $this->id,        'type' => self::class],
+            ['id' => $this->branch_id, 'type' => 'branch'],
+            ['id' => $this->id,        'type' => 'region'],
         ];
     }
 }
