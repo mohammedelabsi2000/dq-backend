@@ -219,24 +219,24 @@ class User extends Authenticatable
     // }
 
     // الأدوار النشطة فقط
-    public function activeRoles()
-    {
-        return $this->roles()->active();
-    }
+    // public function activeRoles()
+    // {
+    //     return $this->roles()->active();
+    // }
 
-    // أدوار ضمن كيان معين (مثلاً حلقة)
-    public function rolesIn($model)
-    {
-        return $this->activeRoles()->forModel($model);
-    }
+    // // أدوار ضمن كيان معين (مثلاً حلقة)
+    // public function rolesIn($model)
+    // {
+    //     return $this->activeRoles()->forModel($model);
+    // }
 
-    // هل عنده دور معين داخل كيان؟
-    public function hasRoleIn(string $roleName, $model): bool
-    {
-        return $this->roles()
-            ->active()
-            ->forRole($roleName)
-            ->forModel($model)
-            ->exists();
-    }
+    // // هل عنده دور معين داخل كيان؟
+    // public function hasRoleIn(string $roleName, $model): bool
+    // {
+    //     return $this->roles()
+    //         ->active()
+    //         ->forRole($roleName)
+    //         ->forModel($model)
+    //         ->exists();
+    // }
 }

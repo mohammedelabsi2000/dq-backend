@@ -60,7 +60,7 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {
-        $this->authorize('create', Branch::class);
+        // $this->authorize('create', Branch::class);
 
         $branch = Branch::create($request->validated());
 
@@ -98,7 +98,8 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        $this->authorize('update', $branch);
+        // $this->authorize('update', $branch);
+
         $branch->update($request->validated());
 
         return $this->success(

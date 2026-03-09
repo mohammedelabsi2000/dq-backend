@@ -4,17 +4,51 @@ namespace App\Concerns;
 
 use App\Contracts\BelongsToHierarchy;
 use App\Models\Role;
+use Illuminate\Database\Eloquent\Model;
 
 trait HasRoles
 {
     public function roles()
     {
-        dd(response()->json(
-            $this->morphToMany(Role::class, 'authorizable', 'role_user')
-        ));
         return $this->morphToMany(Role::class, 'authorizable', 'role_user')
             ->withPivot('scope_id', 'scope_type');
     }
+
+    public function assignRole(Role $role, ?Model $scope = null): void
+    {
+        $alreadyAssigned = $this->roles()
+            ->wherePivot('role_id', $role->id)
+            ->wherePivot('scope_id', $scope?->id)
+            ->wherePivot('scope_type', $scope ? get_class($scope) : null)
+            ->exists();
+
+        if ($alreadyAssigned) {
+            return;
+        }
+
+        $this->roles()->attach($role->id, [
+            'scope_id'   => $scope?->id,
+            'scope_type' => $scope ? get_class($scope) : null,
+        ]);
+    }
+
+    public function syncRole(Role $role, ?Model $scope = null, ?Role $newRole = null, ?Model $newScope = null): void
+    {
+        // احذف القديم
+        $this->removeRole($role, $scope);
+
+        // أضف الجديد
+        $this->assignRole($newRole ?? $role, $newScope ?? $scope);
+    }
+
+    public function removeRole(Role $role, ?Model $scope = null): void
+    {
+        $this->roles()
+            ->wherePivot('scope_id', $scope?->id)
+            ->wherePivot('scope_type', $scope ? get_class($scope) : null)
+            ->detach($role->id);
+    }
+
     public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
     {
         // dd($resource);

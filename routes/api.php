@@ -24,47 +24,77 @@ use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\PlanAssignmentController;
 use App\Http\Controllers\Api\PlanStudentController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolesController;
+use App\Http\Controllers\Api\UserRoleController;
 use App\Http\Controllers\Api\UserRolesController;
 use Illuminate\Support\Facades\Auth;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return Auth::guard('sanctum')->user();
 });
-
+/*******************************Version 1********************************************** */
 
 Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
     ->middleware('guest:sanctum');
-Route::post('change-password', [AccessTokensController::class, 'updatePassword'])->middleware('auth:sanctum');
-Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
-    ->middleware('auth:sanctum');
-
-
-Route::post('register', [AuthController::class, 'register']);
-Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('profile', [AuthController::class, 'profile']);
+    Route::post('change-password', [AccessTokensController::class, 'updatePassword']);
+    Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
+        ->middleware('auth:sanctum');
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
+
+    Route::apiResource('personal-courses', PersonalCourseController::class);
+
+    // راوت احضار شهادات اليوزر person-courses
+    Route::get('person-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+    // راوت احضار شهادات اليوزر academic-qualifications
+    Route::get(
+        'academic-qualifications/{person_type}/{person_id}',
+        [AcademicQualificationController::class, 'getPersonQualifications']
+    );
+
+    Route::apiResource('branches', BranchController::class);
+    Route::apiResource('regions', RegionController::class);
+    Route::apiResource('mosques', MosqueController::class);
+    Route::apiResource('centers', CenterController::class);
+    Route::apiResource('halaqas', HalaqaController::class);
+
+    Route::apiResource('constant_types', ConstantTypeController::class);
+    Route::apiResource('constants', ConstantController::class);
+
+    Route::apiResource('students', StudentController::class);
+    Route::post('students/import', [StudentController::class, 'import']);
+
+    Route::apiResource('images', ImageController::class)
+        ->only(['store', 'destroy', 'index', 'show']);
+    Route::get('users/{user}/images', [ImageController::class, 'userImages']);
+    Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
+
+    // الصلاحيات المتاحة
+    Route::get('abilities', [RoleController::class, 'abilities']);
+    // Roles CRUD
+    Route::apiResource('roles', RoleController::class);
+    Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+
+    // User Roles
+    Route::prefix('users/{user}/roles')->group(function () {
+        Route::get('/',    [UserRoleController::class, 'index']);
+        Route::post('/',   [UserRoleController::class, 'assign']);
+        Route::put('/',    [UserRoleController::class, 'sync']);   // ← أضف هذا
+        Route::delete('/', [UserRoleController::class, 'remove']);
+    });
 });
+/****************************************Version 1******************************************************* */
 
-/*
-|--------------------------------------------------------------------------
-| Constants
-|--------------------------------------------------------------------------
-*/
-Route::apiResource('constant_types', ConstantTypeController::class);
-Route::apiResource('constants', ConstantController::class);
+// Route::post('register', [AuthController::class, 'register']);
+// Route::post('login', [AuthController::class, 'login']);
 
-/*
-|--------------------------------------------------------------------------
-| Locations
-|--------------------------------------------------------------------------
-*/
-Route::apiResource('regions', RegionController::class);
-Route::apiResource('branches', BranchController::class)->middleware('auth:sanctum');
-Route::apiResource('mosques', MosqueController::class);
-Route::apiResource('centers', CenterController::class);
+// Route::middleware('auth:sanctum')->group(function () {
+//     Route::post('logout', [AuthController::class, 'logout']);
+//     Route::get('profile', [AuthController::class, 'profile']);
+// });
 Route::apiResource('plans', PlanController::class);
 Route::apiResource('attendances', AttendanceController::class);
 
@@ -84,7 +114,6 @@ Route::apiResource('attendances', AttendanceController::class);
 Route::apiResource('plans', PlanController::class);
 Route::apiResource('tracks', TrackController::class);
 Route::apiResource('courses', CourseController::class);
-
 
 /*
 | Plan Setup (التركيب)
@@ -129,64 +158,17 @@ Route::prefix('plans')->group(function () {
 */
 Route::get('plans-setup', [PlanController::class, 'setupIndex']);
 
-/*
-|--------------------------------------------------------------------------
-| Plan Levels
-|--------------------------------------------------------------------------
-*/
-
-
-/*
-|--------------------------------------------------------------------------
-| Other Resources
-|--------------------------------------------------------------------------
-*/
 Route::apiResource('grades', GradeController::class);
-Route::apiResource('halaqas', HalaqaController::class);
-Route::apiResource('users', UserController::class);
-Route::apiResource('academic-qualifications', AcademicQualificationController::class);
-Route::apiResource('personal-courses', PersonalCourseController::class);
 
-
-/*
-|--------------------------------------------------------------------------
-| Student Module Routes
-|--------------------------------------------------------------------------
-|
-| Base URL: /api/students
-|
-| 1) Route::apiResource('', StudentController::class)
-|    Generates the following RESTful API endpoints:
-|
-|    GET      /api/students              -> index   (List all students)
-|    POST     /api/students              -> store   (Create new student)
-|    GET      /api/students/{student}    -> show    (Get single student)
-|    PUT      /api/students/{student}    -> update  (Update student)
-|    PATCH    /api/students/{student}    -> update
-|    DELETE   /api/students/{student}    -> destroy (Delete student)
-|
-| 2) POST /api/students/import
-|    Import students from Excel file
-|    Required form-data:
-|        - file (xlsx, xls)
-|        - halaqa_id
-|
-*/
 // Route::prefix('students')->group(function () {
 //     Route::apiResource('', StudentController::class);
 //     Route::post('import', [StudentController::class, 'import']);
 // });
 
 
-Route::apiResource('students', StudentController::class);
-Route::post('students/import', [StudentController::class, 'import']);
 
 
-Route::apiResource('images', ImageController::class)
-    ->only(['store', 'destroy', 'index', 'show']);
-Route::get('users/{user}/images', [ImageController::class, 'userImages']);
-Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
-
+// Route::apiResource('roles', RolesController::class);
 // راوت احضار شهادات اليوزر person-courses
 Route::get('personal-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
 // راوت احضار شهادات اليوزر academic-qualifications
@@ -196,7 +178,6 @@ Route::get(
 );
 Route::apiResource('roles', RolesController::class);
 
-Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
-Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
-Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
-Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+// Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
+// Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
+// Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);

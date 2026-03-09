@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Region;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,7 +18,7 @@ class StoreRegionRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', Region::class);
     }
 
     /**

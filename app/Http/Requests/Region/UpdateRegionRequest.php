@@ -17,7 +17,9 @@ class UpdateRegionRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $region = $this->route('region'); // الحصول على الفرع من الرابط
+
+        return $this->user()->can('update', $region);
     }
 
     /**

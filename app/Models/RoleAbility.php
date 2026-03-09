@@ -16,4 +16,19 @@ class RoleAbility extends Model
         'ability',
         'type',
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function isAllow()
+    {
+        return $this->type === 'allow';
+    }
+
+    public function isDeny()
+    {
+        return $this->type === 'deny';
+    }
 }
