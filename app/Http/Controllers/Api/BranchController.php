@@ -18,12 +18,10 @@ class BranchController extends Controller
 
     public function index(Request $request)
     {
-<<<<<<< HEAD
         $this->authorize('viewAny', Branch::class);
 
         $query = Branch::query();
 
-=======
         // if (Gate::denies('branches.view')) {
         //     abort(403, 'غير مسموح لك');
         // }
@@ -43,7 +41,6 @@ class BranchController extends Controller
         // }
         Gate::authorize('branches.view');
 
->>>>>>> 10af43513f8c857882db09284cb027241097b001
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',

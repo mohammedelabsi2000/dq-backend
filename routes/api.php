@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\HalaqaController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\HalaqaStudentController;
 use App\Http\Controllers\Api\IdQueryController;
 use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\Api\TrackController;
@@ -200,3 +201,14 @@ Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
 Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
 Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
 Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+
+
+
+// اسناد الطلاب لحلقات
+Route::prefix('halaqa-students')->group(function () {
+    Route::get('/', [HalaqaStudentController::class, 'index']);
+    Route::get('{id}', [HalaqaStudentController::class, 'show']);
+    Route::post('/', [HalaqaStudentController::class, 'store']);
+    Route::put('{id}', [HalaqaStudentController::class, 'update']);
+    Route::delete('{id}', [HalaqaStudentController::class, 'destroy']);
+});

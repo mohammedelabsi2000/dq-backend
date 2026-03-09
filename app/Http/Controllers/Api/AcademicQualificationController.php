@@ -82,7 +82,7 @@ class AcademicQualificationController extends Controller
 
         return $this->success(
             new AcademicQualificationResource($qualification->load(['academicDegree', 'major', 'person', 'images'])),
-            'Academic qualification created successfully',
+            'تم إضافة المؤهل العلمي بنجاح',
             201
         );
     }
@@ -132,7 +132,7 @@ class AcademicQualificationController extends Controller
 
         return $this->success(
             new AcademicQualificationResource($academicQualification->load(['academicDegree', 'major', 'person', 'images'])),
-            'Academic qualification updated successfully',
+            'تم تحديث بيانات المؤهل العلمي',
             200
         );
     }
@@ -143,8 +143,8 @@ class AcademicQualificationController extends Controller
 
         return $this->success(
             null,
-            'Academic qualification deleted successfully',
-            204
+            'تم حذف المؤهل العلمي',
+            202
         );
     }
 }

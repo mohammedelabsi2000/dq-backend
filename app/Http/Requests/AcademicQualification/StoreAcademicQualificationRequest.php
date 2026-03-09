@@ -3,6 +3,8 @@
 namespace App\Http\Requests\AcademicQualification;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Helpers\ConstantHelper;
+use Illuminate\Validation\Rule;
 
 class StoreAcademicQualificationRequest extends FormRequest
 {
@@ -23,10 +25,25 @@ class StoreAcademicQualificationRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'academic_degree_id' => 'required|exists:constants,id',
-            'major_id' => 'required|exists:constants,id',
 
+        // 'marital_status_id' => [
+        //             'nullable',
+        //             Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),
+        //         ],
+        //         'prefix_name_id' => [
+        //             'nullable',
+        //             Rule::in(ConstantHelper::getConstantIdsByType('prefix_name')),
+        //         ],
+
+        return [
+            'academic_degree_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('academic_degree')),
+            ],
+            'major_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('major')),
+            ],
             'person_type' => 'required|string',
             'person_id' => 'required|integer',
 
@@ -47,10 +64,10 @@ class StoreAcademicQualificationRequest extends FormRequest
     {
         return [
             'academic_degree_id.required' => 'حقل الدرجة العلمية مطلوب.',
-            'academic_degree_id.exists' => 'الدرجة العلمية المحددة غير موجودة.',
+            'academic_degree_id.in' => 'الدرجة العلمية المحددة غير موجودة.',
 
             'major_id.required' => 'حقل التخصص مطلوب.',
-            'major_id.exists' => 'التخصص المحدد غير موجود.',
+            'major_id.in' => 'التخصص المحدد غير موجود.',
 
             'person_type.required' => 'نوع الشخص مطلوب.',
             'person_type.string' => 'نوع الشخص يجب أن يكون نصاً.',
@@ -80,7 +97,7 @@ class StoreAcademicQualificationRequest extends FormRequest
             'certificate_file.file' => 'كل ملف يجب أن يكون ملفاً صالحاً.',
             'certificate_file.mimes' => 'يجب أن يكون الملف بصيغة PDF فقط.',
             'certificate_file.max' => 'حجم الملف يجب ألا يتجاوز 5 ميجابايت.',
-            
+
         ];
     }
 }

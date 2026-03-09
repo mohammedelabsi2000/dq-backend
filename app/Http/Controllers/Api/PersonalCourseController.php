@@ -81,7 +81,7 @@ class PersonalCourseController extends Controller
         }
         return $this->success(
             new PersonalCourseResource($course->load(['person', 'images', 'type'])),
-            'Personal course created successfully',
+            'تم إضافة الدورات الشخصية بنجاح',
             201
         );
     }
@@ -121,7 +121,7 @@ class PersonalCourseController extends Controller
 
         return $this->success(
             new PersonalCourseResource($personalCourse->load(['person', 'images', 'type'])),
-            'Personal course updated successfully',
+            'تم تحديث بيانات الدورة بنجاح',
             200
         );
     }
@@ -132,8 +132,8 @@ class PersonalCourseController extends Controller
 
         return $this->success(
             null,
-            'Personal course deleted successfully',
-            204
+            'تم حذف الدورة بنجاح',
+            202
         );
     }
 }

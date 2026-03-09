@@ -20,6 +20,7 @@ class PlanResource extends JsonResource
             'weight' => $this->weight,
             'duration_in_days' => $this->duration_in_days,
             'grace_period_days' => $this->grace_period_days,
+            'is_active' => $this->is_active,
 
             // المسارات المرتبطة بالخطة
             'plan_tracks' => $this->whenLoaded('planTracks', function () {
