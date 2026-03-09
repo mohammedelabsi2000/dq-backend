@@ -169,6 +169,14 @@ Route::apiResource('grades', GradeController::class);
 
 
 // Route::apiResource('roles', RolesController::class);
+// راوت احضار شهادات اليوزر person-courses
+Route::get('personal-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+// راوت احضار شهادات اليوزر academic-qualifications
+Route::get(
+    'academic-qualifications/{person_type}/{person_id}',
+    [AcademicQualificationController::class, 'getPersonQualifications']
+);
+Route::apiResource('roles', RolesController::class);
 
 // Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
 // Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
