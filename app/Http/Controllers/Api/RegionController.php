@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Region\StoreRegionRequest;
 use App\Http\Requests\Region\UpdateRegionRequest;
 use App\Http\Resources\RegionResource;
+use App\Models\Branch;
 use App\Models\Region;
 use Illuminate\Http\Request;
 
@@ -59,7 +60,7 @@ class RegionController extends Controller
      */
     public function store(StoreRegionRequest $request)
     {
-        $this->authorize('create', Region::class);
+
         $region = Region::create($request->validated());
 
         // تحميل العلاقات إذا طلب
@@ -101,7 +102,6 @@ class RegionController extends Controller
      */
     public function update(UpdateRegionRequest $request, Region $region)
     {
-        $this->authorize('update', $region);
         $region->update($request->validated());
 
         // تحميل العلاقات إذا طلب

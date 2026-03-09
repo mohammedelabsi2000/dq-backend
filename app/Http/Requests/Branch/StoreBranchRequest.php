@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Branch;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Branch;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -18,8 +19,7 @@ class StoreBranchRequest extends FormRequest
      */
     public function authorize()
     {
-        // return Gate::allows('branches.create');
-        return $this->user()->can('create', \App\Models\Branch::class);
+        return $this->user()->can('create', Branch::class);
     }
 
     /**

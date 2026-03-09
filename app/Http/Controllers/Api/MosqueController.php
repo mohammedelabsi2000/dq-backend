@@ -61,7 +61,7 @@ class MosqueController extends Controller
      */
     public function store(StoreMosqueRequest $request)
     {
-        $this->authorize('create', Mosque::class);
+        // $this->authorize('create', Mosque::class);
 
         $mosque = Mosque::create($request->validated());
 

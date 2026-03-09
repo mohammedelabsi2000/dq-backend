@@ -60,8 +60,6 @@ class BranchController extends Controller
      */
     public function store(StoreBranchRequest $request)
     {
-        // $this->authorize('create', Branch::class);
-
         $branch = Branch::create($request->validated());
 
         return $this->success(

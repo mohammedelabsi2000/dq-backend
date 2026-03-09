@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Center;
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -39,9 +40,9 @@ class CenterPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create($user, Region $region)
     {
-        return $user->hasAbility('centers.create');
+        return $user->hasAbility('centers.create', $region);
     }
 
     /**

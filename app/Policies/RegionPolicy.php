@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Branch;
 use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -39,9 +40,9 @@ class RegionPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create($user, Branch $branch)
     {
-        return $user->hasAbility('regions.create');
+        return $user->hasAbility('regions.create', $branch);
     }
 
     /**
