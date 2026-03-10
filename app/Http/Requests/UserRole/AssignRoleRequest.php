@@ -34,9 +34,10 @@ class AssignRoleRequest extends FormRequest
                 'nullable',
                 'string',
                 Rule::in([
-                    Branch::class,
-                    Region::class,
-                    Center::class,
+                    'branch',
+                    'region',
+                    'center',
+                    'halaqa',
                 ]),
             ],
         ];

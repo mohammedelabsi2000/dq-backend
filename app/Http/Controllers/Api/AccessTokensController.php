@@ -31,7 +31,26 @@ class AccessTokensController extends Controller
             $device_name = $request->post('device_name', $request->userAgent());
             $token = $user->createToken($device_name);
 
-            return $this->success(['token' => $token->plainTextToken, 'user' => $user], "Ok", 201);
+            $user->loadMissing('roles.roleAbilities');
+
+            $abilities = $user->roles
+                ->flatMap(fn($role) => $role->roleAbilities)
+                ->unique('ability')
+                ->values()
+                ->map(fn($ability) => [
+                    'ability' => $ability->ability,
+                    'type'    => $ability->type,
+                ]);
+            // $user->makeHidden('roles');
+            return $this->success([
+                'token'     => $token->plainTextToken,
+                'user'      => $user,
+                'abilities' => $abilities,
+            ], "Ok", 201);
+
+
+
+            // return $this->success(['token' => $token->plainTextToken, 'user' => $user], "Ok", 201);
 
 
             // return Response::json([

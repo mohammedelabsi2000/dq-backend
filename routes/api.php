@@ -33,6 +33,20 @@ use Illuminate\Support\Facades\Auth;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return Auth::guard('sanctum')->user();
+    // $user = $request->user();
+    // $user->loadMissing('roles.roleAbilities');
+
+    // return [
+    //     'user'      => $user,
+    //     'abilities' => $user->roles
+    //         ->flatMap(fn($role) => $role->roleAbilities)
+    //         ->unique('ability')
+    //         ->values()
+    //         ->map(fn($ability) => [
+    //             'ability' => $ability->ability,
+    //             'type'    => $ability->type,
+    //         ]),
+    // ];
 });
 /*******************************Version 1********************************************** */
 
@@ -83,7 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users/{user}/roles')->group(function () {
         Route::get('/',    [UserRoleController::class, 'index']);
         Route::post('/',   [UserRoleController::class, 'assign']);
-        Route::put('/',    [UserRoleController::class, 'sync']);   // ← أضف هذا
+        Route::put('/',    [UserRoleController::class, 'sync']);
         Route::delete('/', [UserRoleController::class, 'remove']);
     });
 });

@@ -28,7 +28,10 @@ class UpdateRoleRequest extends FormRequest
             'name'        => ['required', 'string', Rule::unique('roles', 'name')->ignore($this->role->id)],
             'give_all'    => 'boolean',
             'abilities'   => 'array',
-            'abilities.*' => Rule::in(array_keys(config('abilities'))),
+            // 'abilities.*' => Rule::in(array_keys(config('abilities'))),
+            'abilities.*' => Rule::in(
+                collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
+            ),
         ];
     }
 

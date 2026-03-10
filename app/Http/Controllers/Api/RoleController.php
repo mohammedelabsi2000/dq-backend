@@ -85,8 +85,12 @@ class RoleController extends Controller
 
     public function abilities()
     {
+        // return response()->json([
+        //     'data' => config('abilities'),
+        // ]);
+
         return response()->json([
-            'data' => config('abilities'),
+            'abilities' => config('abilities'),
         ]);
     }
 }
