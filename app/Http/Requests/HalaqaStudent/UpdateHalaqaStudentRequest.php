@@ -32,7 +32,7 @@ class UpdateHalaqaStudentRequest extends FormRequest
             'to_date' => 'nullable|date|after_or_equal:from_date',
             'enrollment_status_id' => [
                 'required',
-                Rule::in(ConstantHelper::getConstantIdsByType('enrollment_status_id')),
+                Rule::in(ConstantHelper::getConstantIdsByType('enrollment_status')),
             ],
         ];
     }
