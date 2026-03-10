@@ -35,9 +35,9 @@ class Mosque extends Model implements BelongsToHierarchy
         $this->loadMissing('region');
 
         return [
-            ['id' => $this->region->branch_id, 'type' => Branch::class],
-            ['id' => $this->region_id,          'type' => Region::class],
-            ['id' => $this->id,                 'type' => self::class],
+            ['id' => $this->region->branch_id, 'type' => 'branch'],
+            ['id' => $this->region_id,          'type' => 'region'],
+            ['id' => $this->id,                 'type' => 'mosque'],
         ];
     }
 }

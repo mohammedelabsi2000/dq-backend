@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Branch;
 use App\Models\Center;
+use App\Models\Halaqa;
+use App\Models\Mosque;
 use App\Models\Region;
 use App\Models\Student;
 use App\Models\User;
@@ -48,6 +50,8 @@ class AppServiceProvider extends ServiceProvider
             'branch' => Branch::class,
             'region' => Region::class,
             'center' => Center::class,
+            'mosque' => Mosque::class,
+            'halaqa' => Halaqa::class,
             'student' => Student::class,
         ]);
     }
