@@ -43,7 +43,7 @@ class UpdateHalaqaStudentRequest extends FormRequest
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
             'student_id.exists' => 'الطالب المحدد غير موجود',
             'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
-            'enrollment_status_id.exists' => 'الحالة المحددة غير موجودة',
+            'enrollment_status_id.in' => 'الحالة المحددة غير موجودة',
         ];
     }
 }

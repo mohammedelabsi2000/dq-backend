@@ -47,7 +47,7 @@ class StoreHalaqaStudentRequest extends FormRequest
             'from_date.required' => 'يجب تحديد تاريخ البداية',
             // 'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
             'enrollment_status_id.required' => 'يجب تحديد الحالة',
-            'enrollment_status_id.exists' => 'الحالة المحددة غير موجودة',
+            'enrollment_status_id.in' => 'الحالة المحددة غير موجودة',
         ];
     }
 }
