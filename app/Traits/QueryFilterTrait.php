@@ -22,6 +22,18 @@ trait QueryFilterTrait
         // Pagination
         $skip = $options['skip'] ?? request()->get('skip', 0);
 
+        // Search
+        $search = $options['search'] ?? request()->get('search');
+        $searchColumns = $options['searchColumns'] ?? [];
+
+        if ($search && !empty($searchColumns)) {
+            $query = $query->where(function ($q) use ($search, $searchColumns) {
+                foreach ($searchColumns as $column) {
+                    $q->orWhere($column, 'LIKE', "%{$search}%");
+                }
+            });
+        }
+
 
         $count = $query->count(); // مهم لحساب العدد الكلي
 
@@ -42,18 +54,6 @@ trait QueryFilterTrait
         if ($orderBy) {
             $orderBy = strtolower($orderBy) === 'asec' ? 'asc' : $orderBy;
             $query = $query->orderBy($orderColumn, $orderBy);
-        }
-
-        // Search
-        $search = $options['search'] ?? request()->get('search');
-        $searchColumns = $options['searchColumns'] ?? [];
-
-        if ($search && !empty($searchColumns)) {
-            $query = $query->where(function ($q) use ($search, $searchColumns) {
-                foreach ($searchColumns as $column) {
-                    $q->orWhere($column, 'LIKE', "%{$search}%");
-                }
-            });
         }
 
         return [
