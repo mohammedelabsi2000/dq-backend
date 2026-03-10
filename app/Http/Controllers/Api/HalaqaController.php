@@ -20,6 +20,7 @@ class HalaqaController extends Controller
     public function index(Request $request)
     {
 
+        $this->authorize('viewAny', Halaqa::class);
         /* Relation::morphMap([
             'Center' => \App\Models\Center::class,
             'Region' => \App\Models\Region::class,
@@ -101,7 +102,7 @@ class HalaqaController extends Controller
      */
     public function show(Request $request, Halaqa $halaqa)
     {
-
+        $this->authorize('view', $halaqa);
         $halaqa->load(['type', 'reference']);
 
         if ($request->boolean(key: 'with_students')) {
@@ -140,6 +141,7 @@ class HalaqaController extends Controller
      */
     public function destroy(Halaqa $halaqa)
     {
+        $this->authorize('delete', $halaqa);
         if ($halaqa->students()->exists()) {
             return $this->errorMessage(
                 'لا يمكن حذف الحلقة لأنها تحتوي على طلاب',
