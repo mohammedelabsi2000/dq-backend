@@ -35,7 +35,7 @@ class HalaqaStudentController extends Controller
         $data = $query->with([
             'halaqa',
             'student',
-            'status'
+            'enrollment_status'
         ])->get();
 
         return $this->apiResponse([
@@ -53,7 +53,7 @@ class HalaqaStudentController extends Controller
         $halaqaStudent = $halaqaStudent->load([
             'halaqa',
             'student',
-            'status',
+            'enrollment_status',
         ]);
 
         return $this->success(
@@ -76,7 +76,7 @@ class HalaqaStudentController extends Controller
         $student = HalaqaStudent::create($request->validated());
 
         return $this->success(
-            new HalaqaStudentResource($student->load(['halaqa', 'student', 'status'])),
+            new HalaqaStudentResource($student->load(['halaqa', 'student', 'enrollment_status'])),
             'تم تسجيل الطالب في الحلقة بنجاح',
             201
         );
@@ -101,11 +101,11 @@ class HalaqaStudentController extends Controller
                 'student_id' => $halaqaStudent->student_id,
                 'halaqa_id' => $validated['halaqa_id'],
                 'from_date' => $validated['from_date'],
-                'status_id' => $validated['status_id'] ?? $halaqaStudent->status_id,
+                'enrollment_status_id' => $validated['enrollment_status_id'] ?? $halaqaStudent->enrollment_status_id,
             ]);
 
             return $this->success(
-                new HalaqaStudentResource($newRecord->load(['halaqa', 'student', 'status'])),
+                new HalaqaStudentResource($newRecord->load(['halaqa', 'student', 'enrollment_status'])),
                 'تم نقل الطالب إلى الحلقة الجديدة بنجاح',
                 201
             );
@@ -114,7 +114,7 @@ class HalaqaStudentController extends Controller
         $halaqaStudent->update($validated);
 
         return $this->success(
-            new HalaqaStudentResource($halaqaStudent->load(['halaqa', 'student', 'status'])),
+            new HalaqaStudentResource($halaqaStudent->load(['halaqa', 'student', 'enrollment_status'])),
             'تم تحديث بيانات التسجيل بنجاح',
             200
         );

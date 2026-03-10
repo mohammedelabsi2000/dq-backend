@@ -28,7 +28,7 @@ class StoreHalaqaStudentRequest extends FormRequest
             'student_id' => 'required|exists:students,id',
             'from_date' => 'required|date',
             // 'to_date' => 'nullable|date|after_or_equal:from_date',
-            'status_id' => 'required|exists:constants,id',
+            'enrollment_status_id' => 'required|exists:constants,id',
         ];
     }
 
@@ -41,8 +41,8 @@ class StoreHalaqaStudentRequest extends FormRequest
             'student_id.exists' => 'الطالب المحدد غير موجود',
             'from_date.required' => 'يجب تحديد تاريخ البداية',
             // 'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
-            'status_id.required' => 'يجب تحديد الحالة',
-            'status_id.exists' => 'الحالة المحددة غير موجودة',
+            'enrollment_status_id.required' => 'يجب تحديد الحالة',
+            'enrollment_status_id.exists' => 'الحالة المحددة غير موجودة',
         ];
     }
 }
