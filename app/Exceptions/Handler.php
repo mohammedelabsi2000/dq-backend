@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Http\Traits\ApiResponser;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
@@ -65,6 +66,14 @@ class Handler extends ExceptionHandler
             // ModelNotFoundException → لو استخدمت Route Model Binding ولم يجد السجل
             if ($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
                 return $this->notFound();
+            }
+
+            /* 
+             * AuthenticationException → لو حاولت تدخل على Route محمي بدون توكن أو بتوكن غير صالح
+             * 401 Unauthorized → عندما لا يتم توفير بيانات الاعتماد أو تكون غير صحيحة.
+             */
+            if ($exception instanceof AuthenticationException) {
+                return $this->errorMessage('Token غير صالح أو منتهي الصلاحية', 401);
             }
         }
 

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AcademicQualificationController;
 use App\Http\Controllers\Api\AccessTokensController;
@@ -29,35 +28,15 @@ use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\Api\RolesController;
 use App\Http\Controllers\Api\UserRoleController;
 use App\Http\Controllers\Api\UserRolesController;
-use Illuminate\Support\Facades\Auth;
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return Auth::guard('sanctum')->user();
-    // $user = $request->user();
-    // $user->loadMissing('roles.roleAbilities');
 
-    // return [
-    //     'user'      => $user,
-    //     'abilities' => $user->roles
-    //         ->flatMap(fn($role) => $role->roleAbilities)
-    //         ->unique('ability')
-    //         ->values()
-    //         ->map(fn($ability) => [
-    //             'ability' => $ability->ability,
-    //             'type'    => $ability->type,
-    //         ]),
-    // ];
-});
-/*******************************Version 1********************************************** */
+foreach (glob(__DIR__ . '/api/*.php') as $file) {
+    require $file;
+}
 
-Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
-    ->middleware('guest:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('change-password', [AccessTokensController::class, 'updatePassword']);
-    Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
-        ->middleware('auth:sanctum');
-    Route::apiResource('users', UserController::class);
+   Route::apiResource('users', UserController::class);
     Route::apiResource('academic-qualifications', AcademicQualificationController::class);
 
     Route::apiResource('personal-courses', PersonalCourseController::class);
@@ -95,9 +74,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User Roles
     Route::prefix('users/{user}/roles')->group(function () {
-        Route::get('/',    [UserRoleController::class, 'index']);
-        Route::post('/',   [UserRoleController::class, 'assign']);
-        Route::put('/',    [UserRoleController::class, 'sync']);
+        Route::get('/', [UserRoleController::class, 'index']);
+        Route::post('/', [UserRoleController::class, 'assign']);
+        Route::put('/', [UserRoleController::class, 'sync']);
         Route::delete('/', [UserRoleController::class, 'remove']);
     });
 });

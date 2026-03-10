@@ -10,6 +10,7 @@ class ConstantController extends Controller
 {
     /**
      * Display a listing of constants
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function index()
     {
