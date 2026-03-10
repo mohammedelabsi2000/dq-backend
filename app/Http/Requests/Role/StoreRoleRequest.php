@@ -28,7 +28,10 @@ class StoreRoleRequest extends FormRequest
             'name'        => 'required|string|unique:roles,name',
             'give_all'    => 'boolean',
             'abilities'   => 'array',
-            'abilities.*' => Rule::in(array_keys(config('abilities'))),
+            // 'abilities.*' => Rule::in(array_keys(config('abilities'))),
+            'abilities.*' => Rule::in(
+                collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
+            ),
         ];
     }
 

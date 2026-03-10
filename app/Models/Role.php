@@ -42,8 +42,12 @@ class Role extends Model
         return DB::transaction(function () use ($data) {
             $role = self::create(['name' => $data['name']]);
 
+            // $abilities = $data['give_all'] ?? false
+            //     ? array_keys(config('abilities'))
+            //     : ($data['abilities'] ?? []);
+
             $abilities = $data['give_all'] ?? false
-                ? array_keys(config('abilities'))
+                ? collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
                 : ($data['abilities'] ?? []);
 
             $role->insertAbilities($abilities);

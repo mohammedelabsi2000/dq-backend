@@ -5,6 +5,9 @@ namespace App\Http\Requests\Halaqa;
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
 use App\Models\Audit;
+use App\Models\Center;
+use App\Models\Halaqa;
+use App\Models\Region;
 use Illuminate\Validation\Rule;
 
 class StoreHalaqaRequest extends DQFormRequest
@@ -16,7 +19,18 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return true;
+        // نجيب الـ reference (Region أو Center)
+        $referenceType = $this->input('reference_type');
+        $referenceId   = $this->input('reference_id');
+
+        $reference = match ($referenceType) {
+            'region' => Region::findOrFail($referenceId),
+            'center' => Center::findOrFail($referenceId),
+            default  => abort(422, 'Invalid reference type'),
+        };
+
+        return $this->user()->can('create', [Halaqa::class, $reference]);
+        // return true;
     }
 
     /**
@@ -46,8 +60,8 @@ class StoreHalaqaRequest extends DQFormRequest
             'reference_type' => [
                 'required',
                 Rule::in([
-                    \App\Models\Center::class,
-                    \App\Models\Region::class,
+                    Center::class,
+                    Region::class,
                 ])
             ],
             'reference_id' => [

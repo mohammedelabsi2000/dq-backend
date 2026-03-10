@@ -9,6 +9,7 @@ use App\Http\Requests\UserRole\SyncRoleRequest;
 use App\Http\Resources\UserRoleResource;
 use App\Models\Branch;
 use App\Models\Center;
+use App\Models\Halaqa;
 use App\Models\Region;
 use App\Models\Role;
 use App\Models\User;
@@ -73,6 +74,15 @@ class UserRoleController extends Controller
             return null;
         }
 
-        return $scopeType::findOrFail($scopeId);
+        $map = [
+            'branch' => Branch::class,
+            'region' => Region::class,
+            'center' => Center::class,
+            'halaqa' => Halaqa::class,
+        ];
+
+        $modelClass = $map[$scopeType] ?? abort(422, 'Invalid scope type');
+
+        return $modelClass::findOrFail($scopeId);
     }
 }
