@@ -16,33 +16,34 @@ class HalaqaStudentController extends Controller
     /**
      * عرض جميع التسجيلات
      */
-    public function index()
-    {
-        $query = HalaqaStudent::query();
+public function index()
+{
+    $query = HalaqaStudent::query();
 
-        $q = $this->applyFilters($query, [
-            'searchColumns' => [''],
-            'orderColumn' => 'created_at',
-            'orderBy' => 'desc'
-        ]);
+    $q = $this->applyFilters($query, [
+        'searchColumns' => ['id'],
+        'orderColumn' => 'created_at',
+        'orderBy' => 'desc'
+    ]);
 
-        $query = $q['query'];
-        $total = $q['count'];
+    $query = $q['query'];
 
-        $data = $query->with([
-            'halaqa',
-            'student',
-            'status'
-        ])->get();
+    // حساب العدد الحقيقي بعد الفلترة
+    $total = (clone $query)->count();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => HalaqaStudentResource::collection($data),
-        ], 'success', 200);
-    }
+    $data = $query->with([
+        'halaqa',
+        'student',
+        'status'
+    ])->get();
 
+    return $this->apiResponse([
+        'total' => $total,
+        'skip' => $q['skip'],
+        'limit' => $q['limit'],
+        'data' => HalaqaStudentResource::collection($data),
+    ], 'success', 200);
+}
     /**
      * عرض تسجيل محدد
      */
