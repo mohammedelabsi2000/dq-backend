@@ -20,6 +20,11 @@ return [
     'mosques.update' => 'Update mosques',
     'mosques.delete' => 'Delete mosques',
 
+    'halaqas.view' => 'View halaqas',
+    'halaqas.create' => 'Create halaqas',
+    'halaqas.update' => 'Update halaqas',
+    'halaqas.delete' => 'Delete halaqas',
+
     'users.view' => 'View users',
     'users.create' => 'Create users',
     'users.update' => 'Update users',

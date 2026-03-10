@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Mosque;
+use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -39,9 +40,9 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create($user, Region $region)
     {
-        return $user->hasAbility('mosques.create');
+        return $user->hasAbility('mosques.create', $region);
     }
 
     /**
