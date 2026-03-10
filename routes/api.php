@@ -187,10 +187,4 @@ Route::get(
 
 
 // اسناد الطلاب لحلقات
-Route::prefix('halaqa-students')->group(function () {
-    Route::get('/', [HalaqaStudentController::class, 'index']);
-    Route::get('{id}', [HalaqaStudentController::class, 'show']);
-    Route::post('/', [HalaqaStudentController::class, 'store']);
-    Route::put('{id}', [HalaqaStudentController::class, 'update']);
-    Route::delete('{id}', [HalaqaStudentController::class, 'destroy']);
-});
+Route::apiResource('halaqa-students', HalaqaStudentController::class);
