@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\HalaqaStudent;
 
+use App\Helpers\ConstantHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateHalaqaStudentRequest extends FormRequest
 {
@@ -28,7 +30,10 @@ class UpdateHalaqaStudentRequest extends FormRequest
             'student_id' => 'sometimes|required|exists:students,id',
             'from_date' => 'sometimes|required|date',
             'to_date' => 'nullable|date|after_or_equal:from_date',
-            'enrollment_status_id' => 'sometimes|required|exists:constants,id',
+            'enrollment_status_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('enrollment_status_id')),
+            ],
         ];
     }
 
