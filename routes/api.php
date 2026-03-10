@@ -55,8 +55,7 @@ Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('change-password', [AccessTokensController::class, 'updatePassword']);
-    Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
-        ->middleware('auth:sanctum');
+    Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy']);
     Route::apiResource('users', UserController::class);
     Route::apiResource('academic-qualifications', AcademicQualificationController::class);
 
