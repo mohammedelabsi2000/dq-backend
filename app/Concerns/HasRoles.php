@@ -49,6 +49,15 @@ trait HasRoles
             ->detach($role->id);
     }
 
+    public function isGlobalAdmin(): bool
+    {
+        $this->loadMissing('roles');
+
+        return $this->roles->contains(
+            fn($role) => $role->pivot->scope_id === null
+        );
+    }
+
     public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
     {
         // dd($resource);
@@ -63,7 +72,7 @@ trait HasRoles
 
             // إذا لم يكن هناك resource → نرفض الـ scoped roles
             if ($resource === null) {
-                return false;
+                return true;
             }
 
             // نتحقق أن الـ scope موجود في هرمية الـ resource
