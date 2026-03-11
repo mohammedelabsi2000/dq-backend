@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponser;
 use App\Http\Requests\AcademicQualification\StoreAcademicQualificationRequest;
 use App\Http\Requests\AcademicQualification\UpdateAcademicQualificationRequest;
 use App\Http\Resources\AcademicQualificationResource;
 use App\Models\AcademicQualification;
 use App\Models\Image;
+use Illuminate\Http\UploadedFile;
 
 class AcademicQualificationController extends Controller
 {
@@ -31,19 +31,22 @@ class AcademicQualificationController extends Controller
         );
     }
 
+    /**
+     * Summary of index
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
         $query = AcademicQualification::query();
 
         $q = $this->applyFilters($query, [
-            'searchColumns' => [''],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
 
         $query = $q['query'];
         $total = $q['count'];
-        // $total = $query->count();
+
         $data = $query->with([
             'academicDegree',
             'major',
@@ -59,25 +62,19 @@ class AcademicQualificationController extends Controller
         ], 'success', 200);
     }
 
+    /**
+     * Store a newly created academic qualification.
+     *
+     * @param  \App\Http\Requests\AcademicQualification\StoreAcademicQualificationRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreAcademicQualificationRequest $request)
     {
-
         $qualification = AcademicQualification::create($request->validated());
 
         if ($request->hasFile('certificate_file')) {
-            $file = $request->file('certificate_file');
-            $path = $file->store('uploads/certificates', 'public');
-
-            $image = Image::create([
-                'imageable_id' => $qualification->id,
-                'imageable_type' => AcademicQualification::class,
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'disk' => 'public',
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                // 'image_type' => $validated['image_type'] ?? null,
-            ]);
+            // delegate file processing to the helper
+            $this->storeCertificate($qualification, $request->file('certificate_file'));
         }
 
         return $this->success(
@@ -104,6 +101,13 @@ class AcademicQualificationController extends Controller
         );
     }
 
+    /**
+     * Update the specified academic qualification.
+     *
+     * @param  \App\Http\Requests\AcademicQualification\UpdateAcademicQualificationRequest  $request
+     * @param  \App\Models\AcademicQualification  $academicQualification
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(
         UpdateAcademicQualificationRequest $request,
         AcademicQualification $academicQualification
@@ -112,23 +116,8 @@ class AcademicQualificationController extends Controller
         $academicQualification->update($request->validated());
 
         if ($request->hasFile('certificate_file')) {
-            $file = $request->file('certificate_file');
-            $path = $file->store('uploads/certificates', 'public');
-
-
-            $image = Image::updateOrCreate([
-                'imageable_id' => $academicQualification->id,
-                'imageable_type' => AcademicQualification::class
-            ], [
-                'file_name' => $file->getClientOriginalName(),
-                'file_path' => $path,
-                'disk' => 'public',
-                'mime_type' => $file->getMimeType(),
-                'file_size' => $file->getSize(),
-                // 'image_type' => $validated['image_type'] ?? null,
-            ]);
+            $this->storeCertificate($academicQualification, $request->file('certificate_file'));
         }
-
 
         return $this->success(
             new AcademicQualificationResource($academicQualification->load(['academicDegree', 'major', 'person', 'images'])),
@@ -145,6 +134,37 @@ class AcademicQualificationController extends Controller
             null,
             'تم حذف المؤهل العلمي',
             202
+        );
+    }
+
+    /**
+     * Save a certificate file for a qualification.
+     *
+     * The uploaded file is stored on the public disk and an Image model
+     * is created or updated so that the qualification can reference it.
+     * This helper hides the storage details and keeps controller actions
+     * clean and DRY.
+     *
+     * @param  AcademicQualification  $qualification  The qualification to attach the image to.
+     * @param  UploadedFile          $file           The uploaded certificate file.
+     * @return Image|\Illuminate\Database\Eloquent\Model
+     */
+    protected function storeCertificate(AcademicQualification $qualification, UploadedFile $file)
+    {
+        $path = $file->store('uploads/certificates', 'public');
+
+        return Image::updateOrCreate(
+            [
+                'imageable_id' => $qualification->id,
+                'imageable_type' => AcademicQualification::class,
+            ],
+            [
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'disk' => 'public',
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+            ]
         );
     }
 }
