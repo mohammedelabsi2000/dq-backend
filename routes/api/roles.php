@@ -1,8 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\IdQueryController;
-use App\Http\Controllers\Api\RoleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\RoleController;
 
 Route::middleware('auth:sanctum')->group(function () {
     // Available abilities
@@ -10,7 +9,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Roles CRUD
     Route::apiResource('roles', RoleController::class);
-
-    // ID Query
-    Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
 });
