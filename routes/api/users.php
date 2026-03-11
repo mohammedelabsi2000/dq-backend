@@ -1,9 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\ImageController;
-use App\Http\Controllers\Api\UserRoleController;
+use App\Http\Controllers\Api\{UserController, ImageController, UserRoleController};
 
 // All user-related routes are protected by Sanctum authentication
 Route::middleware('auth:sanctum')->group(function () {

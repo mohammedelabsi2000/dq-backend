@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Auth;
 
 trait Auditable
 {
+    /**
+     * Boot the Auditable trait to listen for model events and create audit records
+     * @return void
+     */
     public static function bootAuditable()
     {
         static::created(function ($model) {
@@ -25,6 +29,11 @@ trait Auditable
         });
     }
 
+    /**
+     * Create an audit record for the given event
+     * @param mixed $event
+     * @return void
+     */
     protected function audit($event)
     {
         Audit::create([
@@ -39,7 +48,11 @@ trait Auditable
         ]);
     }
 
-
+    /**
+     * Cast an array of values for audit purposes
+     * @param array $values
+     * @return bool|string|null
+     */
     protected function castArrayForAudit(array $values): ?string
     {
         // نحذف أي قيمة غير قابلة للتخزين في JSON
