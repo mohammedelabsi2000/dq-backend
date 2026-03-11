@@ -76,25 +76,15 @@ class AccessTokensController extends Controller
         if (null === $token) {
             $user->currentAccessToken()->delete();
             return $this->success(null, "Logout successfully!", 200);
-            // return Response::json([
-            //     'message' => 'Logout successfully!'
-            // ], 201);
         }
 
         $personalAccessToken = PersonalAccessToken::findToken($token);
         if ($user->id == $personalAccessToken->tokenable_id && get_class($user) == $personalAccessToken->tokenable_type) {
             $personalAccessToken->delete();
             return $this->success($user, "Logout successfully!", 200);
-            // return Response::json([
-            //     'message' => 'Logout successfully!'
-            // ], 201);
         }
 
         return $this->error("Unauthorized!", 401, null);
-
-        // return Response::json([
-        //     'message' => 'Unauthorized!'
-        // ], 401);
     }
 
     public function updatePassword(Request $request)

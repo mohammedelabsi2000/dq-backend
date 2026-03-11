@@ -21,13 +21,16 @@ class HalaqaStudentController extends Controller
         $query = HalaqaStudent::query();
 
         $q = $this->applyFilters($query, [
-            'searchColumns' => [''],
+            'searchColumns' => ['id'],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
 
         $query = $q['query'];
         $total = $q['count'];
+
+        // حساب العدد الحقيقي بعد الفلترة
+        // $total = (clone $query)->count();
 
         $data = $query->with([
             'halaqa',
@@ -42,7 +45,6 @@ class HalaqaStudentController extends Controller
             'data' => HalaqaStudentResource::collection($data),
         ], 'success', 200);
     }
-
     /**
      * عرض تسجيل محدد
      */
