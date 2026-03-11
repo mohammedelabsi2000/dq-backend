@@ -17,6 +17,7 @@ class RoleController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Role::class);
         $roles = Role::with('roleAbilities')->get();
 
         return RoleResource::collection($roles);
@@ -45,6 +46,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
+        $this->authorize('view', $role);
         return new RoleResource($role->load('roleAbilities'));
     }
 
@@ -72,6 +74,7 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
+        $this->authorize('delete', $role);
         $role->deleteRole();
 
         return response()->json([
