@@ -249,37 +249,4 @@ class Halaqa extends Model implements BelongsToHierarchy
     //         }
     //     });
     // }
-    public function getHierarchyData()
-    {
-        $this->loadMissing('reference');
-
-        // لو تابعة لـ Center
-        if ($this->reference_type === 'center') {
-            $center = $this->reference;
-            $center->loadMissing('region.branch');
-
-            return [
-                ['id' => $center->region->branch_id, 'type' => 'branch', 'name' => $center->region->branch->name],
-                ['id' => $center->region_id, 'type' => 'region', 'name' => $center->region->name],
-                ['id' => $center->id, 'type' => 'center', 'name' => $center->name],
-                ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
-            ];
-        }
-
-        // لو تابعة لـ Region
-        if ($this->reference_type === 'region') {
-            $region = $this->reference;
-            $region->loadMissing('branch');
-
-            return [
-                ['id' => $region->branch_id, 'type' => 'branch', 'name' => $region->branch->name],
-                ['id' => $region->id, 'type' => 'region', 'name' => $region->name],
-                ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
-            ];
-        }
-
-        return [
-            ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
-        ];
-    }
 }
