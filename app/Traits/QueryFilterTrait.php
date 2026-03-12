@@ -23,6 +23,7 @@ trait QueryFilterTrait
         $skip = $options['skip'] ?? request()->get('skip', 0);
 
         // Search
+        // يوجد trait منفصل للبحث لكن هذا trait عام ويحتوي على كل الفلاتر بما فيها البحث， لذلك تم دمج الكود الخاص بالبحث هنا
         $search = $options['search'] ?? request()->get('search');
         $searchColumns = $options['searchColumns'] ?? [];
 
@@ -33,7 +34,6 @@ trait QueryFilterTrait
                 }
             });
         }
-
 
         $count = $query->count(); // مهم لحساب العدد الكلي
 
@@ -64,6 +64,13 @@ trait QueryFilterTrait
         ];
     }
 
+    /**
+     * Apply filters and return array format for legacy compatibility
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $options
+     * @return array
+     */
     public function applyFiltersA($query, array $options = [])
     {
         $data = $this->applyFilters($query, $options);

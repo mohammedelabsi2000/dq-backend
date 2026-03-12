@@ -3,6 +3,8 @@
 namespace App\Concerns;
 
 use App\Contracts\BelongsToHierarchy;
+use App\Models\Branch;
+use App\Models\Region;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,7 +29,7 @@ trait HasRoles
         }
 
         $this->roles()->attach($role->id, [
-            'scope_id'   => $scope?->id,
+            'scope_id' => $scope?->id,
             'scope_type' => $scope ? get_class($scope) : null,
         ]);
     }
@@ -49,13 +51,24 @@ trait HasRoles
             ->detach($role->id);
     }
 
-    public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
+    public function isGlobalAdmin(): bool
     {
+        $this->loadMissing('roles');
+
+        return $this->roles->contains(
+            fn($role) => $role->pivot->scope_id === null
+        );
+    }
+
+    public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null, $resourceType = null): bool
+    {
+
         // dd($resource);
         // return true; // دائمًا يسمح
         $this->loadMissing('roles.roleAbilities');
 
-        $roles = $this->roles->filter(function ($role) use ($resource) {
+        $roles = $this->roles->filter(function ($role) use ($ability, $resource) {
+            // dd($role);
             // scope_id = null → admin عام صلاحيته على كل شيء
             if ($role->pivot->scope_id === null) {
                 return true;
@@ -63,19 +76,19 @@ trait HasRoles
 
             // إذا لم يكن هناك resource → نرفض الـ scoped roles
             if ($resource === null) {
-                return false;
+                return true;
             }
 
             // نتحقق أن الـ scope موجود في هرمية الـ resource
             return collect($resource->getHierarchyIds())
                 ->contains(
                     fn($level) =>
-                    $level['id']   == $role->pivot->scope_id
-                        &&
-                        $level['type'] == $role->pivot->scope_type
+                    $level['id'] == $role->pivot->scope_id
+                    &&
+                    $level['type'] == $role->pivot->scope_type
                 );
         });
-
+        dd($roles->first());
         $abilities = $roles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);

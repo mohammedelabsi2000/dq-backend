@@ -1,93 +1,75 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AcademicQualificationController;
-use App\Http\Controllers\Api\AccessTokensController;
-use App\Http\Controllers\Api\AttendanceController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\BranchController;
-use App\Http\Controllers\Api\CenterController;
-use App\Http\Controllers\Api\MosqueController;
-use App\Http\Controllers\Api\RegionController;
-use App\Http\Controllers\Api\GradeController;
-use App\Http\Controllers\Api\ConstantTypeController;
-use App\Http\Controllers\Api\ConstantController;
-use App\Http\Controllers\Api\CourseController;
-use App\Http\Controllers\Api\PersonalCourseController;
-use App\Http\Controllers\Api\HalaqaController;
-use App\Http\Controllers\Api\PlanController;
-use App\Http\Controllers\Api\StudentController;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\HalaqaStudentController;
-use App\Http\Controllers\Api\IdQueryController;
-use App\Http\Controllers\Api\ImageController;
-use App\Http\Controllers\Api\TrackController;
-use App\Http\Controllers\Api\PlanAssignmentController;
-use App\Http\Controllers\Api\PlanStudentController;
-use App\Http\Controllers\Api\RoleController;
-use App\Http\Controllers\Api\RolesController;
-use App\Http\Controllers\Api\UserRoleController;
-use App\Http\Controllers\Api\UserRolesController;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Api\{
+    AcademicQualificationController,
+    AttendanceController,
+    BranchController,
+    CenterController,
+    ConstantController,
+    ConstantTypeController,
+    CourseController,
+    GradeController,
+    HalaqaController,
+    HalaqaStudentController,
+    IdQueryController,
+    ImageController,
+    MosqueController,
+    PersonalCourseController,
+    PlanAssignmentController,
+    PlanController,
+    PlanStudentController,
+    RegionController,
+    StudentController,
+    TrackController
+};
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return Auth::guard('sanctum')->user();
-});
-/*******************************Version 1********************************************** */
-
-Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
-    ->middleware('guest:sanctum');
+// Load all API route files from the api directory
+foreach (glob(__DIR__ . '/api/*.php') as $file) {
+    require $file;
+}
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('change-password', [AccessTokensController::class, 'updatePassword']);
-    Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy'])
-        ->middleware('auth:sanctum');
-    Route::apiResource('users', UserController::class);
-    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
+    // Constants management
+    Route::apiResource('constant_types', ConstantTypeController::class);
+    Route::apiResource('constants', ConstantController::class);
 
-    Route::apiResource('personal-courses', PersonalCourseController::class);
-
-    // راوت احضار شهادات اليوزر person-courses
-    Route::get('person-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
-    // راوت احضار شهادات اليوزر academic-qualifications
-    Route::get(
-        'academic-qualifications/{person_type}/{person_id}',
-        [AcademicQualificationController::class, 'getPersonQualifications']
-    );
-
+    // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
     Route::apiResource('branches', BranchController::class);
     Route::apiResource('regions', RegionController::class);
     Route::apiResource('mosques', MosqueController::class);
     Route::apiResource('centers', CenterController::class);
     Route::apiResource('halaqas', HalaqaController::class);
 
-    Route::apiResource('constant_types', ConstantTypeController::class);
-    Route::apiResource('constants', ConstantController::class);
+    // Students management
+    Route::prefix('students')->group(function () {
+        Route::apiResource('', StudentController::class);
+        Route::post('import', [StudentController::class, 'import']);
+        Route::get('{student}/images', [ImageController::class, 'studentImages']);
+    });
 
-    Route::apiResource('students', StudentController::class);
-    Route::post('students/import', [StudentController::class, 'import']);
+    // Halaqa students assignment
+    Route::apiResource('halaqa-students', HalaqaStudentController::class);
 
+    // Academic qualifications management
+    Route::prefix('academic-qualifications')->group(function () {
+        Route::apiResource('', AcademicQualificationController::class);
+        Route::get('{person_type}/{person_id}', [AcademicQualificationController::class, 'getPersonQualifications']);
+    });
+
+    // Personal courses management
+    Route::prefix('personal-courses')->group(function () {
+        Route::apiResource('', PersonalCourseController::class);
+        Route::get('{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+    });
+
+    // Images management (for students, users, qualifications, etc.)
     Route::apiResource('images', ImageController::class)
         ->only(['store', 'destroy', 'index', 'show']);
-    Route::get('users/{user}/images', [ImageController::class, 'userImages']);
-    Route::get('students/{student}/images', [ImageController::class, 'studentImages']);
 
-    // الصلاحيات المتاحة
-    Route::get('abilities', [RoleController::class, 'abilities']);
-    // Roles CRUD
-    Route::apiResource('roles', RoleController::class);
+    // ID Query endpoint
     Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
-
-    // User Roles
-    Route::prefix('users/{user}/roles')->group(function () {
-        Route::get('/',    [UserRoleController::class, 'index']);
-        Route::post('/',   [UserRoleController::class, 'assign']);
-        Route::put('/',    [UserRoleController::class, 'sync']);   // ← أضف هذا
-        Route::delete('/', [UserRoleController::class, 'remove']);
-    });
 });
-/****************************************Version 1******************************************************* */
 
 // Route::post('register', [AuthController::class, 'register']);
 // Route::post('login', [AuthController::class, 'login']);
@@ -160,31 +142,3 @@ Route::prefix('plans')->group(function () {
 Route::get('plans-setup', [PlanController::class, 'setupIndex']);
 
 Route::apiResource('grades', GradeController::class);
-
-// Route::prefix('students')->group(function () {
-//     Route::apiResource('', StudentController::class);
-//     Route::post('import', [StudentController::class, 'import']);
-// });
-
-
-
-
-// Route::apiResource('roles', RolesController::class);
-// راوت احضار شهادات اليوزر person-courses
-Route::get('personal-courses/{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
-// راوت احضار شهادات اليوزر academic-qualifications
-Route::get(
-    'academic-qualifications/{person_type}/{person_id}',
-    [AcademicQualificationController::class, 'getPersonQualifications']
-);
-// Route::apiResource('roles', RolesController::class);
-
-// Route::get('users/{user}/roles', [UserRolesController::class, 'index']);
-// Route::post('users/{user}/roles', [UserRolesController::class, 'store']);
-// Route::delete('users/{user}/roles/{role}', [UserRolesController::class, 'destroy']);
-// Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
-
-
-
-// اسناد الطلاب لحلقات
-Route::apiResource('halaqa-students', HalaqaStudentController::class);

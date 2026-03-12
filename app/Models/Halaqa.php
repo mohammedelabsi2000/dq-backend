@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Halaqa extends Model
+class Halaqa extends Model implements BelongsToHierarchy
 {
     use HasFactory, SoftDeletes;
 
@@ -63,5 +64,72 @@ class Halaqa extends Model
             ->withPivot(['from_date', 'to_date', 'status_id'])
             ->withTimestamps();
         // ->using(HalaqaStudent::class);
+    }
+
+    public function getHierarchyIds(): array
+    {
+        $this->loadMissing('reference');
+
+        // لو تابعة لـ Center
+        if ($this->reference_type === 'center') {
+            $center = $this->reference;
+            $center->loadMissing('region');
+
+            return [
+                ['id' => $center->region->branch_id, 'type' => 'branch'],
+                ['id' => $center->region_id, 'type' => 'region'],
+                ['id' => $center->id, 'type' => 'center'],
+                ['id' => $this->id, 'type' => 'halaqa'],
+            ];
+        }
+
+        // لو تابعة لـ Region
+        if ($this->reference_type === 'region') {
+            $region = $this->reference;
+
+            return [
+                ['id' => $region->branch_id, 'type' => 'branch'],
+                ['id' => $region->id, 'type' => 'region'],
+                ['id' => $this->id, 'type' => 'halaqa'],
+            ];
+        }
+
+        return [
+            ['id' => $this->id, 'type' => 'halaqa'],
+        ];
+    }
+
+    public function getHierarchyData()
+    {
+        $this->loadMissing('reference');
+
+        // لو تابعة لـ Center
+        if ($this->reference_type === 'center') {
+            $center = $this->reference;
+            $center->loadMissing('region.branch');
+
+            return [
+                ['id' => $center->region->branch_id, 'type' => 'branch', 'name' => $center->region->branch->name],
+                ['id' => $center->region_id, 'type' => 'region', 'name' => $center->region->name],
+                ['id' => $center->id, 'type' => 'center', 'name' => $center->name],
+                ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
+            ];
+        }
+
+        // لو تابعة لـ Region
+        if ($this->reference_type === 'region') {
+            $region = $this->reference;
+            $region->loadMissing('branch');
+
+            return [
+                ['id' => $region->branch_id, 'type' => 'branch', 'name' => $region->branch->name],
+                ['id' => $region->id, 'type' => 'region', 'name' => $region->name],
+                ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
+            ];
+        }
+
+        return [
+            ['id' => $this->id, 'type' => 'halaqa', 'name' => $this->name],
+        ];
     }
 }

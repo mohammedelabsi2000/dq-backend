@@ -155,7 +155,6 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-
         return $this->success(
             null,
             'تم حذف المسخدم بنجاح'

@@ -8,14 +8,14 @@ use Illuminate\Support\Facades\Cache;
 class ConstantHelper
 {
     /**
-     * جلب جميع الـ constants المرتبطة بنوع معين
-     *
-     * @param string $typeName اسم النوع في جدول constant_types
+     * Get all active constants for a given type name.
+     * 
+     * @param string $typeName
      * @return array
      */
     public static function getConstantsByType(string $typeName): array
     {
-        // احصل على ID النوع من cache أو DB
+        // Get constant type ID from cache or DB
         $typeId = Cache::rememberForever("constant_type_id_{$typeName}", function () use ($typeName) {
             return ConstantType::where('name', $typeName)->value('id');
         });
@@ -24,7 +24,7 @@ class ConstantHelper
             return [];
         }
 
-        // جلب الـ constants من cache أو DB
+        // Return constants for the type from cache or DB
         return Cache::rememberForever("constants_for_type_{$typeId}", function () use ($typeId) {
             return Constant::where('constant_type_id', $typeId)
                 ->where('is_active', true)
@@ -34,7 +34,10 @@ class ConstantHelper
     }
 
     /**
-     * جلب IDs فقط
+     * Get an array of constant IDs for a given type name.
+     * 
+     * @param string $typeName
+     * @return array
      */
     public static function getConstantIdsByType(string $typeName): array
     {
