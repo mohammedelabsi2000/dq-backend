@@ -12,36 +12,48 @@ class UserResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-   public function toArray($request): array
-{
-    return [
-        'id' => $this->id,
-        'fName' => $this->fName,
-        'sName' => $this->sName,
-        'thName' => $this->thName,
-        'family' => $this->family,
-        'full_name' => trim(preg_replace('/\s+/', ' ',$this->full_name)),
-        'dob' => $this->dob,
-        'gender' => $this->gender,
-        'genderText' => $this->gender_text,
-        'numChildren' => $this->numChildren,
-        'identity' => $this->identity,
-        'phone' => $this->phone,
-        'whatsapp' => $this->whatsapp,
-        'email' => $this->email,
-        'jobname' => $this->jobname,
-        'job_place' => $this->job_place,
-        'job_salary' => $this->job_salary,
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->id,
+            'fName' => $this->fName,
+            'sName' => $this->sName,
+            'thName' => $this->thName,
+            'family' => $this->family,
+            'full_name' => trim(preg_replace('/\s+/', ' ', $this->full_name)),
+            'dob' => $this->dob,
+            'gender' => $this->gender,
+            'genderText' => $this->gender_text,
+            'numChildren' => $this->numChildren,
+            'identity' => $this->identity,
+            'phone' => $this->phone,
+            'whatsapp' => $this->whatsapp,
+            'email' => $this->email,
+            'jobname' => $this->jobname,
+            'job_place' => $this->job_place,
+            'job_salary' => $this->job_salary,
 
-        // العلاقات
-        'mosque' => new MosqueResource($this->whenLoaded('mosque')),
-        'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
-        'prefix_name' => new ConstantResource($this->whenLoaded('prefixName')),
+            // العلاقات
+            'mosque' => new MosqueResource($this->whenLoaded('mosque')),
+            'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
+            'prefix_name' => new ConstantResource($this->whenLoaded('prefixName')),
+            'roles' => UserRoleResource::collection($this->whenLoaded('roles')),
+            'abilities' => $this->when(
+                $this->relationLoaded('roles'),
+                fn() => $this->roles
+                    ->flatMap(fn($role) => $role->roleAbilities)
+                    ->unique('ability')
+                    ->values()
+                    ->map(fn($ability) => [
+                        'ability' => $ability->ability,
+                        'type'    => $ability->type,
+                    ])
+            ),
 
-        'location' => $this->location,
+            'location' => $this->location,
 
-        // لو عندك صورة بعدين
-        // 'image' => new ImageResource($this->whenLoaded('image')),
-    ];
-}
+            // لو عندك صورة بعدين
+            // 'image' => new ImageResource($this->whenLoaded('image')),
+        ];
+    }
 }

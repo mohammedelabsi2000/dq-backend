@@ -114,10 +114,15 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
-        $user = $user->load(['mosque', 'maritalStatus', 'prefix']);
-        return $this->apiResponse(
+        $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.roleAbilities']);
+        // return $this->apiResponse(
+        //     new UserResource($user),
+        //     'success',
+        //     200
+        // );
+        return $this->success(
             new UserResource($user),
-            'success',
+            'بيانات المستخدم',
             200
         );
     }
