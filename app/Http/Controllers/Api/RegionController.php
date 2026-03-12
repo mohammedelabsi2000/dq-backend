@@ -21,7 +21,7 @@ class RegionController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Region::class);
-        $query = Region::query();
+        $query = Region::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],

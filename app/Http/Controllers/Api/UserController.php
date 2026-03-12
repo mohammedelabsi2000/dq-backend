@@ -20,7 +20,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $query = User::query();
+        $this->authorize('viewAny', User::class);
+        $query = User::query()->visibleTo(auth()->user());
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
@@ -52,6 +53,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        $this->authorize('create', User::class);
         $user = User::where('identity', $request['identity'])
             ->first();
 
@@ -111,6 +113,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        $this->authorize('view', $user);
         $user = $user->load(['mosque', 'maritalStatus', 'prefix']);
         return $this->apiResponse(
             new UserResource($user),
@@ -127,7 +130,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-
+        $this->authorize('update', $user);
         $my_request = $request->validated();
         // تشفير الباسوورد لو تم تغييره
         if ($request->input('password')) {
@@ -154,6 +157,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+        $this->authorize('delete', $user);
         $user->delete();
         return $this->success(
             null,
