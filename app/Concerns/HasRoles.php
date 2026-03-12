@@ -21,7 +21,7 @@ trait HasRoles
         $alreadyAssigned = $this->roles()
             ->wherePivot('role_id', $role->id)
             ->wherePivot('scope_id', $scope?->id)
-            ->wherePivot('scope_type', $scope ? get_class($scope) : null)
+            ->wherePivot('scope_type', $scope ? $scope->getMorphClass() : null)
             ->exists();
 
         if ($alreadyAssigned) {
@@ -29,8 +29,13 @@ trait HasRoles
         }
 
         $this->roles()->attach($role->id, [
+<<<<<<< HEAD
+            'scope_id'   => $scope?->id,
+            'scope_type' => $scope ? $scope->getMorphClass() : null,
+=======
             'scope_id' => $scope?->id,
             'scope_type' => $scope ? get_class($scope) : null,
+>>>>>>> 31e760454fcaa3ca8a78c5f21eed767a14f4c7ae
         ]);
     }
 
@@ -47,7 +52,7 @@ trait HasRoles
     {
         $this->roles()
             ->wherePivot('scope_id', $scope?->id)
-            ->wherePivot('scope_type', $scope ? get_class($scope) : null)
+            ->wherePivot('scope_type', $scope ? $scope->getMorphClass() : null)
             ->detach($role->id);
     }
 
