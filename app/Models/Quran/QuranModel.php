@@ -27,6 +27,6 @@ class QuranModel extends Model
     
     public function save(array $options = [])
     {
-        throw new \Exception('Saving not allowed for this model');
+        throw new \Exception('لايمكن حفظ هذا النموذج لأنه للقرآن الكريم');
     }
 }

@@ -1,26 +1,28 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AcademicQualificationController;
-use App\Http\Controllers\Api\AttendanceController;
-use App\Http\Controllers\Api\BranchController;
-use App\Http\Controllers\Api\CenterController;
-use App\Http\Controllers\Api\MosqueController;
-use App\Http\Controllers\Api\RegionController;
-use App\Http\Controllers\Api\GradeController;
-use App\Http\Controllers\Api\ConstantTypeController;
-use App\Http\Controllers\Api\ConstantController;
-use App\Http\Controllers\Api\CourseController;
-use App\Http\Controllers\Api\PersonalCourseController;
-use App\Http\Controllers\Api\HalaqaController;
-use App\Http\Controllers\Api\PlanController;
-use App\Http\Controllers\Api\StudentController;
-use App\Http\Controllers\Api\HalaqaStudentController;
-use App\Http\Controllers\Api\IdQueryController;
-use App\Http\Controllers\Api\ImageController;
-use App\Http\Controllers\Api\TrackController;
-use App\Http\Controllers\Api\PlanAssignmentController;
-use App\Http\Controllers\Api\PlanStudentController;
+use App\Http\Controllers\Api\{
+    AcademicQualificationController,
+    AttendanceController,
+    BranchController,
+    CenterController,
+    ConstantController,
+    ConstantTypeController,
+    CourseController,
+    GradeController,
+    HalaqaController,
+    HalaqaStudentController,
+    IdQueryController,
+    ImageController,
+    MosqueController,
+    PersonalCourseController,
+    PlanAssignmentController,
+    PlanController,
+    PlanStudentController,
+    RegionController,
+    StudentController,
+    TrackController
+};
 
 // Load all API route files from the api directory
 foreach (glob(__DIR__ . '/api/*.php') as $file) {

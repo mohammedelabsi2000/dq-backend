@@ -164,7 +164,6 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
         $user->delete();
-
         return $this->success(
             null,
             'تم حذف المسخدم بنجاح'

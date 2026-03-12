@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\Api\AccessTokensController;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AccessTokensController;
 
 // Public routes
 Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])

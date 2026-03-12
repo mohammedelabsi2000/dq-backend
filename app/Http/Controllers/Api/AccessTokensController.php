@@ -39,14 +39,14 @@ class AccessTokensController extends Controller
                 ->values()
                 ->map(fn($ability) => [
                     'ability' => $ability->ability,
-                    'type'    => $ability->type,
+                    'type' => $ability->type,
                 ]);
             // $user->makeHidden('roles');
             return $this->success([
-                'token'     => $token->plainTextToken,
-                'user'      => $user,
+                'token' => $token->plainTextToken,
+                'user' => $user,
                 'abilities' => $abilities,
-            ], "Ok", 201);
+            ], "تم تسجيل الدخول بنجاح", 201);
 
 
 
@@ -60,7 +60,7 @@ class AccessTokensController extends Controller
             // ], 201);
         }
 
-        return $this->error("Credentials are incorrect", 401, null);
+        return $this->error("بيانات الدخول غير صحيحة", 401, null);
 
         // return Response::json([
         //     'code' => 0,
@@ -69,22 +69,22 @@ class AccessTokensController extends Controller
     }
 
     // To delete token
-    public function destroy($token = null)
+    public function destroy(Request $request, $token = null)
     {
-        $user = Auth::guard('sanctum')->user();
-
+        // $user = Auth::guard('sanctum')->user();
+        $user = $request->user();
         if (null === $token) {
             $user->currentAccessToken()->delete();
-            return $this->success(null, "Logout successfully!", 200);
+            return $this->success(null, "تم تسجيل الخروج بنجاح", 200);
         }
 
         $personalAccessToken = PersonalAccessToken::findToken($token);
         if ($user->id == $personalAccessToken->tokenable_id && get_class($user) == $personalAccessToken->tokenable_type) {
             $personalAccessToken->delete();
-            return $this->success($user, "Logout successfully!", 200);
+            return $this->success($user, "تم تسجيل الخروج بنجاح", 200);
         }
 
-        return $this->error("Unauthorized!", 401, null);
+        return $this->error("غير مصرح!", 401, null);
     }
 
     public function updatePassword(Request $request)
@@ -96,11 +96,8 @@ class AccessTokensController extends Controller
 
         #Match The Old Password
         if (!Hash::check($request->old_password, auth()->user()->password)) {
-            return $this->error("Old Password Doesn't match!", 404, null);
+            return $this->error("كلمة المرور القديمة غير صحيحة!", 404, null);
             // return $this->apiResponse("Old Password Doesn't match!", 404);
-            return Response::json([
-                'message' => "Old Password Doesn't match!",
-            ], 404);
         }
 
         $authModel = get_class(auth()->user());
@@ -110,10 +107,7 @@ class AccessTokensController extends Controller
                 'password' => Hash::make($request->new_password)
             ]);
 
-            return $this->success(null, "Password changed successfully!", 200);
-            // return Response::json([
-            //     'message' => "Password changed successfully!",
-            // ], 200);
+            return $this->success(null, "تم تغيير كلمة المرور بنجاح!", 200);
         }
     }
 }
