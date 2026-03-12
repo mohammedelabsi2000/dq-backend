@@ -20,7 +20,7 @@ return new class extends Migration
 
             // $table->primary(['authorizable_id', 'authorizable_type', 'role_id'], 'role_user_primary');
             $table->primary(
-                ['authorizable_id', 'authorizable_type', 'role_id', 'scope_type', 'scope_id'],
+                ['authorizable_id', 'authorizable_type', 'role_id'],
                 'role_user_primary'
             );
             $table->index(['scope_type', 'scope_id']);
@@ -34,6 +34,7 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::dropindexIfExists('role_user_scope_type_scope_id_index');
         Schema::dropIfExists('role_user');
     }
 };
