@@ -2,13 +2,15 @@
 
 namespace App\Providers;
 
-use App\Models\Branch;
-use App\Models\Center;
-use App\Models\Halaqa;
-use App\Models\Mosque;
-use App\Models\Region;
-use App\Models\Student;
-use App\Models\User;
+use App\Models\{
+    Branch,
+    Center,
+    Halaqa,
+    Mosque,
+    Region,
+    Student,
+    User,
+};
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
@@ -30,7 +32,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register() {}
+    public function register()
+    {
+    }
 
     /**
      * Bootstrap any application services.
@@ -44,16 +48,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureExcel();
         $this->registerAuditMacro();
         $this->registerAuditObservers();
-
-        Relation::morphMap([
-            'user'   => User::class,
-            'branch' => Branch::class,
-            'region' => Region::class,
-            'center' => Center::class,
-            'mosque' => Mosque::class,
-            'halaqa' => Halaqa::class,
-            'student' => Student::class,
-        ]);
+        $this->configureMorphMap();
     }
 
     /*
@@ -134,10 +129,28 @@ class AppServiceProvider extends ServiceProvider
             if (
                 class_exists($class) &&
                 property_exists($class, 'usesAudit') &&
-                $class::$usesAudit
+                    $class::$usesAudit
             ) {
                 $class::observe(AuditObserver::class);
             }
         }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Morph Map Configuration
+    |--------------------------------------------------------------------------
+    */
+    protected function configureMorphMap(): void
+    {
+        Relation::morphMap([
+            'user' => User::class,
+            'branch' => Branch::class,
+            'region' => Region::class,
+            'center' => Center::class,
+            'mosque' => Mosque::class,
+            'halaqa' => Halaqa::class,
+            'student' => Student::class,
+        ]);
     }
 }

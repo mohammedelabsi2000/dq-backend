@@ -3,6 +3,8 @@
 namespace App\Concerns;
 
 use App\Contracts\BelongsToHierarchy;
+use App\Models\Branch;
+use App\Models\Region;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,7 +29,7 @@ trait HasRoles
         }
 
         $this->roles()->attach($role->id, [
-            'scope_id'   => $scope?->id,
+            'scope_id' => $scope?->id,
             'scope_type' => $scope ? get_class($scope) : null,
         ]);
     }
@@ -125,7 +127,7 @@ trait HasRoles
     //     return $abilities->where('type', 'allow')->isNotEmpty();
     // }
 
-    public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
+    public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null, $resourceType = null): bool
     {
         $this->loadMissing('roles.roleAbilities');
 
@@ -146,7 +148,7 @@ trait HasRoles
                         $level['type'] == $role->pivot->scope_type
                 );
         });
-
+        dd($roles->first());
         $abilities = $roles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
