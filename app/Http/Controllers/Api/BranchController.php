@@ -10,7 +10,6 @@ use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
 use App\Traits\QueryFilterTrait;
-use Illuminate\Support\Facades\Gate;
 
 class BranchController extends Controller
 {

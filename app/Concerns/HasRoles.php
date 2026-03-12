@@ -29,13 +29,8 @@ trait HasRoles
         }
 
         $this->roles()->attach($role->id, [
-<<<<<<< HEAD
             'scope_id'   => $scope?->id,
             'scope_type' => $scope ? $scope->getMorphClass() : null,
-=======
-            'scope_id' => $scope?->id,
-            'scope_type' => $scope ? get_class($scope) : null,
->>>>>>> 31e760454fcaa3ca8a78c5f21eed767a14f4c7ae
         ]);
     }
 
@@ -153,7 +148,7 @@ trait HasRoles
                         $level['type'] == $role->pivot->scope_type
                 );
         });
-        dd($roles->first());
+        // dd($roles->first());
         $abilities = $roles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
