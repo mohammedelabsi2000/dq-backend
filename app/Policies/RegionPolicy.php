@@ -19,7 +19,7 @@ class RegionPolicy
      */
     public function viewAny($user)
     {
-        return $user->hasAbility('regions.view');
+        return $user->hasAbility('regions.view', null, 'region');
     }
 
     /**
