@@ -199,27 +199,33 @@ class User extends Authenticatable implements BelongsToHierarchy
     {
         return $this->morphMany(PersonalCourse::class, 'person');
     }
-
     public function getHierarchyIds(): array
     {
-        $this->loadMissing('mosque.region');
-
-        $mosque = $this->mosque;
-        if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
-
-        $region = $mosque->region;
-        if (!$region) return [
-            ['id' => $mosque->id,  'type' => 'mosque'],
-            ['id' => $this->id,    'type' => 'user'],
-        ];
-
         return [
-            ['id' => $region->branch_id, 'type' => 'branch'],
-            ['id' => $region->id,        'type' => 'region'],
-            ['id' => $mosque->id,        'type' => 'mosque'],
-            ['id' => $this->id,          'type' => 'user'],
+            ['id' => $this->id, 'type' => 'user'],
         ];
     }
+
+    // public function getHierarchyIds(): array
+    // {
+    //     $this->loadMissing('mosque.region');
+
+    //     $mosque = $this->mosque;
+    //     if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
+
+    //     $region = $mosque->region;
+    //     if (!$region) return [
+    //         ['id' => $mosque->id,  'type' => 'mosque'],
+    //         ['id' => $this->id,    'type' => 'user'],
+    //     ];
+
+    //     return [
+    //         ['id' => $region->branch_id, 'type' => 'branch'],
+    //         ['id' => $region->id,        'type' => 'region'],
+    //         ['id' => $mosque->id,        'type' => 'mosque'],
+    //         ['id' => $this->id,          'type' => 'user'],
+    //     ];
+    // }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {

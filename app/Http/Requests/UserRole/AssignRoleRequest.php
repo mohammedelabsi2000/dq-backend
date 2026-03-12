@@ -28,7 +28,7 @@ class AssignRoleRequest extends FormRequest
     public function rules()
     {
         return [
-            'role_id'    => 'required|exists:roles,id',
+            'role_id'    => 'required|array',
             'scope_id'   => 'nullable|integer',
             'scope_type' => [
                 'nullable',
