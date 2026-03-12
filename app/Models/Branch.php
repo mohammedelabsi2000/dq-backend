@@ -45,4 +45,11 @@ class Branch extends Model implements BelongsToHierarchy
             ['id' => $this->id, 'type' => 'branch'],
         ];
     }
+    
+    public function getHierarchyData()
+    {
+        return [
+            ['id' => $this->id, 'type' => 'branch', 'name' => $this->name],
+        ];
+    }
 }

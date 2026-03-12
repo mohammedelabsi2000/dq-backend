@@ -40,4 +40,15 @@ class Mosque extends Model implements BelongsToHierarchy
             ['id' => $this->id,                 'type' => 'mosque'],
         ];
     }
+
+    public function getHierarchyData()
+    {
+        $this->loadMissing('region');
+
+        return [
+            ['id' => $this->region->branch_id, 'type' => 'branch', 'name' => $this->region->branch->name],
+            ['id' => $this->region_id,          'type' => 'region', 'name' => $this->region->name],
+            ['id' => $this->id,                 'type' => 'mosque', 'name' => $this->name],
+        ];
+    }
 }
