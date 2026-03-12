@@ -116,7 +116,9 @@ class UserController extends Controller
         $this->authorize('view', $user);
         $user = $user->load(['mosque', 'maritalStatus', 'prefix']);
         return $this->apiResponse(
-            new UserResource($user),
+            [
+                'data' => new UserResource($user),
+            ],
             'success',
             200
         );

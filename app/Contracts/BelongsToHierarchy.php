@@ -8,5 +8,4 @@ interface BelongsToHierarchy
     // مثال: Center يرجع [Branch, Region, Center]
     public function getHierarchyIds(): array;
     
-    public function getHierarchyData();
 }

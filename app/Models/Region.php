@@ -40,14 +40,4 @@ class Region extends Model implements BelongsToHierarchy
             ['id' => $this->id,        'type' => 'region'],
         ];
     }
-
-    public function getHierarchyData()
-    {
-        $this->loadMissing('branch');
-
-        return [
-            ['id' => $this->branch_id, 'type' => 'branch', 'name' => $this->branch->name],
-            ['id' => $this->id,        'type' => 'region', 'name' => $this->name],
-        ];
-    }
 }
