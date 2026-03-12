@@ -153,7 +153,7 @@ trait HasRoles
                         $level['type'] == $role->pivot->scope_type
                 );
         });
-        dd($roles->first());
+        // dd($roles->first());
         $abilities = $roles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
