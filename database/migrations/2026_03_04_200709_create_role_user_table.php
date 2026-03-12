@@ -18,7 +18,12 @@ return new class extends Migration
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->nullableMorphs('scope');
 
-            $table->primary(['authorizable_id', 'authorizable_type', 'role_id'], 'role_user_primary');
+            // $table->primary(['authorizable_id', 'authorizable_type', 'role_id'], 'role_user_primary');
+            $table->primary(
+                ['authorizable_id', 'authorizable_type', 'role_id', 'scope_type', 'scope_id'],
+                'role_user_primary'
+            );
+            $table->index(['scope_type', 'scope_id']);
         });
     }
 

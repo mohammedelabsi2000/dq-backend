@@ -192,7 +192,6 @@ class UserController extends Controller
 
             return redirect()->route('users.index')
                 ->with('success', 'تم إضافة المستخدم بنجاح');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'حدث خطأ أثناء إضافة المستخدم: ' . $e->getMessage())
@@ -203,7 +202,7 @@ class UserController extends Controller
     /**
      * Show user details
      */
-    public function show ($id)
+    public function show($id)
     {
         $user = User::with([
             'mosque.region.branch',
@@ -335,7 +334,6 @@ class UserController extends Controller
 
             return redirect()->route('users.show', $user->id)
                 ->with('success', 'تم تحديث المستخدم بنجاح');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'حدث خطأ أثناء تحديث المستخدم: ' . $e->getMessage())
@@ -368,7 +366,6 @@ class UserController extends Controller
 
             return redirect()->route('users.index')
                 ->with('success', 'تم حذف المستخدم بنجاح');
-
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'حدث خطأ أثناء حذف المستخدم: ' . $e->getMessage());

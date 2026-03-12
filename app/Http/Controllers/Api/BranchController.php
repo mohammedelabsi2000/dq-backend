@@ -19,34 +19,9 @@ class BranchController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Branch::class);
-        $authUser = $request->user();
-        $authUser->loadMissing('roles');
 
-        $query = Branch::query();
-
-        if (!$authUser->isGlobalAdmin()) {
-            $query->where(function ($q) use ($authUser) {
-                foreach ($authUser->roles as $role) {
-                    if ($role->pivot->scope_type === 'branch') {
-                        $q->orWhere('id', $role->pivot->scope_id);
-                    }
-                    if ($role->pivot->scope_type === 'region') {
-                        $q->orWhereHas(
-                            'regions',
-                            fn($q) =>
-                            $q->where('id', $role->pivot->scope_id)
-                        );
-                    }
-                    if ($role->pivot->scope_type === 'center') {
-                        $q->orWhereHas(
-                            'regions.centers',
-                            fn($q) =>
-                            $q->where('centers.id', $role->pivot->scope_id)
-                        );
-                    }
-                }
-            });
-        }
+        // $query = Branch::query();
+        $query = Branch::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],

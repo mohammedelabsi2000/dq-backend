@@ -20,7 +20,7 @@ class MosqueController extends Controller
     {
         $this->authorize('viewAny', Mosque::class);
 
-        $query = Mosque::query();
+        $query = Mosque::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],

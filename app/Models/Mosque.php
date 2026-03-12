@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Concerns\HasHierarchyScope;
 use App\Contracts\BelongsToHierarchy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Mosque extends Model implements BelongsToHierarchy
 {
-    use HasFactory;
+    use HasFactory, HasHierarchyScope;
 
     protected $fillable = ['name', 'notes', 'region_id'];
 
@@ -28,6 +30,15 @@ class Mosque extends Model implements BelongsToHierarchy
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $this->applyVisibleTo($query, $user, [
+            'branch' => 'branch_id',
+            'region' => 'region_id',
+            'mosque' => 'id',
+        ]);
     }
 
     public function getHierarchyIds(): array

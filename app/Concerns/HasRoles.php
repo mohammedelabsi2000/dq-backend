@@ -49,38 +49,100 @@ trait HasRoles
             ->detach($role->id);
     }
 
-    public function isGlobalAdmin(): bool
-    {
-        $this->loadMissing('roles');
+    // public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
+    // {
+    //     // dd($resource);
+    //     // return true; // دائمًا يسمح
+    //     $this->loadMissing('roles.roleAbilities');
 
-        return $this->roles->contains(
-            fn($role) => $role->pivot->scope_id === null
-        );
-    }
+    //     $roles = $this->roles->filter(function ($role) use ($resource) {
+    //         // scope_id = null → admin عام صلاحيته على كل شيء
+    //         if ($role->pivot->scope_id === null) {
+    //             return true;
+    //         }
+
+    //         // إذا لم يكن هناك resource → نرفض الـ scoped roles
+    //         if ($resource === null) {
+    //             return false;
+    //         }
+
+    //         // نتحقق أن الـ scope موجود في هرمية الـ resource
+    //         return collect($resource->getHierarchyIds())
+    //             ->contains(
+    //                 fn($level) =>
+    //                 $level['id']   == $role->pivot->scope_id
+    //                     &&
+    //                     $level['type'] == $role->pivot->scope_type
+    //             );
+    //     });
+
+    //     $abilities = $roles
+    //         ->flatMap(fn($role) => $role->roleAbilities)
+    //         ->where('ability', $ability);
+
+    //     // // deny يتغلب على allow دائماً
+    //     if ($abilities->where('type', 'deny')->isNotEmpty()) {
+    //         return false;
+    //     }
+
+    //     return $abilities->where('type', 'allow')->isNotEmpty();
+    // }
+    // public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
+    // {
+    //     // تحميل العلاقات مرة واحدة للأداء
+    //     $this->loadMissing('roles.roleAbilities');
+
+    //     $roles = $this->roles->filter(function ($role) use ($resource, $ability) {
+    //         // 1. إذا كان الدور عاماً (Admin مثلاً) -> اسمح له
+    //         if ($role->pivot->scope_id === null) {
+    //             return true;
+    //         }
+
+    //         // 2. التعديل الجديد: إذا لم نمرر مورد (حالة viewAny)
+    //         // نتحقق: هل هذا الدور (مهما كان نطاقه) يمتلك هذه الصلاحية؟
+    //         if ($resource === null) {
+    //             return $role->roleAbilities->contains('ability', $ability);
+    //         }
+
+    //         // 3. إذا كان هناك مورد محدد (حالة view أو update) نطبق منطق الهرمية الخاص بك
+    //         return collect($resource->getHierarchyIds())
+    //             ->contains(
+    //                 fn($level) =>
+    //                 $level['id']   == $role->pivot->scope_id &&
+    //                     $level['type'] == $role->pivot->scope_type
+    //             );
+    //     });
+
+    //     $abilities = $roles
+    //         ->flatMap(fn($role) => $role->roleAbilities)
+    //         ->where('ability', $ability);
+
+    //     // منطق الـ deny والـ allow
+    //     if ($abilities->where('type', 'deny')->isNotEmpty()) {
+    //         return false;
+    //     }
+
+    //     return $abilities->where('type', 'allow')->isNotEmpty();
+    // }
 
     public function hasAbility(string $ability, ?BelongsToHierarchy $resource = null): bool
     {
-        // dd($resource);
-        // return true; // دائمًا يسمح
         $this->loadMissing('roles.roleAbilities');
 
+        // $roles = $this->roles->filter(function ($role) use ($resource) {
+        //     if ($role->pivot->scope_id === null) return true;
         $roles = $this->roles->filter(function ($role) use ($resource) {
-            // scope_id = null → admin عام صلاحيته على كل شيء
-            if ($role->pivot->scope_id === null) {
+            if ($role->pivot->scope_id === null && $role->pivot->scope_type === null) { // ✅
                 return true;
             }
 
-            // إذا لم يكن هناك resource → نرفض الـ scoped roles
-            if ($resource === null) {
-                return true;
-            }
+            // ✅ إذا resource = null → اقبل أي role له صلاحية (للـ viewAny)
+            if ($resource === null) return true;
 
-            // نتحقق أن الـ scope موجود في هرمية الـ resource
             return collect($resource->getHierarchyIds())
                 ->contains(
                     fn($level) =>
-                    $level['id']   == $role->pivot->scope_id
-                        &&
+                    $level['id']   == $role->pivot->scope_id &&
                         $level['type'] == $role->pivot->scope_type
                 );
         });
@@ -89,10 +151,7 @@ trait HasRoles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
 
-        // // deny يتغلب على allow دائماً
-        if ($abilities->where('type', 'deny')->isNotEmpty()) {
-            return false;
-        }
+        if ($abilities->where('type', 'deny')->isNotEmpty()) return false;
 
         return $abilities->where('type', 'allow')->isNotEmpty();
     }
