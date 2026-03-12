@@ -36,7 +36,7 @@ class UserController extends Controller
         $skip = $q['skip'];
         $limit = $q['limit']; */
         // $total = $query->count();
-        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix'])->get();
+        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles.roleAbilities'])->get();
 
         return $this->apiResponse([
             'total' => $total,

@@ -29,13 +29,8 @@ trait HasRoles
         }
 
         $this->roles()->attach($role->id, [
-<<<<<<< HEAD
             'scope_id'   => $scope?->id,
             'scope_type' => $scope ? $scope->getMorphClass() : null,
-=======
-            'scope_id' => $scope?->id,
-            'scope_type' => $scope ? get_class($scope) : null,
->>>>>>> 31e760454fcaa3ca8a78c5f21eed767a14f4c7ae
         ]);
     }
 
