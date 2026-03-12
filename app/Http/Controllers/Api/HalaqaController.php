@@ -26,7 +26,7 @@ class HalaqaController extends Controller
             'Region' => \App\Models\Region::class,
         ]); */
 
-        $query = Halaqa::query();
+        $query = Halaqa::query()->visibleTo(auth()->user());
 
         if ($request->filled('reference_type') && $request->filled('reference_id')) {
 

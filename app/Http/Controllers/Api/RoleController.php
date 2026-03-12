@@ -88,8 +88,19 @@ class RoleController extends Controller
         //     'data' => config('abilities'),
         // ]);
 
+        $abilties = config('abilities');
+
+        $target_arr = [];
+
+        foreach ($abilties as $key => $value) {
+            $target_arr[] = [
+                'label' => $key,
+                'items' => $value
+            ];
+        }
+
         return response()->json([
-            'abilities' => config('abilities'),
+            'abilities' => $target_arr,
         ]);
     }
 }

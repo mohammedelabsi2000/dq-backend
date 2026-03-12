@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use App\Concerns\HasHierarchyScope;
 use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 
 class Branch extends Model implements BelongsToHierarchy
 {
-    use HasFactory;
+    use HasFactory, HasHierarchyScope;
 
     protected $fillable = [
         'name',
@@ -22,22 +24,33 @@ class Branch extends Model implements BelongsToHierarchy
         return $this->hasMany(Region::class);
     }
 
-    public function scopeAllowedFor(Builder $query, User $user)
+    public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        $user->loadMissing('roles');
-
-        // إذا كان Admin (scope = null)
-        if ($user->roles->where('pivot.scope_id', null)->isNotEmpty()) {
-            return $query;
-        }
-
-        $branchIds = $user->roles
-            ->where('pivot.scope_type', self::class)
-            ->pluck('pivot.scope_id')
-            ->filter();
-
-        return $query->whereIn('id', $branchIds);
+        return $this->applyVisibleTo($query, $user, [
+            'branch' => 'id',
+        ]);
     }
+
+    // Branch.php
+    // public function scopeVisibleTo(Builder $query, User $user): Builder
+    // {
+    //     $user->loadMissing('roles');
+
+    //     $hasGlobalRole = $user->roles->contains(fn($role) => $role->pivot->scope_id === null);
+
+    //     if ($hasGlobalRole) {
+    //         return $query;
+    //     }
+
+    //     $morphAlias = array_search(static::class, Relation::morphMap()) ?: static::class;
+
+    //     $allowedIds = $user->roles
+    //         ->filter(fn($role) => $role->pivot->scope_type === $morphAlias)
+    //         ->pluck('pivot.scope_id');
+    //     // dd($allowedIds);
+
+    //     return $query->whereIn('id', $allowedIds);
+    // }
 
     public function getHierarchyIds(): array
     {

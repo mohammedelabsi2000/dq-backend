@@ -22,7 +22,7 @@ class CenterController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Center::class);
-        $query = Center::query();
+        $query = Center::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],

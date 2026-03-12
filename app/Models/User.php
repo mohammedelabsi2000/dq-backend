@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Concerns\HasHierarchyScope;
 use App\Concerns\HasRoles;
+use App\Contracts\BelongsToHierarchy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,9 +13,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements BelongsToHierarchy
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasHierarchyScope;
 
     // مميز الموديلات اللي تستخدم audit يتم قرائته داخل AppServiceProvider.php
     public static $usesAudit = true;
@@ -203,6 +206,39 @@ class User extends Authenticatable
     public function personalCourses()
     {
         return $this->morphMany(PersonalCourse::class, 'person');
+    }
+
+    public function getHierarchyIds(): array
+    {
+        $this->loadMissing('mosque.region');
+
+        $mosque = $this->mosque;
+        if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
+
+        $region = $mosque->region;
+        if (!$region) return [
+            ['id' => $mosque->id,  'type' => 'mosque'],
+            ['id' => $this->id,    'type' => 'user'],
+        ];
+
+        return [
+            ['id' => $region->branch_id, 'type' => 'branch'],
+            ['id' => $region->id,        'type' => 'region'],
+            ['id' => $mosque->id,        'type' => 'mosque'],
+            ['id' => $this->id,          'type' => 'user'],
+        ];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $this->applyVisibleTo($query, $user, [
+            'branch' => fn(Builder $q, $id) =>
+            $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
+            'region' => fn(Builder $q, $id) =>
+            $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
+            'mosque' => 'mosque_id',
+            'user'   => 'id',
+        ]);
     }
 
     // public function currentHalaqa()
