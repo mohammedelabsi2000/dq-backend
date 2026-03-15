@@ -37,10 +37,21 @@ class UserResource extends JsonResource
             'mosque' => new MosqueResource($this->whenLoaded('mosque')),
             'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
             'prefix_name' => new ConstantResource($this->whenLoaded('prefixName')),
+            'roles' => UserRoleResource::collection($this->whenLoaded('roles')),
+            'abilities' => $this->when(
+                $this->relationLoaded('roles'),
+                fn() => $this->roles
+                    ->flatMap(fn($role) => $role->roleAbilities)
+                    ->unique('ability')
+                    ->values()
+                    ->map(fn($ability) => [
+                        'ability' => $ability->ability,
+                        'type'    => $ability->type,
+                    ])
+            ),
 
             'location' => $this->location,
 
-            'roles' => RoleResource::collection($this->whenLoaded('roles')),
             // لو عندك صورة بعدين
             // 'image' => new ImageResource($this->whenLoaded('image')),
         ];

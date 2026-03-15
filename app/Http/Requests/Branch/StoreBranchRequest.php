@@ -20,6 +20,7 @@ class StoreBranchRequest extends FormRequest
     public function authorize()
     {
         return $this->user()->can('create', Branch::class);
+        // return auth()->user()->hasAbility('branches.create');
     }
 
     /**

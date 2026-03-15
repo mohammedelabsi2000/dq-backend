@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use App\Http\Traits\ApiResponser;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -49,6 +50,15 @@ class Handler extends ExceptionHandler
                     $e->getMessage(),
                     500,
                     ['حدث خطأ في قاعدة البيانات'],
+                );
+            }
+        });
+
+        $this->renderable(function (AuthorizationException $e, $request) {
+            if ($request->expectsJson()) {
+                return $this->error(
+                    'ليس لديك صلاحية للقيام بهذا الإجراء',
+                    403,
                 );
             }
         });

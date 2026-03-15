@@ -191,14 +191,6 @@ class User extends Authenticatable implements BelongsToHierarchy
     }
 
 
-    // لو عندك جدول للصور وتضيف image_id لاحقًا
-    /*
-    public function image()
-    {
-        return $this->belongsTo(Image::class);
-    }
-    */
-
     public function academicQualifications()
     {
         return $this->morphMany(AcademicQualification::class, 'person');
@@ -207,27 +199,33 @@ class User extends Authenticatable implements BelongsToHierarchy
     {
         return $this->morphMany(PersonalCourse::class, 'person');
     }
-
     public function getHierarchyIds(): array
     {
-        $this->loadMissing('mosque.region');
-
-        $mosque = $this->mosque;
-        if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
-
-        $region = $mosque->region;
-        if (!$region) return [
-            ['id' => $mosque->id,  'type' => 'mosque'],
-            ['id' => $this->id,    'type' => 'user'],
-        ];
-
         return [
-            ['id' => $region->branch_id, 'type' => 'branch'],
-            ['id' => $region->id,        'type' => 'region'],
-            ['id' => $mosque->id,        'type' => 'mosque'],
-            ['id' => $this->id,          'type' => 'user'],
+            ['id' => $this->id, 'type' => 'user'],
         ];
     }
+
+    // public function getHierarchyIds(): array
+    // {
+    //     $this->loadMissing('mosque.region');
+
+    //     $mosque = $this->mosque;
+    //     if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
+
+    //     $region = $mosque->region;
+    //     if (!$region) return [
+    //         ['id' => $mosque->id,  'type' => 'mosque'],
+    //         ['id' => $this->id,    'type' => 'user'],
+    //     ];
+
+    //     return [
+    //         ['id' => $region->branch_id, 'type' => 'branch'],
+    //         ['id' => $region->id,        'type' => 'region'],
+    //         ['id' => $mosque->id,        'type' => 'mosque'],
+    //         ['id' => $this->id,          'type' => 'user'],
+    //     ];
+    // }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
@@ -240,39 +238,4 @@ class User extends Authenticatable implements BelongsToHierarchy
             'user'   => 'id',
         ]);
     }
-
-    // public function currentHalaqa()
-    // {
-    //     return $this->hasOne(UserRole::class)
-    //         ->where('relation_type', Halaqa::class)
-    //         ->where('role', 'teacher')
-    //         ->whereNull('end_date');
-    // }
-
-    // public function roles()
-    // {
-    //     return $this->hasMany(UserRole::class);
-    // }
-
-    // الأدوار النشطة فقط
-    // public function activeRoles()
-    // {
-    //     return $this->roles()->active();
-    // }
-
-    // // أدوار ضمن كيان معين (مثلاً حلقة)
-    // public function rolesIn($model)
-    // {
-    //     return $this->activeRoles()->forModel($model);
-    // }
-
-    // // هل عنده دور معين داخل كيان؟
-    // public function hasRoleIn(string $roleName, $model): bool
-    // {
-    //     return $this->roles()
-    //         ->active()
-    //         ->forRole($roleName)
-    //         ->forModel($model)
-    //         ->exists();
-    // }
 }
