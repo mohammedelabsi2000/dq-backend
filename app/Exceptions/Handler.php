@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponser;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -43,6 +44,16 @@ class Handler extends ExceptionHandler
             //
         });
 
+        // ✅ أضف هذا
+        // $this->renderable(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
+        //     if ($request->is('api/*') || $request->expectsJson()) {
+        //         return $this->error(
+        //             'ليس لديك صلاحية للقيام بهذا الإجراء',
+        //             403,
+        //         );
+        //     }
+        // });
+
 
         $this->renderable(function (QueryException $e, $request) {
             if ($request->expectsJson()) {
@@ -53,20 +64,28 @@ class Handler extends ExceptionHandler
                 );
             }
         });
-
-        $this->renderable(function (AuthorizationException $e, $request) {
-            if ($request->expectsJson()) {
-                return $this->error(
-                    'ليس لديك صلاحية للقيام بهذا الإجراء',
-                    403,
-                );
-            }
-        });
     }
 
     public function render($request, Throwable $exception)
     {
         if ($request->is('api/*')) {
+
+            if ($exception instanceof AuthenticationException) {
+                return $this->error('Unauthenticated', 401);
+                // return $this->errorMessage('Unauthenticated', 401);
+            }
+
+            if ($exception instanceof AuthorizationException) {
+                return $this->error($exception->getMessage(), 403);
+            }
+
+            if ($exception instanceof ValidationException) {
+                $errors = $exception->validator->errors()->first();
+                return $this->errorMessage($errors, 422);
+                // $errors = $e->errors();
+                // return $this->errorResponse($errors, 422);
+            }
+
 
             // NotFoundHttpException → أي Route غير موجود
             if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
@@ -82,9 +101,9 @@ class Handler extends ExceptionHandler
              * AuthenticationException → لو حاولت تدخل على Route محمي بدون توكن أو بتوكن غير صالح
              * 401 Unauthorized → عندما لا يتم توفير بيانات الاعتماد أو تكون غير صحيحة.
              */
-            if ($exception instanceof AuthenticationException) {
-                return $this->errorMessage('Token غير صالح أو منتهي الصلاحية', 401);
-            }
+            // if ($exception instanceof AuthenticationException) {
+            //     return $this->errorMessage('Token غير صالح أو منتهي الصلاحية', 401);
+            // }
         }
 
         return parent::render($request, $exception);

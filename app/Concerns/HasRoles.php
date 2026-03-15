@@ -149,9 +149,13 @@ trait HasRoles
                 );
         });
         // dd($roles->first());
+
         $abilities = $roles
             ->flatMap(fn($role) => $role->roleAbilities)
             ->where('ability', $ability);
+        // logger("User has abilities for $ability:", $abilities->pluck('ability')->toArray());
+
+
 
         if ($abilities->where('type', 'deny')->isNotEmpty()) return false;
 

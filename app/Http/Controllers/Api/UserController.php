@@ -36,7 +36,7 @@ class UserController extends Controller
         $skip = $q['skip'];
         $limit = $q['limit']; */
         // $total = $query->count();
-        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles.roleAbilities'])->get();
+        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -53,7 +53,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $this->authorize('create', User::class);
+        // $this->authorize('create', User::class);
         $user = User::where('identity', $request['identity'])
             ->first();
 

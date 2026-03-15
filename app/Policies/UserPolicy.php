@@ -15,7 +15,7 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny(User $user)
+    public function viewAny($user)
     {
         return $user->hasAbility('users.view');
     }
@@ -27,7 +27,7 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, User $model)
+    public function view($user, User $model)
     {
         return $user->hasAbility('users.view', $model);
     }
@@ -38,7 +38,7 @@ class UserPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create(User $user)
+    public function create($user)
     {
         return $user->hasAbility('users.create');
     }
@@ -50,7 +50,7 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, User $model)
+    public function update($user, User $model)
     {
         return $user->hasAbility('users.update', $model);
     }
@@ -62,7 +62,7 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, User $model)
+    public function delete($user, User $model)
     {
         // لا يمكن حذف نفسك
         if ($user->id === $model->id) {
@@ -78,7 +78,7 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, User $model)
+    public function restore($user, User $model)
     {
         //
     }
@@ -90,7 +90,7 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, User $model)
+    public function forceDelete($user, User $model)
     {
         //
     }

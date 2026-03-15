@@ -32,8 +32,8 @@ class UserRoleController extends Controller
     public function assign(AssignRoleRequest $request, User $user)
     {
         $data  = $request->validated();
-        $role  = Role::findOrFail($data['role_id']);
-        $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
+        // $role  = Role::findOrFail($data['role_id']);
+        // $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
 
         $scope_type  = $data['scope_type'] ?? null;
         $scope_id    = $data['scope_id'] ?? null;
@@ -49,7 +49,6 @@ class UserRoleController extends Controller
 
         UserRole::upsert($result, ['role_id', 'authorizable_id', 'authorizable_type'], ['scope_id' => $scope_id, 'scope_type' => $scope_type]);
 
-        // $user->assignRole($role, $scope);
         return $this->success(null, 'تم إسناد الدور للمستخدم بنجاح', 201);
     }
 
