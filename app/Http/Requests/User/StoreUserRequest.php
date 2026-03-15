@@ -4,6 +4,7 @@ namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
@@ -15,7 +16,9 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth()->user()->hasAbility('users.create');
+        // // return auth()->user()->hasAbility('users.create');
+        // logger($this->user()->can('create', User::class));
+        return $this->user()->can('create', User::class);
     }
 
     /**
