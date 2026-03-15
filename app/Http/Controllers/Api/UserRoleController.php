@@ -20,34 +20,35 @@ use App\Traits\QueryFilterTrait;
 class UserRoleController extends Controller
 {
     use ApiResponser, QueryFilterTrait;
+
     public function index(User $user)
     {
         // $this->authorize('viewRoles', $user);
         return $this->success(UserRoleResource::collection($user->roles), 'الادوار المخصصة للمستخدم');
-        // $user->loadMissing('roles.roleAbilities');
-
-        // return UserRoleResource::collection($user->roles);
     }
 
     public function assign(AssignRoleRequest $request, User $user)
     {
         $data  = $request->validated();
-        // $role  = Role::findOrFail($data['role_id']);
-        // $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
+        $role  = Role::findOrFail($data['role_id']);
+        $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
+        foreach ($data['role_id'] as $roleId) {
+            $role = Role::findOrFail($roleId);
+            $user->assignRole($role, $scope);
+        }
+        // $scope_type  = $data['scope_type'] ?? null;
+        // $scope_id    = $data['scope_id'] ?? null;
+        // $result = array_map(function ($role) use ($user, $scope_type, $scope_id) {
+        //     return [
+        //         'role_id' => $role,
+        //         'authorizable_id' => $user->id,
+        //         'authorizable_type' => $user->getMorphClass(),
+        //         'scope_id' => $scope_id,
+        //         'scope_type' => $scope_type,
+        //     ];
+        // }, $data['role_id']);
 
-        $scope_type  = $data['scope_type'] ?? null;
-        $scope_id    = $data['scope_id'] ?? null;
-        $result = array_map(function ($role) use ($user, $scope_type, $scope_id) {
-            return [
-                'role_id' => $role,
-                'authorizable_id' => $user->id,
-                'authorizable_type' => $user->getMorphClass(),
-                'scope_id' => $scope_id,
-                'scope_type' => $scope_type,
-            ];
-        }, $data['role_id']);
-
-        UserRole::upsert($result, ['role_id', 'authorizable_id', 'authorizable_type'], ['scope_id' => $scope_id, 'scope_type' => $scope_type]);
+        // UserRole::upsert($result, ['role_id', 'authorizable_id', 'authorizable_type'], ['scope_id' => $scope_id, 'scope_type' => $scope_type]);
 
         return $this->success(null, 'تم إسناد الدور للمستخدم بنجاح', 201);
     }
@@ -89,7 +90,7 @@ class UserRoleController extends Controller
             'halaqa' => Halaqa::class,
         ];
 
-        $modelClass = $map[$scopeType] ?? abort(422, 'Invalid scope type');
+        $modelClass = $map[$scopeType] ?? abort(422, 'نوع النطاق غير صالح');
 
         return $modelClass::findOrFail($scopeId);
     }

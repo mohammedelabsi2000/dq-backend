@@ -44,17 +44,6 @@ class Handler extends ExceptionHandler
             //
         });
 
-        // ✅ أضف هذا
-        // $this->renderable(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
-        //     if ($request->is('api/*') || $request->expectsJson()) {
-        //         return $this->error(
-        //             'ليس لديك صلاحية للقيام بهذا الإجراء',
-        //             403,
-        //         );
-        //     }
-        // });
-
-
         $this->renderable(function (QueryException $e, $request) {
             if ($request->expectsJson()) {
                 return $this->error(
