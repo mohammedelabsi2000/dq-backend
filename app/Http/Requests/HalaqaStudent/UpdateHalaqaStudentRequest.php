@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\HalaqaStudent;
 
+use App\Helpers\ConstantHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateHalaqaStudentRequest extends FormRequest
 {
@@ -28,7 +30,10 @@ class UpdateHalaqaStudentRequest extends FormRequest
             'student_id' => 'sometimes|required|exists:students,id',
             'from_date' => 'sometimes|required|date',
             'to_date' => 'nullable|date|after_or_equal:from_date',
-            'status_id' => 'sometimes|required|exists:constants,id',
+            'enrollment_status_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('enrollment_status')),
+            ],
         ];
     }
 
@@ -38,7 +43,7 @@ class UpdateHalaqaStudentRequest extends FormRequest
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
             'student_id.exists' => 'الطالب المحدد غير موجود',
             'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
-            'status_id.exists' => 'الحالة المحددة غير موجودة',
+            'enrollment_status_id.in' => 'الحالة المحددة غير موجودة',
         ];
     }
 }

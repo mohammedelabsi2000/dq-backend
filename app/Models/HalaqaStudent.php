@@ -26,7 +26,7 @@ class HalaqaStudent extends Model
         'student_id',
         'from_date',
         'to_date',
-        'status_id',
+        'enrollment_status_id',
     ];
 
     /**
@@ -48,8 +48,8 @@ class HalaqaStudent extends Model
     /**
      * علاقة مع جدول Status
      */
-    public function status()
+    public function enrollment_status()
     {
-        return $this->belongsTo(Constant::class, 'status_id');
+        return $this->belongsTo(Constant::class, 'enrollment_status_id');
     }
 }

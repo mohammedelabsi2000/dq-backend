@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->foreignId('student_id')->constrained('students');
             $table->date('from_date');
             $table->date('to_date')->nullable(); // اذا ممكن يكون فارغ
-            $table->foreignId('status_id')->constrained('constants');
+            $table->foreignId('enrollment_status_id')->constrained('constants');
 
             // audit columns (macro)
             $table->auditColumns();

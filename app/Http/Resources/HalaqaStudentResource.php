@@ -17,23 +17,18 @@ class HalaqaStudentResource extends JsonResource
         return [
             'id' => $this->id,
             'halaqa' => [
-                'id' => $this->halaqa->id ?? null,
-                'name' => $this->halaqa->name ?? null, // عدل حسب عمود الاسم عندك
+                'halaqa' => new HalaqaResource($this->whenLoaded('halaqa')),
             ],
             'student' => [
-                'id' => $this->student->id ?? null,
-                'name' => $this->student->name ?? null, // عدل حسب عمود الاسم عندك
-                'email' => $this->student->email ?? null, // اختياري
+                'student' => new StudentResource($this->whenLoaded('student')),
             ],
-            'status' => [
-                'id' => $this->status->id ?? null,
-                'name' => $this->status->name ?? null,
-            ],
+
+            'enrollment_status' => new ConstantResource($this->whenLoaded('enrollment_status')),
+
             'from_date' => $this->from_date,
             'to_date' => $this->to_date,
             'created_at' => optional($this->created_at)->toDateTimeString(),
             'updated_at' => optional($this->updated_at)->toDateTimeString(),
         ];
-
     }
 }
