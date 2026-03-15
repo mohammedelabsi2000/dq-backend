@@ -3,25 +3,27 @@
 namespace App\Exceptions;
 
 use App\Http\Traits\ApiResponser;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
     use ApiResponser;
+    /**
+     * A list of the exception types that are not reported.
+     *
+     * @var array<int, class-string<Throwable>>
+     */
+    protected $dontReport = [
+        //
+    ];
 
     /**
-     * The list of the inputs that are never flashed to the session on validation exceptions.
+     * A list of the inputs that are never flashed for validation exceptions.
      *
      * @var array<int, string>
      */
@@ -33,13 +35,14 @@ class Handler extends ExceptionHandler
 
     /**
      * Register the exception handling callbacks for the application.
+     *
+     * @return void
      */
-    public function register(): void
+    public function register()
     {
         $this->reportable(function (Throwable $e) {
             //
         });
-    }
 
         // ✅ أضف هذا
         // $this->renderable(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
@@ -52,22 +55,20 @@ class Handler extends ExceptionHandler
         // });
 
 
-            // when model nonexistent
-            if ($e instanceof ModelNotFoundException) {
-                $modelName = strtolower(class_basename($e->getModel()));
-                return $this->errorMessage('Does not exists any' . $modelName . 'with the spicified identificator', 404);
+        $this->renderable(function (QueryException $e, $request) {
+            if ($request->expectsJson()) {
+                return $this->error(
+                    $e->getMessage(),
+                    500,
+                    ['حدث خطأ في قاعدة البيانات'],
+                );
             }
         });
     }
 
-            if ($e instanceof AuthorizationException) {
-                return $this->errorMessage($e->getMessage(), 403);
-            }
-
-            // when write nonexistent URL
-            if ($e instanceof NotFoundHttpException) {
-                return $this->errorMessage('The specified URL connot be found.', 404);
-            }
+    public function render($request, Throwable $exception)
+    {
+        if ($request->is('api/*')) {
 
             if ($exception instanceof AuthenticationException) {
                 return $this->error('Unauthenticated', 401);
@@ -91,9 +92,9 @@ class Handler extends ExceptionHandler
                 return $this->notFound();
             }
 
-            // general http exception
-            if ($e instanceof HttpException) {
-                return $this->errorMessage($e->getMessage(), $e->getStatusCode());
+            // ModelNotFoundException → لو استخدمت Route Model Binding ولم يجد السجل
+            if ($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                return $this->notFound();
             }
 
             /* 
@@ -105,9 +106,6 @@ class Handler extends ExceptionHandler
             // }
         }
 
-        // if we turn on the debugbar
-        if (config('app.debug')) {
-            return parent::render($request, $e);
-        }
+        return parent::render($request, $exception);
     }
 }
