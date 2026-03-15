@@ -139,11 +139,12 @@ class UserController extends Controller
         $my_request = $request->validated();
         // تشفير الباسوورد لو تم تغييره
         if ($request->input('password')) {
-            $request['password'] = Hash::make($request['password']);
+            $my_request['password'] = Hash::make($request['password']);
         } else {
             unset($my_request['password']);
         }
-
+        
+        // Update or create the user based on the identity field
         $user->updateOrCreate(
             ['identity' => $request['identity']],
             $my_request
