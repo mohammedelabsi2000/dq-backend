@@ -66,21 +66,32 @@ class HalaqaStudentController extends Controller
     /**
      * إنشاء تسجيل جديد
      */
-    public function store(StoreHalaqaStudentRequest $request)
-    {
-        // اغلاق أي سجلات مفتوحة للطالب
-        HalaqaStudent::where('student_id', $request->validated()['student_id'])
-            ->whereNull('to_date')
-            ->update(['to_date' => $request->validated()['from_date']]);
+   public function store(StoreHalaqaStudentRequest $request)
+{
+    $validated = $request->validated();
 
-        $student = HalaqaStudent::create($request->validated());
+    // التحقق هل الطالب مسجل حالياً في حلقة
+    $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
+        ->whereNull('to_date')
+        ->first();
 
-        return $this->success(
-            new HalaqaStudentResource($student->load(['halaqa', 'student', 'enrollment_status'])),
-            'تم تسجيل الطالب في الحلقة بنجاح',
-            201
+    if ($existingEnrollment) {
+        return $this->error(
+            'الطالب مسجل حالياً في حلقة أخرى ولا يمكن تسجيله في أكثر من حلقة بنفس الوقت. استخدم التعديل لنقله إلى حلقة أخرى.',
+            422
         );
     }
+
+    $student = HalaqaStudent::create($validated);
+
+    return $this->success(
+        new HalaqaStudentResource(
+            $student->load(['halaqa', 'student', 'enrollment_status'])
+        ),
+        'تم تسجيل الطالب في الحلقة بنجاح',
+        201
+    );
+}
 
     /**
      * تعديل تسجيل موجود
