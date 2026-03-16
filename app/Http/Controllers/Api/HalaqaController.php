@@ -28,25 +28,45 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user());
 
-        if ($request->filled('reference_type') && $request->filled('reference_id')) {
-
-            // 1️⃣ نوع المرجع من request (مثلاً "user" أو "school")
-            $typeKey = $request->input('reference_type');
-
-            if (!class_exists($typeKey)) {
-                return $this->validationError([$typeKey . ' مرجع غير صالح']);
-            }
-
-            $referenceId = request()->integer('reference_id');
-
+        if ($request->filled('center_id')) {
+            // If center_id is provided, filter halaqas based on the center
             $query->whereHasMorph(
                 'reference',
-                [$typeKey],
-                function ($query) use ($referenceId) {
-                    $query->where('id', $referenceId);
+                ['center'],
+                function ($query) {
+                    $query->where('id', request()->integer('center_id'));
+                }
+            );
+        } elseif ($request->filled('region_id')) {
+            // If region_id is provided (and center_id is not), filter halaqas based on the region
+            $query->whereHasMorph(
+                'reference',
+                ['region'],
+                function ($query) {
+                    $query->where('id', request()->integer('region_id'));
                 }
             );
         }
+
+        /* if ($request->filled('reference_type') && $request->filled('reference_id')) {
+
+             // 1️⃣ نوع المرجع من request (مثلاً "user" أو "school")
+             $typeKey = $request->input('reference_type');
+
+             if (!class_exists($typeKey)) {
+                 return $this->validationError([$typeKey . ' مرجع غير صالح']);
+             }
+
+             $referenceId = request()->integer('reference_id');
+
+             $query->whereHasMorph(
+                 'reference',
+                 [$typeKey],
+                 function ($query) use ($referenceId) {
+                     $query->where('id', $referenceId);
+                 }
+             );
+         }*/
 
         if ($request->filled('type_id')) {
             $query->where('type_id', $request->integer('type_id'));
