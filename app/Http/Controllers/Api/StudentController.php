@@ -24,7 +24,9 @@ class StudentController extends Controller
 
     public function index()
     {
-        $query = Student::query();
+        $this->authorize('viewAny', Student::class);
+        // $query = Student::query();
+        $query = Student::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['full_name', 'identity'],
@@ -94,6 +96,7 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
+        $this->authorize('view', $student);
         $student = $student->load([
             'mosque',
             'maritalStatus',
@@ -113,24 +116,26 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
+        // $this->authorize('update', $student);
         $student = $this->studentService->update($student, $request->validated());
 
         return $this->success(
             new StudentResource($student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'guardian',
-        ])),
+                'mosque',
+                'maritalStatus',
+                'moneyStatus',
+                'guardian',
+                'guardianType',
+                'prefixName',
+                'guardian',
+            ])),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }
 
     public function destroy(Student $student)
     {
+        $this->authorize('delete', $student);
         $student->delete();
 
         return $this->success(
