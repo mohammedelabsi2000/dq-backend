@@ -26,6 +26,39 @@ class StudentController extends Controller
     {
         $query = Student::query();
 
+        if (request()->filled('halaqa_id')) {
+            // Students linked to the specified halaqa
+            $query->whereHas('halaqas', function ($q) {
+                $q->where('halaqa_id', request()->integer('halaqa_id'));
+            });
+        } elseif (request()->filled('center_id')) {
+            // Students linked to the specified center through halaqas
+            $query->whereHas('halaqas', function ($q) {
+                $q->whereHasMorph(
+                    'reference',
+                    ['center'],
+                    function ($q) {
+                        $q->where('id', request()->integer('center_id'));
+                    }
+                );
+            });
+        } elseif (request()->filled('region_id')) {
+            // Students linked to the specified region through halaqas or centers
+            $regionId = request()->integer('region_id');
+            $query->whereHas('halaqas', function ($q) use ($regionId) {
+                $q->where(function ($q) use ($regionId) {
+                    // Halaqas directly linked to the region
+                    $q->whereHasMorph('reference', ['region'], function ($q) use ($regionId) {
+                        $q->where('id', $regionId);
+                    })
+                        // Halaqas linked to centers that belong to the region
+                        ->orWhereHasMorph('reference', ['center'], function ($q) use ($regionId) {
+                            $q->where('region_id', $regionId);
+                        });
+                });
+            });
+        }
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
@@ -117,14 +150,14 @@ class StudentController extends Controller
 
         return $this->success(
             new StudentResource($student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'guardian',
-        ])),
+                'mosque',
+                'maritalStatus',
+                'moneyStatus',
+                'guardian',
+                'guardianType',
+                'prefixName',
+                'guardian',
+            ])),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }
