@@ -7,6 +7,8 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -39,26 +41,24 @@ class Handler extends ExceptionHandler
         });
     }
 
-    public function render($request, Throwable $e)
-    {
-        if ($request->is('api/*')) {
-            // convert validation errors to json response
-            if ($e instanceof ValidationException) {
-                $errors = $e->validator->errors()->first();
-                return $this->errorMessage($errors, 422);
-                // $errors = $e->errors();
-                // return $this->errorResponse($errors, 422);
-            }
+        // ✅ أضف هذا
+        // $this->renderable(function (\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e, $request) {
+        //     if ($request->is('api/*') || $request->expectsJson()) {
+        //         return $this->error(
+        //             'ليس لديك صلاحية للقيام بهذا الإجراء',
+        //             403,
+        //         );
+        //     }
+        // });
+
 
             // when model nonexistent
             if ($e instanceof ModelNotFoundException) {
                 $modelName = strtolower(class_basename($e->getModel()));
                 return $this->errorMessage('Does not exists any' . $modelName . 'with the spicified identificator', 404);
             }
-
-            if ($e instanceof AuthenticationException) {
-                return $this->errorMessage('Unauthenticated', 401);
-            }
+        });
+    }
 
             if ($e instanceof AuthorizationException) {
                 return $this->errorMessage($e->getMessage(), 403);
@@ -69,9 +69,26 @@ class Handler extends ExceptionHandler
                 return $this->errorMessage('The specified URL connot be found.', 404);
             }
 
-            // when try excepted resource api methods or nonexistent method
-            if ($e instanceof MethodNotAllowedHttpException) {
-                return $this->errorMessage('The specified methode for the request is invaild.', 404);
+            if ($exception instanceof AuthenticationException) {
+                return $this->error('Unauthenticated', 401);
+                // return $this->errorMessage('Unauthenticated', 401);
+            }
+
+            if ($exception instanceof AuthorizationException) {
+                return $this->error($exception->getMessage(), 403);
+            }
+
+            if ($exception instanceof ValidationException) {
+                $errors = $exception->validator->errors()->first();
+                return $this->errorMessage($errors, 422);
+                // $errors = $e->errors();
+                // return $this->errorResponse($errors, 422);
+            }
+
+
+            // NotFoundHttpException → أي Route غير موجود
+            if ($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+                return $this->notFound();
             }
 
             // general http exception
@@ -79,15 +96,13 @@ class Handler extends ExceptionHandler
                 return $this->errorMessage($e->getMessage(), $e->getStatusCode());
             }
 
-            // when have error in query like delete an instance which has a relation with other models
-            if ($e instanceof QueryException) {
-                $errorCode = $e->errorInfo[1];
-                if ($errorCode == 1451) {
-                    return $this->errorMessage('Cannot remove this resource permanently. It is related with any other resource', 409);
-                }
-            }
-
-            // return $this->errorMessage('Unexpected Error. Try later.', 500);
+            /* 
+             * AuthenticationException → لو حاولت تدخل على Route محمي بدون توكن أو بتوكن غير صالح
+             * 401 Unauthorized → عندما لا يتم توفير بيانات الاعتماد أو تكون غير صحيحة.
+             */
+            // if ($exception instanceof AuthenticationException) {
+            //     return $this->errorMessage('Token غير صالح أو منتهي الصلاحية', 401);
+            // }
         }
 
         // if we turn on the debugbar
