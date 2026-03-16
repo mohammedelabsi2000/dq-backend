@@ -32,6 +32,8 @@ class Student extends Model implements BelongsToHierarchy
         'guardian_type_id',
         'phone',
         'whatsapp',
+        'created_by',
+        'updated_by',
     ];
 
     public static $usesAudit = true;
