@@ -3,6 +3,8 @@
 namespace App\Http\Requests\HalaqaStudent;
 
 use App\Helpers\ConstantHelper;
+use App\Models\Halaqa;
+use App\Models\HalaqaStudent;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +17,9 @@ class StoreHalaqaStudentRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $halaqa = Halaqa::findOrFail($this->input('halaqa_id'));
+
+        return $this->user()->can('create', [HalaqaStudent::class, $halaqa]);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Requests\Student;
 
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
+use App\Models\Student;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
@@ -12,13 +13,13 @@ class StoreStudentRequest extends DQFormRequest
 {
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', Student::class);
     }
 
     public function rules()
     {
         return [
-            'identity' => ['nullable', 'string', 'max:9'],//, Rule::unique('students', 'identity')],
+            'identity' => ['nullable', 'string', 'max:9'], //, Rule::unique('students', 'identity')],
             'fName' => 'required|string|max:255',
             'sName' => 'nullable|string|max:255',
             'thName' => 'nullable|string|max:255',
@@ -103,6 +104,4 @@ class StoreStudentRequest extends DQFormRequest
             'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
         ];
     }
-
-
 }
