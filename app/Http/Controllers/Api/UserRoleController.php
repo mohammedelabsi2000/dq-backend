@@ -23,35 +23,57 @@ class UserRoleController extends Controller
 
     public function index(User $user)
     {
-        // $this->authorize('viewRoles', $user);
+        $this->authorize('index', [UserRole::class, $user]);
         return $this->success(UserRoleResource::collection($user->roles), 'الادوار المخصصة للمستخدم');
     }
 
-    public function assign(AssignRoleRequest $request, User $user)
+    public function save(AssignRoleRequest $request, User $user)
     {
-        $data  = $request->validated();
-        $role  = Role::findOrFail($data['role_id']);
-        $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
-        foreach ($data['role_id'] as $roleId) {
+        $request->validated();
+
+        $roleIds   = $request->input('role_id');
+        $scopeType = $request->input('scope_type');
+        $scopeId   = $request->input('scope_id');
+        $scope     = $this->resolveScope($scopeType, $scopeId);
+
+        // احذف كل الأدوار الحالية
+        $user->roles()->detach();
+
+        // أضف الجديدة
+        foreach ($roleIds as $roleId) {
             $role = Role::findOrFail($roleId);
             $user->assignRole($role, $scope);
         }
-        // $scope_type  = $data['scope_type'] ?? null;
-        // $scope_id    = $data['scope_id'] ?? null;
-        // $result = array_map(function ($role) use ($user, $scope_type, $scope_id) {
-        //     return [
-        //         'role_id' => $role,
-        //         'authorizable_id' => $user->id,
-        //         'authorizable_type' => $user->getMorphClass(),
-        //         'scope_id' => $scope_id,
-        //         'scope_type' => $scope_type,
-        //     ];
-        // }, $data['role_id']);
-
-        // UserRole::upsert($result, ['role_id', 'authorizable_id', 'authorizable_type'], ['scope_id' => $scope_id, 'scope_type' => $scope_type]);
-
-        return $this->success(null, 'تم إسناد الدور للمستخدم بنجاح', 201);
+        return $this->success(
+            UserRoleResource::collection($user->roles()->with('roleAbilities')->get()),
+            'تم حفظ أدوار المستخدم بنجاح'
+        );
     }
+    // public function assign(AssignRoleRequest $request, User $user)
+    // {
+    //     $data  = $request->validated();
+    //     $role  = Role::findOrFail($data['role_id']);
+    //     $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
+    //     foreach ($data['role_id'] as $roleId) {
+    //         $role = Role::findOrFail($roleId);
+    //         $user->assignRole($role, $scope);
+    //     }
+    //     // $scope_type  = $data['scope_type'] ?? null;
+    //     // $scope_id    = $data['scope_id'] ?? null;
+    //     // $result = array_map(function ($role) use ($user, $scope_type, $scope_id) {
+    //     //     return [
+    //     //         'role_id' => $role,
+    //     //         'authorizable_id' => $user->id,
+    //     //         'authorizable_type' => $user->getMorphClass(),
+    //     //         'scope_id' => $scope_id,
+    //     //         'scope_type' => $scope_type,
+    //     //     ];
+    //     // }, $data['role_id']);
+
+    //     // UserRole::upsert($result, ['role_id', 'authorizable_id', 'authorizable_type'], ['scope_id' => $scope_id, 'scope_type' => $scope_type]);
+
+    //     return $this->success(null, 'تم إسناد الدور للمستخدم بنجاح', 201);
+    // }
 
     public function sync(SyncRoleRequest $request, User $user)
     {
@@ -67,14 +89,22 @@ class UserRoleController extends Controller
         return $this->success(null, 'تم تحديث دور المستخدم بنجاح');
     }
 
-    public function remove(RemoveRoleRequest $request, User $user)
-    {
-        $data  = $request->validated();
-        $role  = Role::findOrFail($data['role_id']);
-        $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
+    // public function remove(RemoveRoleRequest $request, User $user)
+    // {
+    //     $data  = $request->validated();
+    //     $role  = Role::findOrFail($data['role_id']);
+    //     $scope = $this->resolveScope($data['scope_type'] ?? null, $data['scope_id'] ?? null);
 
-        $user->removeRole($role, $scope);
-        return $this->success(null, 'تم إزالة الدور من المستخدم بنجاح');
+    //     $user->removeRole($role, $scope);
+    //     return $this->success(null, 'تم إزالة الدور من المستخدم بنجاح');
+    // }
+
+    public function remove(User $user)
+    {
+        $this->authorize('remove', [UserRole::class, $user]);
+
+        $user->roles()->detach();
+        return $this->success(null, 'تم حذف جميع أدوار المستخدم بنجاح');
     }
 
     private function resolveScope(?string $scopeType, ?int $scopeId)

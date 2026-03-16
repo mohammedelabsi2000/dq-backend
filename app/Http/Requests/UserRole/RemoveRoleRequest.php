@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\UserRole;
 
+use App\Models\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RemoveRoleRequest extends FormRequest
@@ -13,7 +14,9 @@ class RemoveRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $target = $this->route('user');
+        return $this->user()->can('remove', [UserRole::class, $target]);
+        // return true; --- IGNORE ---
     }
 
     /**

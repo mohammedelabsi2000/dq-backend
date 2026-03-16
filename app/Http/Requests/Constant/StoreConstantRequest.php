@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Constant;
 
 use App\Http\Requests\DQFormRequest;
+use App\Models\Constant;
 
 class StoreConstantRequest extends DQFormRequest
 {
@@ -13,7 +14,7 @@ class StoreConstantRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', Constant::class);
     }
 
     /**

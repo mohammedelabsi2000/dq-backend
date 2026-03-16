@@ -36,6 +36,25 @@ return [
         ['ability' => 'users.update',    'label_en' => 'Update users',    'label_ar' => 'تعديل المستخدمين'],
         ['ability' => 'users.delete',    'label_en' => 'Delete users',    'label_ar' => 'حذف المستخدمين'],
     ],
+    'constants' => [
+        ['ability' => 'constants.view',   'label_en' => 'View constants',   'label_ar' => 'عرض الثوابت'],
+        ['ability' => 'constants.create', 'label_en' => 'Create constants', 'label_ar' => 'إنشاء الثوابت'],
+        ['ability' => 'constants.update', 'label_en' => 'Update constants', 'label_ar' => 'تعديل الثوابت'],
+        ['ability' => 'constants.delete', 'label_en' => 'Delete constants', 'label_ar' => 'حذف الثوابت'],
+    ],
+    'students' => [
+        ['ability' => 'students.view',   'label_en' => 'View students',   'label_ar' => 'عرض الطلاب'],
+        ['ability' => 'students.create', 'label_en' => 'Create students', 'label_ar' => 'إنشاء الطلاب'],
+        ['ability' => 'students.update', 'label_en' => 'Update students', 'label_ar' => 'تعديل الطلاب'],
+        ['ability' => 'students.delete', 'label_en' => 'Delete students', 'label_ar' => 'حذف الطلاب'],
+    ],
+
+    'halaqa_students' => [
+        ['ability' => 'halaqa_students.view',   'label_en' => 'View halaqa students',   'label_ar' => 'عرض تسجيلات الحلقة'],
+        ['ability' => 'halaqa_students.create', 'label_en' => 'Create halaqa students', 'label_ar' => 'إنشاء تسجيلات الحلقة'],
+        ['ability' => 'halaqa_students.update', 'label_en' => 'Update halaqa students', 'label_ar' => 'تعديل تسجيلات الحلقة'],
+        ['ability' => 'halaqa_students.delete', 'label_en' => 'Delete halaqa students', 'label_ar' => 'حذف تسجيلات الحلقة'],
+    ],
     'roles' => [
         ['ability' => 'roles.view',      'label_en' => 'View roles',      'label_ar' => 'عرض الأدوار'],
         ['ability' => 'roles.create',    'label_en' => 'Create roles',    'label_ar' => 'إنشاء الأدوار'],

@@ -60,7 +60,7 @@ class Handler extends ExceptionHandler
         if ($request->is('api/*')) {
 
             if ($exception instanceof AuthenticationException) {
-                return $this->error('Unauthenticated', 401);
+                return $this->error('غير مسجل الدخول', 401);
                 // return $this->errorMessage('Unauthenticated', 401);
             }
 

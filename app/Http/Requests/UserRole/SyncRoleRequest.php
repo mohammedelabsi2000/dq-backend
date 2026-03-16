@@ -5,6 +5,7 @@ namespace App\Http\Requests\UserRole;
 use App\Models\Branch;
 use App\Models\Center;
 use App\Models\Region;
+use App\Models\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +18,9 @@ class SyncRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        $target = $this->route('user');
+        return $this->user()->can('sync', [UserRole::class, $target]);
+        // return true; --- IGNORE ---
     }
 
     /**

@@ -20,31 +20,10 @@ class Role extends Model
         return $this->hasMany(RoleAbility::class);
     }
 
-    // public static function createWithAbilities(string $name, array $abilities): self
-    // {
-    //     return DB::transaction(function () use ($name, $abilities) {
-    //         $role = self::create(['name' => $name]);
-
-    //         foreach ($abilities as $ability => $type) {
-    //             RoleAbility::create([
-    //                 'role_id' => $role->id,
-    //                 'ability' => $ability,
-    //                 'type'    => $type,
-    //             ]);
-    //         }
-
-    //         return $role;
-    //     });
-    // }
-
     public static function createWithAbilities(array $data)
     {
         return DB::transaction(function () use ($data) {
             $role = self::create(['name' => $data['name']]);
-
-            // $abilities = $data['give_all'] ?? false
-            //     ? array_keys(config('abilities'))
-            //     : ($data['abilities'] ?? []);
 
             $abilities = $data['give_all'] ?? false
                 ? collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
@@ -55,62 +34,6 @@ class Role extends Model
             return $role;
         });
     }
-
-    // public static function createWithAbilities(Request $request)
-    // {
-    //     DB::beginTransaction();
-    //     try {
-    //         $role = Role::create([
-    //             'name' => $request->post('name'),
-    //         ]);
-
-    //         // foreach ($request->post('abilities') as $ability) {
-    //         //     RoleAbility::create([
-    //         //         'role_id' => $role->id,
-    //         //         'ability_id' => $ability,
-    //         //         'type' => 'allow',
-    //         //     ]);
-    //         // }
-    //         // $allAbilities = array_keys(config('abilities'));
-    //         if ($request->give_all) {
-    //             $abilities = array_keys(config('abilities'));
-    //         } else {
-    //             $abilities = $request->abilities ?? [];
-    //         }
-    //         foreach ($abilities as $ability) {
-    //             RoleAbility::create([
-    //                 'role_id' => $role->id,
-    //                 'ability' => $ability,
-    //                 'type' => 'allow',
-    //             ]);
-    //         }
-    //         Db::commit();
-    //     } catch (\Exception $e) {
-    //         Db::rollBack();
-    //         throw $e;
-    //     }
-
-    //     return $role;
-    // }
-
-    // public function updateWithAbilities(string $name, array $abilities): self
-    // {
-    //     return DB::transaction(function () use ($name, $abilities) {
-    //         $this->update(['name' => $name]);
-
-    //         $this->roleAbilities()->delete();
-
-    //         foreach ($abilities as $ability => $type) {
-    //             RoleAbility::create([
-    //                 'role_id' => $this->id,
-    //                 'ability' => $ability,
-    //                 'type'    => $type,
-    //             ]);
-    //         }
-
-    //         return $this->load('roleAbilities');
-    //     });
-    // }
 
     public function updateWithAbilities(array $data)
     {
@@ -136,52 +59,6 @@ class Role extends Model
             $this->delete();
         });
     }
-
-    // public function updateWithAbilities(Request $request)
-    // {
-    //     DB::beginTransaction();
-    //     try {
-    //         $this->update([
-    //             'name' => $request->post('name'),
-    //         ]);
-
-    //         // foreach ($request->post('abilities') as $ability) {
-    //         //     RoleAbility::updateOrCreate(
-    //         //         [
-    //         //             'role_id' => $this->id,
-    //         //             'ability_id' => $ability,
-    //         //         ],
-    //         //         [
-    //         //             'type' => 'allow',
-    //         //         ]
-    //         //     );
-    //         // }
-    //         // $allAbilities = array_keys(config('abilities'));
-    //         if ($request->give_all) {
-    //             $abilities = array_keys(config('abilities'));
-    //         } else {
-    //             $abilities = $request->abilities ?? [];
-    //         }
-    //         foreach ($abilities as $ability) {
-    //             RoleAbility::updateOrCreate(
-    //                 [
-    //                     'role_id' => $this->id,
-    //                     'ability' => $ability,
-    //                 ],
-    //                 [
-    //                     'type' => 'allow',
-    //                 ]
-    //             );
-    //         }
-    //         Db::commit();
-    //     } catch (\Exception $e) {
-    //         Db::rollBack();
-    //         throw $e;
-    //     }
-
-
-    //     return $this;
-    // }
 
     private function insertAbilities(array $abilities)
     {

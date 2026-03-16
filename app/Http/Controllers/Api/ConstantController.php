@@ -24,6 +24,7 @@ class ConstantController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Constant::class);
         $query = Constant::query();
         // لإرجاع الثوابت الفعالة فقط إلا عند الطلب
         if ($request->isNotFilled('with_inactive')) {
@@ -70,7 +71,7 @@ class ConstantController extends Controller
         $query = $q['query'];
         $total = $q['count'];
         // لإرجاع جميع ثوابت النظام
-        $constants = $query->with(['constantType','parent'])->get();
+        $constants = $query->with(['constantType', 'parent'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -87,6 +88,7 @@ class ConstantController extends Controller
      */
     public function show(Constant $constant)
     {
+        $this->authorize('view', $constant);
         $constant = $constant->load([
             'parent',
             'constantType'
@@ -107,9 +109,9 @@ class ConstantController extends Controller
         $constant = Constant::create($request->validated());
         return $this->success(
             new ConstantResource($constant->load([
-            'parent',
-            'constantType'
-        ])),
+                'parent',
+                'constantType'
+            ])),
             'تم إنشاء الثابت بنجاح',
             201
         );
@@ -141,6 +143,7 @@ class ConstantController extends Controller
      */
     public function destroy(Constant $constant)
     {
+        $this->authorize('delete', $constant);
         if ($constant->isUsed()) {
             return $this->errorMessage(
                 'لا يمكن حذف هذا الثابت لأنه مستخدم في سجلات أخرى.',
