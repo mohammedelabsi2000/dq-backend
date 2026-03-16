@@ -18,6 +18,9 @@ class RoleResource extends JsonResource
             'id'          => $this->id,
             'name'        => $this->name,
             'abilities'   => RoleAbilityResource::collection($this->whenLoaded('roleAbilities')),
+            // 'abilities'   => $this->whenLoaded('roleAbilities', function () {
+            //     return $this->roleAbilities->pluck('ability')->toArray();
+            // }),
             'created_at'  => $this->created_at,
         ];
     }

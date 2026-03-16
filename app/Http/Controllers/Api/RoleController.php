@@ -49,11 +49,6 @@ class RoleController extends Controller
         $role = Role::createWithAbilities($request->validated());
 
         return $this->success(new RoleResource($role->load('roleAbilities')), 'تم إنشاء الدور بنجاح', 201);
-
-        // return response()->json([
-        //     'message' => 'Role created successfully',
-        //     'data'    => new RoleResource($role->load('roleAbilities')),
-        // ], 201);
     }
 
     /**
@@ -79,12 +74,6 @@ class RoleController extends Controller
     {
         $role->updateWithAbilities($request->validated());
         return $this->success(new RoleResource($role->load('roleAbilities')), 'تم تحديث الدور بنجاح');
-
-
-        // return response()->json([
-        //     'message' => 'Role updated successfully',
-        //     'data'    => new RoleResource($role->load('roleAbilities')),
-        // ]);
     }
     /**
      * Remove the specified resource from storage.
@@ -97,19 +86,11 @@ class RoleController extends Controller
         $this->authorize('delete', $role);
         $role->deleteRole();
         return $this->success(null, 'تم حذف الدور بنجاح');
-        // return $this->successMessage('تم حذف الدور بنجاح');
-
-        // return response()->json([
-        //     'message' => 'Role deleted successfully',
-        // ]);
     }
 
     public function abilities()
     {
-        // return response()->json([
-        //     'data' => config('abilities'),
-        // ]);
-
+        $this->authorize('viewAny', Role::class);
         $abilties = config('abilities');
 
         $target_arr = [];
@@ -120,9 +101,6 @@ class RoleController extends Controller
                 'items' => $value
             ];
         }
-
-        return response()->json([
-            'abilities' => $target_arr,
-        ]);
+        return $this->apiResponse($target_arr, 'الصلاحيات', 200);
     }
 }
