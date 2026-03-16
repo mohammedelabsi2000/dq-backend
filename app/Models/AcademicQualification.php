@@ -43,12 +43,19 @@ class AcademicQualification extends Model
         }
         return $this->person_type . ' #' . $this->person_id; // fallback
     }
-
+    /**
+     * This method defines a relationship between the AcademicQualification model and the Constant model
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function major()
     {
         return $this->belongsTo(Constant::class, 'major_id');
     }
 
+    /**
+     * This method defines a polymorphic relationship between the AcademicQualification model and any model that can be associated with it (like User or Student)
+     * @return \Illuminate\Database\Eloquent\Relations\MorphTo
+     */
     public function person()
     {
         return $this->morphTo();
