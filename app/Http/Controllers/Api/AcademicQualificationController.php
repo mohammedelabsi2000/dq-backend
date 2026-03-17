@@ -15,6 +15,7 @@ class AcademicQualificationController extends Controller
 
     public function getPersonQualifications($person_type, $person_id)
     {
+        $this->authorize('viewAny', AcademicQualification::class);
         $data = AcademicQualification::with([
             'academicDegree',
             'major',
@@ -37,6 +38,7 @@ class AcademicQualificationController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', AcademicQualification::class);
         $query = AcademicQualification::query();
 
         $q = $this->applyFilters($query, [
@@ -86,6 +88,7 @@ class AcademicQualificationController extends Controller
 
     public function show(AcademicQualification $academicQualification)
     {
+        $this->authorize('view', $academicQualification);
         $academicQualification = $academicQualification->load([
             'academicDegree',
             'major',
@@ -128,6 +131,7 @@ class AcademicQualificationController extends Controller
 
     public function destroy(AcademicQualification $academicQualification)
     {
+        $this->authorize('delete', $academicQualification);
         $academicQualification->delete();
 
         return $this->success(

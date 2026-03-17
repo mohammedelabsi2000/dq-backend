@@ -2,13 +2,17 @@
 
 namespace App\Providers;
 
+use App\Models\AcademicQualification;
 use App\Models\Branch;
 use App\Models\Center;
+use App\Models\PersonalCourse;
 use App\Models\Region;
 use App\Models\User;
 use App\Models\UserRole;
+use App\Policies\AcademicQualificationPolicy;
 use App\Policies\BranchPolicy;
 use App\Policies\CenterPolicy;
+use App\Policies\PersonalCoursePolicy;
 use App\Policies\RegionPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\UserRolePolicy;
@@ -29,6 +33,10 @@ class AuthServiceProvider extends ServiceProvider
         Center::class => CenterPolicy::class,
         User::class => UserPolicy::class,
         UserRole::class => UserRolePolicy::class,
+        PersonalCourse::class => PersonalCoursePolicy::class,
+        AcademicQualification::class => AcademicQualificationPolicy::class,
+
+
     ];
 
     /**
