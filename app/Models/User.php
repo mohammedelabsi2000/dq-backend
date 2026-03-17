@@ -238,4 +238,11 @@ class User extends Authenticatable implements BelongsToHierarchy
             'user'   => 'id',
         ]);
     }
+
+    public function scopeOnlyTeachers(Builder $query)
+    {
+        return $query->whereHas('roles', function ($q) {
+            $q->where('name', 'teacher');
+        });
+    }
 }

@@ -68,7 +68,7 @@ class AccessTokensController extends Controller
         // $user = $request->user();
         // $user = auth()->user();
         if (null === $token) {
-            $user->currentAccessToken()->delete();
+            $request->user()->currentAccessToken()->delete();
             return $this->success(null, "تم تسجيل الخروج بنجاح", 200);
         }
 

@@ -21,7 +21,8 @@ use App\Http\Controllers\Api\{
     PlanStudentController,
     RegionController,
     StudentController,
-    TrackController
+    TrackController,
+    StatisticsController
 };
 
 // Load all API route files from the api directory
@@ -69,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ID Query endpoint
     Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+    Route::get('/statistics', [StatisticsController::class, 'index']);
 });
 
 // Route::post('register', [AuthController::class, 'register']);
