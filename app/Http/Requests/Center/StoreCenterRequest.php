@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\Center;
 
+use App\Http\Requests\DQFormRequest;
 use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use App\Models\Region;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreCenterRequest extends FormRequest
+class StoreCenterRequest extends DQFormRequest
 {
     use ApiResponser;
     /**
@@ -52,14 +50,5 @@ class StoreCenterRequest extends FormRequest
             'region_id.exists'   => 'المنطقة المحددة غير موجودة',
             'mosque_id.exists'   => 'المسجد المحدد غير موجود',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException($this->validationError([
-            // 'status'  => false,
-            // 'message' => 'خطأ في البيانات المدخلة',
-            $validator->errors(),
-        ]));
     }
 }

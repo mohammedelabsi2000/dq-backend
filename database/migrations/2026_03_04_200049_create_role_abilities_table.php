@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('role_id')->constrained('roles')->cascadeOnDelete();
             $table->string('ability');
-            $table->enum('type', ['allow', 'deny', 'inherit']);
+            $table->enum('type', ['allow', 'deny', 'inherit'])->default('allow');
 
             $table->unique(['role_id', 'ability']);
         });

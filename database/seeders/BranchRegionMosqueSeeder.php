@@ -12,37 +12,42 @@ class BranchRegionMosqueSeeder extends Seeder
 {
     public function run(): void
     {
-        // إنشاء 5 فروع
+        // Creating 5 branches with specific names
         $branches = Branch::factory(5)
             ->sequence(
-                ['name' => 'الفرع الرئيسي - الرياض'],
-                ['name' => 'الفرع الشمالي - الرياض'],
-                ['name' => 'فرع جدة'],
-                ['name' => 'فرع الدمام'],
-                ['name' => 'فرع مكة'],
+                ['name' => 'شمال غزة'],
+                ['name' => 'شرق غزة'],
+                ['name' => 'غرب غزة'],
+                ['name' => 'جنوب غزة'],
+                ['name' => 'الوسطى'],
+                ['name' => 'خانيونس'],
+                ['name' => 'رفح'],
             )
             ->create();
 
         foreach ($branches as $branch) {
-            // كل فرع له 3-5 مناطق
+            // Every branch has 3-5 regions
             $regions = Region::factory()
                 ->count(fake()->numberBetween(3, 5))
                 ->create(['branch_id' => $branch->id]);
 
             foreach ($regions as $region) {
-                // كل منطقة لها 4-8 مساجد
+                // Every region has 4-8 mosques
                 $mosques = Mosque::factory()
                     ->count(fake()->numberBetween(4, 8))
                     ->create(['region_id' => $region->id]);
 
                 foreach ($mosques as $mosque) {
-                    // كل مسجد له 2-5 مراكز
-                    Center::factory()
-                        ->count(fake()->numberBetween(2, 5))
+                    // Every mosque has 1-3 centers
+                    $centers = Center::factory()
+                        ->count(fake()->numberBetween(1, 3))
                         ->create([
                             'region_id' => $region->id,
                             'mosque_id' => $mosque->id,
                         ]);
+
+                        // Every center has 1-3 halaqas
+                        
                 }
             }
         }

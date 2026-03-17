@@ -43,8 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('halaqas', HalaqaController::class);
 
     // Students management
+    Route::apiResource('students', StudentController::class);
     Route::prefix('students')->group(function () {
-        Route::apiResource('', StudentController::class);
         Route::post('import', [StudentController::class, 'import']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
     });

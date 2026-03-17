@@ -36,6 +36,10 @@ class Student extends Model implements BelongsToHierarchy
         'updated_by',
     ];
 
+    protected $casts = [
+        'dob' => 'date',
+    ];
+
     public static $usesAudit = true;
 
     protected $appends = ['full_name'];
@@ -136,15 +140,15 @@ class Student extends Model implements BelongsToHierarchy
             if ($halaqa->reference_type === 'center') {
                 $center = $halaqa->reference;
 
-                $ids[] = ['id' => $center->id,                'type' => 'center'];
-                $ids[] = ['id' => $center->region_id,          'type' => 'region'];
-                $ids[] = ['id' => $center->region->branch_id,  'type' => 'branch'];
+                $ids[] = ['id' => $center->id, 'type' => 'center'];
+                $ids[] = ['id' => $center->region_id, 'type' => 'region'];
+                $ids[] = ['id' => $center->region->branch_id, 'type' => 'branch'];
             }
 
             if ($halaqa->reference_type === 'region') {
                 $region = $halaqa->reference;
 
-                $ids[] = ['id' => $region->id,        'type' => 'region'];
+                $ids[] = ['id' => $region->id, 'type' => 'region'];
                 $ids[] = ['id' => $region->branch_id, 'type' => 'branch'];
             }
         }
