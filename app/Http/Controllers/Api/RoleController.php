@@ -101,6 +101,7 @@ class RoleController extends Controller
                 'items' => $value
             ];
         }
-        return $this->apiResponse($target_arr, 'الصلاحيات', 200);
+        return $this->success($target_arr, 'الصلاحيات', 200);
+        // return $this->apiResponse($target_arr, 'الصلاحيات', 200);
     }
 }
