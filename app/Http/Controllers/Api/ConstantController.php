@@ -94,9 +94,11 @@ class ConstantController extends Controller
             'constantType'
         ]);
 
-        return $this->apiResponse([
-            'data' => new ConstantResource($constant),
-        ], 'success', 200);
+        return $this->success(
+            new ConstantResource($constant),
+            'success',
+            200
+        );
     }
 
     /**
