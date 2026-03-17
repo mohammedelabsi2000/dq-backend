@@ -19,7 +19,7 @@ class HalaqaStudentController extends Controller
     public function index()
     {
         $this->authorize('viewAny', HalaqaStudent::class);
-        $query = HalaqaStudent::query();
+        $query = HalaqaStudent::query()->visibleTo(auth()->user());
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['id'],
