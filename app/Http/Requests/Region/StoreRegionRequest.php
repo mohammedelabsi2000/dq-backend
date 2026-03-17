@@ -19,7 +19,6 @@ class StoreRegionRequest extends FormRequest
      */
     public function authorize()
     {
-
         $branch = Branch::findOrFail($this->input('branch_id'));
 
         return $this->user()->can('create', [Region::class, $branch]);
@@ -48,12 +47,12 @@ class StoreRegionRequest extends FormRequest
         ];
     }
 
-    protected function failedValidation(Validator $validator)
+    /* protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException($this->validationError([
             // 'status'  => false,
             // 'message' => 'خطأ في البيانات المدخلة',
             $validator->errors(),
         ]));
-    }
+    } */
 }

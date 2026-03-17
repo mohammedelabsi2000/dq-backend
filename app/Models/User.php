@@ -241,15 +241,15 @@ class User extends Authenticatable implements BelongsToHierarchy
 
     public function scopeOnlyTeachers(Builder $query)
     {
-        $roleId = Role::where('name', 'محفظ')->firstOrFail()->id;
+        $role = Role::where('name', 'محفظ')->first();
 
         // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
-        if(!$roleId) {
+        if(!$role) {
             return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
         }
         
-        return $query->whereHas('roles', function ($q) use ($roleId) {
-            $q->where('role_id', $roleId);
+        return $query->whereHas('roles', function ($q) use ($role) {
+            $q->where('role_id', $role->id);
         });
     }
 }

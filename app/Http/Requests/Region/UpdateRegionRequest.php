@@ -47,10 +47,8 @@ class UpdateRegionRequest extends FormRequest
 
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->validationError([
-            // 'status'  => false,
-            // 'message' => 'خطأ في البيانات المدخلة',
+        $this->validationError([
             $validator->errors(),
-        ]));
+        ]);
     }
 }

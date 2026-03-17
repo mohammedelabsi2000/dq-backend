@@ -10,6 +10,7 @@ class ConstantTypeSeeder extends Seeder
 {
     public function run(): void
     {
+
         $constantTypes = [
             [
                 'name' => 'marital_status',
