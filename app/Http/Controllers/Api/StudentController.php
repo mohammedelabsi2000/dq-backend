@@ -177,6 +177,12 @@ class StudentController extends Controller
         );
     }
 
+    /**
+     * Import students from an Excel file.
+     *
+     * @param  \App\Http\Requests\Student\ImportStudentRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function import(ImportStudentRequest $request)
     {
         Excel::import(

@@ -19,8 +19,6 @@ trait QueryFilterTrait
      */
     public function applyFilters($query, array $options = [])
     {
-        // Pagination
-        $skip = $options['skip'] ?? request()->get('skip', 0);
 
         // Search
         // يوجد trait منفصل للبحث لكن هذا trait عام ويحتوي على كل الفلاتر بما فيها البحث， لذلك تم دمج الكود الخاص بالبحث هنا
@@ -35,8 +33,20 @@ trait QueryFilterTrait
             });
         }
 
+        // Count total before applying limit
         $count = $query->count(); // مهم لحساب العدد الكلي
 
+        // Order
+        $orderBy = $options['orderBy'] ?? request()->get('order_by');
+        $orderColumn = $options['orderColumn'] ?? 'created_at';
+
+        if ($orderBy) {
+            $orderBy = strtolower($orderBy) === 'asec' ? 'asc' : $orderBy;
+            $query = $query->orderBy($orderColumn, $orderBy);
+        }
+        
+        // Pagination (skip/limit)
+        $skip = $options['skip'] ?? request()->get('skip', 0);
         $limit = request()->get('limit');
 
         if ($limit === null || $limit === '') {
@@ -47,15 +57,7 @@ trait QueryFilterTrait
             $query = $query->skip($skip)->take($limit);
         }
 
-        // Order
-        $orderBy = $options['orderBy'] ?? request()->get('order_by');
-        $orderColumn = $options['orderColumn'] ?? 'created_at';
-
-        if ($orderBy) {
-            $orderBy = strtolower($orderBy) === 'asec' ? 'asc' : $orderBy;
-            $query = $query->orderBy($orderColumn, $orderBy);
-        }
-
+        // Return modified query and pagination info
         return [
             'query' => $query,
             'skip' => $skip,
@@ -66,6 +68,9 @@ trait QueryFilterTrait
 
     /**
      * Apply filters and return array format for legacy compatibility
+     * The difference between this method and applyFilters is that this method returns an array with the query and pagination info,
+     * while applyFilters returns the modified query builder instance.
+     * This is useful for backward compatibility with existing code that expects an array format.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @param array $options

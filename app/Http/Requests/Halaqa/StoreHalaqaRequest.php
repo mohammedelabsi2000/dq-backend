@@ -9,6 +9,7 @@ use App\Models\Center;
 use App\Models\Halaqa;
 use App\Models\Region;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class StoreHalaqaRequest extends DQFormRequest
 {
@@ -44,27 +45,35 @@ class StoreHalaqaRequest extends DQFormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        if ($this->filled('center_id')) {
+            $this->merge([
+                'reference_type' => 'center',
+                'reference_id' => (int) $this->center_id,
+            ]);
+        } elseif ($this->filled('region_id')) {
+            $this->merge([
+                'reference_type' => 'region',
+                'reference_id' => (int) $this->region_id,
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
      */
     public function rules()
     {
-        if (!$this->input('center_id')) {
-            $this->merge([
-                'reference_type' => Region::class,
-                'reference_id' => intval($this->input('region_id')),
-            ]);
-        } else {
-            $this->merge([
-                'reference_type' => Center::class,
-                'reference_id' => intval($this->input('center_id')),
-            ]);
-        }
-
-        
-
         return [
+            'center_id' => 'nullable|integer|exists:centers,id',
+            'region_id' => 'nullable|integer|exists:regions,id',
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -80,7 +89,8 @@ class StoreHalaqaRequest extends DQFormRequest
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $type = $this->reference_type;
+                    // $type = $this->reference_type;
+                    $type = Relation::getMorphedModel($this->reference_type);
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');
                         return;

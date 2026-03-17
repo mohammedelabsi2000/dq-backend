@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Student;
 
+use App\Http\Requests\DQFormRequest;
+use App\Models\Student;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class ImportStudentRequest extends FormRequest
+class ImportStudentRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -15,7 +16,7 @@ class ImportStudentRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', Student::class);
     }
 
     /**
@@ -42,16 +43,5 @@ class ImportStudentRequest extends FormRequest
             'halaqa_id.required' => 'الرجاء اختيار الحلقة.',
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
         ];
-    }
-
-    /**
-     * Override فشل الـ validation ليكون JSON response بدلاً من redirect
-     */
-    protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException(response()->json([
-            'status' => 'error',
-            'errors' => $validator->errors()
-        ], 422));
     }
 }
