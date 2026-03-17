@@ -3,8 +3,6 @@
 namespace App\Concerns;
 
 use App\Contracts\BelongsToHierarchy;
-use App\Models\Branch;
-use App\Models\Region;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Model;
 

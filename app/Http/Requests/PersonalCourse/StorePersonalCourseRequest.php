@@ -4,6 +4,7 @@ namespace App\Http\Requests\PersonalCourse;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
+use App\Models\PersonalCourse;
 use Illuminate\Validation\Rule;
 
 class StorePersonalCourseRequest extends FormRequest
@@ -15,7 +16,7 @@ class StorePersonalCourseRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', PersonalCourse::class);
     }
 
     /**

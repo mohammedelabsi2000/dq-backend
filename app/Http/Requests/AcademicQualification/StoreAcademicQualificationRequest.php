@@ -4,6 +4,7 @@ namespace App\Http\Requests\AcademicQualification;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
+use App\Models\AcademicQualification;
 use Illuminate\Validation\Rule;
 
 class StoreAcademicQualificationRequest extends FormRequest
@@ -16,7 +17,7 @@ class StoreAcademicQualificationRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', AcademicQualification::class);
     }
 
     /**
