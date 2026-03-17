@@ -52,15 +52,17 @@ class StoreHalaqaRequest extends DQFormRequest
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => 'region',
+                'reference_type' => Region::class,
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => 'center',
+                'reference_type' => Center::class,
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }
+
+        
 
         return [
             'name' => 'required|string|max:255',
