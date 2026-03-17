@@ -19,6 +19,7 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
+        // return true;
         // نجيب الـ reference (Region أو Center)
         $referenceType = $this->input('reference_type');
         $referenceId   = $this->input('reference_id');
@@ -30,7 +31,6 @@ class StoreHalaqaRequest extends DQFormRequest
         };
 
         return $this->user()->can('create', [Halaqa::class, $reference]);
-        // return true;
     }
 
     /**
@@ -42,15 +42,17 @@ class StoreHalaqaRequest extends DQFormRequest
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => \App\Models\Region::class,
+                'reference_type' => Region::class,
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => \App\Models\Center::class,
+                'reference_type' => Center::class,
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }
+
+        
 
         return [
             'name' => 'required|string|max:255',

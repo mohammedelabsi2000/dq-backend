@@ -34,9 +34,6 @@ class Halaqa extends Model implements BelongsToHierarchy
      */
     public function reference()
     {
-        if ($this->reference_type == \App\Models\Center::class) {
-            // $this->reference;
-        }
         return $this->morphTo();
     }
 
