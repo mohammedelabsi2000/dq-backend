@@ -231,18 +231,25 @@ class User extends Authenticatable implements BelongsToHierarchy
     {
         return $this->applyVisibleTo($query, $user, [
             'branch' => fn(Builder $q, $id) =>
-            $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
+                $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
             'region' => fn(Builder $q, $id) =>
-            $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
+                $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
             'mosque' => 'mosque_id',
-            'user'   => 'id',
+            'user' => 'id',
         ]);
     }
 
     public function scopeOnlyTeachers(Builder $query)
     {
-        return $query->whereHas('roles', function ($q) {
-            $q->where('name', 'teacher');
+        $roleId = Role::where('name', 'محفظ')->firstOrFail()->id;
+
+        // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
+        if(!$roleId) {
+            return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
+        }
+        
+        return $query->whereHas('roles', function ($q) use ($roleId) {
+            $q->where('role_id', $roleId);
         });
     }
 }
