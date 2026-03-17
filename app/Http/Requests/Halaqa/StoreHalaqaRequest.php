@@ -19,7 +19,7 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return true;
+        // return true;
         // نجيب الـ reference (Region أو Center)
         $referenceType = $this->input('reference_type');
         $referenceId   = $this->input('reference_id');
