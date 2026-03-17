@@ -102,8 +102,7 @@ class UserRoleController extends Controller
     public function remove(User $user)
     {
         $this->authorize('remove', [UserRole::class, $user]);
-
-        $user->roles()->detach();
+        $$user->roles()->detach();
         return $this->success(null, 'تم حذف جميع أدوار المستخدم بنجاح');
     }
 

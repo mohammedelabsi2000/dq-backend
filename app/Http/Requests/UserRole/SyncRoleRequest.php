@@ -18,9 +18,8 @@ class SyncRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        $target = $this->route('user');
-        return $this->user()->can('sync', [UserRole::class, $target]);
-        // return true; --- IGNORE ---
+        $targetUser = $this->route('user');
+        return $this->user()->can('sync', [UserRole::class, $targetUser]);
     }
 
     /**

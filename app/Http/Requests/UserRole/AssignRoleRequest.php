@@ -19,8 +19,8 @@ class AssignRoleRequest extends FormRequest
      */
     public function authorize()
     {
-        $target = $this->route('user');
-        return $this->user()->can('assign', [UserRole::class, $target]);
+        $targetUser = $this->route('user');
+        return $this->user()->can('assign', [UserRole::class, $targetUser]);
     }
 
     /**

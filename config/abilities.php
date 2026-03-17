@@ -48,7 +48,6 @@ return [
         ['ability' => 'students.update', 'label_en' => 'Update students', 'label_ar' => 'تعديل الطلاب'],
         ['ability' => 'students.delete', 'label_en' => 'Delete students', 'label_ar' => 'حذف الطلاب'],
     ],
-
     'halaqa_students' => [
         ['ability' => 'halaqa_students.view',   'label_en' => 'View halaqa students',   'label_ar' => 'عرض تسجيلات الحلقة'],
         ['ability' => 'halaqa_students.create', 'label_en' => 'Create halaqa students', 'label_ar' => 'إنشاء تسجيلات الحلقة'],
