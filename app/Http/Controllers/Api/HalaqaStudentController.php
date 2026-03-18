@@ -21,8 +21,20 @@ class HalaqaStudentController extends Controller
         $this->authorize('viewAny', HalaqaStudent::class);
         $query = HalaqaStudent::query()->visibleTo(auth()->user());
 
+        $search = request()->get('search');
+
+        $query = $query->dqSearch($search, [], [
+            // 'halaqa' => ['name'],
+            'student' => ['full_name'],
+        ]);
+        /* $query = $query->whereHas('student', function ($qr) use ($search) {
+            foreach (['fName'] as $column) {
+                $qr->where($column, 'LIKE', "%{$search}%");
+            }
+        }); */
+
         $q = $this->applyFilters($query, [
-            'searchColumns' => ['id'],
+            'searchColumns' => [],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
@@ -35,6 +47,7 @@ class HalaqaStudentController extends Controller
 
         $data = $query->with([
             'halaqa',
+            'halaqa.reference',
             'student',
             'enrollment_status'
         ])->get();
@@ -70,29 +83,50 @@ class HalaqaStudentController extends Controller
      */
     public function store(StoreHalaqaStudentRequest $request)
     {
-        $validated = $request->validated();
+        // $validated = $request->validated();
 
-        // التحقق هل الطالب مسجل حالياً في حلقة
-        $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
-            ->whereNull('to_date')
-            ->first();
+        $data = collect($request->students)->map(function ($studentId) use ($request) {
+            return [
+                'halaqa_id' => $request->halaqa_id,
+                'student_id' => $studentId,
+                'from_date' => $request->from_date,
+                'enrollment_status_id' => $request->enrollment_status_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        })->toArray();
 
-        if ($existingEnrollment) {
-            return $this->error(
-                'الطالب مسجل حالياً في حلقة أخرى ولا يمكن تسجيله في أكثر من حلقة بنفس الوقت. استخدم التعديل لنقله إلى حلقة أخرى.',
-                422
-            );
+        $halaqStudents = HalaqaStudent::insert($data);
+        if (!$halaqStudents) {
+            return $this->error('حدث خطأ أثناء تسجيل الطلاب في الحلقة', 500);
         }
 
-        $student = HalaqaStudent::create($validated);
-
         return $this->success(
-            new HalaqaStudentResource(
-                $student->load(['halaqa', 'student', 'enrollment_status'])
-            ),
-            'تم تسجيل الطالب في الحلقة بنجاح',
+            null,
+            'تم تسجيل الطلاب في الحلقة بنجاح',
             201
         );
+        // التحقق هل الطالب مسجل حالياً في حلقة
+        /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
+             ->whereNull('to_date')
+             ->first();
+
+         if ($existingEnrollment) {
+             return $this->error(
+                 'الطالب مسجل حالياً في حلقة أخرى ولا يمكن تسجيله في أكثر من حلقة بنفس الوقت. استخدم التعديل لنقله إلى حلقة أخرى.',
+                 422
+             );
+         }
+
+         $student = HalaqaStudent::create($validated);
+
+         return $this->success(
+             new HalaqaStudentResource(
+                 $student->load(['halaqa', 'student', 'enrollment_status'])
+             ),
+             'تم تسجيل الطالب في الحلقة بنجاح',
+             201
+         );*/
     }
 
     /**

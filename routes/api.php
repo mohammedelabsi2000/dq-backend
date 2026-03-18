@@ -53,14 +53,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('halaqa-students', HalaqaStudentController::class);
 
     // Academic qualifications management
+    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
     Route::prefix('academic-qualifications')->group(function () {
-        Route::apiResource('', AcademicQualificationController::class);
         Route::get('{person_type}/{person_id}', [AcademicQualificationController::class, 'getPersonQualifications']);
     });
 
     // Personal courses management
+    Route::apiResource('personal-courses', PersonalCourseController::class);
     Route::prefix('personal-courses')->group(function () {
-        Route::apiResource('', PersonalCourseController::class);
         Route::get('{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
     });
 

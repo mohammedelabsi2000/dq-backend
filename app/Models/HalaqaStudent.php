@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasHierarchyScope;
+use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class HalaqaStudent extends Model
 {
-    use HasFactory, SoftDeletes, HasHierarchyScope;
+    
+    use HasFactory, SoftDeletes, HasHierarchyScope, Searchable;
 
     protected $casts = [
         'from_date' => 'date',
