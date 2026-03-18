@@ -34,8 +34,14 @@ class StudentController extends Controller
                 $q->where('halaqa_id', request()->integer('halaqa_id'));
             });
         } elseif (request()->filled('center_id')) {
+            $centerId = request()->integer('center_id');
+            $query->whereHas('mosque', function ($q) use ($centerId) {
+                $q->whereHas('centers', function ($q) use ($centerId) {
+                    $q->where('id', $centerId);
+                });
+            });
             // Students linked to the specified center through halaqas
-            $query->whereHas('halaqas', function ($q) {
+            /* $query->whereHas('halaqas', function ($q) {
                 $q->whereHasMorph(
                     'reference',
                     ['center'],
@@ -43,11 +49,16 @@ class StudentController extends Controller
                         $q->where('id', request()->integer('center_id'));
                     }
                 );
-            });
+            }); */
         } elseif (request()->filled('region_id')) {
             // Students linked to the specified region through halaqas or centers
             $regionId = request()->integer('region_id');
-            $query->whereHas('halaqas', function ($q) use ($regionId) {
+
+            $query->whereHas('mosque', function ($q) use ($regionId) {
+                $q->where('region_id', $regionId);
+            });
+
+            /* $query->whereHas('halaqas', function ($q) use ($regionId) {
                 $q->where(function ($q) use ($regionId) {
                     // Halaqas directly linked to the region
                     $q->whereHasMorph('reference', ['region'], function ($q) use ($regionId) {
@@ -58,7 +69,8 @@ class StudentController extends Controller
                             $q->where('region_id', $regionId);
                         });
                 });
-            });
+            }); */
+
         }
 
         $q = $this->applyFilters($query, [

@@ -16,12 +16,12 @@ class HalaqaStudentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'halaqa' => [
+            // 'halaqa' => [
                 'halaqa' => new HalaqaResource($this->whenLoaded('halaqa')),
-            ],
-            'student' => [
+            // ],
+            // 'student' => [
                 'student' => new StudentResource($this->whenLoaded('student')),
-            ],
+            // ],
 
             'enrollment_status' => new ConstantResource($this->whenLoaded('enrollment_status')),
 

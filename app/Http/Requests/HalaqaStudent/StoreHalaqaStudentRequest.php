@@ -31,7 +31,8 @@ class StoreHalaqaStudentRequest extends FormRequest
     {
         return [
             'halaqa_id' => 'required|exists:halaqas,id',
-            'students.*' => 'required|exists:students,id',
+            'students' => 'required|array',
+            'students.*' => 'distinct|exists:students,id',
             'from_date' => 'required|date',
             // 'to_date' => 'nullable|date|after_or_equal:from_date',
             'enrollment_status_id' => [
