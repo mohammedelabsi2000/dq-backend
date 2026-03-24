@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('replacement_limits', function (Blueprint $table) {
             $table->id();
             $table->integer('max_replacement_limit')->default(0);
-            $table->text('min_replacement_limit')->default(0);
+            $table->text('min_replacement_limit')->nullable();
             $table->foreignId('branch_id')->constrained('branches')->cascadeOnDelete();
             $table->date('from_date');
             $table->date('to_date')->nullable();
