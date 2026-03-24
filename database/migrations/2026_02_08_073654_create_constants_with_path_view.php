@@ -13,6 +13,7 @@ return new class extends Migration {
      */
     public function up()
     {
+        return;
         DB::statement("
             CREATE OR REPLACE VIEW constants_with_path AS
             WITH RECURSIVE constants_tree AS (
