@@ -54,6 +54,7 @@ class HalaqaStudentController extends Controller
     {
         $halaqaStudent = $halaqaStudent->load([
             'halaqa',
+            'halaqa.reference',
             'student',
             'enrollment_status',
         ]);
