@@ -15,7 +15,7 @@ class UpdateHalaqaStudentRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('halaqaStudent'));
+        return $this->user()->can('update', $this->route('halaqa_student'));
     }
 
     /**

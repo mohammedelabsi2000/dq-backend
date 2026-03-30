@@ -13,7 +13,7 @@ class UpdateAcademicQualificationRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('academicQualification'));
+        return $this->user()->can('update', $this->route('academic_qualification'));
     }
 
     /**
