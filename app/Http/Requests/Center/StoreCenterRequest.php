@@ -18,6 +18,7 @@ class StoreCenterRequest extends DQFormRequest
     public function authorize()
     {
         $region = Region::findOrFail($this->input('region_id'));
+        // dd($this->user()->can('create', [Center::class, $region]));
 
         return $this->user()->can('create', [Center::class, $region]);
     }

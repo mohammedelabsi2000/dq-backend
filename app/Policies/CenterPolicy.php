@@ -42,6 +42,7 @@ class CenterPolicy
      */
     public function create($user, Region $region)
     {
+        // dd($user->hasAbility('centers.create', $region));
         return $user->hasAbility('centers.create', $region);
     }
 
