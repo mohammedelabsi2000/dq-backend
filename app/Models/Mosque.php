@@ -35,7 +35,11 @@ class Mosque extends Model implements BelongsToHierarchy
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return $this->applyVisibleTo($query, $user, [
-            // 'branch' => 'branch_id',
+            'branch' => function (Builder $q, int $branchId) {
+                $q->whereHas('region', function (Builder $subQ) use ($branchId) {
+                    $subQ->where('branch_id', $branchId);
+                });
+            },
             'region' => 'region_id',
             'mosque' => 'id',
         ]);
@@ -45,10 +49,17 @@ class Mosque extends Model implements BelongsToHierarchy
     {
         $this->loadMissing('region');
 
-        return [
-            ['id' => $this->region->branch_id, 'type' => 'branch'],
-            ['id' => $this->region_id,          'type' => 'region'],
-            ['id' => $this->id,                 'type' => 'mosque'],
+        $hierarchy = [
+            ['id' => $this->id, 'type' => 'mosque'],
         ];
+
+        if ($this->region) {
+            $hierarchy[] = ['id' => $this->region_id, 'type' => 'region'];
+            if ($this->region->branch_id) {
+                $hierarchy[] = ['id' => $this->region->branch_id, 'type' => 'branch'];
+            }
+        }
+
+        return $hierarchy;
     }
 }
