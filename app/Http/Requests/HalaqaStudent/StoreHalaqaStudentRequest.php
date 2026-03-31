@@ -47,7 +47,7 @@ class StoreHalaqaStudentRequest extends FormRequest
         return [
             'halaqa_id.required' => 'يجب تحديد الحلقة',
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
-            'students.*.required' => 'يجب تحديد الطالب',
+            'students.required' => 'يجب تحديد الطالب',
             'students.*.exists' => 'الطالب المحدد غير موجود',
             'from_date.required' => 'يجب تحديد تاريخ البداية',
             // 'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',

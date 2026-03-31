@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Region;
 
 use App\Http\Traits\ApiResponser;
+use App\Models\Branch;
+use App\Models\Region;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -17,9 +19,20 @@ class UpdateRegionRequest extends FormRequest
      */
     public function authorize()
     {
-        $region = $this->route('region'); // الحصول على الفرع من الرابط
+        $region = $this->route('region'); // الحصول على المنطقة من الرابط
 
-        return $this->user()->can('update', $region);
+        // التحقق من صلاحية تعديل المنطقة الحالية
+        if (!$this->user()->can('update', $region)) {
+            return false;
+        }
+
+        // إذا تم تغيير الفرع، تحقق من صلاحية الإنشاء في الفرع الجديد
+        if ($this->has('branch_id') && $this->input('branch_id') != $region->branch_id) {
+            $newBranch = Branch::findOrFail($this->input('branch_id'));
+            return $this->user()->can('create', [Region::class, $newBranch]);
+        }
+
+        return true;
     }
 
     /**
