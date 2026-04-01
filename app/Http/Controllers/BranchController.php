@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Traits\ApiResponser;
 use App\Http\Requests\Branch\StoreBranchRequest;
 use App\Http\Requests\Branch\UpdateBranchRequest;
 use App\Models\Branch;
@@ -10,8 +9,6 @@ use Illuminate\Http\Request;
 
 class BranchController extends Controller
 {
-    use ApiResponser;
-
     public function index(Request $request)
     {
         $branches = Branch::latest()->paginate(15);

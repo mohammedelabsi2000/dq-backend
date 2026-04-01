@@ -10,17 +10,17 @@ class QuranModel extends Model
     public static function booted()
     {
         static::creating(function ($model) {
-            throw new \Exception("Not allowed");
+            throw new \Exception("لا يمكن إضافة سجلات جديدة إلى هذا النموذج لأنه يمثل القرآن الكريم");
             return false; // يمنع الإضافة
         });
 
         static::updating(function ($model) {
-            throw new \Exception("Not allowed");
+            throw new \Exception("لا يمكن تعديل السجلات في هذا النموذج لأنه يمثل القرآن الكريم");
             return false; // يمنع التعديل
         });
 
         static::deleting(function ($model) {
-            throw new \Exception("Not allowed");
+            throw new \Exception("لا يمكن حذف السجلات في هذا النموذج لأنه يمثل القرآن الكريم");
             return false; // يمنع الحذف
         });
     }

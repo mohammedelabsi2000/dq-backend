@@ -34,7 +34,6 @@ class Halaqa extends Model implements BelongsToHierarchy
      */
     public function reference()
     {
-
         return $this->morphTo();
     }
 

@@ -36,7 +36,7 @@ class StudentService
 
     private function findOrCreateGuardian(string $identity, string $studentName): User
     {
-        $guardian = User::where('identity', $identity)->first();
+        $guardian = User::withTrashed()->where('identity', $identity)->first();
 
         if (!$guardian) {
             $guardian = User::create([
@@ -46,6 +46,10 @@ class StudentService
                 'identity' => $identity,
 
             ]);
+        } else {
+            if ($guardian->trashed()) {
+                $guardian->restore();
+            }
         }
 
         return $guardian;

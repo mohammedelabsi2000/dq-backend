@@ -75,7 +75,9 @@ class ImageController extends Controller
                 ];
             });
 
-        return response()->json($images);
+        return $this->success(
+            $images,
+        );
     }
 
     /**
@@ -96,6 +98,8 @@ class ImageController extends Controller
                 ];
             });
 
-        return response()->json($images);
+        return $this->success(
+            $images,
+        );
     }
 }

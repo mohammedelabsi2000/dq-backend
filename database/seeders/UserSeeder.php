@@ -15,12 +15,12 @@ class UserSeeder extends Seeder
     {
         // إنشاء مستخدم مسؤول
         User::create([
-            'fName' => 'Admin',
-            'sName' => 'System',
-            'thName' => '',
-            'family' => 'Administrator',
+            'fName' => 'رائد',
+            'sName' => 'علي',
+            'thName' => 'حسن',
+            'family' => 'المدهون',
             'name' => 'admin',
-            'email' => 'admin@example.com',
+            'email' => 'admin@tahfeez.dq',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'gender' => 'ذكر',
@@ -32,7 +32,7 @@ class UserSeeder extends Seeder
         ]);
 
         // إنشاء 50 مستخدم عادي
-        User::factory(50)
+        /* User::factory(50)
             ->create()
             ->each(function ($user) {
                 // لكل مستخدم 1-3 مؤهلات أكاديمية
@@ -40,7 +40,7 @@ class UserSeeder extends Seeder
                     ->count(fake()->numberBetween(1, 3))
                     ->create([
                         'person_id' => $user->id,
-                        'person_type' => 'App\\Models\\User',
+                        'person_type' => 'user',
                     ]);
 
                 // لكل مستخدم 0-5 دورات
@@ -48,8 +48,8 @@ class UserSeeder extends Seeder
                     ->count(fake()->numberBetween(0, 5))
                     ->create([
                         'person_id' => $user->id,
-                        'person_type' => 'App\\Models\\User',
+                        'person_type' => 'user',
                     ]);
-            });
+            }); */
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,11 +18,12 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $this->call([
             ConstantTypeSeeder::class,
-            BranchRegionMosqueSeeder::class,
+            // BranchRegionMosqueSeeder::class,
             UserSeeder::class,
-            GradeSeeder::class,
+            RoleSeeder::class,
+            // StudentSeeder::class,
+            // GradeSeeder::class,
             // PlanSeeder::class,
-            StudentSeeder::class,
         ]);
     }
 }

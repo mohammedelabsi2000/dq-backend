@@ -21,7 +21,8 @@ use App\Http\Controllers\Api\{
     PlanStudentController,
     RegionController,
     StudentController,
-    TrackController
+    TrackController,
+    StatisticsController
 };
 
 // Load all API route files from the api directory
@@ -42,8 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('halaqas', HalaqaController::class);
 
     // Students management
+    Route::apiResource('students', StudentController::class);
     Route::prefix('students')->group(function () {
-        Route::apiResource('', StudentController::class);
         Route::post('import', [StudentController::class, 'import']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
     });
@@ -52,14 +53,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('halaqa-students', HalaqaStudentController::class);
 
     // Academic qualifications management
+    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
     Route::prefix('academic-qualifications')->group(function () {
-        Route::apiResource('', AcademicQualificationController::class);
         Route::get('{person_type}/{person_id}', [AcademicQualificationController::class, 'getPersonQualifications']);
     });
 
     // Personal courses management
+    Route::apiResource('personal-courses', PersonalCourseController::class);
     Route::prefix('personal-courses')->group(function () {
-        Route::apiResource('', PersonalCourseController::class);
         Route::get('{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
     });
 
@@ -69,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ID Query endpoint
     Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
+    Route::get('/statistics', [StatisticsController::class, 'index']);
 });
 
 // Route::post('register', [AuthController::class, 'register']);

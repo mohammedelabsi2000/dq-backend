@@ -16,21 +16,29 @@ class ConstantHelper
     public static function getConstantsByType(string $typeName): array
     {
         // Get constant type ID from cache or DB
-        $typeId = Cache::rememberForever("constant_type_id_{$typeName}", function () use ($typeName) {
+        /* $typeId = Cache::remember("constant_type_id_{$typeName}", 1, function () use ($typeName) {
             return ConstantType::where('name', $typeName)->value('id');
-        });
+        }); */
+
+        $typeId = ConstantType::where('name', $typeName)->value('id');
 
         if (!$typeId) {
             return [];
         }
 
         // Return constants for the type from cache or DB
-        return Cache::rememberForever("constants_for_type_{$typeId}", function () use ($typeId) {
+        /* return Cache::remember("constants_for_type_{$typeId}", 1, function () use ($typeId) {
             return Constant::where('constant_type_id', $typeId)
                 ->where('is_active', true)
                 ->get()
                 ->toArray();
-        });
+        }); */
+
+
+        return Constant::where('constant_type_id', $typeId)
+            ->where('is_active', true)
+            ->get()
+            ->toArray();
     }
 
     /**

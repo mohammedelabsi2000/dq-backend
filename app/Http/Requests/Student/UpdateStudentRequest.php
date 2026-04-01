@@ -10,7 +10,7 @@ class UpdateStudentRequest extends DQFormRequest
 {
     public function authorize()
     {
-        return true;
+        return $this->user()->can('update', $this->route('student'));
     }
 
     public function rules()

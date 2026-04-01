@@ -5,6 +5,7 @@ namespace App\Http\Requests\Halaqa;
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class UpdateHalaqaRequest extends DQFormRequest
 {
@@ -14,21 +15,33 @@ class UpdateHalaqaRequest extends DQFormRequest
         return $this->user()->can('update', $this->route('halaqa'));
     }
 
-
-    public function rules()
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    public function prepareForValidation()
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => \App\Models\Region::class,
+                'reference_type' => 'region',
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => \App\Models\Center::class,
+                'reference_type' => 'center',
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }
+    }
 
+
+    /** Get the validation rules that apply to the request.
+     *s
+     * @return array
+     */
+    public function rules()
+    {
         return [
             'name' => 'sometimes|required|string|max:255',
             'location' => 'nullable|string|max:255',
@@ -38,8 +51,8 @@ class UpdateHalaqaRequest extends DQFormRequest
                 'sometimes',
                 'required',
                 Rule::in([
-                    \App\Models\Center::class,
-                    \App\Models\Region::class,
+                    'center',
+                    'region',
                 ])
             ],
 
@@ -48,7 +61,8 @@ class UpdateHalaqaRequest extends DQFormRequest
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $type = $this->input('reference_type');
+                    // $type = $this->input('reference_type');
+                    $type = Relation::getMorphedModel($this->input('reference_type'));
 
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');
@@ -69,6 +83,11 @@ class UpdateHalaqaRequest extends DQFormRequest
         ];
     }
 
+    /**
+     * Get custom error messages for validation failures.
+     *
+     * @return array
+     */
     public function messages(): array
     {
         return [

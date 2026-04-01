@@ -10,6 +10,7 @@ class ConstantTypeSeeder extends Seeder
 {
     public function run(): void
     {
+
         $constantTypes = [
             [
                 'name' => 'marital_status',
@@ -31,6 +32,9 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'الدكتور', 'notes' => null, 'is_active' => true],
                     ['name' => 'الأستاذ', 'notes' => null, 'is_active' => true],
                     ['name' => 'الحاج', 'notes' => null, 'is_active' => true],
+                    ['name' => 'السيد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'السيدة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'الآنسة', 'notes' => null, 'is_active' => true],
                 ]
             ],
             [
@@ -42,6 +46,7 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'تجويد', 'notes' => 'خطة لتعليم التجويد', 'is_active' => true],
                     ['name' => 'علوم شرعية', 'notes' => 'خطة للعلوم الشرعية', 'is_active' => true],
                     ['name' => 'لغة عربية', 'notes' => 'خطة لتعليم اللغة العربية', 'is_active' => true],
+
                 ]
             ],
             [
@@ -53,6 +58,7 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'ناشئة', 'notes' => 'من 13-18 سنة', 'is_active' => true],
                     ['name' => 'شباب', 'notes' => 'من 19-35 سنة', 'is_active' => true],
                     ['name' => 'كبار', 'notes' => 'فوق 35 سنة', 'is_active' => true],
+
                 ]
             ],
             [
@@ -64,6 +70,7 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'أسبوع', 'notes' => null, 'is_active' => true],
                     ['name' => 'شهر', 'notes' => null, 'is_active' => true],
                     ['name' => 'سنة', 'notes' => null, 'is_active' => true],
+
                 ]
             ],
             [
@@ -76,6 +83,7 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'بكالوريوس', 'notes' => 'أربع سنوات', 'is_active' => true],
                     ['name' => 'ماجستير', 'notes' => 'دراسات عليا', 'is_active' => true],
                     ['name' => 'دكتوراه', 'notes' => 'دراسات عليا متقدمة', 'is_active' => true],
+
                 ]
             ],
             [
@@ -89,6 +97,9 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'شريعة', 'notes' => null, 'is_active' => true],
                     ['name' => 'لغة عربية', 'notes' => null, 'is_active' => true],
                     ['name' => 'تربية', 'notes' => null, 'is_active' => true],
+                    ['name' => 'إعلام', 'notes' => null, 'is_active' => true],
+                    ['name' => 'اقتصاد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'علوم حاسوب', 'notes' => null, 'is_active' => true],
                 ]
             ],
             [
@@ -108,11 +119,19 @@ class ConstantTypeSeeder extends Seeder
                 'description' => 'صلة القرابة',
                 'notes' => '',
                 'constants' => [
-                    // ['name' => 'بنفسه', 'notes' => null, 'is_active' => true],
-                    // ['name' => 'أب', 'notes' => null, 'is_active' => true],
-                    // ['name' => 'جد', 'notes' => null, 'is_active' => true],
-                    // ['name' => 'غم', 'notes' => null, 'is_active' => true],
-                    // ['name' => 'خال', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أب', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أم', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أخ', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أخت', 'notes' => null, 'is_active' => true],
+                    ['name' => 'جد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'جدة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'عم', 'notes' => null, 'is_active' => true],
+                    ['name' => 'عمة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'خال', 'notes' => null, 'is_active' => true],
+                    ['name' => 'خالة', 'notes' => null, 'is_active' => true],
+                    ['name' => 'وصي', 'notes' => null, 'is_active' => true],
+                    ['name' => 'غير ذلك', 'notes' => null, 'is_active' => true],
+                    ['name' => 'بنفسه', 'notes' => null, 'is_active' => true],
                 ]
             ],
             [
@@ -153,7 +172,12 @@ class ConstantTypeSeeder extends Seeder
                 'name' => 'halaqa_types',
                 'description' => 'أنواع الحلقات',
                 'notes' => '',
-                'constants' => []
+                'constants' => [
+                    ['name' => 'حفظ', 'notes' => null, 'is_active' => true],
+                    ['name' => 'تجويد', 'notes' => null, 'is_active' => true],
+                    ['name' => 'علوم شرعية', 'notes' => null, 'is_active' => true],
+                    ['name' => 'لغة عربية', 'notes' => null, 'is_active' => true],
+                ]
             ],
         ];
 
@@ -163,16 +187,12 @@ class ConstantTypeSeeder extends Seeder
 
             $constantType = ConstantType::create([
                 ...$typeData,
-                // 'created_by' => 1,
-                // 'updated_by' => 1,
             ]);
 
             foreach ($constants as $constant) {
                 Constant::create([
                     ...$constant,
                     'constant_type_id' => $constantType->id,
-                    // 'created_by' => 1,
-                    // 'updated_by' => 1,
                 ]);
             }
         }

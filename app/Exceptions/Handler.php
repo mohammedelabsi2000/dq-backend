@@ -3,7 +3,6 @@
 namespace App\Exceptions;
 
 use App\Http\Traits\ApiResponser;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
@@ -15,6 +14,14 @@ use Throwable;
 class Handler extends ExceptionHandler
 {
     use ApiResponser;
+    /**
+     * A list of the exception types that are not reported.
+     *
+     * @var array<int, class-string<Throwable>>
+     */
+    protected $dontReport = [
+        //
+    ];
 
     /**
      * The list of inputs that are never flashed on validation exceptions.
@@ -30,12 +37,12 @@ class Handler extends ExceptionHandler
     /**
      * Register exception handling callbacks.
      */
-    public function register(): void
+    public function register()
     {
         $this->reportable(function (Throwable $e) {
             //
         });
-    }
+        }
 
     /**
      * Render an exception into an HTTP response.

@@ -18,10 +18,27 @@ class HalaqaStudentController extends Controller
      */
     public function index()
     {
-        $query = HalaqaStudent::query();
+        $this->authorize('viewAny', HalaqaStudent::class);
+        $query = HalaqaStudent::query()->visibleTo(auth()->user());
+
+        $search = request()->get('search');
+
+        $query = $query->dqSearch($search, [], [
+            // 'halaqa' => ['name'],
+            'student' => ['full_name'],
+        ]);
+        /* $query = $query->whereHas('student', function ($qr) use ($search) {
+            foreach (['fName'] as $column) {
+                $qr->where($column, 'LIKE', "%{$search}%");
+            }
+        }); */
 
         $q = $this->applyFilters($query, [
+<<<<<<< HEAD
             'searchColumns' => ['id', 'student_id', 'halaqa_id'],
+=======
+            'searchColumns' => [],
+>>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
@@ -52,6 +69,7 @@ class HalaqaStudentController extends Controller
      */
     public function show(HalaqaStudent $halaqaStudent)
     {
+        $this->authorize('view', $halaqaStudent);
         $halaqaStudent = $halaqaStudent->load([
             'halaqa',
             'halaqa.reference',
@@ -71,6 +89,7 @@ class HalaqaStudentController extends Controller
      */
     public function store(StoreHalaqaStudentRequest $request)
     {
+<<<<<<< HEAD
         $validated = $request->validated();
 
         $studentsCreated = [];
@@ -105,8 +124,57 @@ class HalaqaStudentController extends Controller
                     ->get()
             ),
             'تم تسجيل الطلاب في الحلقة بنجاح'
+=======
+        // $validated = $request->validated();
+
+        $data = collect($request->students)->map(function ($studentId) use ($request) {
+            return [
+                'halaqa_id' => $request->halaqa_id,
+                'student_id' => $studentId,
+                'from_date' => $request->from_date,
+                'enrollment_status_id' => $request->enrollment_status_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        })->toArray();
+
+        $halaqStudents = HalaqaStudent::insert($data);
+        if (!$halaqStudents) {
+            return $this->error('حدث خطأ أثناء تسجيل الطلاب في الحلقة', 500);
+        }
+
+        return $this->success(
+            null,
+            'تم تسجيل الطلاب في الحلقة بنجاح',
+            201
+>>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
         );
+        // التحقق هل الطالب مسجل حالياً في حلقة
+        /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
+             ->whereNull('to_date')
+             ->first();
+
+         if ($existingEnrollment) {
+             return $this->error(
+                 'الطالب مسجل حالياً في حلقة أخرى ولا يمكن تسجيله في أكثر من حلقة بنفس الوقت. استخدم التعديل لنقله إلى حلقة أخرى.',
+                 422
+             );
+         }
+
+         $student = HalaqaStudent::create($validated);
+
+         return $this->success(
+             new HalaqaStudentResource(
+                 $student->load(['halaqa', 'student', 'enrollment_status'])
+             ),
+             'تم تسجيل الطالب في الحلقة بنجاح',
+             201
+         );*/
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
     /**
      * تعديل تسجيل موجود
      */
@@ -114,6 +182,7 @@ class HalaqaStudentController extends Controller
         UpdateHalaqaStudentRequest $request,
         HalaqaStudent $halaqaStudent
     ) {
+        $this->authorize('update', $halaqaStudent);
         $validated = $request->validated();
 
         if ($halaqaStudent->halaqa_id != $validated['halaqa_id'] || $halaqaStudent->from_date != $validated['from_date']) {
@@ -150,6 +219,7 @@ class HalaqaStudentController extends Controller
      */
     public function destroy(HalaqaStudent $halaqaStudent)
     {
+        $this->authorize('delete', $halaqaStudent);
         $halaqaStudent->delete();
 
         return $this->success(

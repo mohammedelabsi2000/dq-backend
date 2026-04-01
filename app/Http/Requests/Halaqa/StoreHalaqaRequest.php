@@ -9,6 +9,7 @@ use App\Models\Center;
 use App\Models\Halaqa;
 use App\Models\Region;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class StoreHalaqaRequest extends DQFormRequest
 {
@@ -19,18 +20,48 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
-        // نجيب الـ reference (Region أو Center)
-        $referenceType = $this->input('reference_type');
-        $referenceId   = $this->input('reference_id');
-
-        $reference = match ($referenceType) {
-            'region' => Region::findOrFail($referenceId),
-            'center' => Center::findOrFail($referenceId),
-            default  => abort(422, 'Invalid reference type'),
-        };
-
+        $reference = null;
+        if ($this->input('center_id')) {
+            $reference = Center::find($this->input('center_id'));
+        } elseif ($this->input('region_id')) {
+            $reference = Region::find($this->input('region_id'));
+        }
         return $this->user()->can('create', [Halaqa::class, $reference]);
+
+        // نجيب الـ reference (Region أو Center)
+        // $referenceType = $this->input('reference_type');
+        // $referenceId   = $this->input('reference_id');
+
+        // $reference = match ($referenceType) {
+        //     'region' => Region::findOrFail($referenceId),
+        //     'center' => Center::findOrFail($referenceId),
+        //     // default  => abort(422, 'Invalid reference type'),
+
+        //     default  => abort(422, 'Invalid reference type'),
+        // };
+
+        // return $this->user()->can('create', [Halaqa::class, $reference]);
         // return true;
+    }
+
+    /**
+     * Prepare the data for validation.
+     *
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        if ($this->filled('center_id')) {
+            $this->merge([
+                'reference_type' => 'center',
+                'reference_id' => (int) $this->center_id,
+            ]);
+        } elseif ($this->filled('region_id')) {
+            $this->merge([
+                'reference_type' => 'region',
+                'reference_id' => (int) $this->region_id,
+            ]);
+        }
     }
 
     /**
@@ -40,19 +71,9 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function rules()
     {
-        if (!$this->input('center_id')) {
-            $this->merge([
-                'reference_type' => \App\Models\Region::class,
-                'reference_id' => intval($this->input('region_id')),
-            ]);
-        } else {
-            $this->merge([
-                'reference_type' => \App\Models\Center::class,
-                'reference_id' => intval($this->input('center_id')),
-            ]);
-        }
-
         return [
+            'center_id' => 'nullable|integer|exists:centers,id',
+            'region_id' => 'nullable|integer|exists:regions,id',
             'name' => 'required|string|max:255',
             'location' => 'nullable|string|max:255',
             'description' => 'nullable|string',
@@ -60,15 +81,16 @@ class StoreHalaqaRequest extends DQFormRequest
             'reference_type' => [
                 'required',
                 Rule::in([
-                    Center::class,
-                    Region::class,
+                    'center',
+                    'region'
                 ])
             ],
             'reference_id' => [
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    $type = $this->reference_type;
+                    // $type = $this->reference_type;
+                    $type = Relation::getMorphedModel($this->reference_type);
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');
                         return;

@@ -12,10 +12,16 @@ class DQFormRequest extends FormRequest
 {
     use ApiResponser;
 
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @return void
+     */
     protected function failedValidation(Validator $validator)
     {
-        throw new HttpResponseException($this->validationError(
+        $this->validationError(
             $validator->errors()
-        ));
+        );
     }
 }

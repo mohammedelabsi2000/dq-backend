@@ -9,7 +9,7 @@ trait ApiResponser
     protected function success($data, string $message = '', int $code = 200)
     {
         return response()->json([
-            'status'  => true,
+            'success'  => true,
             'message' => $message,
             'code'    => $code,
             'data'    => $data,
@@ -20,7 +20,7 @@ trait ApiResponser
     protected function error($message = 'حدث خطأ', $code = 400, $errors = null)
     {
         return response()->json([
-            'status'  => false,
+            'success'  => false,
             'message' => $message,
             'errors'  => $errors,
             'code' => $code,
@@ -30,7 +30,7 @@ trait ApiResponser
     protected function validationError($errors)
     {
         return response()->json([
-            'status'  => false,
+            'success'  => false,
             'code' => "422",
             'message' => 'خطأ في التحقق من البيانات',
             'errors'  => $errors
@@ -40,7 +40,7 @@ trait ApiResponser
     protected function notFound($message = 'العنصر غير موجود')
     {
         return response()->json([
-            'status'  => false,
+            'success'  => false,
             'message' => $message
         ], 404);
     }

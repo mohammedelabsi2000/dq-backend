@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PersonalCourse\StorePersonalCourseRequest;
 use App\Http\Requests\PersonalCourse\UpdatePersonalCourseRequest;
 use App\Http\Resources\PersonalCourseResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Image;
 use App\Models\PersonalCourse;
 
@@ -15,6 +14,8 @@ class PersonalCourseController extends Controller
 
     public function getPersonCourses($person_type, $person_id)
     {
+        $this->authorize('viewAny', PersonalCourse::class);
+
         $data = PersonalCourse::with(['person', 'type', 'images'])
             ->where('person_type', $person_type)
             ->where('person_id', $person_id)
@@ -28,7 +29,7 @@ class PersonalCourseController extends Controller
     }
     public function index()
     {
-
+        $this->authorize('viewAny', PersonalCourse::class);
         $query = PersonalCourse::query();
 
         $q = $this->applyFilters($query, [
@@ -88,6 +89,7 @@ class PersonalCourseController extends Controller
 
     public function show(PersonalCourse $personalCourse)
     {
+        $this->authorize('view', $personalCourse);
         $personalCourse = $personalCourse->load(['person', 'type']);
 
         return $this->success(
@@ -128,6 +130,7 @@ class PersonalCourseController extends Controller
 
     public function destroy(PersonalCourse $personalCourse)
     {
+        $this->authorize('delete', $personalCourse);
         $personalCourse->delete();
 
         return $this->success(

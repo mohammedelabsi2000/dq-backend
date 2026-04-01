@@ -24,7 +24,54 @@ class StudentController extends Controller
 
     public function index()
     {
-        $query = Student::query();
+        $this->authorize('viewAny', Student::class);
+        // $query = Student::query();
+        $query = Student::query()->visibleTo(auth()->user());
+
+        if (request()->filled('halaqa_id')) {
+            // Students linked to the specified halaqa
+            $query->whereHas('halaqas', function ($q) {
+                $q->where('halaqa_id', request()->integer('halaqa_id'));
+            });
+        } elseif (request()->filled('center_id')) {
+            $centerId = request()->integer('center_id');
+            $query->whereHas('mosque', function ($q) use ($centerId) {
+                $q->whereHas('centers', function ($q) use ($centerId) {
+                    $q->where('id', $centerId);
+                });
+            });
+            // Students linked to the specified center through halaqas
+            /* $query->whereHas('halaqas', function ($q) {
+                $q->whereHasMorph(
+                    'reference',
+                    ['center'],
+                    function ($q) {
+                        $q->where('id', request()->integer('center_id'));
+                    }
+                );
+            }); */
+        } elseif (request()->filled('region_id')) {
+            // Students linked to the specified region through halaqas or centers
+            $regionId = request()->integer('region_id');
+
+            $query->whereHas('mosque', function ($q) use ($regionId) {
+                $q->where('region_id', $regionId);
+            });
+
+            /* $query->whereHas('halaqas', function ($q) use ($regionId) {
+                $q->where(function ($q) use ($regionId) {
+                    // Halaqas directly linked to the region
+                    $q->whereHasMorph('reference', ['region'], function ($q) use ($regionId) {
+                        $q->where('id', $regionId);
+                    })
+                        // Halaqas linked to centers that belong to the region
+                        ->orWhereHasMorph('reference', ['center'], function ($q) use ($regionId) {
+                            $q->where('region_id', $regionId);
+                        });
+                });
+            }); */
+
+        }
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['full_name', 'identity'],
@@ -94,6 +141,7 @@ class StudentController extends Controller
 
     public function show(Student $student)
     {
+        $this->authorize('view', $student);
         $student = $student->load([
             'mosque',
             'maritalStatus',
@@ -113,24 +161,26 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
+        // $this->authorize('update', $student);
         $student = $this->studentService->update($student, $request->validated());
 
         return $this->success(
             new StudentResource($student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'guardian',
-        ])),
+                'mosque',
+                'maritalStatus',
+                'moneyStatus',
+                'guardian',
+                'guardianType',
+                'prefixName',
+                'guardian',
+            ])),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }
 
     public function destroy(Student $student)
     {
+        $this->authorize('delete', $student);
         $student->delete();
 
         return $this->success(
@@ -139,6 +189,12 @@ class StudentController extends Controller
         );
     }
 
+    /**
+     * Import students from an Excel file.
+     *
+     * @param  \App\Http\Requests\Student\ImportStudentRequest  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function import(ImportStudentRequest $request)
     {
         Excel::import(

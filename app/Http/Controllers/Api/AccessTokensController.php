@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Response;
 use Laravel\Sanctum\PersonalAccessToken;
 
 class AccessTokensController extends Controller
@@ -18,6 +17,10 @@ class AccessTokensController extends Controller
             'login' => 'required|string|max:255',
             'password' => 'required|string|min:6',
             'device_name' => 'string|max:255'
+        ], [
+            'login.required' => 'حقل البريد الإلكتروني أو الهوية مطلوب',
+            'password.required' => 'حقل كلمة المرور مطلوب',
+            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
         ]);
 
         $login = $request->login;
@@ -33,39 +36,29 @@ class AccessTokensController extends Controller
 
             $user->loadMissing('roles.roleAbilities');
 
+            // $abilities = $user->roles
+            //     ->flatMap(fn($role) => $role->roleAbilities)
+            //     ->unique('ability')
+            //     ->values()
+            //     ->map(fn($ability) => [
+            //         'ability' => $ability->ability,
+            //         'type' => $ability->type,
+            //     ]);
             $abilities = $user->roles
                 ->flatMap(fn($role) => $role->roleAbilities)
+                ->where('type', 'allow') // ✅ فقط الـ allow
                 ->unique('ability')
-                ->values()
-                ->map(fn($ability) => [
-                    'ability' => $ability->ability,
-                    'type' => $ability->type,
-                ]);
+                ->pluck('ability') // ✅ فقط الـ string
+                ->values();
             // $user->makeHidden('roles');
             return $this->success([
                 'token' => $token->plainTextToken,
                 'user' => $user,
                 'abilities' => $abilities,
             ], "تم تسجيل الدخول بنجاح", 201);
-
-
-
-            // return $this->success(['token' => $token->plainTextToken, 'user' => $user], "Ok", 201);
-
-
-            // return Response::json([
-            //     'code' => 1,
-            //     'token' => $token->plainTextToken,
-            //     'user' => $user
-            // ], 201);
         }
 
         return $this->error("بيانات الدخول غير صحيحة", 401, null);
-
-        // return Response::json([
-        //     'code' => 0,
-        //     'message' => 'Invalid credentials'
-        // ], 401);
     }
 
     // To delete token
@@ -75,7 +68,7 @@ class AccessTokensController extends Controller
         // $user = $request->user();
         // $user = auth()->user();
         if (null === $token) {
-            $user->currentAccessToken()->delete();
+            $request->user()->currentAccessToken()->delete();
             return $this->success(null, "تم تسجيل الخروج بنجاح", 200);
         }
 
@@ -93,12 +86,15 @@ class AccessTokensController extends Controller
         $request->validate([
             'old_password' => 'required',
             'new_password' => 'required|confirmed',
+        ], [
+            'old_password.required' => 'حقل كلمة المرور القديمة مطلوب',
+            'new_password.required' => 'حقل كلمة المرور الجديدة مطلوب',
+            'new_password.confirmed' => 'تأكيد كلمة المرور الجديدة غير متطابق',
         ]);
 
         #Match The Old Password
         if (!Hash::check($request->old_password, auth()->user()->password)) {
             return $this->error("كلمة المرور القديمة غير صحيحة!", 404, null);
-            // return $this->apiResponse("Old Password Doesn't match!", 404);
         }
 
         $authModel = get_class(auth()->user());
