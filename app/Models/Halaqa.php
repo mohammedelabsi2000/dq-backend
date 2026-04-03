@@ -59,7 +59,7 @@ class Halaqa extends Model implements BelongsToHierarchy
     public function students()
     {
         return $this->belongsToMany(Student::class, 'halaqa_students')
-            ->withPivot(['from_date', 'to_date', 'status_id'])
+            ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
             ->withTimestamps();
         // ->using(HalaqaStudent::class);
     }

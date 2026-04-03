@@ -70,7 +70,6 @@ class StudentController extends Controller
                         });
                 });
             }); */
-
         }
 
         $q = $this->applyFilters($query, [
@@ -101,25 +100,26 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request)
     {
         $data = $request->validated();
+        if ($data['identity']) {
+            $student = Student::withTrashed()
+                ->where('identity', $data['identity'])
+                ->first();
 
-        $student = Student::withTrashed()
-            ->where('identity', $data['identity'])
-            ->first();
+            if ($student) {
+                // إذا كان محذوف نرجعه
+                if ($student->trashed()) {
+                    $student->restore();
+                }
 
-        if ($student) {
-            // إذا كان محذوف نرجعه
-            if ($student->trashed()) {
-                $student->restore();
+                // نحدث البيانات
+                $student->update($data);
+
+                return $this->success(
+                    new StudentResource($student),
+                    'تم استعادة الطالب بنجاح',
+                    201
+                );
             }
-
-            // نحدث البيانات
-            $student->update($data);
-
-            return $this->success(
-                new StudentResource($student),
-                'تم استعادة الطالب بنجاح',
-                201
-            );
         }
 
         $student = $this->studentService->create($request->validated());

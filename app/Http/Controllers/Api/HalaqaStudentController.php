@@ -34,11 +34,7 @@ class HalaqaStudentController extends Controller
         }); */
 
         $q = $this->applyFilters($query, [
-<<<<<<< HEAD
             'searchColumns' => ['id', 'student_id', 'halaqa_id'],
-=======
-            'searchColumns' => [],
->>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
@@ -89,7 +85,6 @@ class HalaqaStudentController extends Controller
      */
     public function store(StoreHalaqaStudentRequest $request)
     {
-<<<<<<< HEAD
         $validated = $request->validated();
 
         $studentsCreated = [];
@@ -124,30 +119,6 @@ class HalaqaStudentController extends Controller
                     ->get()
             ),
             'تم تسجيل الطلاب في الحلقة بنجاح'
-=======
-        // $validated = $request->validated();
-
-        $data = collect($request->students)->map(function ($studentId) use ($request) {
-            return [
-                'halaqa_id' => $request->halaqa_id,
-                'student_id' => $studentId,
-                'from_date' => $request->from_date,
-                'enrollment_status_id' => $request->enrollment_status_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
-
-        $halaqStudents = HalaqaStudent::insert($data);
-        if (!$halaqStudents) {
-            return $this->error('حدث خطأ أثناء تسجيل الطلاب في الحلقة', 500);
-        }
-
-        return $this->success(
-            null,
-            'تم تسجيل الطلاب في الحلقة بنجاح',
-            201
->>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
         );
         // التحقق هل الطالب مسجل حالياً في حلقة
         /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
@@ -171,10 +142,6 @@ class HalaqaStudentController extends Controller
              201
          );*/
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> bda5d2a0746cee0d4cba20f14672cefff12b619e
     /**
      * تعديل تسجيل موجود
      */
@@ -182,7 +149,7 @@ class HalaqaStudentController extends Controller
         UpdateHalaqaStudentRequest $request,
         HalaqaStudent $halaqaStudent
     ) {
-        $this->authorize('update', $halaqaStudent);
+        // $this->authorize('update', $halaqaStudent);
         $validated = $request->validated();
 
         if ($halaqaStudent->halaqa_id != $validated['halaqa_id'] || $halaqaStudent->from_date != $validated['from_date']) {
