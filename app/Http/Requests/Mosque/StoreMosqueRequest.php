@@ -31,9 +31,10 @@ class StoreMosqueRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'      => 'required|string|max:255',
-            'region_id' => 'required|exists:regions,id',
-            'notes'     => 'nullable|string',
+            'name'         => 'required|string|max:255',
+            'region_id'    => 'required|exists:regions,id',
+            'notes'        => 'nullable|string',
+            'create_center' => 'boolean',
         ];
     }
 

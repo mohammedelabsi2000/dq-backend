@@ -5,6 +5,8 @@ namespace App\Http\Requests\AcademicQualification;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use App\Models\AcademicQualification;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Validation\Rule;
 
 class StoreAcademicQualificationRequest extends FormRequest
@@ -17,7 +19,18 @@ class StoreAcademicQualificationRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('create', AcademicQualification::class);
+        // الحصول على الشخص المراد إنشاء شهادة له
+        $personType = $this->input('person_type');
+        $personId = $this->input('person_id');
+
+        $person = null;
+        if ($personType === 'student') {
+            $person = Student::find($personId);
+        } elseif ($personType === 'user') {
+            $person = User::find($personId);
+        }
+
+        return $this->user()->can('create', [AcademicQualification::class, $person]);
     }
 
     /**

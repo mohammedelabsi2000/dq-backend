@@ -52,13 +52,27 @@ class AcademicQualificationPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether user can create models.
      *
      * @param  \App\Models\User  $user
+     * @param  mixed  $person
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create($user, $person = null)
     {
+        // إذا تم تمرير person، تحقق من صلاحياته
+        if ($person) {
+            if ($person instanceof \App\Models\User) {
+                return $user->hasAbility('users.create') ||
+                    ($user->id === $person->id && $user->hasAbility('users.create'));
+            }
+
+            if ($person instanceof \App\Models\Student) {
+                return $user->hasAbility('students.create', $person);
+            }
+        }
+
+        // خلاف ذلك، تحقق من الصلاحية العامة
         return $user->hasAbility('users.create') || $user->hasAbility('students.create');
     }
 
