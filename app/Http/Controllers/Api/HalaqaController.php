@@ -83,7 +83,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type'])->get();
+        $halaqas = $query->with(['reference', 'type', 'supervisor'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -123,7 +123,7 @@ class HalaqaController extends Controller
     public function show(Request $request, Halaqa $halaqa)
     {
         $this->authorize('view', $halaqa);
-        $halaqa->load(['type', 'reference']);
+        $halaqa->load(['type', 'reference', 'supervisor']);
 
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');
