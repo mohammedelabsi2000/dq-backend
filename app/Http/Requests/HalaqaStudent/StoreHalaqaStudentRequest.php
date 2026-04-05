@@ -31,10 +31,9 @@ class StoreHalaqaStudentRequest extends FormRequest
     {
         return [
             'halaqa_id' => 'required|exists:halaqas,id',
-            'students' => 'required|array',
-            'students.*' => 'distinct|exists:students,id',
+            'students' => 'required|array|min:1',
+            'students.*' => 'exists:students,id',
             'from_date' => 'required|date',
-            // 'to_date' => 'nullable|date|after_or_equal:from_date',
             'enrollment_status_id' => [
                 'required',
                 Rule::in(ConstantHelper::getConstantIdsByType('enrollment_status')),
@@ -47,10 +46,12 @@ class StoreHalaqaStudentRequest extends FormRequest
         return [
             'halaqa_id.required' => 'يجب تحديد الحلقة',
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
-            'students.required' => 'يجب تحديد الطالب',
-            'students.*.exists' => 'الطالب المحدد غير موجود',
+            'students.required' => 'يجب تحديد الطلاب',
+            'students.array' => 'الطلاب يجب أن يكونوا مصفوفة',
+            'students.min' => 'يجب تحديد طالب واحد على الأقل',
+            'students.*.exists' => 'أحد الطلاب غير موجود',
             'from_date.required' => 'يجب تحديد تاريخ البداية',
-            // 'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
+            'from_date.date' => 'تاريخ البداية غير صالح',
             'enrollment_status_id.required' => 'يجب تحديد الحالة',
             'enrollment_status_id.in' => 'الحالة المحددة غير موجودة',
         ];

@@ -66,6 +66,7 @@ class StudentService
                 'email' => $identity . '@dq.com',
                 'password' => Hash::make('12345678'),
                 'identity' => $identity,
+
             ]);
         } else {
             if ($guardian->trashed()) {
