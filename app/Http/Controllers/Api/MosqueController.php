@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Mosque\StoreMosqueRequest;
 use App\Http\Requests\Mosque\UpdateMosqueRequest;
 use App\Http\Resources\MosqueResource;
+use App\Http\Resources\CenterResource;
 use App\Models\Mosque;
+use App\Models\Center;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
@@ -63,23 +66,43 @@ class MosqueController extends Controller
     {
         // $this->authorize('create', Mosque::class);
 
-        $mosque = Mosque::create($request->validated());
+        $center = null;
+        $mosque = null;
 
-        if ($request->boolean('with_region')) {
+        DB::transaction(function () use ($request, &$center, &$mosque) {
+            $mosque = Mosque::create($request->validated());
+
+            // Check if user wants to create a center with the same name
+            if ($request->boolean('create_center')) {
+                $centerData = [
+                    'name' => $request->input('name'),
+                    'region_id' => $request->input('region_id'),
+                    'mosque_id' => $mosque->id,
+                    'notes' => $request->input('notes'),
+                ];
+                $center = Center::create($centerData);
+            }
+        });
+
+        if ($request->boolean('with_region') && $mosque) {
             $mosque->load('region.branch');
         }
 
-        // if ($request->boolean('with_region')) {
-        //     $mosque->load('region');
-        // }
+        // Prepare response data
+        $responseData = [
+            'mosque' => new MosqueResource($mosque),
+        ];
 
-        // if ($request->boolean('with_region_and_branch')) {
-        //     $mosque->load('region.branch');
-        // }
+        if ($center) {
+            if ($request->boolean('with_region')) {
+                $center->load('mosque.region.branch');
+            }
+            $responseData['center'] = new CenterResource($center);
+        }
 
         return $this->success(
-            new MosqueResource($mosque),
-            'تم إنشاء المسجد بنجاح',
+            $responseData,
+            $center ? 'تم إنشاء المسجد والمركز بنجاح' : 'تم إنشاء المسجد بنجاح',
             201
         );
     }

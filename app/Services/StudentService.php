@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helpers\ConstantHelper;
+use App\Models\HalaqaStudent;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +18,18 @@ class StudentService
 
             $guardian = $this->findOrCreateGuardian($data['guardian_id'], $data['fName']);
 
-            return Student::create($data);
+            // Extract halaqa_id from data if present
+            $halaqaId = $data['halaqa_id'] ?? null;
+            unset($data['halaqa_id']);
+
+            $student = Student::create($data);
+
+            // Assign student to halaqa if provided
+            if ($halaqaId) {
+                $this->assignStudentToHalaqa($student, $halaqaId);
+            }
+
+            return $student;
         });
     }
 
@@ -28,7 +41,16 @@ class StudentService
                 $this->findOrCreateGuardian($data['guardian_id'], $student->fName);
             }
 
+            // Extract halaqa_id from data if present
+            $halaqaId = $data['halaqa_id'] ?? null;
+            unset($data['halaqa_id']);
+
             $student->update($data);
+
+            // Handle halaqa assignment if provided
+            if ($halaqaId !== null) {
+                $this->updateStudentHalaqaAssignment($student, $halaqaId);
+            }
 
             return $student;
         });
@@ -44,6 +66,7 @@ class StudentService
                 'email' => $identity . '@dq.com',
                 'password' => Hash::make('12345678'),
                 'identity' => $identity,
+
             ]);
         } else {
             if ($guardian->trashed()) {
@@ -52,5 +75,29 @@ class StudentService
         }
 
         return $guardian;
+    }
+
+    public function assignStudentToHalaqa(Student $student, int $halaqaId): void
+    {
+        // Get the default enrollment status ID for "منتظم" (regular)
+        $enrollmentStatusId = ConstantHelper::getConstantIdByName('enrollment_status', 'منتظم');
+
+        HalaqaStudent::create([
+            'halaqa_id' => $halaqaId,
+            'student_id' => $student->id,
+            'from_date' => now()->toDateString(),
+            'enrollment_status_id' => $enrollmentStatusId,
+        ]);
+    }
+
+    public function updateStudentHalaqaAssignment(Student $student, ?int $halaqaId): void
+    {
+        // Remove existing halaqa assignments
+        HalaqaStudent::where('student_id', $student->id)->delete();
+
+        // Assign to new halaqa if provided
+        if ($halaqaId) {
+            $this->assignStudentToHalaqa($student, $halaqaId);
+        }
     }
 }

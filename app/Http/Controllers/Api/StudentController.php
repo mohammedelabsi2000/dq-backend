@@ -70,7 +70,6 @@ class StudentController extends Controller
                         });
                 });
             }); */
-
         }
 
         $q = $this->applyFilters($query, [
@@ -88,6 +87,9 @@ class StudentController extends Controller
             'guardian',
             'guardianType',
             'prefixName',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ])->get();
 
         return $this->apiResponse([
@@ -101,25 +103,31 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request)
     {
         $data = $request->validated();
+        if ($data['identity']) {
+            $student = Student::withTrashed()
+                ->where('identity', $data['identity'])
+                ->first();
 
-        $student = Student::withTrashed()
-            ->where('identity', $data['identity'])
-            ->first();
+            if ($student) {
+                // إذا كان محذوف نرجعه
+                if ($student->trashed()) {
+                    $student->restore();
+                }
 
-        if ($student) {
-            // إذا كان محذوف نرجعه
-            if ($student->trashed()) {
-                $student->restore();
+                // نحدث البيانات
+                $student->update($data);
+
+                // Assign to halaqa if provided and not already assigned
+                if (isset($data['halaqa_id']) && $data['halaqa_id']) {
+                    $this->studentService->assignStudentToHalaqa($student, $data['halaqa_id']);
+                }
+
+                return $this->success(
+                    new StudentResource($student),
+                    'تم استعادة الطالب بنجاح',
+                    201
+                );
             }
-
-            // نحدث البيانات
-            $student->update($data);
-
-            return $this->success(
-                new StudentResource($student),
-                'تم استعادة الطالب بنجاح',
-                201
-            );
         }
 
         $student = $this->studentService->create($request->validated());
@@ -130,6 +138,9 @@ class StudentController extends Controller
             'guardian',
             'guardianType',
             'prefixName',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ]);
 
         return $this->success(
@@ -150,6 +161,9 @@ class StudentController extends Controller
             'guardianType',
             'prefixName',
             'guardian',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ]);
 
         return $this->success(
@@ -173,6 +187,9 @@ class StudentController extends Controller
                 'guardianType',
                 'prefixName',
                 'guardian',
+                'halaqas' => function ($query) {
+                    $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+                },
             ])),
             'تم تحديث بيانات الطالب بنجاح'
         );

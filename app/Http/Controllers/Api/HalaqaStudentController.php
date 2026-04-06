@@ -34,7 +34,7 @@ class HalaqaStudentController extends Controller
         }); */
 
         $q = $this->applyFilters($query, [
-            'searchColumns' => [],
+            'searchColumns' => ['id', 'student_id', 'halaqa_id'],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
@@ -44,6 +44,7 @@ class HalaqaStudentController extends Controller
 
         // حساب العدد الحقيقي بعد الفلترة
         // $total = (clone $query)->count();
+
 
         $data = $query->with([
             'halaqa',
@@ -67,6 +68,7 @@ class HalaqaStudentController extends Controller
         $this->authorize('view', $halaqaStudent);
         $halaqaStudent = $halaqaStudent->load([
             'halaqa',
+            'halaqa.reference',
             'student',
             'enrollment_status',
         ]);
@@ -83,28 +85,40 @@ class HalaqaStudentController extends Controller
      */
     public function store(StoreHalaqaStudentRequest $request)
     {
-        // $validated = $request->validated();
+        $validated = $request->validated();
 
-        $data = collect($request->students)->map(function ($studentId) use ($request) {
-            return [
-                'halaqa_id' => $request->halaqa_id,
+        $studentsCreated = [];
+        $studentsAlreadyEnrolled = [];
+
+        foreach ($validated['students'] as $studentId) {
+
+            // التحقق هل الطالب مسجل في حلقة أخرى
+            $existingEnrollment = HalaqaStudent::where('student_id', $studentId)
+                ->whereNull('to_date')
+                ->exists();
+
+            if ($existingEnrollment) {
+                $studentsAlreadyEnrolled[] = $studentId;
+                continue;
+            }
+
+            $student = HalaqaStudent::create([
+                'halaqa_id' => $validated['halaqa_id'],
                 'student_id' => $studentId,
-                'from_date' => $request->from_date,
-                'enrollment_status_id' => $request->enrollment_status_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+                'from_date' => $validated['from_date'],
+                'enrollment_status_id' => $validated['enrollment_status_id'],
+            ]);
 
-        $halaqStudents = HalaqaStudent::insert($data);
-        if (!$halaqStudents) {
-            return $this->error('حدث خطأ أثناء تسجيل الطلاب في الحلقة', 500);
+            $studentsCreated[] = $student;
         }
 
         return $this->success(
-            null,
-            'تم تسجيل الطلاب في الحلقة بنجاح',
-            201
+            HalaqaStudentResource::collection(
+                HalaqaStudent::with(['halaqa', 'student', 'enrollment_status'])
+                    ->whereIn('id', collect($studentsCreated)->pluck('id'))
+                    ->get()
+            ),
+            'تم تسجيل الطلاب في الحلقة بنجاح'
         );
         // التحقق هل الطالب مسجل حالياً في حلقة
         /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
@@ -128,7 +142,6 @@ class HalaqaStudentController extends Controller
              201
          );*/
     }
-
     /**
      * تعديل تسجيل موجود
      */
@@ -136,7 +149,7 @@ class HalaqaStudentController extends Controller
         UpdateHalaqaStudentRequest $request,
         HalaqaStudent $halaqaStudent
     ) {
-        $this->authorize('update', $halaqaStudent);
+        // $this->authorize('update', $halaqaStudent);
         $validated = $request->validated();
 
         if ($halaqaStudent->halaqa_id != $validated['halaqa_id'] || $halaqaStudent->from_date != $validated['from_date']) {
