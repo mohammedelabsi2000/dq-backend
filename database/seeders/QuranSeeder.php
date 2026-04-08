@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class QuranSeeder extends Seeder
 {
@@ -18,11 +19,16 @@ class QuranSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            // Disable foreign key constraints to allow seeding because of the relations
+            Schema::disableForeignKeyConstraints();
+
             $this->seedSurahs();
             $this->seedVersesAndRelations();
 
             $this->calculatePercentages();
             $this->buildJuz();
+
+            Schema::enableForeignKeyConstraints();
         });
     }
 
@@ -37,11 +43,12 @@ class QuranSeeder extends Seeder
 
         foreach ($response['chapters'] as $surah) {
             DB::table('quran_surahs')->updateOrInsert(
-                ['number' => $surah['id']],
+                ['id' => $surah['id']],
                 [
                     'name_ar' => $surah['name_arabic'],
                     'name_en' => $surah['name_simple'],
                     'name_transliteration' => $surah['name_complex'],
+                    'revelation_place' => $surah['revelation_place'] === 'makkah' ? 1 : 2,
                     'revelation_place_ar' => $surah['revelation_place'] === 'makkah' ? 'مكية' : 'مدنية',
                     'revelation_place_en' => $surah['revelation_place'],
                     'verses_count' => $surah['verses_count'],
@@ -88,14 +95,14 @@ class QuranSeeder extends Seeder
 
                 DB::table('quran_verses')->updateOrInsert(
                     [
-                        'surah_number' => $surah,
+                        'surah_id' => $surah,
                         'number' => $verse['verse_number'],
                     ],
                     [
                         'text_ar' => $text,
                         'text_en' => $verse['translations'][0]['text'] ?? null,
-                        'juz' => $verse['juz_number'],
-                        'page' => $page,
+                        'juz_id' => $verse['juz_number'],
+                        'page_id' => $page,
                         'sajda' => $verse['sajdah_number'] ? 1 : 0,
                         'letters_count' => $letters,
                     ]
@@ -117,7 +124,7 @@ class QuranSeeder extends Seeder
     {
         foreach ($stats as $surah => $data) {
             DB::table('quran_surahs')
-                ->where('number', $surah)
+                ->where('id', $surah)
                 ->update([
                     'letters_count' => $data['letters'],
                     'words_count' => $data['words'],
@@ -135,15 +142,15 @@ class QuranSeeder extends Seeder
     {
         foreach ($pageStats as $page => $data) {
 
-            $first = DB::table('quran_verses')->where('page', $page)->first();
-            $last = DB::table('quran_verses')->where('page', $page)->orderByDesc('id')->first();
+            $first = DB::table('quran_verses')->where('page_id', $page)->first();
+            $last = DB::table('quran_verses')->where('page_id', $page)->orderByDesc('id')->first();
 
             DB::table('quran_pages')->updateOrInsert(
-                ['page_number' => $page],
+                ['id' => $page],
                 [
-                    'start_surah' => $first->surah_number,
+                    'start_surah_id' => $first->surah_id,
                     'start_aya' => $first->number,
-                    'end_surah' => $last->surah_number,
+                    'end_surah_id' => $last->surah_id,
                     'end_aya' => $last->number,
                     'letters_count' => $data['letters'],
                 ]
@@ -163,7 +170,7 @@ class QuranSeeder extends Seeder
         foreach ($pages as $page) {
 
             $verses = DB::table('quran_verses')
-                ->where('page', $page->page_number)
+                ->where('page_id', $page->id)
                 ->orderBy('id')
                 ->get();
 
@@ -209,22 +216,22 @@ class QuranSeeder extends Seeder
         ];
 
         $juzData = DB::table('quran_verses')
-            ->select('juz')
+            ->select('juz_id')
             ->distinct()
-            ->pluck('juz');
+            ->pluck('juz_id');
 
         foreach ($juzData as $juz) {
             // $juz = DB::table('quran_verses')->where('juz', $juz)->first();
-            $first = DB::table('quran_verses')->where('juz', $juz)->first();
-            $last = DB::table('quran_verses')->where('juz', $juz)->orderByDesc('id')->first();
+            $first = DB::table('quran_verses')->where('juz_id', $juz)->first();
+            $last = DB::table('quran_verses')->where('juz_id', $juz)->orderByDesc('id')->first();
 
             DB::table('quran_juz')->updateOrInsert(
-                ['juz_number' => $juz],
+                ['id' => $juz],
                 [
                     'name' => $jus_names[$juz] ?? 'الجزء ' . $juz,
-                    'start_surah' => $first->surah_number,
+                    'start_surah_id' => $first->surah_id,
                     'start_aya' => $first->number,
-                    'end_surah' => $last->surah_number,
+                    'end_surah_id' => $last->surah_id,
                     'end_aya' => $last->number,
                 ]
             );
