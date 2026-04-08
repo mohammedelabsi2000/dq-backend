@@ -42,6 +42,12 @@ class Mosque extends Model implements BelongsToHierarchy
             },
             'region' => 'region_id',
             'mosque' => 'id',
+            'center' => function (Builder $q, int $centerId) {
+                // Allow center managers to see mosques in their region
+                $q->orWhereHas('region.centers', function (Builder $subQ) use ($centerId) {
+                    $subQ->where('id', $centerId);
+                });
+            },
         ]);
     }
 

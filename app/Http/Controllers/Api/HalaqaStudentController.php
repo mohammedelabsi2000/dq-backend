@@ -21,6 +21,74 @@ class HalaqaStudentController extends Controller
         $this->authorize('viewAny', HalaqaStudent::class);
         $query = HalaqaStudent::query()->visibleTo(auth()->user());
 
+        // Filter by branch (through halaqa)
+        if (request()->filled('branch_id')) {
+            $branchId = request()->integer('branch_id');
+            $query->whereHas('halaqa', function ($q) use ($branchId) {
+                $q->where(function ($hq) use ($branchId) {
+                    // Halaqas under centers in this branch
+                    $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                        $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
+                            $regionQuery->where('branch_id', $branchId);
+                        });
+                    })
+                        // Halaqas directly under regions in this branch
+                        ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                            $regionQuery->where('branch_id', $branchId);
+                        });
+                });
+            });
+        }
+
+        // Filter by center (through halaqa)
+        if (request()->filled('center_id')) {
+            $query->whereHas('halaqa', function ($q) {
+                $q->whereHasMorph('reference', ['center'], function ($centerQuery) {
+                    $centerQuery->where('id', request()->integer('center_id'));
+                });
+            });
+        }
+
+        // Filter by region (through halaqa)
+        if (request()->filled('region_id')) {
+            $regionId = request()->integer('region_id');
+            $query->whereHas('halaqa', function ($q) use ($regionId) {
+                $q->where(function ($hq) use ($regionId) {
+                    // Halaqas directly under this region
+                    $hq->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                        $regionQuery->where('id', $regionId);
+                    })
+                        // Halaqas under centers in this region
+                        ->orWhereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                            $centerQuery->where('region_id', $regionId);
+                        });
+                });
+            });
+        }
+
+        // Filter by specific halaqa
+        if (request()->filled('halaqa_id')) {
+            $query->where('halaqa_id', request()->integer('halaqa_id'));
+        }
+
+        // Filter by enrollment status
+        if (request()->filled('enrollment_status_id')) {
+            $query->where('enrollment_status_id', request()->integer('enrollment_status_id'));
+        }
+
+        // Filter by active students (no to_date or to_date in future)
+        if (request()->boolean('active_only')) {
+            $query->where(function ($q) {
+                $q->whereNull('to_date')
+                    ->orWhere('to_date', '>=', now());
+            });
+        }
+
+        // Filter by student
+        if (request()->filled('student_id')) {
+            $query->where('student_id', request()->integer('student_id'));
+        }
+
         $search = request()->get('search');
 
         $query = $query->dqSearch($search, [], [

@@ -46,6 +46,7 @@ class UpdateMosqueRequest extends FormRequest
             'name'      => 'sometimes|required|string|max:255',
             'region_id' => 'sometimes|required|exists:regions,id',
             'notes'     => 'nullable|string',
+            'create_center' => 'boolean',
         ];
     }
 

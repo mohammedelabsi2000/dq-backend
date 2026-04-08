@@ -39,6 +39,13 @@ class MosqueController extends Controller
             $query->where('region_id', $request->integer('region_id'));
         }
 
+        // فلترة حسب البرانش
+        if ($request->filled('branch_id')) {
+            $query->whereHas('region', function ($q) use ($request) {
+                $q->where('branch_id', $request->integer('branch_id'));
+            });
+        }
+
         // if ($request->boolean('with_region')) {
         //     $query->with('region.branch');
         // }
@@ -78,7 +85,7 @@ class MosqueController extends Controller
                     'name' => $request->input('name'),
                     'region_id' => $request->input('region_id'),
                     'mosque_id' => $mosque->id,
-                    'notes' => $request->input('notes'),
+                    // 'notes' => $request->input('notes'),
                 ];
                 $center = Center::create($centerData);
             }
@@ -154,22 +161,64 @@ class MosqueController extends Controller
      */
     public function update(UpdateMosqueRequest $request, Mosque $mosque)
     {
-
         $this->authorize('update', $mosque);
 
-        $mosque->update($request->validated());
+        $center = null;
 
-        // // تحميل العلاقات إذا طلب
-        // if ($request->boolean('with_region')) {
-        //     $mosque->load('region');
-        // }
+        DB::transaction(function () use ($request, $mosque, &$center) {
+            // Store original values before update
+            $originalName = $mosque->name;
+            $mosque->update($request->validated());
+
+            // Check if user wants to create a center with the same name
+            if ($request->boolean('create_center')) {
+                // Check if center already exists with same name, region, and mosque
+                $centerName = $request->input('name', $mosque->name);
+                $centerRegionId = $request->input('region_id', $mosque->region_id);
+
+                $existingCenter = Center::where('name', $centerName)
+                    ->where('region_id', $centerRegionId)
+                    ->where('mosque_id', $mosque->id)
+                    ->first();
+
+                // Only create new center if none exists with same specifications
+                if (!$existingCenter) {
+                    $centerData = [
+                        'name' => $centerName,
+                        'region_id' => $centerRegionId,
+                        'mosque_id' => $mosque->id,
+                        // 'notes' => $request->input('notes', $mosque->notes),
+                    ];
+                    $center = Center::create($centerData);
+                }
+            }
+        });
+
         if ($request->boolean('with_region')) {
             $mosque->load('region.branch');
         }
 
+        // Prepare response data
+        $responseData = [
+            'mosque' => new MosqueResource($mosque),
+        ];
+
+        if ($center) {
+            if ($request->boolean('with_region')) {
+                $center->load('mosque.region.branch');
+            }
+            $responseData['center'] = new CenterResource($center);
+        }
+
+        // Prepare success message
+        $message = 'تم تحديث بيانات المسجد بنجاح';
+        if ($center) {
+            $message = 'تم تحديث بيانات المسجد وإنشاء مركز جديد بنجاح';
+        }
+
         return $this->success(
-            new MosqueResource($mosque),
-            'تم تحديث بيانات المسجد بنجاح'
+            $responseData,
+            $message
         );
     }
 

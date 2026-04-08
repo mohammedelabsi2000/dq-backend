@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Constant;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
@@ -69,7 +70,7 @@ class StudentResource extends JsonResource
                         'to_date' => $halaqa->pivot->to_date,
                         'enrollment_status_id' => $halaqa->pivot->enrollment_status_id,
                         'enrollment_status' => $halaqa->pivot->enrollment_status_id ?
-                            \App\Models\Constant::find($halaqa->pivot->enrollment_status_id)?->name : null,
+                            Constant::find($halaqa->pivot->enrollment_status_id)?->name : null,
                     ];
                 });
             }),
@@ -81,7 +82,7 @@ class StudentResource extends JsonResource
                         'name' => $current->name,
                         'from_date' => $current->pivot->from_date,
                         'enrollment_status' => $current->pivot->enrollment_status_id ?
-                            \App\Models\Constant::find($current->pivot->enrollment_status_id)?->name : null,
+                            Constant::find($current->pivot->enrollment_status_id)?->name : null,
                     ];
                 }
                 return null;
