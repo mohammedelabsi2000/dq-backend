@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class QuranModel extends Model
 {
-    protected $connection = 'quran';
+    // protected $connection = 'quran';
+    protected $fillable = [];
     public static function booted()
     {
         static::creating(function ($model) {
