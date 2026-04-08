@@ -7,64 +7,39 @@ use App\Models\Constant;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Services\IdQueryServices;
 
 class IdQueryController extends Controller
 {
-    public function getDataFromAPI($identity)
+
+    private IdQueryServices $idQueryServices;
+
+    public function __construct(IdQueryServices $idQueryServices)
     {
-        $apiURL = 'https://afp.daralquran.ps/api/id-query/';
-
-        $curl = curl_init();
-
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => $apiURL,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => array(
-                'id' => $identity,
-                'token' => 'z&G(FF=H\'~Wu#29yb<R=q{Rt,8X,&8kgcnFp<6M8Q)=AL7mr'
-            ),
-        ));
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
-
-        try {
-            $data = json_decode($response, true)['DATA'][0];
-        } catch (\Throwable $th) {
-            return $this->notFound($th->getMessage());
-        }
-
-        return $data;
+        $this->idQueryServices = $idQueryServices;
     }
 
     public function sendRequest(Request $request)
     {
-        $data = $this->getDataFromAPI($request->id);
+        $identity = $request->id;
+
+        $personData = null;
 
         try {
-            $data['CI_ID_NUM'];
-        } catch (\Throwable $th) {
-            return $this->notFound("لايوجد بيانات لرقم الهوية {$request->id}");
+            $personData = $this->idQueryServices->get($identity);
+        } catch (\InvalidArgumentException $e) {
+            return $this->notFound("لايوجد بيانات لرقم الهوية {$identity}");
         }
 
         return $this->apiResponse([
             'data' => [
-                // 'data' => $data,
-                'identity ' => $data['CI_ID_NUM'],
-                'fName' => $data['CI_FIRST_ARB'],
-                'sName' => $data['CI_FATHER_ARB'],
-                'thName' => $data['CI_GRAND_FATHER_ARB'],
-                'family' => $data['CI_FAMILY_ARB'],
-                'dob' => $data['CI_BIRTH_DT'],
-                'gender' => $data['SEX'],
-                // 'marital_status_id' => Constant::where('name', 'LIKE', $data['SOCIAL_STATUS'])->get('id'),
+                'identity ' => $personData['CI_ID_NUM'],
+                'fName' => $personData['CI_FIRST_ARB'],
+                'sName' => $personData['CI_FATHER_ARB'],
+                'thName' => $personData['CI_GRAND_FATHER_ARB'],
+                'family' => $personData['CI_FAMILY_ARB'],
+                'dob' => $personData['CI_BIRTH_DT'],
+                'gender' => $personData['SEX'],
             ],
         ], 'success', 200);
     }

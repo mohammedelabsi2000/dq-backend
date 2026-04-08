@@ -29,7 +29,7 @@ class StudentsImport implements ToModel, WithHeadingRow
 
         $studentService = new StudentService();
 
-        return $studentService->create([
+        $student = $studentService->create([
             'identity' => $row['رقم الهوية'],
             'fName' => $row['الاسم'],
             'sName' => $row['اسم الأب'],
@@ -40,5 +40,7 @@ class StudentsImport implements ToModel, WithHeadingRow
             'mosque_id' => $this->request['mosque_id'],
             'halaqa_id' => $this->request['halaqa_id'],
         ]);
+
+        return $student;
     }
 }

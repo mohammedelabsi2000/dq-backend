@@ -2,17 +2,13 @@
 
 namespace App\Services;
 
-use App\Http\Controllers\Api\IdQueryController;
-use App\Http\Traits\ApiResponser;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class StudentService
 {
-    use ApiResponser;
     public function create(array $data): Student
     {
         return DB::transaction(function () use ($data) {
@@ -42,23 +38,23 @@ class StudentService
         $guardian = User::withTrashed()->where('identity', $identity)->first();
 
         if (!$guardian) {
-            $idQueryController = new IdQueryController();
-            $data = $idQueryController->getDataFromAPI($identity);
+            $idQueryServices = new IdQueryServices();
+            $personData = null;
             $gurdianData = [];
 
-            try {
-                $data['CI_ID_NUM'];
-            } catch (\Throwable $th) {
-                return $this->notFound("لايوجد بيانات لرقم الهوية {$identity}");
-            }
+            $personData = $idQueryServices->get($identity);
+            /* try {
+            } catch (\InvalidArgumentException $e) {
+                return $this->notFound("لايوجد بيانات لرقم هوية ولي الأمر {$identity}");
+            } */
 
             $gurdianData = [
-                'fName' => $data['CI_FIRST_ARB'] ?? null,
-                'sName' => $data['CI_FATHER_ARB'] ?? null,
-                'thName' => $data['CI_GRAND_FATHER_ARB'] ?? null,
-                'family' => $data['CI_FAMILY_ARB'] ?? null,
-                'dob' => $data['CI_BIRTH_DT'] ?? null,
-                'gender' => $data['SEX'] ?? null,
+                'fName' => $personData['CI_FIRST_ARB'] ?? null,
+                'sName' => $personData['CI_FATHER_ARB'] ?? null,
+                'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
+                'family' => $personData['CI_FAMILY_ARB'] ?? null,
+                'dob' => $personData['CI_BIRTH_DT'] ?? null,
+                'gender' => $personData['SEX'] ?? null,
             ];
 
             $guardian = User::create(array_merge([
