@@ -28,8 +28,25 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user());
 
+        // Filter by branch (through both center and region)
+        if ($request->filled('branch_id')) {
+            $branchId = $request->integer('branch_id');
+            $query->where(function ($q) use ($branchId) {
+                // Halaqas under centers in this branch
+                $q->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                    $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
+                        $regionQuery->where('branch_id', $branchId);
+                    });
+                })
+                    // Halaqas directly under regions in this branch
+                    ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                        $regionQuery->where('branch_id', $branchId);
+                    });
+            });
+        }
+
+        // Filter by specific center
         if ($request->filled('center_id')) {
-            // If center_id is provided, filter halaqas based on the center
             $query->whereHasMorph(
                 'reference',
                 ['center'],
@@ -37,15 +54,33 @@ class HalaqaController extends Controller
                     $query->where('id', request()->integer('center_id'));
                 }
             );
-        } elseif ($request->filled('region_id')) {
-            // If region_id is provided (and center_id is not), filter halaqas based on the region
-            $query->whereHasMorph(
-                'reference',
-                ['region'],
-                function ($query) {
-                    $query->where('id', request()->integer('region_id'));
-                }
-            );
+        }
+
+        // Filter by specific region
+        if ($request->filled('region_id')) {
+            $regionId = $request->integer('region_id');
+            $query->where(function ($q) use ($regionId) {
+                // Halaqas directly under this region
+                $q->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                    $regionQuery->where('id', $regionId);
+                })
+                    // Halaqas under centers in this region
+                    ->orWhereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                        $centerQuery->where('region_id', $regionId);
+                    });
+            });
+        }
+
+        // Filter by supervisor
+        // if ($request->filled('supervisor_id')) {
+        //     $query->whereHas('supervisor', function ($q) use ($request) {
+        //         $q->where('users.id', $request->integer('supervisor_id'));
+        //     });
+        // }
+
+        // Filter by reference type
+        if ($request->filled('reference_type')) {
+            $query->where('reference_type', $request->input('reference_type'));
         }
 
         /* if ($request->filled('reference_type') && $request->filled('reference_id')) {
@@ -83,7 +118,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type'])->get();
+        $halaqas = $query->with(['reference', 'type', 'supervisor'])->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -123,7 +158,7 @@ class HalaqaController extends Controller
     public function show(Request $request, Halaqa $halaqa)
     {
         $this->authorize('view', $halaqa);
-        $halaqa->load(['type', 'reference']);
+        $halaqa->load(['type', 'reference', 'supervisor']);
 
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');

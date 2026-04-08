@@ -13,7 +13,7 @@ class UpdateAcademicQualificationRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('academicQualification'));
+        return $this->user()->can('update', $this->route('academic_qualification'));
     }
 
     /**
@@ -36,6 +36,8 @@ class UpdateAcademicQualificationRequest extends FormRequest
             'certificate_link' => 'sometimes|nullable|url',
             'educational_institution' => 'sometimes|nullable|string|max:255',
             'notes' => 'sometimes|nullable|string',
+
+            'certificate_file' => 'nullable|file|mimes:pdf|max:5120',
         ];
     }
 
@@ -62,6 +64,10 @@ class UpdateAcademicQualificationRequest extends FormRequest
             'educational_institution.max' => 'اسم المؤسسة التعليمية يجب ألا يتجاوز 255 حرفاً.',
 
             'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
+
+            'certificate_file.file' => 'الملف يجب أن يكون ملفاً صالحاً.',
+            'certificate_file.mimes' => 'يجب أن يكون الملف بصيغة PDF فقط.',
+            'certificate_file.max' => 'حجم الملف لا يجب أن يتجاوز 5 ميجابايت.',
         ];
     }
 }

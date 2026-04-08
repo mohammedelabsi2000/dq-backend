@@ -28,49 +28,135 @@ class StudentController extends Controller
         // $query = Student::query();
         $query = Student::query()->visibleTo(auth()->user());
 
+        // Filter by branch (through halaqas or mosques)
+        if (request()->filled('branch_id')) {
+            $branchId = request()->integer('branch_id');
+            $query->where(function ($q) use ($branchId) {
+                // Students in halaqas under this branch
+                $q->whereHas('halaqas', function ($hq) use ($branchId) {
+                    $hq->where(function ($hqQuery) use ($branchId) {
+                        // Halaqas under centers in this branch
+                        $hqQuery->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                            $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
+                                $regionQuery->where('branch_id', $branchId);
+                            });
+                        })
+                            // Halaqas directly under regions in this branch
+                            ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                                $regionQuery->where('branch_id', $branchId);
+                            });
+                    });
+                })
+                    // Students in mosques under this branch
+                    ->orWhereHas('mosque', function ($mosqueQuery) use ($branchId) {
+                        $mosqueQuery->whereHas('region', function ($regionQuery) use ($branchId) {
+                            $regionQuery->where('branch_id', $branchId);
+                        });
+                    });
+            });
+        }
+
+        // Filter by halaqa
         if (request()->filled('halaqa_id')) {
-            // Students linked to the specified halaqa
             $query->whereHas('halaqas', function ($q) {
                 $q->where('halaqa_id', request()->integer('halaqa_id'));
             });
-        } elseif (request()->filled('center_id')) {
+        }
+
+        // Filter by center (through halaqas or mosques)
+        if (request()->filled('center_id')) {
             $centerId = request()->integer('center_id');
-            $query->whereHas('mosque', function ($q) use ($centerId) {
-                $q->whereHas('centers', function ($q) use ($centerId) {
-                    $q->where('id', $centerId);
-                });
-            });
-            // Students linked to the specified center through halaqas
-            /* $query->whereHas('halaqas', function ($q) {
-                $q->whereHasMorph(
-                    'reference',
-                    ['center'],
-                    function ($q) {
-                        $q->where('id', request()->integer('center_id'));
-                    }
-                );
-            }); */
-        } elseif (request()->filled('region_id')) {
-            // Students linked to the specified region through halaqas or centers
-            $regionId = request()->integer('region_id');
-
-            $query->whereHas('mosque', function ($q) use ($regionId) {
-                $q->where('region_id', $regionId);
-            });
-
-            /* $query->whereHas('halaqas', function ($q) use ($regionId) {
-                $q->where(function ($q) use ($regionId) {
-                    // Halaqas directly linked to the region
-                    $q->whereHasMorph('reference', ['region'], function ($q) use ($regionId) {
-                        $q->where('id', $regionId);
-                    })
-                        // Halaqas linked to centers that belong to the region
-                        ->orWhereHasMorph('reference', ['center'], function ($q) use ($regionId) {
-                            $q->where('region_id', $regionId);
+            $query->where(function ($q) use ($centerId) {
+                // Students in halaqas under this center
+                $q->whereHas('halaqas', function ($hq) use ($centerId) {
+                    $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($centerId) {
+                        $centerQuery->where('id', $centerId);
+                    });
+                })
+                    // Students in mosques under this center
+                    ->orWhereHas('mosque', function ($mosqueQuery) use ($centerId) {
+                        $mosqueQuery->whereHas('centers', function ($centerQuery) use ($centerId) {
+                            $centerQuery->where('id', $centerId);
                         });
-                });
-            }); */
+                    });
+            });
+        }
 
+        // Filter by region (through halaqas or mosques)
+        if (request()->filled('region_id')) {
+            $regionId = request()->integer('region_id');
+            $query->where(function ($q) use ($regionId) {
+                // Students in halaqas directly under this region
+                // $q->whereHas('halaqas', function ($hq) use ($regionId) {
+                //     $hq->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                //         $regionQuery->where('id', $regionId);
+                //     });
+                // })
+                //     // Students in halaqas under centers in this region
+                //     ->orWhereHas('halaqas', function ($hq) use ($regionId) {
+                //         $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                //             $centerQuery->where('region_id', $regionId);
+                //         });
+                //     })
+                //     // Students whose mosque is in this region
+                //     ->or
+                $q->WhereHas('mosque', function ($mosqueQuery) use ($regionId) {
+                    $mosqueQuery->where('region_id', $regionId);
+                });
+            });
+        }
+
+        // Filter by mosque
+        if (request()->filled('mosque_id')) {
+            $query->where('mosque_id', request()->integer('mosque_id'));
+        }
+
+        // Filter by gender
+        if (request()->filled('gender')) {
+            $query->where('gender', request()->input('gender'));
+        }
+
+        // Filter by marital status
+        if (request()->filled('marital_status_id')) {
+            $query->where('marital_status_id', request()->integer('marital_status_id'));
+        }
+
+        // Filter by money status
+        if (request()->filled('money_status_id')) {
+            $query->where('money_status_id', request()->integer('money_status_id'));
+        }
+
+        // Filter by guardian type
+        if (request()->filled('guardian_type_id')) {
+            $query->where('guardian_type_id', request()->integer('guardian_type_id'));
+        }
+
+        // Filter by age range
+        if (request()->filled('age_min')) {
+            $minAge = request()->integer('age_min');
+            $query->where('dob', '<=', now()->subYears($minAge));
+        }
+        if (request()->filled('age_max')) {
+            $maxAge = request()->integer('age_max');
+            $query->where('dob', '>=', now()->subYears($maxAge + 1));
+        }
+
+        // Filter by enrollment status (active in halaqas)
+        if (request()->boolean('has_active_halaqa')) {
+            $query->whereHas('halaqas', function ($q) {
+                $q->whereNull('halaqa_students.to_date')
+                    ->orWhere('halaqa_students.to_date', '>=', now());
+            });
+        }
+
+        // Filter by students with any halaqa
+        if (request()->boolean('has_halaqa')) {
+            $query->whereHas('halaqas');
+        }
+
+        // Filter by guardian
+        if (request()->filled('guardian_id')) {
+            $query->where('guardian_id', request()->input('guardian_id'));
         }
 
         $q = $this->applyFilters($query, [
@@ -88,6 +174,9 @@ class StudentController extends Controller
             'guardian',
             'guardianType',
             'prefixName',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ])->get();
 
         return $this->apiResponse([
@@ -101,25 +190,31 @@ class StudentController extends Controller
     public function store(StoreStudentRequest $request)
     {
         $data = $request->validated();
+        if ($data['identity']) {
+            $student = Student::withTrashed()
+                ->where('identity', $data['identity'])
+                ->first();
 
-        $student = Student::withTrashed()
-            ->where('identity', $data['identity'])
-            ->first();
+            if ($student) {
+                // إذا كان محذوف نرجعه
+                if ($student->trashed()) {
+                    $student->restore();
+                }
 
-        if ($student) {
-            // إذا كان محذوف نرجعه
-            if ($student->trashed()) {
-                $student->restore();
+                // نحدث البيانات
+                $student->update($data);
+
+                // Assign to halaqa if provided and not already assigned
+                if (isset($data['halaqa_id']) && $data['halaqa_id']) {
+                    $this->studentService->assignStudentToHalaqa($student, $data['halaqa_id']);
+                }
+
+                return $this->success(
+                    new StudentResource($student),
+                    'تم استعادة الطالب بنجاح',
+                    201
+                );
             }
-
-            // نحدث البيانات
-            $student->update($data);
-
-            return $this->success(
-                new StudentResource($student),
-                'تم استعادة الطالب بنجاح',
-                201
-            );
         }
 
         $student = $this->studentService->create($request->validated());
@@ -130,6 +225,9 @@ class StudentController extends Controller
             'guardian',
             'guardianType',
             'prefixName',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ]);
 
         return $this->success(
@@ -150,6 +248,9 @@ class StudentController extends Controller
             'guardianType',
             'prefixName',
             'guardian',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
         ]);
 
         return $this->success(
@@ -173,6 +274,9 @@ class StudentController extends Controller
                 'guardianType',
                 'prefixName',
                 'guardian',
+                'halaqas' => function ($query) {
+                    $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+                },
             ])),
             'تم تحديث بيانات الطالب بنجاح'
         );
