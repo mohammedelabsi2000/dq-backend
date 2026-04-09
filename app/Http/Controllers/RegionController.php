@@ -13,7 +13,8 @@ class RegionController extends Controller
      */
     public function index()
     {
-        $regions = Region::with('branch')->latest()->paginate(15);
+        $this->authorize('viewAny', Region::class);
+        $regions = Region::with('branch')->visibleTo(auth()->user())->latest()->paginate(15);
         return view('regions.index', compact('regions'));
     }
 
@@ -22,7 +23,8 @@ class RegionController extends Controller
      */
     public function create()
     {
-        $branches = Branch::all();
+        $this->authorize('create', Region::class);
+        $branches = Branch::visibleTo(auth()->user())->get();
         return view('regions.create', compact('branches'));
     }
 
@@ -37,6 +39,10 @@ class RegionController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // التحقق من الصلاحيات للفرع المستهدف
+        $branch = Branch::findOrFail($request->branch_id);
+        $this->authorize('create', [Region::class, $branch]);
+
         Region::create($request->all());
 
         return redirect()->route('regions.index')->with('success', 'تم إنشاء المنطقة بنجاح');
@@ -47,6 +53,7 @@ class RegionController extends Controller
      */
     public function show(Region $region)
     {
+        $this->authorize('view', $region);
         $region->load('branch');
         return view('regions.show', compact('region'));
     }
@@ -56,7 +63,8 @@ class RegionController extends Controller
      */
     public function edit(Region $region)
     {
-        $branches = Branch::all();
+        $this->authorize('update', $region);
+        $branches = Branch::visibleTo(auth()->user())->get();
         return view('regions.edit', compact('region', 'branches'));
     }
 
@@ -65,6 +73,9 @@ class RegionController extends Controller
      */
     public function update(Request $request, Region $region)
     {
+        // التحقق من الصلاحيات
+        $this->authorize('update', $region);
+
         $request->validate([
             'name' => 'required|string|max:255',
             'branch_id' => 'required|exists:branches,id',
@@ -81,6 +92,8 @@ class RegionController extends Controller
      */
     public function destroy(Region $region)
     {
+        $this->authorize('delete', $region);
+
         // منع الحذف إذا هناك مساجد مرتبطة
         if ($region->mosques()->count() > 0) {
             return back()->with('error', 'لا يمكن حذف المنطقة لوجود مساجد مرتبطة بها');

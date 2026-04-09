@@ -21,6 +21,74 @@ class HalaqaStudentController extends Controller
         $this->authorize('viewAny', HalaqaStudent::class);
         $query = HalaqaStudent::query()->visibleTo(auth()->user());
 
+        // Filter by branch (through halaqa)
+        if (request()->filled('branch_id')) {
+            $branchId = request()->integer('branch_id');
+            $query->whereHas('halaqa', function ($q) use ($branchId) {
+                $q->where(function ($hq) use ($branchId) {
+                    // Halaqas under centers in this branch
+                    $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                        $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
+                            $regionQuery->where('branch_id', $branchId);
+                        });
+                    })
+                        // Halaqas directly under regions in this branch
+                        ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                            $regionQuery->where('branch_id', $branchId);
+                        });
+                });
+            });
+        }
+
+        // Filter by center (through halaqa)
+        if (request()->filled('center_id')) {
+            $query->whereHas('halaqa', function ($q) {
+                $q->whereHasMorph('reference', ['center'], function ($centerQuery) {
+                    $centerQuery->where('id', request()->integer('center_id'));
+                });
+            });
+        }
+
+        // Filter by region (through halaqa)
+        if (request()->filled('region_id')) {
+            $regionId = request()->integer('region_id');
+            $query->whereHas('halaqa', function ($q) use ($regionId) {
+                $q->where(function ($hq) use ($regionId) {
+                    // Halaqas directly under this region
+                    $hq->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                        $regionQuery->where('id', $regionId);
+                    })
+                        // Halaqas under centers in this region
+                        ->orWhereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                            $centerQuery->where('region_id', $regionId);
+                        });
+                });
+            });
+        }
+
+        // Filter by specific halaqa
+        if (request()->filled('halaqa_id')) {
+            $query->where('halaqa_id', request()->integer('halaqa_id'));
+        }
+
+        // Filter by enrollment status
+        if (request()->filled('enrollment_status_id')) {
+            $query->where('enrollment_status_id', request()->integer('enrollment_status_id'));
+        }
+
+        // Filter by active students (no to_date or to_date in future)
+        if (request()->boolean('active_only')) {
+            $query->where(function ($q) {
+                $q->whereNull('to_date')
+                    ->orWhere('to_date', '>=', now());
+            });
+        }
+
+        // Filter by student
+        if (request()->filled('student_id')) {
+            $query->where('student_id', request()->integer('student_id'));
+        }
+
         $search = request()->get('search');
 
         $query = $query->dqSearch($search, [], [
@@ -34,7 +102,7 @@ class HalaqaStudentController extends Controller
         }); */
 
         $q = $this->applyFilters($query, [
-            'searchColumns' => [],
+            'searchColumns' => ['id', 'student_id', 'halaqa_id'],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'
         ]);
@@ -44,6 +112,7 @@ class HalaqaStudentController extends Controller
 
         // حساب العدد الحقيقي بعد الفلترة
         // $total = (clone $query)->count();
+
 
         $data = $query->with([
             'halaqa',
@@ -67,6 +136,7 @@ class HalaqaStudentController extends Controller
         $this->authorize('view', $halaqaStudent);
         $halaqaStudent = $halaqaStudent->load([
             'halaqa',
+            'halaqa.reference',
             'student',
             'enrollment_status',
         ]);
@@ -83,28 +153,40 @@ class HalaqaStudentController extends Controller
      */
     public function store(StoreHalaqaStudentRequest $request)
     {
-        // $validated = $request->validated();
+        $validated = $request->validated();
 
-        $data = collect($request->students)->map(function ($studentId) use ($request) {
-            return [
-                'halaqa_id' => $request->halaqa_id,
+        $studentsCreated = [];
+        $studentsAlreadyEnrolled = [];
+
+        foreach ($validated['students'] as $studentId) {
+
+            // التحقق هل الطالب مسجل في حلقة أخرى
+            $existingEnrollment = HalaqaStudent::where('student_id', $studentId)
+                ->whereNull('to_date')
+                ->exists();
+
+            if ($existingEnrollment) {
+                $studentsAlreadyEnrolled[] = $studentId;
+                continue;
+            }
+
+            $student = HalaqaStudent::create([
+                'halaqa_id' => $validated['halaqa_id'],
                 'student_id' => $studentId,
-                'from_date' => $request->from_date,
-                'enrollment_status_id' => $request->enrollment_status_id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+                'from_date' => $validated['from_date'],
+                'enrollment_status_id' => $validated['enrollment_status_id'],
+            ]);
 
-        $halaqStudents = HalaqaStudent::insert($data);
-        if (!$halaqStudents) {
-            return $this->error('حدث خطأ أثناء تسجيل الطلاب في الحلقة', 500);
+            $studentsCreated[] = $student;
         }
 
         return $this->success(
-            null,
-            'تم تسجيل الطلاب في الحلقة بنجاح',
-            201
+            HalaqaStudentResource::collection(
+                HalaqaStudent::with(['halaqa', 'student', 'enrollment_status'])
+                    ->whereIn('id', collect($studentsCreated)->pluck('id'))
+                    ->get()
+            ),
+            'تم تسجيل الطلاب في الحلقة بنجاح'
         );
         // التحقق هل الطالب مسجل حالياً في حلقة
         /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
@@ -128,7 +210,6 @@ class HalaqaStudentController extends Controller
              201
          );*/
     }
-
     /**
      * تعديل تسجيل موجود
      */
@@ -136,7 +217,7 @@ class HalaqaStudentController extends Controller
         UpdateHalaqaStudentRequest $request,
         HalaqaStudent $halaqaStudent
     ) {
-        $this->authorize('update', $halaqaStudent);
+        // $this->authorize('update', $halaqaStudent);
         $validated = $request->validated();
 
         if ($halaqaStudent->halaqa_id != $validated['halaqa_id'] || $halaqaStudent->from_date != $validated['from_date']) {

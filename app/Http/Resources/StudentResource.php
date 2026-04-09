@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Constant;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
@@ -60,6 +61,33 @@ class StudentResource extends JsonResource
             'location' => $this->location,
 
             'previous_achievement' => $this->whenLoaded('previousAchievement'),
+            // الحلقات
+            'halaqas' => $this->whenLoaded('halaqas', function () {
+                return $this->halaqas->map(function ($halaqa) {
+                    return [
+                        'id' => $halaqa->id,
+                        'name' => $halaqa->name,
+                        'from_date' => $halaqa->pivot->from_date,
+                        'to_date' => $halaqa->pivot->to_date,
+                        'enrollment_status_id' => $halaqa->pivot->enrollment_status_id,
+                        'enrollment_status' => $halaqa->pivot->enrollment_status_id ?
+                            Constant::find($halaqa->pivot->enrollment_status_id)?->name : null,
+                    ];
+                });
+            }),
+            'current_halaqa' => $this->whenLoaded('halaqas', function () {
+                $current = $this->halaqas->firstWhere('pivot.to_date', null);
+                if ($current) {
+                    return [
+                        'id' => $current->id,
+                        'name' => $current->name,
+                        'from_date' => $current->pivot->from_date,
+                        'enrollment_status' => $current->pivot->enrollment_status_id ?
+                            Constant::find($current->pivot->enrollment_status_id)?->name : null,
+                    ];
+                }
+                return null;
+            }),
 
             // التواريخ
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),

@@ -3,6 +3,8 @@
 namespace App\Http\Requests\HalaqaStudent;
 
 use App\Helpers\ConstantHelper;
+use App\Models\Halaqa;
+use App\Models\HalaqaStudent;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +17,20 @@ class UpdateHalaqaStudentRequest extends FormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('halaqaStudent'));
+        $halaqaStudent = $this->route('halaqa_student');
+
+        // التحقق من صلاحية تعديل التسجيل الحالي
+        if (!$this->user()->can('update', $halaqaStudent)) {
+            return false;
+        }
+
+        // إذا تم تغيير الحلقة، تحقق من صلاحية الحلقة الجديدة
+        if ($this->has('halaqa_id') && $this->input('halaqa_id') != $halaqaStudent->halaqa_id) {
+            $newHalaqa = Halaqa::findOrFail($this->input('halaqa_id'));
+            return $this->user()->can('create', [HalaqaStudent::class, $newHalaqa]);
+        }
+
+        return true;
     }
 
     /**

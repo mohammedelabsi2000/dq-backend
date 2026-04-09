@@ -24,11 +24,22 @@ class Region extends Model implements BelongsToHierarchy
     {
         return $this->hasMany(Mosque::class);
     }
+
+    public function centers()
+    {
+        return $this->hasMany(Center::class);
+    }
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return $this->applyVisibleTo($query, $user, [
             'branch' => 'branch_id',
             'region' => 'id',
+            'center' => function (Builder $q, int $centerId) {
+                // Allow center managers to see their region
+                $q->orWhereHas('centers', function (Builder $subQ) use ($centerId) {
+                    $subQ->where('id', $centerId);
+                });
+            },
         ]);
     }
 
