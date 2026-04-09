@@ -31,7 +31,7 @@ class CustomJuzController extends Controller
 
     public function store(StoreCustomJuzRequest $request)
     {
-        $juz = CustomJuz::create($request->all());
+        $juz = CustomJuz::create($request->validated());
         return $this->success($juz, 'تم إنشاء الجزء بنجاح');
     }
     public function show(CustomJuz $juz)
