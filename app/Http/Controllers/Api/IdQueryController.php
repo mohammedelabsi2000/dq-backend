@@ -10,9 +10,8 @@ use Illuminate\Support\Facades\Http;
 
 class IdQueryController extends Controller
 {
-    public function sendRequest(Request $request)
+    public function getDataFromAPI($identity)
     {
-
         $apiURL = 'https://afp.daralquran.ps/api/id-query/';
 
         $curl = curl_init();
@@ -27,7 +26,7 @@ class IdQueryController extends Controller
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => array(
-                'id' => $request->id,
+                'id' => $identity,
                 'token' => 'z&G(FF=H\'~Wu#29yb<R=q{Rt,8X,&8kgcnFp<6M8Q)=AL7mr'
             ),
         ));
@@ -35,10 +34,24 @@ class IdQueryController extends Controller
         $response = curl_exec($curl);
 
         curl_close($curl);
+
         try {
             $data = json_decode($response, true)['DATA'][0];
         } catch (\Throwable $th) {
             return $this->notFound($th->getMessage());
+        }
+
+        return $data;
+    }
+
+    public function sendRequest(Request $request)
+    {
+        $data = $this->getDataFromAPI($request->id);
+
+        try {
+            $data['CI_ID_NUM'];
+        } catch (\Throwable $th) {
+            return $this->notFound("لايوجد بيانات لرقم الهوية {$request->id}");
         }
 
         return $this->apiResponse([
