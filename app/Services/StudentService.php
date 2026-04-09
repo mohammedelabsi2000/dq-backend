@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PreviousAchievement;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,9 @@ class StudentService
         return DB::transaction(function () use ($data) {
 
             $guardian = $this->findOrCreateGuardian($data['guardian_id'], $data['fName']);
-
-            return Student::create($data);
+            $student = Student::create($data);
+            $this->updateOrCreatePreviousAchievement($student, $data);
+            return $student;
         });
     }
 
@@ -29,6 +31,7 @@ class StudentService
             }
 
             $student->update($data);
+            $this->updateOrCreatePreviousAchievement($student, $data);
 
             return $student;
         });
@@ -52,5 +55,23 @@ class StudentService
         }
 
         return $guardian;
+    }
+
+    private function updateOrCreatePreviousAchievement(Student $student, array $data): void
+    {
+        if (
+            isset($data['memorized_juz_id']) ||
+            isset($data['completed_juz_id']) ||
+            isset($data['surah_id'])
+        ) {
+            PreviousAchievement::updateOrCreate([
+                'student_id' => $student->id,
+            ], [
+                'memorized_juz_id' => $data['memorized_juz_id'] ?? null,
+                'completed_juz_id' => $data['completed_juz_id'] ?? null,
+                'surah_id' => $data['surah_id'] ?? null,
+                'end_aya' => $data['end_aya'] ?? null,
+            ]);
+        }
     }
 }

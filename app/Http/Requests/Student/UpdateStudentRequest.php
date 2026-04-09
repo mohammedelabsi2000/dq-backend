@@ -3,10 +3,9 @@
 namespace App\Http\Requests\Student;
 
 use App\Helpers\ConstantHelper;
-use App\Http\Requests\DQFormRequest;
 use Illuminate\Validation\Rule;
 
-class UpdateStudentRequest extends DQFormRequest
+class UpdateStudentRequest extends BaseStudentRequest
 {
     public function authorize()
     {
