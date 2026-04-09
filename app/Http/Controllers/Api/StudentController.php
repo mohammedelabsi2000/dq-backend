@@ -248,7 +248,7 @@ class StudentController extends Controller
             'guardianType',
             'prefixName',
             'guardian',
-            'previousAchievement'
+            'previousAchievement',
             'halaqas' => function ($query) {
                 $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
             },
