@@ -39,10 +39,17 @@ class HalaqaStudentPolicy
      * Determine whether the user can create models.
      *
      * @param  \App\Models\User  $user
+     * @param  mixed  $halaqa
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create($user, $halaqa = null)
     {
+        // إذا تم تمرير halaqa، تحقق من صلاحيات الحلقة
+        if ($halaqa) {
+            return $user->hasAbility('halaqa_students.create', $halaqa);
+        }
+
+        // خلاف ذلك، تحقق من الصلاحية العامة
         return $user->hasAbility('halaqa_students.create');
     }
 

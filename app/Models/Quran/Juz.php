@@ -2,11 +2,18 @@
 
 namespace App\Models\Quran;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
 class Juz extends QuranModel
 {
-    protected $table = 'juz';
+    protected $table = 'quran_juz';
     protected $guarded = [];
+
+    public function start_surah()
+    {
+        return $this->belongsTo(Surah::class, 'start_surah_id');
+    }
+
+    public function end_surah()
+    {
+        return $this->belongsTo(Surah::class, 'end_surah_id');
+    }
 }

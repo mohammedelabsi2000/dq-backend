@@ -59,9 +59,29 @@ class Halaqa extends Model implements BelongsToHierarchy
     public function students()
     {
         return $this->belongsToMany(Student::class, 'halaqa_students')
-            ->withPivot(['from_date', 'to_date', 'status_id'])
+            ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
             ->withTimestamps();
         // ->using(HalaqaStudent::class);
+    }
+
+    /**
+     * Get the supervisor (محفظ) of this halaqa based on role_user permissions.
+     */
+    public function supervisor()
+    {
+        return $this->belongsToMany(User::class, 'role_user', 'scope_id', 'authorizable_id')
+            ->where('scope_type', 'halaqas');
+    }
+
+    /**
+     * Get the count of active students in this halaqa.
+     */
+    public function studentsCount()
+    {
+        return $this->studentEnrollments()
+            ->whereNull('to_date')
+            ->orWhere('to_date', '>=', now())
+            ->count();
     }
 
     public function getHierarchyIds(): array

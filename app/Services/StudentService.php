@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PreviousAchievement;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,19 @@ class StudentService
 
             $guardian = $this->findOrCreateGuardian($data['guardian_id'], $data['fName']);
 
-            return Student::create($data);
+            // Extract halaqa_id from data if present
+            $halaqaId = $data['halaqa_id'] ?? null;
+            unset($data['halaqa_id']);
+
+            $student = Student::create($data);
+            $this->updateOrCreatePreviousAchievement($student, $data);
+
+            // Assign student to halaqa if provided
+            if ($halaqaId) {
+                $this->assignStudentToHalaqa($student, $halaqaId);
+            }
+
+            return $student;
         });
     }
 
@@ -27,7 +40,17 @@ class StudentService
                 $this->findOrCreateGuardian($data['guardian_id'], $student->fName);
             }
 
+            // Extract halaqa_id from data if present
+            $halaqaId = $data['halaqa_id'] ?? null;
+            unset($data['halaqa_id']);
+
             $student->update($data);
+            $this->updateOrCreatePreviousAchievement($student, $data);
+
+            // Handle halaqa assignment if provided
+            if ($halaqaId !== null) {
+                $this->updateStudentHalaqaAssignment($student, $halaqaId);
+            }
 
             return $student;
         });
@@ -70,5 +93,47 @@ class StudentService
         }
 
         return $guardian;
+    }
+
+    private function updateOrCreatePreviousAchievement(Student $student, array $data): void
+    {
+        if (
+            isset($data['memorized_juz_id']) ||
+            isset($data['completed_juz_id']) ||
+            isset($data['surah_id'])
+        ) {
+            PreviousAchievement::updateOrCreate([
+                'student_id' => $student->id,
+            ], [
+                'memorized_juz_id' => $data['memorized_juz_id'] ?? null,
+                'completed_juz_id' => $data['completed_juz_id'] ?? null,
+                'surah_id' => $data['surah_id'] ?? null,
+                'end_aya' => $data['end_aya'] ?? null,
+            ]);
+        }
+    }
+  
+    public function assignStudentToHalaqa(Student $student, int $halaqaId): void
+    {
+        // Get the default enrollment status ID for "منتظم" (regular)
+        $enrollmentStatusId = ConstantHelper::getConstantIdByName('enrollment_status', 'منتظم');
+
+        HalaqaStudent::create([
+            'halaqa_id' => $halaqaId,
+            'student_id' => $student->id,
+            'from_date' => now()->toDateString(),
+            'enrollment_status_id' => $enrollmentStatusId,
+        ]);
+    }
+
+    public function updateStudentHalaqaAssignment(Student $student, ?int $halaqaId): void
+    {
+        // Remove existing halaqa assignments
+        HalaqaStudent::where('student_id', $student->id)->delete();
+
+        // Assign to new halaqa if provided
+        if ($halaqaId) {
+            $this->assignStudentToHalaqa($student, $halaqaId);
+        }
     }
 }

@@ -43,6 +43,12 @@ class CenterController extends Controller
             $query->where('region_id', $request->integer('region_id'));
         }
 
+        if ($request->filled('branch_id')) {
+            $query->whereHas('region', function ($q) use ($request) {
+                $q->where('branch_id', $request->integer('branch_id'));
+            });
+        }
+
         // if ($request->boolean('with_mosque')) {
         //     $query->with('mosque.region.branch');
         // }

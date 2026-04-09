@@ -3,13 +3,10 @@
 namespace App\Http\Requests\Student;
 
 use App\Helpers\ConstantHelper;
-use App\Http\Requests\DQFormRequest;
 use App\Models\Student;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class StoreStudentRequest extends DQFormRequest
+class StoreStudentRequest extends BaseStudentRequest
 {
     public function authorize()
     {
@@ -49,7 +46,9 @@ class StoreStudentRequest extends DQFormRequest
             ],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
-        ];
+          
+            'halaqa_id' => 'nullable|exists:halaqas,id',
+        ]);
     }
 
     public function messages()
@@ -100,6 +99,8 @@ class StoreStudentRequest extends DQFormRequest
 
             'whatsapp.string' => 'رقم الواتساب يجب أن يكون نصاً.',
             'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
-        ];
+         
+            'halaqa_id.exists' => 'الحلقة المحددة غير موجودة في النظام.',
+        ]);
     }
 }

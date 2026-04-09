@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Helpers;
 
 use App\Models\Constant;
@@ -50,5 +51,25 @@ class ConstantHelper
     public static function getConstantIdsByType(string $typeName): array
     {
         return array_column(self::getConstantsByType($typeName), 'id');
+    }
+
+    /**
+     * Get a constant ID by type name and constant name.
+     * 
+     * @param string $typeName
+     * @param string $constantName
+     * @return int|null
+     */
+    public static function getConstantIdByName(string $typeName, string $constantName): ?int
+    {
+        $constants = self::getConstantsByType($typeName);
+
+        foreach ($constants as $constant) {
+            if ($constant['name'] === $constantName) {
+                return $constant['id'];
+            }
+        }
+
+        return null;
     }
 }

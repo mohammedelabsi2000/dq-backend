@@ -4,6 +4,9 @@ namespace App\Http\Requests\Halaqa;
 
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
+use App\Models\Center;
+use App\Models\Halaqa;
+use App\Models\Region;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -11,8 +14,34 @@ class UpdateHalaqaRequest extends DQFormRequest
 {
     public function authorize()
     {
-        // return true;
-        return $this->user()->can('update', $this->route('halaqa'));
+        $halaqa = $this->route('halaqa');
+
+        // التحقق من صلاحية تعديل الحلقة الحالية
+        if (!$this->user()->can('update', $halaqa)) {
+            return false;
+        }
+
+        // إذا تم تغيير المرجع، تحقق من الصلاحية الجديدة
+        $referenceType = $this->input('reference_type');
+        $referenceId = $this->input('reference_id');
+
+        if ($referenceType && $referenceId) {
+            // تحديد النموذج بناءً على نوع المرجع
+            $modelMap = [
+                'center' => Center::class,
+                'region' => Region::class,
+            ];
+
+            if (isset($modelMap[$referenceType])) {
+                $modelClass = $modelMap[$referenceType];
+                $newReference = $modelClass::findOrFail($referenceId);
+
+                // التحقق من صلاحية الإنشاء في المرجع الجديد
+                return $this->user()->can('create', [Halaqa::class, $newReference]);
+            }
+        }
+
+        return true;
     }
 
     /**

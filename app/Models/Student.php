@@ -123,14 +123,17 @@ class Student extends Model implements BelongsToHierarchy
     public function halaqas()
     {
         return $this->belongsToMany(Halaqa::class, 'halaqa_students')
-            ->withPivot(['from_date', 'to_date', 'status_id'])
-            ->withTimestamps()
-            ->using(HalaqaStudent::class);
+            ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
+            ->withTimestamps();
     }
 
     public function getHierarchyIds(): array
     {
-        $this->loadMissing('halaqas.reference.region');
+        // تحميل halaqas مع العلاقات المطلوبة فقط
+        $this->loadMissing(['halaqas' => function ($query) {
+            $query->with(['reference'])
+                ->select('halaqas.*');  // تجنب تحميل بيانات pivot
+        }]);
 
         $ids = [];
 
@@ -140,16 +143,27 @@ class Student extends Model implements BelongsToHierarchy
             if ($halaqa->reference_type === 'center') {
                 $center = $halaqa->reference;
 
-                $ids[] = ['id' => $center->id, 'type' => 'center'];
-                $ids[] = ['id' => $center->region_id, 'type' => 'region'];
-                $ids[] = ['id' => $center->region->branch_id, 'type' => 'branch'];
-            }
+                if ($center) {
+                    $ids[] = ['id' => $center->id, 'type' => 'center'];
+                    if ($center->region_id) {
+                        $ids[] = ['id' => $center->region_id, 'type' => 'region'];
 
-            if ($halaqa->reference_type === 'region') {
+                        // تحميل region للحصول على branch_id
+                        $center->loadMissing('region');
+                        if ($center->region) {
+                            $ids[] = ['id' => $center->region->branch_id, 'type' => 'branch'];
+                        }
+                    }
+                }
+            } elseif ($halaqa->reference_type === 'region') {
                 $region = $halaqa->reference;
 
-                $ids[] = ['id' => $region->id, 'type' => 'region'];
-                $ids[] = ['id' => $region->branch_id, 'type' => 'branch'];
+                if ($region) {
+                    $ids[] = ['id' => $region->id, 'type' => 'region'];
+                    if ($region->branch_id) {
+                        $ids[] = ['id' => $region->branch_id, 'type' => 'branch'];
+                    }
+                }
             }
         }
 
@@ -212,7 +226,10 @@ class Student extends Model implements BelongsToHierarchy
         ]);
     }
 
-
+    public function previousAchievement()
+    {
+        return $this->hasOne(PreviousAchievement::class);
+    }
 
     // public function scopeVisibleTo(Builder $query, User $user): Builder
     // {
