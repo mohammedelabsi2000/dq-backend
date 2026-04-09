@@ -16,7 +16,7 @@ class UpdateStudentRequest extends BaseStudentRequest
     {
         $studentId = $this->route('student')?->id;
 
-        return [
+        return array_merge($this->baseRules(), [
             'identity' => ['sometimes', 'string', 'max:9', Rule::unique('students', 'identity')->ignore($studentId)],
             'fName' => 'sometimes|string|max:255',
             'sName' => 'sometimes|nullable|string|max:255',
@@ -47,12 +47,12 @@ class UpdateStudentRequest extends BaseStudentRequest
             ],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
-        ];
+        ]);
     }
 
     public function messages()
     {
-        return [
+        return array_merge($this->baseMessages(), [
             'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
             'identity.max' => 'رقم الهوية يجب ألا يتجاوز 9 أحرف.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
@@ -94,6 +94,6 @@ class UpdateStudentRequest extends BaseStudentRequest
 
             'whatsapp.string' => 'رقم الواتساب يجب أن يكون نصاً.',
             'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
-        ];
+        ]);
     }
 }

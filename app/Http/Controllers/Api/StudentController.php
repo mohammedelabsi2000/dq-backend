@@ -150,6 +150,7 @@ class StudentController extends Controller
             'guardianType',
             'prefixName',
             'guardian',
+            'previousAchievement'
         ]);
 
         return $this->success(

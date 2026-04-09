@@ -59,6 +59,8 @@ class StudentResource extends JsonResource
             // الموقع
             'location' => $this->location,
 
+            'previous_achievement' => $this->whenLoaded('previousAchievement'),
+
             // التواريخ
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

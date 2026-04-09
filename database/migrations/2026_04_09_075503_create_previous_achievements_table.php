@@ -31,7 +31,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('surah_id')->nullable()->comment('آخر سورة');
             $table->foreign('surah_id')->references('id')->on('quran_surahs');
 
-            $table->unsignedSmallInteger('end_aya')->comment('رقم الآية');
+            $table->unsignedSmallInteger('end_aya')->nullable()->comment('رقم الآية');
 
             $table->auditColumns();
         });

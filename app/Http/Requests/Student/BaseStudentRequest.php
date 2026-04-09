@@ -24,7 +24,7 @@ class BaseStudentRequest extends DQFormRequest
                         $surah = DB::table('quran_surahs')->where('id', $surahId)->first();
 
                         if ($surah && ($value < 1 || $value > $surah->verses_count)) {
-                            $fail("رقم الآية يجب أن يكون بين 1 و {$surah->verses_count}");
+                            $fail('رقم الآية في سورة ' . $surah->name_ar . ' يجب أن يكون من 1 إلى ' . $surah->verses_count);
                         }
                     }
                 },
