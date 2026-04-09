@@ -24,9 +24,10 @@ on:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: >-
       github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_tests == 'true')
     steps:
       - uses: actions/checkout@v4
@@ -55,7 +56,7 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-test
     if: >-
       always() &&
@@ -70,7 +71,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: 22
           script: |
             cd ${{ secrets.APP_PATH }}
             chmod -R 775 storage bootstrap/cache
@@ -81,4 +82,5 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+            chmod -R 775 storage bootstrap/cache
             php artisan queue:restart
