@@ -3,13 +3,10 @@
 namespace App\Http\Requests\Student;
 
 use App\Helpers\ConstantHelper;
-use App\Http\Requests\DQFormRequest;
 use App\Models\Student;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class StoreStudentRequest extends DQFormRequest
+class StoreStudentRequest extends BaseStudentRequest
 {
     public function authorize()
     {
@@ -18,7 +15,7 @@ class StoreStudentRequest extends DQFormRequest
 
     public function rules()
     {
-        return [
+        return array_merge($this->baseRules(), [
             'identity' => ['nullable', 'string', 'max:9'], //, Rule::unique('students', 'identity')],
             'fName' => 'required|string|max:255',
             'sName' => 'nullable|string|max:255',
@@ -49,13 +46,14 @@ class StoreStudentRequest extends DQFormRequest
             ],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
+          
             'halaqa_id' => 'nullable|exists:halaqas,id',
-        ];
+        ]);
     }
 
     public function messages()
     {
-        return [
+        return array_merge($this->baseMessages(), [
             'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
             'identity.max' => 'رقم الهوية يجب ألا يتجاوز 9 أحرف.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
@@ -103,8 +101,8 @@ class StoreStudentRequest extends DQFormRequest
 
             'whatsapp.string' => 'رقم الواتساب يجب أن يكون نصاً.',
             'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
-
+         
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة في النظام.',
-        ];
+        ]);
     }
 }

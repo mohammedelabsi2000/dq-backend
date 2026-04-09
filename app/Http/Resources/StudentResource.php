@@ -60,6 +60,7 @@ class StudentResource extends JsonResource
             // الموقع
             'location' => $this->location,
 
+            'previous_achievement' => $this->whenLoaded('previousAchievement'),
             // الحلقات
             'halaqas' => $this->whenLoaded('halaqas', function () {
                 return $this->halaqas->map(function ($halaqa) {
