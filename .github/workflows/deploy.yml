@@ -3,6 +3,8 @@ name: Deploy DQ Tahfiz API
 on:
   push:
     branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
   workflow_dispatch:
     inputs:
       environment:
@@ -22,9 +24,10 @@ on:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: >-
       github.event_name == 'push' ||
+      github.event_name == 'pull_request' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.run_tests == 'true')
     steps:
       - uses: actions/checkout@v4
@@ -53,9 +56,12 @@ jobs:
 
   deploy:
     name: Deploy
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-and-test
-    if: always() && (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped')
+    if: >-
+      always() &&
+      github.event_name != 'pull_request' &&
+      needs.build-and-test.result != 'failure'
     environment:
       name: ${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || 'dev') }}
     steps:
@@ -65,7 +71,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT || 22 }}
+          port: 22
           script: |
             cd ${{ secrets.APP_PATH }}
             git pull origin ${{ github.ref_name }}
@@ -74,4 +80,5 @@ jobs:
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
+            chmod -R 775 storage bootstrap/cache
             php artisan queue:restart
