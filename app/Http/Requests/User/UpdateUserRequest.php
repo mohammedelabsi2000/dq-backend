@@ -64,8 +64,7 @@ class UpdateUserRequest extends FormRequest
 
             'identity' => [
                 'nullable',
-                'string',
-                'size:9',
+                'digits:9',
                 Rule::unique('users', 'identity')->ignore($userId),
             ],
 
@@ -133,8 +132,7 @@ class UpdateUserRequest extends FormRequest
             'numChildren.min' => 'عدد الأبناء لا يمكن أن يكون أقل من صفر.',
 
             // identity
-            'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
-            'identity.size' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
+            'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً.',
 
             // phone

@@ -216,8 +216,12 @@ class StudentController extends Controller
                 );
             }
         }
+        try {
+            $student = $this->studentService->create($request->validated());
+        } catch (\InvalidArgumentException $th) {
+            return $this->error($th->getMessage(), 422);
+        }
 
-        $student = $this->studentService->create($request->validated());
         $student->load([
             'mosque',
             'maritalStatus',
@@ -264,7 +268,11 @@ class StudentController extends Controller
     public function update(UpdateStudentRequest $request, Student $student)
     {
         // $this->authorize('update', $student);
-        $student = $this->studentService->update($student, $request->validated());
+        try {
+            $student = $this->studentService->update($student, $request->validated());
+        } catch (\InvalidArgumentException $th) {
+            return $this->error($th->getMessage(), 422);
+        }
 
         return $this->success(
             new StudentResource($student->load([
@@ -302,10 +310,14 @@ class StudentController extends Controller
      */
     public function import(ImportStudentRequest $request)
     {
-        Excel::import(
-            new StudentsImport($request->except('file')),
-            $request->file
-        );
+        try {
+            Excel::import(
+                new StudentsImport($request->except('file')),
+                $request->file
+            );
+        } catch (\InvalidArgumentException $e) {
+            return $this->error($e->getMessage(), 422);
+        }
 
         return $this->success(
             null,

@@ -16,8 +16,8 @@ class UpdateStudentRequest extends BaseStudentRequest
     {
         $studentId = $this->route('student')?->id;
 
-        return array_merge($this->baseRules(), [
-            'identity' => ['sometimes', 'string', 'max:9', Rule::unique('students', 'identity')->ignore($studentId)],
+        return [
+            'identity' => ['sometimes', 'digits:9', Rule::unique('students', 'identity')->ignore($studentId)],
             'fName' => 'sometimes|string|max:255',
             'sName' => 'sometimes|nullable|string|max:255',
             'thName' => 'sometimes|nullable|string|max:255',
@@ -40,7 +40,7 @@ class UpdateStudentRequest extends BaseStudentRequest
             ],
             // مراجعة سيناريو إنشاء ولي الأمر
             // |exists:users,identity
-            'guardian_id' => 'sometimes|string|max:9',
+            'guardian_id' => 'sometimes|digits:9',
             'guardian_type_id' => [
                 'sometimes',
                 Rule::in(ConstantHelper::getConstantIdsByType('guardian_type')),
@@ -54,9 +54,8 @@ class UpdateStudentRequest extends BaseStudentRequest
 
     public function messages()
     {
-        return array_merge($this->baseMessages(), [
-            'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
-            'identity.max' => 'رقم الهوية يجب ألا يتجاوز 9 أحرف.',
+        return [
+            'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
 
             'fName.string' => 'الاسم الأول يجب أن يكون نصاً.',
@@ -85,8 +84,7 @@ class UpdateStudentRequest extends BaseStudentRequest
 
             'prefix_name_id.in' => 'اللقب المحدد غير صحيح.',
 
-            'guardian_id.string' => 'رقم هوية ولي الأمر يجب أن يكون نصاً.',
-            'guardian_id.max' => 'رقم هوية ولي الأمر يجب ألا يتجاوز 9 أحرف.',
+            'guardian_id.digits' => 'رقم هوية ولي الأمر يجب أن يكون 9 أرقام.',
             // 'guardian_id.exists' => 'رقم هوية ولي الأمر غير موجود في النظام.',
 
             'guardian_type_id.in' => 'نوع ولي الأمر المحدد غير صحيح.',

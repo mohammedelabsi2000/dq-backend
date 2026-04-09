@@ -59,7 +59,7 @@ class StoreUserRequest extends FormRequest
             'gender' => 'nullable|in:ذكر,أنثى',
             'numChildren' => 'nullable|integer|min:0',
 
-            'identity' => ['nullable', 'string', 'max:9'],
+            'identity' => ['nullable', 'digits:9'],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
 
@@ -143,8 +143,7 @@ class StoreUserRequest extends FormRequest
             'numChildren.integer' => 'عدد الأبناء يجب أن يكون رقم صحيح.',
             'numChildren.min' => 'عدد الأبناء لا يمكن أن يكون سالباً.',
 
-            'identity.string' => 'رقم الهوية يجب أن يكون نصاً.',
-            'identity.size' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
+            'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً.',
 
             'phone.string' => 'رقم الهاتف يجب أن يكون نصاً.',
