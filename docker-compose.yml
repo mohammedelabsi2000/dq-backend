@@ -1,5 +1,6 @@
 services:
   app:
+    image: dq-tahfiz-api-app:latest
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
