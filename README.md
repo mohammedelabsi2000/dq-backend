@@ -41,7 +41,7 @@ Run `make help` to see all commands. Key ones:
 
 ## Development Workflow
 
-1. Create a new branch from `main`:
+1. Create a new branch from `dev`:
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -49,4 +49,4 @@ Run `make help` to see all commands. Key ones:
 3. Push your branch and open a Pull Request (PR).
 4. Wait for review and approval before merging.
 
-> **Note:** Do not push directly to `main`. All changes must go through a PR.
+> **Note:** Do not push directly to `dev`. All changes must go through a PR.
