@@ -60,7 +60,14 @@ class StudentResource extends JsonResource
             // الموقع
             'location' => $this->location,
 
-            'previous_achievement' => $this->whenLoaded('previousAchievement'),
+            // Previous achievement
+            'memorized_juz' => $this->memorized_juz ?? null,
+            'memorized_juz_array' => $this->memorized_juz ? array_map('intval', explode(',', $this->memorized_juz)) : null,
+            'completed_juz' => $this->memorized_juz ?? null,
+            'completed_juz_array' => $this->completed_juz ? array_map('intval', explode(',', $this->completed_juz)) : null,
+            'surah_id' => $this->surah_id ?? null,
+            'end_aya' => $this->end_aya ?? null,
+
             // الحلقات
             'halaqas' => $this->whenLoaded('halaqas', function () {
                 return $this->halaqas->map(function ($halaqa) {

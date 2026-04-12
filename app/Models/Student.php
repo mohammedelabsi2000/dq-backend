@@ -34,6 +34,10 @@ class Student extends Model implements BelongsToHierarchy
         'whatsapp',
         'created_by',
         'updated_by',
+        'memorized_juz',
+        'completed_juz',
+        'surah_id',
+        'end_aya',
     ];
 
     protected $casts = [
@@ -130,10 +134,12 @@ class Student extends Model implements BelongsToHierarchy
     public function getHierarchyIds(): array
     {
         // تحميل halaqas مع العلاقات المطلوبة فقط
-        $this->loadMissing(['halaqas' => function ($query) {
-            $query->with(['reference'])
-                ->select('halaqas.*');  // تجنب تحميل بيانات pivot
-        }]);
+        $this->loadMissing([
+            'halaqas' => function ($query) {
+                $query->with(['reference'])
+                    ->select('halaqas.*');  // تجنب تحميل بيانات pivot
+            }
+        ]);
 
         $ids = [];
 
