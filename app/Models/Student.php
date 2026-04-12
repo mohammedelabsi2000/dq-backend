@@ -232,11 +232,6 @@ class Student extends Model implements BelongsToHierarchy
         ]);
     }
 
-    public function previousAchievement()
-    {
-        return $this->hasOne(PreviousAchievement::class);
-    }
-
     // public function scopeVisibleTo(Builder $query, User $user): Builder
     // {
     //     $user->loadMissing('roles');

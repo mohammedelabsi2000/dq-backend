@@ -23,7 +23,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student = Student::create($data);
-            // $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Assign student to halaqa if provided
             if ($halaqaId) {
@@ -47,7 +46,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student->update($data);
-            // $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Handle halaqa assignment if provided
             if ($halaqaId !== null) {
@@ -95,24 +93,6 @@ class StudentService
         }
 
         return $guardian;
-    }
-
-    private function updateOrCreatePreviousAchievement(Student $student, array $data): void
-    {
-        if (
-            isset($data['memorized_juz']) ||
-            isset($data['completed_juz']) ||
-            isset($data['surah_id'])
-        ) {
-            PreviousAchievement::updateOrCreate([
-                'student_id' => $student->id,
-            ], [
-                'memorized_juz' => $data['memorized_juz'] ?? null,
-                'completed_juz' => $data['completed_juz'] ?? null,
-                'surah_id' => $data['surah_id'] ?? null,
-                'end_aya' => $data['end_aya'] ?? null,
-            ]);
-        }
     }
   
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
