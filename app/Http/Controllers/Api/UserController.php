@@ -136,23 +136,19 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
-        $my_request = $request->validated();
+        $data = $request->validated();
         // تشفير الباسوورد لو تم تغييره
         if ($request->input('password')) {
-            $my_request['password'] = Hash::make($request['password']);
+            $data['password'] = Hash::make($request['password']);
         } else {
-            unset($my_request['password']);
+            unset($data['password']);
         }
-        
-        // Update or create the user based on the identity field
-        $user->updateOrCreate(
-            ['identity' => $request['identity']],
-            $my_request
-        );
+
+        $user->update($data);
 
         return $this->success(
             new UserResource($user),
-            'تم تحديث بيانات المسخدم بنجاح'
+            'تم تحديث بيانات المستخدم بنجاح'
         );
     }
 
