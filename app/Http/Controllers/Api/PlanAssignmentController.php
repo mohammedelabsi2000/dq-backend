@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AssignmentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanAssignmentResource;
 use App\Models\Plan;
@@ -85,7 +86,7 @@ class PlanAssignmentController extends Controller
                     'student_id' => $studentId
                 ],
                 [
-                    'assignment_type' => 'manual',
+                    'assignment_type' => AssignmentType::Manual,
                     'criteria' => null
                 ]
             );

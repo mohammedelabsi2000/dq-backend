@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\HasHierarchyScope;
 use App\Concerns\HasRoles;
 use App\Contracts\BelongsToHierarchy;
+use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -68,6 +69,7 @@ class User extends Authenticatable implements BelongsToHierarchy
         'email_verified_at' => 'datetime',
         'dob' => 'date',
         'job_salary' => 'decimal:2',
+        'gender' => Gender::class,
     ];
 
     /*
@@ -171,12 +173,7 @@ class User extends Authenticatable implements BelongsToHierarchy
 
     public function getGenderTextAttribute()
     {
-        return $this->gender ?? 'غير محدد';
-        /* return match ($this->gender) {
-            'male' => 'ذكر',
-            'female' => 'أنثى',
-            default => 'غير محدد',
-        }; */
+        return $this->gender?->label() ?? 'غير محدد';
     }
 
 
@@ -194,27 +191,6 @@ class User extends Authenticatable implements BelongsToHierarchy
             ['id' => $this->id, 'type' => 'user'],
         ];
     }
-
-    // public function getHierarchyIds(): array
-    // {
-    //     $this->loadMissing('mosque.region');
-
-    //     $mosque = $this->mosque;
-    //     if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
-
-    //     $region = $mosque->region;
-    //     if (!$region) return [
-    //         ['id' => $mosque->id,  'type' => 'mosque'],
-    //         ['id' => $this->id,    'type' => 'user'],
-    //     ];
-
-    //     return [
-    //         ['id' => $region->branch_id, 'type' => 'branch'],
-    //         ['id' => $region->id,        'type' => 'region'],
-    //         ['id' => $mosque->id,        'type' => 'mosque'],
-    //         ['id' => $this->id,          'type' => 'user'],
-    //     ];
-    // }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {

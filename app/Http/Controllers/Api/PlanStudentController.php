@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AssignmentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanStudentResource;
 use App\Models\Plan;
 use App\Models\PlanAssignment;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 
 class PlanStudentController extends Controller
 {
@@ -33,7 +35,7 @@ class PlanStudentController extends Controller
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'assignment_type' => 'nullable|string'
+            'assignment_type' => ['nullable', 'string', new Enum(AssignmentType::class)]
         ]);
 
         $plan = Plan::findOrFail($plan_id);
@@ -54,7 +56,7 @@ class PlanStudentController extends Controller
         $assignment = PlanAssignment::create([
             'plan_id' => $plan->id,
             'student_id' => $request->student_id,
-            'assignment_type' => $request->input('assignment_type', 'manual'),
+            'assignment_type' => $request->input('assignment_type', AssignmentType::Manual),
         ]);
 
         $assignment->load('student');
