@@ -53,7 +53,6 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        // $this->authorize('create', User::class);
         $user = User::where('identity', $request['identity'])
             ->first();
 

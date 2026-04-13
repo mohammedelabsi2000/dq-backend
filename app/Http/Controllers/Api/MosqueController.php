@@ -70,8 +70,6 @@ class MosqueController extends Controller
      */
     public function store(StoreMosqueRequest $request)
     {
-        // $this->authorize('create', Mosque::class);
-
         $center = null;
         $mosque = null;
 

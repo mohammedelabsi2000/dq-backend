@@ -236,7 +236,6 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
-        // $this->authorize('update', $student);
         try {
             $student = $this->studentService->update($student, $request->validated());
         } catch (\InvalidArgumentException $th) {
