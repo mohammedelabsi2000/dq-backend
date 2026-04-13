@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Plan;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\DQFormRequest;
 
-class StorePlanRequest extends FormRequest
+class StorePlanRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

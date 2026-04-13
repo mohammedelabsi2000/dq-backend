@@ -3,12 +3,9 @@
 namespace App\Http\Requests\Branch;
 
 use App\Http\Traits\ApiResponser;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateBranchRequest extends FormRequest
+class UpdateBranchRequest extends DQFormRequest
 {
     use ApiResponser;
     /**
@@ -42,12 +39,5 @@ class UpdateBranchRequest extends FormRequest
             'name.required' => 'اسم الفرع مطلوب',
             'name.max'      => 'اسم الفرع يجب ألا يتجاوز 255 حرف',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        $this->validationError([
-            $validator->errors(),
-        ]);
     }
 }

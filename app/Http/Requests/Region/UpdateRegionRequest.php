@@ -5,11 +5,9 @@ namespace App\Http\Requests\Region;
 use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Models\Region;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateRegionRequest extends FormRequest
+class UpdateRegionRequest extends DQFormRequest
 {
     use ApiResponser;
     /**
@@ -56,12 +54,5 @@ class UpdateRegionRequest extends FormRequest
             'branch_id.required' => 'يجب اختيار الفرع',
             'branch_id.exists'   => 'الفرع المحدد غير موجود',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        $this->validationError([
-            $validator->errors(),
-        ]);
     }
 }

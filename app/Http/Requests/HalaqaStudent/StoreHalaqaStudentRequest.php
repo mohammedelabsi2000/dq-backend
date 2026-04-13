@@ -5,10 +5,10 @@ namespace App\Http\Requests\HalaqaStudent;
 use App\Helpers\ConstantHelper;
 use App\Models\Halaqa;
 use App\Models\HalaqaStudent;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class StoreHalaqaStudentRequest extends FormRequest
+class StoreHalaqaStudentRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

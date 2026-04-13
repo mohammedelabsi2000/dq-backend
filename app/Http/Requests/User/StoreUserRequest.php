@@ -3,13 +3,13 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\Gender;
-use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\DQFormRequest;
 
-class StoreUserRequest extends FormRequest
+class StoreUserRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

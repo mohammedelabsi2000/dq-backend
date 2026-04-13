@@ -7,7 +7,6 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-
 class DQFormRequest extends FormRequest
 {
     use ApiResponser;
@@ -20,8 +19,8 @@ class DQFormRequest extends FormRequest
      */
     protected function failedValidation(Validator $validator)
     {
-        $this->validationError(
-            $validator->errors()
+        throw new HttpResponseException(
+            $this->validationError($validator->errors())
         );
     }
 }

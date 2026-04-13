@@ -3,9 +3,9 @@
 namespace App\Http\Requests\UserRole;
 
 use App\Models\UserRole;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\DQFormRequest;
 
-class RemoveRoleRequest extends FormRequest
+class RemoveRoleRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

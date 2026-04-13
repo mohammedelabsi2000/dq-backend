@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Grade;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateGradeRequest extends FormRequest
+class UpdateGradeRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

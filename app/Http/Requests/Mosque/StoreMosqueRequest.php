@@ -5,11 +5,9 @@ namespace App\Http\Requests\Mosque;
 use App\Http\Traits\ApiResponser;
 use App\Models\Mosque;
 use App\Models\Region;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\DQFormRequest;
 
-class StoreMosqueRequest extends FormRequest
+class StoreMosqueRequest extends DQFormRequest
 {
     use ApiResponser;
     /**
@@ -45,12 +43,5 @@ class StoreMosqueRequest extends FormRequest
             'region_id.required' => 'يجب اختيار المنطقة',
             'region_id.exists'   => 'المنطقة المحددة غير موجودة',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        $this->validationError([
-            $validator->errors(),
-        ]);
     }
 }
