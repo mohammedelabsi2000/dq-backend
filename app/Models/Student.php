@@ -40,15 +40,19 @@ class Student extends Model implements BelongsToHierarchy
         'end_aya',
     ];
 
-    public static array $standardRelations = [
-        'mosque',
-        'maritalStatus',
-        'moneyStatus',
-        'guardian',
-        'guardianType',
-        'prefixName',
-        'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
-    ];
+    public static function standardRelations()
+    {
+        return [
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+            'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
+        ];
+    }
+
 
     protected $casts = [
         'dob' => 'date',
@@ -241,10 +245,10 @@ class Student extends Model implements BelongsToHierarchy
             }),
         ]);
     }
-    
+
     public function scopeWithStandardRelations($query)
     {
-        return $query->with(self::$standardRelations);
+        return $query->with(self::standardRelations());
     }
 
     // public function scopeVisibleTo(Builder $query, User $user): Builder
