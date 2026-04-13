@@ -28,7 +28,7 @@ class IdQueryController extends Controller
         try {
             $personData = $this->idQueryServices->get($identity);
         } catch (\InvalidArgumentException $e) {
-            return $this->notFound("لايوجد بيانات لرقم الهوية {$identity}");
+            return $this->notFound($e->getMessage());
         }
 
         return $this->apiResponse([
