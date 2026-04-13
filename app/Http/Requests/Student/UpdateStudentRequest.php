@@ -16,7 +16,7 @@ class UpdateStudentRequest extends BaseStudentRequest
     {
         $studentId = $this->route('student')?->id;
 
-        return [
+        return array_merge($this->baseRules(), [
             'identity' => ['sometimes', 'digits:9', Rule::unique('students', 'identity')->ignore($studentId)],
             'fName' => 'sometimes|string|max:255',
             'sName' => 'sometimes|nullable|string|max:255',
@@ -54,7 +54,7 @@ class UpdateStudentRequest extends BaseStudentRequest
 
     public function messages()
     {
-        return [
+        return array_merge($this->baseMessages(), [
             'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
 

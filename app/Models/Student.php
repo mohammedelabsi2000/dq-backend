@@ -34,6 +34,20 @@ class Student extends Model implements BelongsToHierarchy
         'whatsapp',
         'created_by',
         'updated_by',
+        'memorized_juz',
+        'completed_juz',
+        'surah_id',
+        'end_aya',
+    ];
+
+    public static array $standardRelations = [
+        'mosque',
+        'maritalStatus',
+        'moneyStatus',
+        'guardian',
+        'guardianType',
+        'prefixName',
+        'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
     ];
 
     protected $casts = [
@@ -130,10 +144,12 @@ class Student extends Model implements BelongsToHierarchy
     public function getHierarchyIds(): array
     {
         // تحميل halaqas مع العلاقات المطلوبة فقط
-        $this->loadMissing(['halaqas' => function ($query) {
-            $query->with(['reference'])
-                ->select('halaqas.*');  // تجنب تحميل بيانات pivot
-        }]);
+        $this->loadMissing([
+            'halaqas' => function ($query) {
+                $query->with(['reference'])
+                    ->select('halaqas.*');  // تجنب تحميل بيانات pivot
+            }
+        ]);
 
         $ids = [];
 
@@ -225,10 +241,10 @@ class Student extends Model implements BelongsToHierarchy
             }),
         ]);
     }
-
-    public function previousAchievement()
+    
+    public function scopeWithStandardRelations($query)
     {
-        return $this->hasOne(PreviousAchievement::class);
+        return $query->with(self::$standardRelations);
     }
 
     // public function scopeVisibleTo(Builder $query, User $user): Builder
