@@ -212,7 +212,7 @@ class StudentController extends Controller
             return $this->error($th->getMessage(), 422);
         }
 
-        $student->load(Student::$standardRelations);
+        $student->load(Student::standardRelations());
 
         return $this->success(
             new StudentResource($student),
@@ -224,7 +224,7 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $this->authorize('view', $student);
-        $student = $student->load(Student::$standardRelations);
+        $student = $student->load(Student::standardRelations());
 
         return $this->success(
             new StudentResource($student),
@@ -243,7 +243,7 @@ class StudentController extends Controller
         }
 
         return $this->success(
-            new StudentResource($student->load(Student::$standardRelations)),
+            new StudentResource($student->load(Student::standardRelations())),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }
