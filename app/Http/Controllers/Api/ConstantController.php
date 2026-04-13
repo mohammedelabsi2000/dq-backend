@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Constant\StoreConstantRequest;
 use App\Http\Requests\Constant\UpdateConstantRequest;
 use App\Http\Resources\ConstantResource;
-use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Models\Constant;
 use App\Models\ConstantType;

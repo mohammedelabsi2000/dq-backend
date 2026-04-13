@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TrackResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Track;
 use Illuminate\Http\Request;
 
 class TrackController extends Controller
 {
-    use ApiResponser;
 
     public function index(Request $request)
     {

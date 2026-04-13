@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
-    // use ApiResponser, QueryFilterTrait;
 
     /**
      * Display a listing of the resource.
