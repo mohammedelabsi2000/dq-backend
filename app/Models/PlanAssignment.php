@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AssignmentType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +15,10 @@ class PlanAssignment extends Model
         'student_id',
         'assignment_type',
         'criteria'
+    ];
+
+    protected $casts = [
+        'assignment_type' => AssignmentType::class
     ];
 
     public function plan()

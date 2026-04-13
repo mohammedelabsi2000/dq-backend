@@ -34,8 +34,8 @@ class StudentResource extends JsonResource
             'dob' => $this->dob,
 
             // الجنس
-            'gender' => $this->gender,
-            'genderText' => $this->gender_text ?? null,
+            'gender' => $this->gender?->label(),
+            'genderText' => $this->gender_text,
 
             // المسجد
             'mosque' => new MosqueResource($this->whenLoaded('mosque')),

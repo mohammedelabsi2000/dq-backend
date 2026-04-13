@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\Gender;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreUserRequest extends FormRequest
 {
@@ -56,7 +58,7 @@ class StoreUserRequest extends FormRequest
 
             // Other fields
             'location' => 'nullable|string|max:255',
-            'gender' => 'nullable|in:ذكر,أنثى',
+            'gender' => ['nullable', new Enum(Gender::class)],
             'numChildren' => 'nullable|integer|min:0',
 
             'identity' => ['nullable', 'digits:9'],
@@ -138,7 +140,7 @@ class StoreUserRequest extends FormRequest
             'location.string' => 'الموقع يجب أن يكون نصاً.',
             'location.max' => 'الموقع يجب ألا يتجاوز 255 حرفاً.',
 
-            'gender.in' => 'قيمة الجنس يجب أن تكون ذكر أو أنثى.',
+            'gender.enum' => 'قيمة الجنس يجب أن تكون ذكر أو أنثى.',
 
             'numChildren.integer' => 'عدد الأبناء يجب أن يكون رقم صحيح.',
             'numChildren.min' => 'عدد الأبناء لا يمكن أن يكون سالباً.',
