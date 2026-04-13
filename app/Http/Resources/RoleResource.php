@@ -17,11 +17,11 @@ class RoleResource extends JsonResource
         return [
             'id'          => $this->id,
             'name'        => $this->name,
-            'abilities'   => RoleAbilityResource::collection($this->whenLoaded('roleAbilities')),
-            // 'abilities'   => $this->whenLoaded('roleAbilities', function () {
-            //     return $this->roleAbilities->pluck('ability')->toArray();
-            // }),
+            'permissions' => $this->whenLoaded('permissions', function () {
+                return $this->permissions->toArray();
+            }),
             'created_at'  => $this->created_at,
+            'updated_at'  => $this->updated_at,
         ];
     }
 }

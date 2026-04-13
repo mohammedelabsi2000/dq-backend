@@ -21,7 +21,8 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('viewAny', User::class);
-        $query = User::query()->visibleTo(auth()->user());
+        // $query = User::query()->visibleTo(auth()->user());
+        $query = User::query();
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
@@ -53,7 +54,6 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        // $this->authorize('create', User::class);
         $user = User::where('identity', $request['identity'])
             ->first();
 
@@ -76,34 +76,6 @@ class UserController extends Controller
                 201
             );
         }
-
-
-        /////////////////////////////////////
-        /* $request['password'] = Hash::make($request['password']);
-        $data = $request->validated();
-
-        $user = User::withTrashed()
-            ->where('identity', $data['identity'])
-            ->first();
-
-        if ($user) {
-            // إذا كان محذوف نرجعه
-            if ($user->trashed()) {
-                $user->restore();
-            }
-
-            // نحدث البيانات
-            $user->update($data);
-
-            return $this->success(
-                new UserResource($user),
-                'تم استعادة المستخدم بنجاح',
-                201
-            );
-        }
-        // تشفير الباسوورد 
-
-        $user = User::create($data); */
     }
 
     /**
@@ -115,11 +87,6 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
         $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.roleAbilities']);
-        // return $this->apiResponse(
-        //     new UserResource($user),
-        //     'success',
-        //     200
-        // );
         return $this->success(
             new UserResource($user),
             'بيانات المستخدم',
@@ -135,7 +102,6 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $this->authorize('update', $user);
         $my_request = $request->validated();
         // تشفير الباسوورد لو تم تغييره
         if ($request->input('password')) {
@@ -143,7 +109,7 @@ class UserController extends Controller
         } else {
             unset($my_request['password']);
         }
-        
+
         // Update or create the user based on the identity field
         $user->updateOrCreate(
             ['identity' => $request['identity']],

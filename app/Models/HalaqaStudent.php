@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Contracts\BelongsToHierarchy;
+use App\Concerns\HasVisibilityScope;
 use App\Traits\Searchable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,10 +10,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class HalaqaStudent extends Model implements BelongsToHierarchy
+class HalaqaStudent extends Model
 {
 
-    use HasFactory, SoftDeletes, HasHierarchyScope, Searchable;
+    use HasFactory, SoftDeletes, Searchable, HasVisibilityScope;
 
     protected $casts = [
         'from_date' => 'date',
@@ -58,96 +57,47 @@ class HalaqaStudent extends Model implements BelongsToHierarchy
         return $this->belongsTo(Constant::class, 'enrollment_status_id');
     }
 
-    public function getHierarchyIds(): array
-    {
-        $this->loadMissing('halaqa.reference');
-
-        $hierarchy = [
-            ['id' => $this->id, 'type' => 'halaqa_student'],
-        ];
-
-        if ($this->halaqa) {
-            $hierarchy[] = ['id' => $this->halaqa->id, 'type' => 'halaqa'];
-
-            // إضافة هرمية الحلقة
-            if ($this->halaqa->reference_type === 'center') {
-                $center = $this->halaqa->reference;
-                if ($center) {
-                    $hierarchy[] = ['id' => $center->id, 'type' => 'center'];
-                    if ($center->region_id) {
-                        $hierarchy[] = ['id' => $center->region_id, 'type' => 'region'];
-                        if ($center->region->branch_id) {
-                            $hierarchy[] = ['id' => $center->region->branch_id, 'type' => 'branch'];
-                        }
-                    }
-                }
-            } elseif ($this->halaqa->reference_type === 'region') {
-                $region = $this->halaqa->reference;
-                if ($region) {
-                    $hierarchy[] = ['id' => $region->id, 'type' => 'region'];
-                    if ($region->branch_id) {
-                        $hierarchy[] = ['id' => $region->branch_id, 'type' => 'branch'];
-                    }
-                }
-            }
-        }
-
-        return $hierarchy;
-    }
-
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->applyVisibleTo($query, $user, [
-            'halaqa' => fn($q, $scopeId) => $q->orWhere('halaqa_id', $scopeId),
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
 
-            'center' => fn($q, $scopeId) => $q->orWhereHas(
-                'halaqa',
-                fn($q) =>
-                $q->where('reference_type', 'center')
-                    ->where('reference_id', $scopeId)
-            ),
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-            'region' => fn($q, $scopeId) => $q->orWhere(function ($q) use ($scopeId) {
-                $q->orWhereHas(
-                    'halaqa',
-                    fn($q) =>
-                    $q->where('reference_type', 'region')
-                        ->where('reference_id', $scopeId)
-                );
+        // توسيع الهرمية
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = $regionIds->merge(
+                Region::whereIn('branch_id', $branchIds)->pluck('id')
+            )->unique();
+        }
 
-                $centerIds = Center::where('region_id', $scopeId)->pluck('id');
-                if ($centerIds->isNotEmpty()) {
-                    $q->orWhereHas(
-                        'halaqa',
-                        fn($q) =>
-                        $q->where('reference_type', 'center')
-                            ->whereIn('reference_id', $centerIds)
-                    );
-                }
-            }),
+        if ($regionIds->isNotEmpty()) {
+            $centerIds = $centerIds->merge(
+                Center::whereIn('region_id', $regionIds)->pluck('id')
+            )->unique();
+        }
 
-            'branch' => fn($q, $scopeId) => $q->orWhere(function ($q) use ($scopeId) {
-                $regionIds = Region::where('branch_id', $scopeId)->pluck('id');
+        $allHalaqaIds = $halaqaIds
+            ->merge(
+                Halaqa::where('reference_type', 'region')
+                    ->whereIn('reference_id', $regionIds)
+                    ->pluck('id')
+            )
+            ->merge(
+                Halaqa::where('reference_type', 'center')
+                    ->whereIn('reference_id', $centerIds)
+                    ->pluck('id')
+            )
+            ->unique();
 
-                if ($regionIds->isNotEmpty()) {
-                    $q->orWhereHas(
-                        'halaqa',
-                        fn($q) =>
-                        $q->where('reference_type', 'region')
-                            ->whereIn('reference_id', $regionIds)
-                    );
+        if ($allHalaqaIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
 
-                    $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
-                    if ($centerIds->isNotEmpty()) {
-                        $q->orWhereHas(
-                            'halaqa',
-                            fn($q) =>
-                            $q->where('reference_type', 'center')
-                                ->whereIn('reference_id', $centerIds)
-                        );
-                    }
-                }
-            }),
-        ]);
+        return $query->whereIn('halaqa_id', $allHalaqaIds);
     }
 }

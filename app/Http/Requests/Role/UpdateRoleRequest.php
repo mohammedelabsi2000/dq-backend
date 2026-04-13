@@ -4,34 +4,27 @@ namespace App\Http\Requests\Role;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Spatie\Permission\Models\Role;
 
 class UpdateRoleRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('role'));
+        // return $this->user()->can('update', $this->route('role'));
+        return $this->user()->hasPermissionTo('roles.update', 'sanctum');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name'        => ['required', 'string', Rule::unique('roles', 'name')->ignore($this->role->id)],
+            'name'        => [
+                'required',
+                'string',
+                Rule::unique('roles', 'name')->ignore($this->route('role')->id),
+            ],
             'give_all'    => 'boolean',
             'abilities'   => 'array',
-            // 'abilities.*' => Rule::in(array_keys(config('abilities'))),
-            'abilities.*' => Rule::in(
-                collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
-            ),
+            'abilities.*' => 'integer|exists:permissions,id',
         ];
     }
 
@@ -41,7 +34,7 @@ class UpdateRoleRequest extends FormRequest
             'name.required'      => 'اسم الدور مطلوب',
             'name.unique'        => 'اسم الدور موجود مسبقاً',
             'abilities.array'    => 'الصلاحيات يجب أن تكون مصفوفة',
-            'abilities.*.in'     => 'إحدى الصلاحيات غير صالحة',
+            'abilities.*.exists' => 'إحدى الصلاحيات غير موجودة',
         ];
     }
 }

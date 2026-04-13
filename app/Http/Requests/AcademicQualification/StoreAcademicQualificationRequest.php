@@ -41,15 +41,6 @@ class StoreAcademicQualificationRequest extends FormRequest
     public function rules()
     {
 
-        // 'marital_status_id' => [
-        //             'nullable',
-        //             Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),
-        //         ],
-        //         'prefix_name_id' => [
-        //             'nullable',
-        //             Rule::in(ConstantHelper::getConstantIdsByType('prefix_name')),
-        //         ],
-
         return [
             'academic_degree_id' => [
                 'required',
@@ -67,10 +58,6 @@ class StoreAcademicQualificationRequest extends FormRequest
             'certificate_link' => 'nullable|url',
             'educational_institution' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
-
-            // Validation للملفات المتعددة
-            // 'images' => 'nullable|array',
-            // 'images.*' => 'file|mimes:pdf|max:5120'
             'certificate_file' => 'nullable|file|mimes:pdf|max:5120'
         ];
     }
@@ -102,12 +89,6 @@ class StoreAcademicQualificationRequest extends FormRequest
             'educational_institution.max' => 'اسم المؤسسة التعليمية يجب ألا يتجاوز 255 حرفاً.',
 
             'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
-
-            // 'images.array' => 'حقل الملفات يجب أن يكون مصفوفة.',
-
-            // 'images.*.file' => 'كل ملف يجب أن يكون ملفاً صالحاً.',
-            // 'images.*.mimes' => 'يجب أن يكون الملف بصيغة PDF فقط.',
-            // 'images.*.max' => 'حجم الملف يجب ألا يتجاوز 5 ميجابايت.',
 
             'certificate_file.file' => 'الملف يجب أن يكون ملفاً صالحاً.',
             'certificate_file.mimes' => 'يجب أن يكون الملف بصيغة PDF فقط.',

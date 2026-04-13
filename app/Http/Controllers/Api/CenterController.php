@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
-    // use ApiResponser; // استخدم الـ Trait
+    use ApiResponser; // استخدم الـ Trait
 
     /**
      * Display a listing of the resource.
@@ -49,9 +49,6 @@ class CenterController extends Controller
             });
         }
 
-        // if ($request->boolean('with_mosque')) {
-        //     $query->with('mosque.region.branch');
-        // }
         if ($request->boolean('with_relations')) {
             $query->with(['region.branch', 'mosque']);
         }

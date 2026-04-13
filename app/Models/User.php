@@ -2,20 +2,20 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Concerns\HasRoles;
-use App\Contracts\BelongsToHierarchy;
-use Illuminate\Database\Eloquent\Builder;
+use App\Concerns\HasVisibilityScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements BelongsToHierarchy
+class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasHierarchyScope;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasVisibilityScope;
+
+    protected $guard_name = 'sanctum';
 
     // مميز الموديلات اللي تستخدم audit يتم قرائته داخل AppServiceProvider.php
     public static $usesAudit = true;
@@ -39,27 +39,10 @@ class User extends Authenticatable implements BelongsToHierarchy
         'whatsapp',
         'email',
         'password',
-        'fName',
-        'sName',
-        'thName',
-        'family',
-        'dob',
-        'mosque_id',
-        'location',
-        'gender',
-        'marital_status_id',
-        'numChildren',
-        'identity',
-        'phone',
-        'whatsapp',
         'jobname',
         'job_place',
         'job_salary',
         'image',
-        'prefix_name_id',
-        'jobname',
-        'job_place',
-        'job_salary',
         'prefix_name_id',
         // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
@@ -170,24 +153,9 @@ class User extends Authenticatable implements BelongsToHierarchy
         return $this->person_type . ' #' . $this->person_id;
     }
 
-    /* public function getFullNameAttribute()
-    {
-        return trim(preg_replace('/\s+/', ' ', "{$this->fName} {$this->sName} {$this->thName} {$this->family}"));
-
-        // if ($this->person) {
-        //     return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
-        // }
-        // return $this->person_type . ' #' . $this->person_id;
-    } */
-
     public function getGenderTextAttribute()
     {
         return $this->gender ?? 'غير محدد';
-        /* return match ($this->gender) {
-            'male' => 'ذكر',
-            'female' => 'أنثى',
-            default => 'غير محدد',
-        }; */
     }
 
 
@@ -199,57 +167,42 @@ class User extends Authenticatable implements BelongsToHierarchy
     {
         return $this->morphMany(PersonalCourse::class, 'person');
     }
-    public function getHierarchyIds(): array
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes Management
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopes()
     {
-        return [
-            ['id' => $this->id, 'type' => 'user'],
-        ];
+        return $this->hasMany(UserScope::class);
     }
 
-    // public function getHierarchyIds(): array
-    // {
-    //     $this->loadMissing('mosque.region');
-
-    //     $mosque = $this->mosque;
-    //     if (!$mosque) return [['id' => $this->id, 'type' => 'user']];
-
-    //     $region = $mosque->region;
-    //     if (!$region) return [
-    //         ['id' => $mosque->id,  'type' => 'mosque'],
-    //         ['id' => $this->id,    'type' => 'user'],
-    //     ];
-
-    //     return [
-    //         ['id' => $region->branch_id, 'type' => 'branch'],
-    //         ['id' => $region->id,        'type' => 'region'],
-    //         ['id' => $mosque->id,        'type' => 'mosque'],
-    //         ['id' => $this->id,          'type' => 'user'],
-    //     ];
-    // }
-
-    public function scopeVisibleTo(Builder $query, User $user): Builder
+    public function getScopesAttribute()
     {
-        return $this->applyVisibleTo($query, $user, [
-            'branch' => fn(Builder $q, $id) =>
-                $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
-            'region' => fn(Builder $q, $id) =>
-                $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
-            'mosque' => 'mosque_id',
-            'user' => 'id',
-        ]);
-    }
-
-    public function scopeOnlyTeachers(Builder $query)
-    {
-        $role = Role::where('name', 'محفظ')->first();
-
-        // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
-        if(!$role) {
-            return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
-        }
-        
-        return $query->whereHas('roles', function ($q) use ($role) {
-            $q->where('role_id', $role->id);
+        return $this->scopes()->get()->map(function ($scope) {
+            return [
+                'type' => $scope->scope_type,
+                'id' => $scope->scope_id,
+            ];
         });
+    }
+
+    public function syncScopes(array $scopes)
+    {
+        $this->scopes()->delete();
+
+        foreach ($scopes as $scope) {
+            $this->scopes()->create([
+                'scope_type' => $scope['type'],
+                'scope_id' => $scope['id'],
+            ]);
+        }
+    }
+
+    public function clearScopes()
+    {
+        $this->scopes()->delete();
     }
 }

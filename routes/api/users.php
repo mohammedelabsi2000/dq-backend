@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //     Route::put('/', [UserRoleController::class, 'sync']);
     //     Route::delete('/', [UserRoleController::class, 'remove']);
     // });
-    Route::post('users/{user}/roles', [UserRoleController::class, 'save']);
-    Route::get('users/{user}/roles', [UserRoleController::class, 'index']);
-    Route::delete('users/{user}/roles', [UserRoleController::class, 'remove']);
+    // Route::post('users/{user}/roles', [UserRoleController::class, 'save']);
+    // Route::get('users/{user}/roles', [UserRoleController::class, 'index']);
+    // Route::delete('users/{user}/roles', [UserRoleController::class, 'remove']);
 });

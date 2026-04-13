@@ -19,13 +19,13 @@ class BranchController extends Controller
     {
         $this->authorize('viewAny', Branch::class);
 
-        // $query = Branch::query();
         $query = Branch::query()->visibleTo(auth()->user());
+        // $query = Branch::query();
+
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
-            'limit'         => '*',
         ]);
 
         $query = $q['query'];
@@ -38,11 +38,6 @@ class BranchController extends Controller
         }
 
         $branches = $query->withCount('regions')->get();
-
-        // $perPage  = $request->integer('per_page', 15);
-        // $branches = $query->withCount('regions')->latest()->paginate($perPage);
-
-        // $branches = $query->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -96,8 +91,6 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        // $this->authorize('update', $branch);
-
         $branch->update($request->validated());
 
         return $this->success(

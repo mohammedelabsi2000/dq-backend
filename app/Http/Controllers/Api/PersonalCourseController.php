@@ -53,16 +53,6 @@ class PersonalCourseController extends Controller
 
     public function store(StorePersonalCourseRequest $request)
     {
-        // $course = new PersonalCourse($request->validated());
-
-        // $personType = $request->person_type;
-        // $personId = $request->person_id;
-
-        // $person = $personType::findOrFail($personId);
-
-        // $course->person()->associate($person);
-        // $course->save();
-
         $course = PersonalCourse::create($request->validated());
 
         if ($request->hasFile('certificate_file')) {

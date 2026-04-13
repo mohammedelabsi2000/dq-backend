@@ -12,28 +12,28 @@ class UserRolePolicy
     // عرض أدوار المستخدم
     public function index($user, User $target)
     {
-        // return $user->hasAbility('roles.view', $target);
-        return $user->hasAbility('roles.view');
+        // return $user->hasPermissionTo('roles.show', $target);
+        return $user->hasPermissionTo('users.roles.update');
     }
 
     // إسناد دور
     public function assign($user, User $target)
     {
-        // return $user->hasAbility('roles.update', $target);
-        return $user->hasAbility('roles.create');
+        // return $user->hasPermissionTo('roles.update', $target);
+        return $user->hasPermissionTo('users.roles.update');
     }
 
     // تحديث دور
     public function sync($user, User $target)
     {
-        // return $user->hasAbility('roles.update', $target);
-        return $user->hasAbility('roles.update');
+        // return $user->hasPermissionTo('roles.update', $target);
+        return $user->hasPermissionTo('users.roles.update');
     }
 
     // إزالة دور
     public function remove($user, User $target)
     {
-        // return $user->hasAbility('roles.update', $target);
-        return $user->hasAbility('roles.delete');
+        // return $user->hasPermissionTo('roles.update', $target);
+        return $user->hasPermissionTo('users.roles.update');
     }
 }

@@ -46,9 +46,9 @@ class StoreStudentRequest extends BaseStudentRequest
             ],
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
-          
+
             'halaqa_id' => 'nullable|exists:halaqas,id',
-        ]);
+        ];
     }
 
     public function messages()
@@ -99,8 +99,8 @@ class StoreStudentRequest extends BaseStudentRequest
 
             'whatsapp.string' => 'رقم الواتساب يجب أن يكون نصاً.',
             'whatsapp.max' => 'رقم الواتساب يجب ألا يتجاوز 25 حرفاً.',
-         
+
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة في النظام.',
-        ]);
+        ];
     }
 }

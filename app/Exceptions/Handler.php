@@ -54,24 +54,25 @@ class Handler extends ExceptionHandler
         if ($e instanceof ModelNotFoundException) {
             $modelName = strtolower(class_basename($e->getModel()));
             return $this->errorMessage(
-                'Does not exist any ' . $modelName . ' with the specified identifier',
+                'لا يوجد ' . $modelName . ' بالمعرف المحدد',
                 404
             );
         }
 
         // Authorization exception
         if ($e instanceof AuthorizationException) {
-            return $this->errorMessage($e->getMessage(), 403);
+            // return $this->errorMessage($e->getMessage(), 403);
+            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         // Route not found
         if ($e instanceof NotFoundHttpException) {
-            return $this->errorMessage('The specified URL cannot be found.', 404);
+            return $this->errorMessage('الرابط المطلوب غير موجود.', 404);
         }
 
         // Authentication exception
         if ($e instanceof AuthenticationException) {
-            return $this->error('Unauthenticated', 401);
+            return $this->error('غير مسجل الدخول', 401);
         }
 
         // Validation exception
@@ -91,6 +92,6 @@ class Handler extends ExceptionHandler
         }
 
         // Default fallback
-        return $this->errorMessage('Unexpected error occurred', 500);
+        return $this->errorMessage('حدث خطأ غير متوقع', 500);
     }
 }
