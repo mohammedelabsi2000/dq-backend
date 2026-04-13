@@ -32,12 +32,12 @@ class PlanController extends Controller
             ->with(['planTracks.courses.track'])
             ->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => PlanResource::collection($plans)
-        ], 'success', 200);
+        return $this->successWithPagination(
+            PlanResource::collection($plans),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
 
@@ -71,7 +71,7 @@ class PlanController extends Controller
     {
         $plan->load(['planTracks.courses.track']);
 
-        return $this->apiResponse(
+        return $this->success(
             new PlanResource($plan),
             'success',
             200
@@ -130,7 +130,7 @@ class PlanController extends Controller
 
         $plan->load('planTracks.courses.track');
 
-        return $this->apiResponse([
+        return $this->success([
             'plan' => new PlanResource($plan),
             'tracks' => $tracks,
             'plan_tracks' => $plan->planTracks
@@ -192,7 +192,7 @@ class PlanController extends Controller
     {
         $plans = Plan::with('planTracks.courses.track')->get();
 
-        return $this->apiResponse(
+        return $this->success(
             PlanResource::collection($plans),
             'success'
         );
@@ -206,7 +206,7 @@ class PlanController extends Controller
     {
         $plan->load('planTracks.courses.track');
 
-        return $this->apiResponse(
+        return $this->success(
             new PlanResource($plan),
             'success'
         );

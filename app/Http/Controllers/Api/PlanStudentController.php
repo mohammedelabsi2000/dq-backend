@@ -20,7 +20,7 @@ class PlanStudentController extends Controller
 
         $students = $plan->assignments()->with('student')->paginate(50);
 
-        return $this->apiResponse(
+        return $this->success(
             [
                 'plan' => $plan,
                 'students' => PlanStudentResource::collection($students)
@@ -46,7 +46,7 @@ class PlanStudentController extends Controller
             ->exists();
 
         if ($exists) {
-            return $this->apiResponse(
+            return $this->success(
                 null,
                 'الطالب مسند مسبقاً لهذه الخطة',
                 409
@@ -61,7 +61,7 @@ class PlanStudentController extends Controller
 
         $assignment->load('student');
 
-        return $this->apiResponse(
+        return $this->success(
             new PlanStudentResource($assignment),
             'تم إسناد الطالب بنجاح',
             201

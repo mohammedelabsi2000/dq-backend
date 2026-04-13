@@ -61,12 +61,12 @@ class CenterController extends Controller
         // dd($centers);
         // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => CenterResource::collection($centers),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            CenterResource::collection($centers),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**

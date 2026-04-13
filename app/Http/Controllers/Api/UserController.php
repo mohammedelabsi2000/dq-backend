@@ -38,12 +38,12 @@ class UserController extends Controller
         // $total = $query->count();
         $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $skip,
-            'limit' => $limit,
-            'data' => UserResource::collection($users),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            UserResource::collection($users),
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'success',
+            200
+        );
     }
 
     /**

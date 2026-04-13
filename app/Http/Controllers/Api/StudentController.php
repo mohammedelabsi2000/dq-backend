@@ -170,12 +170,12 @@ class StudentController extends Controller
 
         $students = $query->withStandardRelations()->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => StudentResource::collection($students),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            StudentResource::collection($students),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     public function store(StoreStudentRequest $request)

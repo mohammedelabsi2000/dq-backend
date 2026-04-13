@@ -19,12 +19,12 @@ class QuranController extends Controller
 
         $juz = $query->with(['start_surah', 'end_surah'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $skip,
-            'limit' => $limit,
-            'data' => $juz,
-        ], 'success', 200);
+        return $this->successWithPagination(
+            $juz,
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'success',
+            200
+        );
     }
 
     public function surahs()
@@ -38,11 +38,11 @@ class QuranController extends Controller
 
         $surahs = $query->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $skip,
-            'limit' => $limit,
-            'data' => $surahs,
-        ], 'success', 200);
+        return $this->successWithPagination(
+            $surahs,
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'success',
+            200
+        );
     }
 }

@@ -41,12 +41,12 @@ class BranchController extends Controller
 
         // $branches = $query->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip'  => $q['skip'],
-            'limit' => $q['limit'],
-            'data'  => BranchResource::collection($branches),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            BranchResource::collection($branches),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
 
@@ -116,7 +116,7 @@ class BranchController extends Controller
         $this->authorize('delete', $branch);
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف الفرع لأنه يحتوي على مناطق تابعة',
                 400
             );

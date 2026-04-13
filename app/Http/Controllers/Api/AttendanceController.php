@@ -16,8 +16,9 @@ class AttendanceController extends Controller
             ->when($request->date, fn($q) => $q->where('date', $request->date))
             ->get();
 
-        return $this->apiResponse(
+        return $this->successWithPagination(
             AttendanceResource::collection($attendances),
+            [],
             'success',
             200
         );

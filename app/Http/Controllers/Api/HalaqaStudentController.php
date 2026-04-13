@@ -120,12 +120,12 @@ class HalaqaStudentController extends Controller
             'enrollment_status'
         ])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => HalaqaStudentResource::collection($data),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            HalaqaStudentResource::collection($data),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
     /**
      * عرض تسجيل محدد

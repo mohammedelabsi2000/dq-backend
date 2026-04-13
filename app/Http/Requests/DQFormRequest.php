@@ -20,7 +20,7 @@ class DQFormRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(
-            $this->validationError($validator->errors())
+            $this->error('حدث خطأ في التحقق من البيانات', 422, $validator->errors())
         );
     }
 }

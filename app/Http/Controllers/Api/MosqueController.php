@@ -53,12 +53,12 @@ class MosqueController extends Controller
         // $perPage = $request->integer('per_page', 15);
         // $mosques = $query->withCount('centers')->latest()->paginate($perPage);
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => MosqueResource::collection($mosques),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            MosqueResource::collection($mosques),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
 
@@ -114,7 +114,8 @@ class MosqueController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  Request  $request
+     * @param  Mosque  $mosque
      */
     public function show(Request $request, Mosque $mosque)
     {
@@ -153,8 +154,8 @@ class MosqueController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  UpdateMosqueRequest  $request
+     * @param  Mosque  $mosque
      */
     public function update(UpdateMosqueRequest $request, Mosque $mosque)
     {
@@ -222,7 +223,7 @@ class MosqueController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Mosque  $mosque
      */
     public function destroy(Mosque $mosque)
     {
@@ -230,7 +231,7 @@ class MosqueController extends Controller
 
         // تحقق من وجود مراكز تابعة قبل الحذف
         if ($mosque->centers()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف المسجد لأنه يحتوي على مراكز تابعة',
                 400
             );

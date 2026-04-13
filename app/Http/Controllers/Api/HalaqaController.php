@@ -121,12 +121,12 @@ class HalaqaController extends Controller
         $total = $q['count'];
         $halaqas = $query->with(['reference', 'type', 'supervisor'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => HalaqaResource::collection($halaqas),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            HalaqaResource::collection($halaqas),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -153,7 +153,8 @@ class HalaqaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  Request  $request
+     * @param  Halaqa  $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Halaqa $halaqa)
@@ -192,14 +193,14 @@ class HalaqaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Halaqa  $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Halaqa $halaqa)
     {
         $this->authorize('delete', $halaqa);
         if ($halaqa->students()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف الحلقة لأنها تحتوي على طلاب',
                 400
             );
