@@ -6,14 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Branch\StoreBranchRequest;
 use App\Http\Requests\Branch\UpdateBranchRequest;
 use App\Http\Resources\BranchResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
-use App\Traits\QueryFilterTrait;
 
 class BranchController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
 
     public function index(Request $request)
     {

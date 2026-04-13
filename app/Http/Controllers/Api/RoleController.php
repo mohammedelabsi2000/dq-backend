@@ -6,13 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\RoleResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Role;
-use App\Traits\QueryFilterTrait;
 
 class RoleController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
     /**
      * Display a listing of the resource.
      * 

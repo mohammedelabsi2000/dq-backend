@@ -4,14 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanStudentResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\PlanAssignment;
 use Illuminate\Http\Request;
 
 class PlanStudentController extends Controller
 {
-    use ApiResponser;
 
     // GET: عرض الطلاب المسندين للخطة
     public function index($plan_id)

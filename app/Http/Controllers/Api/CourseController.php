@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    use ApiResponser;
 
     /**
      * Display a listing of courses.

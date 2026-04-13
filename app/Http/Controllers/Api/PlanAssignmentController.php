@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanAssignmentResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\Student;
 use App\Models\PlanAssignment;
@@ -12,7 +11,6 @@ use Illuminate\Http\Request;
 
 class PlanAssignmentController extends Controller
 {
-    use ApiResponser;
 
     /**
      * عرض الطلاب مع الفلاتر لإسنادهم لخطة
