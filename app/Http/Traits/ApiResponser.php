@@ -5,82 +5,50 @@ namespace App\Http\Traits;
 trait ApiResponser
 {
 
-    //***************************************mohammed************************* */
     protected function success($data, string $message = '', int $code = 200)
     {
         return response()->json([
-            'success'  => true,
+            'success' => true,
             'message' => $message,
-            'code'    => $code,
-            'data'    => $data,
+            'code' => $code,
+            'data' => $data,
         ], $code);
     }
 
+    /**
+     * Return success response with pagination data.
+     *
+     * @param mixed $data
+     * @param array{
+     *     total?: int|null,
+     *     skip?: int|null,
+     *     limit?: int|null
+     * } $pagination
+     * @param string $message
+     * @param int $code
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function successWithPagination($data, $pagination = [], $message = '', $code = 200)
+    {
+        $pag = array_merge($pagination, [
+            'success' => true,
+            'message' => $message,
+            'code' => $code,
+            'data' => $data,
+        ]);
+
+        return response()->json($pag, $code);
+    }
 
     protected function error($message = 'حدث خطأ', $code = 400, $errors = null)
     {
         return response()->json([
-            'success'  => false,
+            'success' => false,
             'message' => $message,
-            'errors'  => $errors,
+            'errors' => $errors,
             'code' => $code,
         ], $code);
-    }
-
-    protected function validationError($errors)
-    {
-        return response()->json([
-            'success'  => false,
-            'code' => "422",
-            'message' => 'خطأ في التحقق من البيانات',
-            'errors'  => $errors
-        ], 422);
-    }
-
-    protected function notFound($message = 'العنصر غير موجود')
-    {
-        return response()->json([
-            'success'  => false,
-            'message' => $message
-        ], 404);
-    }
-    // ****************************** mohammed *******************************
-    protected function successMessage($msg, $code = 200)
-    {
-        return response()->json([
-            'message' => $msg,
-            'code' => $code,
-            'success' => true,
-        ]);
-    }
-
-    protected function errorMessage($msg, $code = 400)
-    {
-        return response()->json([
-            'message' => $msg,
-            'code' => $code,
-            'success' => false,
-        ]);
-    }
-
-    protected function errorResponse($data, $code)
-    {
-        return response()->json([
-            'code' => $code,
-            'success' => false,
-            'errors' => $data,
-        ]);
-    }
-
-    protected function apiResponse($data, $msg, $code = 200, $success = true)
-    {
-        $resp = array_merge([
-            'message' => $msg,
-            'code' => $code,
-            'success' => $success,
-            // 'data' => $data,
-        ], $data);
-        return response()->json($resp);
     }
 
     protected function paginate($object)
@@ -98,7 +66,6 @@ trait ApiResponser
             'total' => $object->total(),
             'skip' => $object->firstItem() - 1,
             'limit' => $object->perPage(),
-
         ];
     }
 }

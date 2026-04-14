@@ -43,12 +43,16 @@ class PersonalCourseController extends Controller
         // $total = $query->count();
         $users = $query->with(['person', 'type', 'images'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => PersonalCourseResource::collection($users),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            PersonalCourseResource::collection($users),
+            [
+                'total' => $total,
+                'skip' => $q['skip'],
+                'limit' => $q['limit'],
+            ],
+            'success',
+            200
+        );
     }
 
     public function store(StorePersonalCourseRequest $request)

@@ -6,14 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Branch\StoreBranchRequest;
 use App\Http\Requests\Branch\UpdateBranchRequest;
 use App\Http\Resources\BranchResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use Illuminate\Http\Request;
-use App\Traits\QueryFilterTrait;
 
 class BranchController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
 
     public function index(Request $request)
     {
@@ -39,12 +36,17 @@ class BranchController extends Controller
 
         $branches = $query->withCount('regions')->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip'  => $q['skip'],
-            'limit' => $q['limit'],
-            'data'  => BranchResource::collection($branches),
-        ], 'success', 200);
+        // $perPage  = $request->integer('per_page', 15);
+        // $branches = $query->withCount('regions')->latest()->paginate($perPage);
+
+        // $branches = $query->get();
+
+        return $this->successWithPagination(
+            BranchResource::collection($branches),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
 
@@ -66,8 +68,10 @@ class BranchController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
+     * 
+     * @param Request $request
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Branch $branch)
     {
@@ -86,8 +90,9 @@ class BranchController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param UpdateBranchRequest $request
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
@@ -102,14 +107,15 @@ class BranchController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Branch $branch)
     {
         $this->authorize('delete', $branch);
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف الفرع لأنه يحتوي على مناطق تابعة',
                 400
             );

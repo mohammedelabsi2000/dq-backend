@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\HalaqaReferenceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Halaqa\StoreHalaqaRequest;
 use App\Http\Requests\Halaqa\UpdateHalaqaRequest;
@@ -29,13 +30,13 @@ class HalaqaController extends Controller
             $branchId = $request->integer('branch_id');
             $query->where(function ($q) use ($branchId) {
                 // Halaqas under centers in this branch
-                $q->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($branchId) {
                     $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
                         $regionQuery->where('branch_id', $branchId);
                     });
                 })
                     // Halaqas directly under regions in this branch
-                    ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($branchId) {
                         $regionQuery->where('branch_id', $branchId);
                     });
             });
@@ -45,7 +46,7 @@ class HalaqaController extends Controller
         if ($request->filled('center_id')) {
             $query->whereHasMorph(
                 'reference',
-                ['center'],
+                [HalaqaReferenceType::Center],
                 function ($query) {
                     $query->where('id', request()->integer('center_id'));
                 }
@@ -57,11 +58,11 @@ class HalaqaController extends Controller
             $regionId = $request->integer('region_id');
             $query->where(function ($q) use ($regionId) {
                 // Halaqas directly under this region
-                $q->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($regionId) {
                     $regionQuery->where('id', $regionId);
                 })
                     // Halaqas under centers in this region
-                    ->orWhereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($regionId) {
                         $centerQuery->where('region_id', $regionId);
                     });
             });
@@ -88,12 +89,12 @@ class HalaqaController extends Controller
         $total = $q['count'];
         $halaqas = $query->with(['reference', 'type', 'supervisors.user'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => HalaqaResource::collection($halaqas),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            HalaqaResource::collection($halaqas),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -120,7 +121,8 @@ class HalaqaController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  Request  $request
+     * @param  Halaqa  $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Halaqa $halaqa)
@@ -159,14 +161,14 @@ class HalaqaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Halaqa  $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Halaqa $halaqa)
     {
         $this->authorize('delete', $halaqa);
         if ($halaqa->students()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف الحلقة لأنها تحتوي على طلاب',
                 400
             );

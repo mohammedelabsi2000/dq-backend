@@ -56,12 +56,12 @@ class AcademicQualificationController extends Controller
             'images',
         ])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => AcademicQualificationResource::collection($data),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            AcademicQualificationResource::collection($data),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**

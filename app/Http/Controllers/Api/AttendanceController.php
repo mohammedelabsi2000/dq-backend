@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttendanceResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
 {
-    use ApiResponser;
     public function index(Request $request)
     {
         $attendances = Attendance::with(['attendable', 'halaqa', 'status'])
@@ -18,8 +16,9 @@ class AttendanceController extends Controller
             ->when($request->date, fn($q) => $q->where('date', $request->date))
             ->get();
 
-        return $this->apiResponse(
+        return $this->successWithPagination(
             AttendanceResource::collection($attendances),
+            [],
             'success',
             200
         );

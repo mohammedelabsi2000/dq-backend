@@ -44,10 +44,6 @@
     <!-- Custom CSS -->
     @stack('styles')
     <style>
-        @font-face {
-            font-family: 'Droid';
-            src: url('{{ asset('css/NotoKufiArabic-Light.ttf') }}') format('truetype');
-        }
 
         :root {
             --primary-color: #1e4a6b;

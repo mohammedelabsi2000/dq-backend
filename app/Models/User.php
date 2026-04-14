@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
-use App\Concerns\HasVisibilityScope;
+use App\Concerns\HasHierarchyScope;
+use App\Concerns\HasRoles;
+use App\Contracts\BelongsToHierarchy;
+use App\Enums\Gender;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,28 +27,34 @@ class User extends Authenticatable
     // protected $appends = ['full_name'];
 
     protected $fillable = [
+        // Auth
+        'name',
+        'email',
+        'password',
+        // Personal info
         'fName',
         'sName',
         'thName',
         'family',
-        'name',
-        'dob',
-        'mosque_id',
-        'location',
-        'gender',
-        'marital_status_id',
-        'numChildren',
         'identity',
+        'dob',
+        'gender',
+        'prefix_name_id',
+        // Contact
         'phone',
         'whatsapp',
-        'email',
-        'password',
+        // Location
+        'mosque_id',
+        'location',
+        // Status
+        'marital_status_id',
+        'numChildren',
+        // Job
         'jobname',
         'job_place',
         'job_salary',
+        // Media
         'image',
-        'prefix_name_id',
-        // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
 
     /**
@@ -62,6 +72,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'dob' => 'date',
         'job_salary' => 'decimal:2',
+        'gender' => Gender::class,
     ];
 
     /*
@@ -155,7 +166,7 @@ class User extends Authenticatable
 
     public function getGenderTextAttribute()
     {
-        return $this->gender ?? 'غير محدد';
+        return $this->gender?->label() ?? 'غير محدد';
     }
 
 
@@ -179,13 +190,29 @@ class User extends Authenticatable
         return $this->hasMany(UserScope::class);
     }
 
-    public function getScopesAttribute()
+    public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->scopes()->get()->map(function ($scope) {
-            return [
-                'type' => $scope->scope_type,
-                'id' => $scope->scope_id,
-            ];
+        return $this->applyVisibleTo($query, $user, [
+            'branch' => fn(Builder $q, $id) =>
+                $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
+            'region' => fn(Builder $q, $id) =>
+                $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
+            'mosque' => 'mosque_id',
+            'user' => 'id',
+        ]);
+    }
+
+    public function scopeOnlyTeachers(Builder $query)
+    {
+        $role = Role::where('name', 'محفظ')->first();
+
+        // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
+        if (!$role) {
+            return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
+        }
+
+        return $query->whereHas('roles', function ($q) use ($role) {
+            $q->where('role_id', $role->id);
         });
     }
 

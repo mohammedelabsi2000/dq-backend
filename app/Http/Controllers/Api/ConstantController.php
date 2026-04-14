@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Constant\StoreConstantRequest;
 use App\Http\Requests\Constant\UpdateConstantRequest;
 use App\Http\Resources\ConstantResource;
-use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Models\Constant;
 use App\Models\ConstantType;
@@ -54,12 +53,12 @@ class ConstantController extends Controller
             $total = $q['count'];
 
             $constants = $query->get(['id', 'name']);
-            return $this->apiResponse([
-                'total' => $total,
-                'skip' => $q['skip'],
-                'limit' => $q['limit'],
-                'data' => $constants,
-            ], 'success', 200);
+            return $this->successWithPagination(
+                $constants,
+                ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+                'success',
+                200
+            );
         }
 
         $q = $this->applyFilters($query, [
@@ -73,12 +72,12 @@ class ConstantController extends Controller
         // لإرجاع جميع ثوابت النظام
         $constants = $query->with(['constantType', 'parent'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => ConstantResource::collection($constants),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            ConstantResource::collection($constants),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -147,7 +146,7 @@ class ConstantController extends Controller
     {
         $this->authorize('delete', $constant);
         if ($constant->isUsed()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف هذا الثابت لأنه مستخدم في سجلات أخرى.',
                 400
             );

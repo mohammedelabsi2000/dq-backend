@@ -2,10 +2,11 @@
 
 namespace App\Http\Requests\UserRole;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class AssignRoleRequest extends FormRequest
+use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
+
+class AssignRoleRequest extends DQFormRequest
 {
     public function authorize(): bool
     {

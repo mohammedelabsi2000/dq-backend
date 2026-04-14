@@ -1,8 +1,8 @@
 <?php
 namespace App\Traits;
 
+use App\Enums\AuditEvent;
 use App\Models\Audit;
-use Illuminate\Support\Facades\Auth;
 
 trait Auditable
 {
@@ -13,19 +13,19 @@ trait Auditable
     public static function bootAuditable()
     {
         static::created(function ($model) {
-            $model->audit('created');
+            $model->audit(AuditEvent::Created);
         });
 
         static::updated(function ($model) {
-            $model->audit('updated');
+            $model->audit(AuditEvent::Updated);
         });
 
         static::deleted(function ($model) {
-            $model->audit('deleted');
+            $model->audit(AuditEvent::Deleted);
         });
 
         static::restored(function ($model) {
-            $model->audit('restored');
+            $model->audit(AuditEvent::Restored);
         });
     }
 

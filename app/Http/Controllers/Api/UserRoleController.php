@@ -5,16 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRole\AssignRoleRequest;
 use App\Http\Requests\UserRole\AssignScopeRequest;
-use App\Http\Resources\UserRoleResource;
-use App\Http\Traits\ApiResponser;
+use App\Models\Role;
 use App\Models\User;
-use App\Models\UserScope;
-use Illuminate\Http\JsonResponse;
-use Spatie\Permission\Models\Role;
 
 class UserRoleController extends Controller
 {
-    use ApiResponser;
 
     /*
     |--------------------------------------------------------------------------

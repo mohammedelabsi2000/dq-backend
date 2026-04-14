@@ -18,7 +18,7 @@ class PlanAssignmentResource extends JsonResource
             'id' => $this->id,
             'student_id' => $this->student_id,
             'plan_id' => $this->plan_id,
-            'assignment_type' => $this->assignment_type,
+            'assignment_type' => $this->assignment_type?->label(),
             'criteria' => $this->criteria,
 
             'student' => $this->whenLoaded('student', function () {

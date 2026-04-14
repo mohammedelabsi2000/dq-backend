@@ -5,11 +5,9 @@ namespace App\Http\Requests\Region;
 use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Models\Region;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use App\Http\Requests\DQFormRequest;
 
-class StoreRegionRequest extends FormRequest
+class StoreRegionRequest extends DQFormRequest
 {
     use ApiResponser;
     /**
@@ -46,13 +44,4 @@ class StoreRegionRequest extends FormRequest
             'branch_id.exists'   => 'الفرع المحدد غير موجود',
         ];
     }
-
-    /* protected function failedValidation(Validator $validator)
-    {
-        throw new HttpResponseException($this->validationError([
-            // 'status'  => false,
-            // 'message' => 'خطأ في البيانات المدخلة',
-            $validator->errors(),
-        ]));
-    } */
 }

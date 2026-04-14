@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Models\Branch;
 use App\Models\Halaqa;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Constant;
 use App\Models\ConstantType;
+use App\Models\Region;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,6 +26,15 @@ class HalaqaSupervisorTest extends TestCase
         // Seed basic required data
         $this->seed(\Database\Seeders\ConstantTypeSeeder::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $branch = Branch::create([
+            'name' => 'Test branch',
+        ]);
+
+        $region = Region::create([
+            'name' => 'Test region',
+            'branch_id' => $branch->id,
+        ]);
     }
 
     /**
@@ -47,7 +58,7 @@ class HalaqaSupervisorTest extends TestCase
             'name' => 'Test Halaqa',
             'location' => 'Test Location',
             'description' => 'Test Description',
-            'reference_type' => 'user', // Using user as reference for testing
+            'reference_type' => 'region', // Using region as reference for testing
             'reference_id' => 1,
             'type_id' => $type->id,
         ]);
@@ -92,7 +103,7 @@ class HalaqaSupervisorTest extends TestCase
         $halaqa = Halaqa::create([
             'name' => 'Test Halaqa',
             'location' => 'Test Location',
-            'reference_type' => 'user',
+            'reference_type' => 'region',
             'reference_id' => 1,
             'type_id' => $type->id,
         ]);
@@ -125,7 +136,7 @@ class HalaqaSupervisorTest extends TestCase
         $halaqa = Halaqa::create([
             'name' => 'API Test Halaqa',
             'location' => 'Test Location',
-            'reference_type' => 'user',
+            'reference_type' => 'region',
             'reference_id' => 1,
             'type_id' => $type->id,
         ]);
@@ -157,11 +168,10 @@ class HalaqaSupervisorTest extends TestCase
             ->getJson("/api/halaqas/{$halaqa->id}");
         $response->assertStatus(200)
             ->assertJsonStructure([
-                
-                    'id',
-                    'name',
-                    'supervisor',
-                    'students_count'
+                'id',
+                'name',
+                'supervisor',
+                'students_count'
             ])
             ->assertJsonPath('supervisor.full_name', 'علي محمد')
             ->assertJsonPath('students_count', 0);

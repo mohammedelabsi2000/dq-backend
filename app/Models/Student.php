@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Gender;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,10 +34,29 @@ class Student extends Model
         'whatsapp',
         'created_by',
         'updated_by',
+        'memorized_juz',
+        'completed_juz',
+        'surah_id',
+        'end_aya',
     ];
+
+    public static function standardRelations()
+    {
+        return [
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+            'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
+        ];
+    }
+
 
     protected $casts = [
         'dob' => 'date',
+        'gender' => Gender::class
     ];
 
     public static $usesAudit = true;
@@ -77,6 +97,10 @@ class Student extends Model
             $this->thName,
             $this->family,
         ]));
+    }
+    public function getGenderTextAttribute()
+    {
+        return $this->gender?->label() ?? 'غير محدد';
     }
 
     public function mosque()
@@ -126,6 +150,7 @@ class Student extends Model
             ->withTimestamps();
     }
 
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->isGlobalAdmin()) {
@@ -160,8 +185,8 @@ class Student extends Model
         return $query->whereIn('mosque_id', $mosqueIds);
     }
 
-    public function previousAchievement()
+    public function scopeWithStandardRelations($query)
     {
-        return $this->hasOne(PreviousAchievement::class);
+        return $query->with(self::standardRelations());
     }
 }

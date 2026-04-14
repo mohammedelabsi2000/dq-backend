@@ -4,13 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    use ApiResponser;
 
     /**
      * Display a listing of courses.
@@ -21,7 +19,7 @@ class CourseController extends Controller
 
         $courses = Course::with('track')->latest()->paginate($perPage);
 
-        return $this->apiResponse(
+        return $this->success(
             CourseResource::collection($courses),
             'تم جلب الدورات بنجاح',
             200
@@ -43,7 +41,7 @@ class CourseController extends Controller
 
         $course = Course::create($request->all());
 
-        return $this->apiResponse(
+        return $this->success(
             new CourseResource($course),
             'تم إنشاء الدورة',
             201
@@ -57,7 +55,7 @@ class CourseController extends Controller
     {
         $course->load('track');
 
-        return $this->apiResponse(
+        return $this->success(
             new CourseResource($course),
             'تم جلب الدورة',
             200
@@ -78,7 +76,7 @@ class CourseController extends Controller
 
         $course->update($request->all());
 
-        return $this->apiResponse(
+        return $this->success(
             new CourseResource($course->fresh()),
             'تم التعديل',
             200
@@ -92,7 +90,7 @@ class CourseController extends Controller
     {
         $course->delete();
 
-        return $this->apiResponse(
+        return $this->success(
             null,
             'تم الحذف',
             200

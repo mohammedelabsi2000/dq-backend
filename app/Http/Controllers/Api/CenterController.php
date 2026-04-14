@@ -6,13 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Center\StoreCenterRequest;
 use App\Http\Requests\Center\UpdateCenterRequest;
 use App\Http\Resources\CenterResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
+<<<<<<< HEAD
     use ApiResponser; // استخدم الـ Trait
+=======
+>>>>>>> 05ac341f871de2fd695bb2a396e1d2fb8616f83b
 
     /**
      * Display a listing of the resource.
@@ -60,12 +62,12 @@ class CenterController extends Controller
         // dd($centers);
         // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => CenterResource::collection($centers),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            CenterResource::collection($centers),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -76,7 +78,6 @@ class CenterController extends Controller
      */
     public function store(StoreCenterRequest $request)
     {
-        // $this->authorize('create', Center::class);
         $center = Center::create($request->validated());
 
         if ($request->boolean('with_mosque')) {
@@ -134,7 +135,6 @@ class CenterController extends Controller
      */
     public function update(UpdateCenterRequest $request, Center $center)
     {
-        // $this->authorize('update', $center);
         $center->update($request->validated());
         // // تحميل العلاقات إذا طلب
         // if ($request->boolean('with_mosque')) {

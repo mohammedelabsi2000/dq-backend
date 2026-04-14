@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AssignmentType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PlanStudentResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Plan;
 use App\Models\PlanAssignment;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 
 class PlanStudentController extends Controller
 {
-    use ApiResponser;
 
     // GET: عرض الطلاب المسندين للخطة
     public function index($plan_id)
@@ -20,7 +20,7 @@ class PlanStudentController extends Controller
 
         $students = $plan->assignments()->with('student')->paginate(50);
 
-        return $this->apiResponse(
+        return $this->success(
             [
                 'plan' => $plan,
                 'students' => PlanStudentResource::collection($students)
@@ -35,7 +35,7 @@ class PlanStudentController extends Controller
     {
         $request->validate([
             'student_id' => 'required|exists:students,id',
-            'assignment_type' => 'nullable|string'
+            'assignment_type' => ['nullable', 'string', new Enum(AssignmentType::class)]
         ]);
 
         $plan = Plan::findOrFail($plan_id);
@@ -46,7 +46,7 @@ class PlanStudentController extends Controller
             ->exists();
 
         if ($exists) {
-            return $this->apiResponse(
+            return $this->success(
                 null,
                 'الطالب مسند مسبقاً لهذه الخطة',
                 409
@@ -56,12 +56,12 @@ class PlanStudentController extends Controller
         $assignment = PlanAssignment::create([
             'plan_id' => $plan->id,
             'student_id' => $request->student_id,
-            'assignment_type' => $request->input('assignment_type', 'manual'),
+            'assignment_type' => $request->input('assignment_type', AssignmentType::Manual),
         ]);
 
         $assignment->load('student');
 
-        return $this->apiResponse(
+        return $this->success(
             new PlanStudentResource($assignment),
             'تم إسناد الطالب بنجاح',
             201

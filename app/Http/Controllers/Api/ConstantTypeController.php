@@ -5,14 +5,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ConstantTypeResource;
-use App\Http\Traits\ApiResponser;
 use Illuminate\Http\Request;
 use App\Models\ConstantType;
 
 
 class ConstantTypeController extends Controller
 {
-    use ApiResponser;
     /**
      * Display a listing of the resource.
      * @return \Illuminate\Http\JsonResponse
@@ -21,9 +19,11 @@ class ConstantTypeController extends Controller
     {
         $constantTypes = ConstantType::get();
 
-        return $this->apiResponse([
-            'data' => ConstantTypeResource::collection($constantTypes),
-        ], 'success', 200);
+        return $this->success(
+            ConstantTypeResource::collection($constantTypes),
+            'success',
+            200
+        );
     }
 
     /**
@@ -39,7 +39,7 @@ class ConstantTypeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param ConstantType $constantType
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(ConstantType $constantType)
@@ -47,9 +47,11 @@ class ConstantTypeController extends Controller
         $constantType = $constantType->load([
             'constants'
         ]);
-        return $this->apiResponse([
-            'data' => ConstantTypeResource::collection($constantType),
-        ], 'success', 200);
+        return $this->success(
+            ConstantTypeResource::collection($constantType),
+            'success',
+            200
+        );
     }
 
     /**

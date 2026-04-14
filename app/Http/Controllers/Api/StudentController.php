@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\HalaqaReferenceType;
 use App\Models\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\ImportStudentRequest;
@@ -35,13 +36,13 @@ class StudentController extends Controller
                 $q->whereHas('halaqas', function ($hq) use ($branchId) {
                     $hq->where(function ($hqQuery) use ($branchId) {
                         // Halaqas under centers in this branch
-                        $hqQuery->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                        $hqQuery->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($branchId) {
                             $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
                                 $regionQuery->where('branch_id', $branchId);
                             });
                         })
                             // Halaqas directly under regions in this branch
-                            ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                            ->orWhereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($branchId) {
                                 $regionQuery->where('branch_id', $branchId);
                             });
                     });
@@ -68,7 +69,7 @@ class StudentController extends Controller
             $query->where(function ($q) use ($centerId) {
                 // Students in halaqas under this center
                 $q->whereHas('halaqas', function ($hq) use ($centerId) {
-                    $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($centerId) {
+                    $hq->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($centerId) {
                         $centerQuery->where('id', $centerId);
                     });
                 })
@@ -152,24 +153,14 @@ class StudentController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-        $students = $query->with([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ])->get();
+        $students = $query->withStandardRelations()->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => StudentResource::collection($students),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            StudentResource::collection($students),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     public function store(StoreStudentRequest $request)
@@ -208,17 +199,7 @@ class StudentController extends Controller
             return $this->error($th->getMessage(), 422);
         }
 
-        $student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ]);
+        $student->load(Student::standardRelations());
 
         return $this->success(
             new StudentResource($student),
@@ -230,19 +211,8 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $this->authorize('view', $student);
-        $student = $student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'guardian',
-            'previousAchievement',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ]);
+        $student = $student->load(Student::standardRelations());
+
 
         return $this->success(
             new StudentResource($student),
@@ -253,7 +223,6 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
-        // $this->authorize('update', $student);
         try {
             $student = $this->studentService->update($student, $request->validated());
         } catch (\InvalidArgumentException $th) {
@@ -261,18 +230,7 @@ class StudentController extends Controller
         }
 
         return $this->success(
-            new StudentResource($student->load([
-                'mosque',
-                'maritalStatus',
-                'moneyStatus',
-                'guardian',
-                'guardianType',
-                'prefixName',
-                'guardian',
-                'halaqas' => function ($query) {
-                    $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-                },
-            ])),
+            new StudentResource($student->load(Student::standardRelations())),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }

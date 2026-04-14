@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Http\Requests\DQFormRequest;
 
-class StoreRoleRequest extends FormRequest
+class StoreRoleRequest extends DQFormRequest
 {
     public function authorize(): bool
     {

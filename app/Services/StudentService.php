@@ -23,7 +23,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student = Student::create($data);
-            $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Assign student to halaqa if provided
             if ($halaqaId) {
@@ -47,7 +46,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student->update($data);
-            $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Handle halaqa assignment if provided
             if ($halaqaId !== null) {
@@ -115,6 +113,7 @@ class StudentService
         }
     }
 
+  
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
     {
         // Get the default enrollment status ID for "منتظم" (regular)

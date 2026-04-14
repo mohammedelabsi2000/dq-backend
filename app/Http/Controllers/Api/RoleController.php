@@ -8,15 +8,10 @@ use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\PermissionGroupResource;
 use App\Http\Resources\PermissionResource;
 use App\Http\Resources\RoleResource;
-use App\Http\Traits\ApiResponser;
-use App\Traits\QueryFilterTrait;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use App\Models\Role;
 
 class RoleController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
-
     /**
      * Display a listing of the resource.
      * 
@@ -37,14 +32,13 @@ class RoleController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $roles = $query->with('permissions')->get();
-
-        return $this->apiResponse([
-            'total' => $total,
-            'skip'  => $q['skip'],
-            'limit' => $q['limit'],
-            'data'  => RoleResource::collection($roles),
-        ], 'success', 200);
+        $roles = $query->with('roleAbilities')->get();
+        return $this->successWithPagination(
+            RoleResource::collection($roles),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**

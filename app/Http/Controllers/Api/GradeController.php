@@ -7,11 +7,9 @@ use App\Models\Grade;
 use App\Http\Requests\Grade\StoreGradeRequest;
 use App\Http\Requests\Grade\UpdateGradeRequest;
 use App\Http\Resources\GradeResource;
-use App\Http\Traits\ApiResponser;
 
 class GradeController extends Controller
 {
-    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
@@ -21,7 +19,7 @@ class GradeController extends Controller
     {
         $data = Grade::get();
 
-        return $this->apiResponse(
+        return $this->success(
             GradeResource::collection($data),
             'success',
             200
@@ -53,7 +51,7 @@ class GradeController extends Controller
      */
     public function show(Grade $grade)
     {
-        return $this->apiResponse(
+        return $this->success(
             new GradeResource($grade),
             'success',
             200

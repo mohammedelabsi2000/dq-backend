@@ -39,12 +39,12 @@ class UserController extends Controller
         // $total = $query->count();
         $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $skip,
-            'limit' => $limit,
-            'data' => UserResource::collection($users),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            UserResource::collection($users),
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'success',
+            200
+        );
     }
 
     /**
@@ -102,23 +102,20 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $my_request = $request->validated();
+        $this->authorize('update', $user);
+        $data = $request->validated();
         // تشفير الباسوورد لو تم تغييره
         if ($request->input('password')) {
-            $my_request['password'] = Hash::make($request['password']);
+            $data['password'] = Hash::make($request['password']);
         } else {
-            unset($my_request['password']);
+            unset($data['password']);
         }
 
-        // Update or create the user based on the identity field
-        $user->updateOrCreate(
-            ['identity' => $request['identity']],
-            $my_request
-        );
+        $user->update($data);
 
         return $this->success(
             new UserResource($user),
-            'تم تحديث بيانات المسخدم بنجاح'
+            'تم تحديث بيانات المستخدم بنجاح'
         );
     }
 

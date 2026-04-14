@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'family' => $this->family,
             'full_name' => trim(preg_replace('/\s+/', ' ', $this->full_name)),
             'dob' => $this->dob,
-            'gender' => $this->gender,
+            'gender' => $this->gender?->label(),
             'genderText' => $this->gender_text,
             'numChildren' => $this->numChildren,
             'identity' => $this->identity,

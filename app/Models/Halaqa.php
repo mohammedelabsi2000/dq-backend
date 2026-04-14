@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasVisibilityScope;
+use App\Enums\HalaqaReferenceType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,10 @@ class Halaqa extends Model
         'reference_type',
         'reference_id',
         'type_id',
+    ];
+
+    protected $casts = [
+        'reference_type' => HalaqaReferenceType::class,
     ];
 
     /*

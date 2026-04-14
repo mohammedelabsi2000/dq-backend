@@ -71,7 +71,7 @@ class ImageController extends Controller
                     'file_name' => $img->file_name,
                     'url' => asset('storage/' . $img->file_path),
                     'is_main' => $img->is_main,
-                    'image_type' => $img->image_type,
+                    'image_type' => $img->image_type?->label(),
                 ];
             });
 
@@ -94,7 +94,7 @@ class ImageController extends Controller
                     'file_name' => $img->file_name,
                     'url' => asset('storage/' . $img->file_path),
                     'is_main' => $img->is_main,
-                    'image_type' => $img->image_type,
+                    'image_type' => $img->image_type?->label(),
                 ];
             });
 

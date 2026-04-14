@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 
 class RegionController extends Controller
 {
-    // use ApiResponser, QueryFilterTrait;
 
     /**
      * Display a listing of the resource.
@@ -45,12 +44,12 @@ class RegionController extends Controller
         // $perPage = $request->integer('per_page', 15);
         // $regions = $query->withCount('mosques')->latest()->paginate($perPage);
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => RegionResource::collection($regions),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            RegionResource::collection($regions),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -78,7 +77,8 @@ class RegionController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param Request $request
+     * @param Region $region
      */
     public function show(Request $request, Region $region)
     {
@@ -97,8 +97,8 @@ class RegionController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  UpdateRegionRequest  $request
+     * @param  Region  $region
      */
     public function update(UpdateRegionRequest $request, Region $region)
     {
@@ -118,14 +118,14 @@ class RegionController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  Region  $region
      */
     public function destroy(Region $region)
     {
         $this->authorize('delete', $region);
         // تحقق من وجود مساجد تابعة قبل الحذف
         if ($region->mosques()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف المنطقة لأنها تحتوي على مساجد تابعة',
                 400
             );

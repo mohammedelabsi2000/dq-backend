@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUserRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -59,7 +61,7 @@ class UpdateUserRequest extends FormRequest
             ],
 
             'location' => 'nullable|string|max:255',
-            'gender' => 'nullable|in:ذكر,أنثى',
+            'gender' => ['nullable', new Enum(Gender::class)],
             'numChildren' => 'nullable|integer|min:0',
 
             'identity' => [
@@ -125,7 +127,7 @@ class UpdateUserRequest extends FormRequest
             'location.max' => 'الموقع يجب ألا يتجاوز 255 حرفاً.',
 
             // gender
-            'gender.in' => 'الجنس يجب أن يكون ذكر أو أنثى.',
+            'gender.enum' => 'الجنس يجب أن يكون ذكر أو أنثى.',
 
             // numChildren
             'numChildren.integer' => 'عدد الأبناء يجب أن يكون رقماً صحيحاً.',

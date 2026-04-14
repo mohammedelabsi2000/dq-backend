@@ -21,12 +21,12 @@ class CustomJuzController extends Controller
 
         $juz = $query->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $skip,
-            'limit' => $limit,
-            'data' => CustomJuzResource::collection($juz),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            CustomJuzResource::collection($juz),
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'success',
+            200
+        );
     }
 
     public function store(StoreCustomJuzRequest $request)

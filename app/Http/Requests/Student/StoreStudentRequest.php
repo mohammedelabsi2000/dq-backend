@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Student;
 
+use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
 use App\Models\Student;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreStudentRequest extends BaseStudentRequest
 {
@@ -15,7 +17,7 @@ class StoreStudentRequest extends BaseStudentRequest
 
     public function rules()
     {
-        return [
+        return array_merge($this->baseRules(), [
             'identity' => ['nullable', 'digits:9'], //, Rule::unique('students', 'identity')],
             'fName' => 'required|string|max:255',
             'sName' => 'nullable|string|max:255',
@@ -24,7 +26,7 @@ class StoreStudentRequest extends BaseStudentRequest
             'dob' => 'nullable|date',
             'mosque_id' => 'required|exists:mosques,id',
             'location' => 'nullable|string',
-            'gender' => ['required', Rule::in(['ذكر', 'أنثى'])],
+            'gender' => ['required', new Enum(Gender::class)],
             'marital_status_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),
@@ -53,7 +55,7 @@ class StoreStudentRequest extends BaseStudentRequest
 
     public function messages()
     {
-        return [
+        return array_merge($this->baseMessages(), [
             'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
 
@@ -79,7 +81,7 @@ class StoreStudentRequest extends BaseStudentRequest
             'location.string' => 'الموقع يجب أن يكون نصاً.',
 
             'gender.required' => 'الجنس مطلوب.',
-            'gender.in' => 'قيمة الجنس غير صحيحة، يجب أن تكون ذكر أو أنثى.',
+            'gender.enum' => 'قيمة الجنس يجب أن تكون ذكر أو أنثى.',
 
             'marital_status_id.in' => 'الحالة الاجتماعية المحددة غير صحيحة.',
 
