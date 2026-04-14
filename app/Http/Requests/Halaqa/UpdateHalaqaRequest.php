@@ -30,8 +30,8 @@ class UpdateHalaqaRequest extends DQFormRequest
         if ($referenceType && $referenceId) {
             // تحديد النموذج بناءً على نوع المرجع
             $modelMap = [
-                HalaqaReferenceType::Center => Center::class,
-                HalaqaReferenceType::Region => Region::class,
+                HalaqaReferenceType::Center->code() => Center::class,
+                HalaqaReferenceType::Region->code() => Region::class,
             ];
 
             if (isset($modelMap[$referenceType])) {
@@ -55,12 +55,12 @@ class UpdateHalaqaRequest extends DQFormRequest
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Region,
+                'reference_type' => HalaqaReferenceType::Region->code(),
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Center,
+                'reference_type' => HalaqaReferenceType::Center->code(),
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }

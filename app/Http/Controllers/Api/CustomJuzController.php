@@ -16,7 +16,6 @@ class CustomJuzController extends Controller
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'sort_order',
-            'limit' => '*',
         ]);
 
         $juz = $query->get();

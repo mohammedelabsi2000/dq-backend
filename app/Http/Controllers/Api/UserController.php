@@ -26,16 +26,7 @@ class UserController extends Controller
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
         ]);
-        /* $q = $this->applyFilters($query, [
-            'searchColumns' => ['full_name', 'identity'],
-            'orderColumn' => 'created_at',
-        ]);
-
-        $query = $q['query'];
-        $total = $q['count'];
-        $skip = $q['skip'];
-        $limit = $q['limit']; */
-        // $total = $query->count();
+        
         $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
 
         return $this->successWithPagination(

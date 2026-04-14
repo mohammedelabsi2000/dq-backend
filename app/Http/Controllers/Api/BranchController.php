@@ -36,11 +36,6 @@ class BranchController extends Controller
 
         $branches = $query->withCount('regions')->get();
 
-        // $perPage  = $request->integer('per_page', 15);
-        // $branches = $query->withCount('regions')->latest()->paginate($perPage);
-
-        // $branches = $query->get();
-
         return $this->successWithPagination(
             BranchResource::collection($branches),
             ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],

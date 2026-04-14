@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\ConstantFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Constant\StoreConstantRequest;
 use App\Http\Requests\Constant\UpdateConstantRequest;
@@ -25,10 +26,8 @@ class ConstantController extends Controller
     {
         $this->authorize('viewAny', Constant::class);
         $query = Constant::query();
-        // لإرجاع الثوابت الفعالة فقط إلا عند الطلب
-        if ($request->isNotFilled('with_inactive')) {
-            $query->where('is_active', 1);
-        }
+        
+        $query = (new ConstantFilter($query, $request))->apply();
 
         // لإرجاع قائمة بالثوابت من نوع مخصص
         if ($request->filled('with_type_name')) {
@@ -69,6 +68,7 @@ class ConstantController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
+
         // لإرجاع جميع ثوابت النظام
         $constants = $query->with(['constantType', 'parent'])->get();
 

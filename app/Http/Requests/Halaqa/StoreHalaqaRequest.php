@@ -55,12 +55,12 @@ class StoreHalaqaRequest extends DQFormRequest
     {
         if ($this->filled('center_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Center,
+                'reference_type' => HalaqaReferenceType::Center->code(),
                 'reference_id' => (int) $this->center_id,
             ]);
         } elseif ($this->filled('region_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Region,
+                'reference_type' => HalaqaReferenceType::Region->code(),
                 'reference_id' => (int) $this->region_id,
             ]);
         }

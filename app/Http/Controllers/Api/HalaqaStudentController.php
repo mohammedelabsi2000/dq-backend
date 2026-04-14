@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HalaqaReferenceType;
+use App\Filters\HalaqaStudentFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HalaqaStudent\StoreHalaqaStudentRequest;
 use App\Http\Requests\HalaqaStudent\UpdateHalaqaStudentRequest;
 use App\Http\Resources\HalaqaStudentResource;
 use App\Models\HalaqaStudent;
+use Illuminate\Http\Request;
 
 class HalaqaStudentController extends Controller
 {
@@ -15,7 +17,7 @@ class HalaqaStudentController extends Controller
     /**
      * عرض جميع التسجيلات
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', HalaqaStudent::class);
         $query = HalaqaStudent::query()->visibleTo(auth()->user());
@@ -42,7 +44,7 @@ class HalaqaStudentController extends Controller
         // Filter by center (through halaqa)
         if (request()->filled('center_id')) {
             $query->whereHas('halaqa', function ($q) {
-                $q->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) {
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Center->code()], function ($centerQuery) {
                     $centerQuery->where('id', request()->integer('center_id'));
                 });
             });
@@ -54,11 +56,11 @@ class HalaqaStudentController extends Controller
             $query->whereHas('halaqa', function ($q) use ($regionId) {
                 $q->where(function ($hq) use ($regionId) {
                     // Halaqas directly under this region
-                    $hq->whereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($regionId) {
+                    $hq->whereHasMorph('reference', [HalaqaReferenceType::Region->code()], function ($regionQuery) use ($regionId) {
                         $regionQuery->where('id', $regionId);
                     })
                         // Halaqas under centers in this region
-                        ->orWhereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($regionId) {
+                        ->orWhereHasMorph('reference', [HalaqaReferenceType::Center->code()], function ($centerQuery) use ($regionId) {
                             $centerQuery->where('region_id', $regionId);
                         });
                 });
@@ -70,37 +72,33 @@ class HalaqaStudentController extends Controller
             $query->where('halaqa_id', request()->integer('halaqa_id'));
         }
 
-        // Filter by enrollment status
-        if (request()->filled('enrollment_status_id')) {
-            $query->where('enrollment_status_id', request()->integer('enrollment_status_id'));
-        }
-
         // Filter by active students (no to_date or to_date in future)
-        if (request()->boolean('active_only')) {
+        /* if (request()->boolean('active_only')) {
             $query->where(function ($q) {
                 $q->whereNull('to_date')
                     ->orWhere('to_date', '>=', now());
             });
-        }
+        } */
 
         // Filter by student
-        if (request()->filled('student_id')) {
+        /* if (request()->filled('student_id')) {
             $query->where('student_id', request()->integer('student_id'));
-        }
+        } */
 
-        $search = request()->get('search');
+        /* $search = request()->get('search');
 
         $query = $query->dqSearch($search, [], [
             // 'halaqa' => ['name'],
             'student' => ['full_name'],
-        ]);
+        ]); */
         /* $query = $query->whereHas('student', function ($qr) use ($search) {
             foreach (['fName'] as $column) {
                 $qr->where($column, 'LIKE', "%{$search}%");
             }
         }); */
 
-        $q = $this->applyFilters($query, [
+        $filterdQuery = (new HalaqaStudentFilter($query, $request))->apply();
+        $q = $this->applyFilters($filterdQuery, [
             'searchColumns' => ['id', 'student_id', 'halaqa_id'],
             'orderColumn' => 'created_at',
             'orderBy' => 'desc'

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\CenterFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Center\StoreCenterRequest;
 use App\Http\Requests\Center\UpdateCenterRequest;
@@ -23,6 +24,8 @@ class CenterController extends Controller
         $this->authorize('viewAny', Center::class);
         $query = Center::query()->visibleTo(auth()->user());
 
+        $query = (new CenterFilter($query, $request))->apply();
+        
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -32,34 +35,7 @@ class CenterController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-
-        if ($request->filled('mosque_id')) {
-            $query->where('mosque_id', $request->integer('mosque_id'));
-        }
-
-        if ($request->filled('region_id')) {
-            $query->where('region_id', $request->integer('region_id'));
-        }
-
-        if ($request->filled('branch_id')) {
-            $query->whereHas('region', function ($q) use ($request) {
-                $q->where('branch_id', $request->integer('branch_id'));
-            });
-        }
-
-        // if ($request->boolean('with_mosque')) {
-        //     $query->with('mosque.region.branch');
-        // }
-        if ($request->boolean('with_relations')) {
-            $query->with(['region.branch', 'mosque']);
-        }
-
-        // if ($request->boolean('with_mosque')) {
-        //     $query->with('mosque');
-        // }
         $centers = $query->get();
-        // dd($centers);
-        // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
         return $this->successWithPagination(
             CenterResource::collection($centers),
@@ -101,7 +77,8 @@ class CenterController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param Request $request
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Center $center)
@@ -128,8 +105,8 @@ class CenterController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param Request $request
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateCenterRequest $request, Center $center)
@@ -157,7 +134,7 @@ class CenterController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Center $center)
