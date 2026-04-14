@@ -26,7 +26,6 @@ class StudentController extends Controller
     public function index()
     {
         $this->authorize('viewAny', Student::class);
-        // $query = Student::query();
         $query = Student::query()->visibleTo(auth()->user());
 
         // Filter by branch (through halaqas or mosques)
@@ -87,20 +86,6 @@ class StudentController extends Controller
         if (request()->filled('region_id')) {
             $regionId = request()->integer('region_id');
             $query->where(function ($q) use ($regionId) {
-                // Students in halaqas directly under this region
-                // $q->whereHas('halaqas', function ($hq) use ($regionId) {
-                //     $hq->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
-                //         $regionQuery->where('id', $regionId);
-                //     });
-                // })
-                //     // Students in halaqas under centers in this region
-                //     ->orWhereHas('halaqas', function ($hq) use ($regionId) {
-                //         $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
-                //             $centerQuery->where('region_id', $regionId);
-                //         });
-                //     })
-                //     // Students whose mosque is in this region
-                //     ->or
                 $q->WhereHas('mosque', function ($mosqueQuery) use ($regionId) {
                     $mosqueQuery->where('region_id', $regionId);
                 });
@@ -210,6 +195,7 @@ class StudentController extends Controller
         try {
             $student = $this->studentService->create($request->validated());
         } catch (\InvalidArgumentException $th) {
+            logger($th);
             return $this->error($th->getMessage(), 422);
         }
 
@@ -268,6 +254,7 @@ class StudentController extends Controller
      */
     public function import(ImportStudentRequest $request)
     {
+        $this->authorize('create', Student::class);
         try {
             Excel::import(
                 new StudentsImport($request->except('file')),

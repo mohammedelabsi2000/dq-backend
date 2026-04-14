@@ -2,91 +2,60 @@
 
 namespace App\Http\Requests\UserRole;
 
-use App\Models\Branch;
-use App\Models\Center;
-use App\Models\Halaqa;
-use App\Models\Region;
-use App\Models\UserRole;
+
 use Illuminate\Validation\Rule;
 use App\Http\Requests\DQFormRequest;
 
 class AssignRoleRequest extends DQFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        $targetUser = $this->route('user');
-        return $this->user()->can('assign', [UserRole::class, $targetUser]);
+        // return $this->user()->can('create', Role::class);
+        return $this->user()->hasPermissionTo('users.roles.update', 'sanctum');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
-            'role_id'    => 'required|array',
-            'role_id.*'  => 'required|integer|exists:roles,id',
-            'scope_type' => ['nullable', 'string', Rule::in(['branch', 'region', 'center', 'halaqa'])],
-            'scope_id'   => 'nullable|integer',
-            'branch_id'  => 'nullable|exists:branches,id',
-            'region_id'  => 'nullable|exists:regions,id',
-            'center_id'  => 'nullable|exists:centers,id',
-            'halaqa_id'  => 'nullable|exists:halaqas,id',
+            'role_ids'   => 'required|array',
+            'role_ids.*' => 'required|integer|exists:roles,id',
+            'scopes'        => 'sometimes|array',
+            'scopes.*.type' => [
+                'required_with:scopes',
+                'string',
+                Rule::in(['branch', 'region', 'center', 'halaqa']),
+            ],
+            'scopes.*.id'   => 'required_with:scopes|integer',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'role_id.required' => 'الدور مطلوب',
-            'role_id.array'    => 'الدور يجب أن يكون مصفوفة',
-            'role_id.*.required' => 'معرف الدور مطلوب',
-            'role_id.*.integer'  => 'معرف الدور يجب أن يكون رقماً',
-            'role_id.*.exists'   => 'الدور غير موجود',
-            'scope_type.in'    => 'نوع النطاق غير صالح',
-            'scope_id.integer' => 'معرف النطاق يجب أن يكون رقماً',
-            'branch_id.exists' => 'الفرع غير موجود',
-            'region_id.exists' => 'المنطقة غير موجودة',
-            'center_id.exists' => 'المركز غير موجود',
-            'halaqa_id.exists' => 'الحلقة غير موجودة',
+            'role_ids.required'   => 'الأدوار مطلوبة',
+            'role_ids.array'      => 'الأدوار يجب أن تكون مصفوفة',
+            'role_ids.*.required' => 'معرف الدور مطلوب',
+            'role_ids.*.integer'  => 'معرف الدور يجب أن يكون رقماً',
+            'role_ids.*.exists'   => 'الدور غير موجود',
+            'scopes.array'        => 'النطاقات يجب أن تكون مصفوفة',
+            'scopes.*.type.required_with' => 'نوع النطاق مطلوب عند إرسال النطاقات',
+            'scopes.*.type.string'  => 'نوع النطاق يجب أن يكون نصاً',
+            'scopes.*.type.in'    => 'نوع النطاق غير صالح',
+            'scopes.*.id.required_with' => 'معرف النطاق مطلوب عند إرسال النطاقات',
+            'scopes.*.id.integer' => 'معرف النطاق يجب أن يكون رقماً',
         ];
     }
 
-    protected function prepareForValidation(): void
+    protected function prepareForValidation()
     {
-        if ($this->input('halaqa_id')) {
-            $this->merge([
-                'scope_type' => 'halaqa',
-                'scope_id'   => intval($this->input('halaqa_id')),
-            ]);
-        } elseif ($this->input('center_id')) {
-            $this->merge([
-                'scope_type' => 'center',
-                'scope_id'   => intval($this->input('center_id')),
-            ]);
-        } elseif ($this->input('region_id')) {
-            $this->merge([
-                'scope_type' => 'region',
-                'scope_id'   => intval($this->input('region_id')),
-            ]);
-        } elseif ($this->input('branch_id')) {
-            $this->merge([
-                'scope_type' => 'branch',
-                'scope_id'   => intval($this->input('branch_id')),
-            ]);
-        } else {
-            // مدير عام بدون scope
-            $this->merge([
-                'scope_type' => null,
-                'scope_id'   => null,
-            ]);
+        $scopes = [];
+        if ($this->has('scopes')) {
+            foreach ($this->scopes as $scope) {
+                $scope = json_decode($scope, true);
+                array_push($scopes, $scope);
+            }
         }
+
+        $this->merge(['scopes' => $scopes]);
     }
 }

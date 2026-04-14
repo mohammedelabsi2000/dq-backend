@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Concerns\HasVisibilityScope;
 
-class Center extends Model implements BelongsToHierarchy
+class Center extends Model
 {
-    use HasFactory, HasHierarchyScope;
+    use HasFactory, HasVisibilityScope;
 
     protected $fillable = ['name', 'notes', 'region_id', 'mosque_id'];
 
@@ -31,21 +30,32 @@ class Center extends Model implements BelongsToHierarchy
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->applyVisibleTo($query, $user, [
-            'branch' => fn(Builder $q, $id) => $q->orWhereHas('region', fn($r) => $r->where('branch_id', $id)),
-            'region' => 'region_id',
-            'center' => 'id',
-        ]);
-    }
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
 
-    public function getHierarchyIds(): array
-    {
-        $this->loadMissing('region');
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
 
-        return [
-            ['id' => $this->region->branch_id, 'type' => 'branch'],
-            ['id' => $this->region_id,          'type' => 'region'],
-            ['id' => $this->id,                 'type' => 'center'],
-        ];
+        // مدير فرع ← يشوف كل مناطق الفرع ثم مراكزها
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
+            $regionIds = $regionIds->merge(
+                Region::whereIn('branch_id', $branchIds)->pluck('id')
+            )->unique();
+        }
+
+        // مدير منطقة ← يشوف مراكز منطقته بس
+        if ($regionIds->isNotEmpty()) {
+            $centerIds = $centerIds->merge(
+                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
+            )->unique();
+        }
+
+        if ($centerIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('centers.id', $centerIds);
     }
 }

@@ -2,9 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Center;
 use App\Models\Halaqa;
-use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -12,85 +10,28 @@ class HalaqaPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
-        return $user->hasAbility('halaqas.view');
+        return $user->hasPermissionTo('halaqas.show');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Halaqa  $halaqa
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view($user, Halaqa $halaqa)
+    public function view(User $user, Halaqa $halaqa): bool
     {
-        return $user->hasAbility('halaqas.view', $halaqa);
+        return $user->hasPermissionTo('halaqas.show');
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create($user, Region|Center $reference)
+    public function create(User $user): bool
     {
-        return $user->hasAbility('halaqas.create', $reference);
+        return $user->hasPermissionTo('halaqas.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Halaqa  $halaqa
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update($user, Halaqa $halaqa)
+    public function update(User $user, Halaqa $halaqa): bool
     {
-        return $user->hasAbility('halaqas.update', $halaqa);
+        return $user->hasPermissionTo('halaqas.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Halaqa  $halaqa
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete($user, Halaqa $halaqa)
+    public function delete(User $user, Halaqa $halaqa): bool
     {
-        return $user->hasAbility('halaqas.delete', $halaqa);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Halaqa  $halaqa
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore($user, Halaqa $halaqa)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Halaqa  $halaqa
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete($user, Halaqa $halaqa)
-    {
-        //
+        return $user->hasPermissionTo('halaqas.delete');
     }
 }

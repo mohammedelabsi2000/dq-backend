@@ -22,10 +22,6 @@ class HalaqaController extends Controller
     {
 
         $this->authorize('viewAny', Halaqa::class);
-        /* Relation::morphMap([
-            'Center' => \App\Models\Center::class,
-            'Region' => \App\Models\Region::class,
-        ]); */
 
         $query = Halaqa::query()->visibleTo(auth()->user());
 
@@ -71,38 +67,10 @@ class HalaqaController extends Controller
                     });
             });
         }
-
-        // Filter by supervisor
-        // if ($request->filled('supervisor_id')) {
-        //     $query->whereHas('supervisor', function ($q) use ($request) {
-        //         $q->where('users.id', $request->integer('supervisor_id'));
-        //     });
-        // }
-
         // Filter by reference type
         if ($request->filled('reference_type')) {
             $query->where('reference_type', $request->input('reference_type'));
         }
-
-        /* if ($request->filled('reference_type') && $request->filled('reference_id')) {
-
-             // 1️⃣ نوع المرجع من request (مثلاً "user" أو "school")
-             $typeKey = $request->input('reference_type');
-
-             if (!class_exists($typeKey)) {
-                 return $this->validationError([$typeKey . ' مرجع غير صالح']);
-             }
-
-             $referenceId = request()->integer('reference_id');
-
-             $query->whereHasMorph(
-                 'reference',
-                 [$typeKey],
-                 function ($query) use ($referenceId) {
-                     $query->where('id', $referenceId);
-                 }
-             );
-         }*/
 
         if ($request->filled('type_id')) {
             $query->where('type_id', $request->integer('type_id'));
@@ -119,7 +87,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type', 'supervisor'])->get();
+        $halaqas = $query->with(['reference', 'type', 'supervisors.user'])->get();
 
         return $this->successWithPagination(
             HalaqaResource::collection($halaqas),
@@ -160,7 +128,7 @@ class HalaqaController extends Controller
     public function show(Request $request, Halaqa $halaqa)
     {
         $this->authorize('view', $halaqa);
-        $halaqa->load(['type', 'reference', 'supervisor']);
+        $halaqa->load(['type', 'reference', 'supervisors.user']);
 
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');

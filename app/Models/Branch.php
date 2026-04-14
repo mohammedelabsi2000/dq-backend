@@ -2,17 +2,14 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use App\Concerns\HasVisibilityScope;
 
-
-class Branch extends Model implements BelongsToHierarchy
+class Branch extends Model
 {
-    use HasFactory, HasHierarchyScope;
+    use HasFactory, HasVisibilityScope;
 
     protected $fillable = [
         'name',
@@ -26,36 +23,61 @@ class Branch extends Model implements BelongsToHierarchy
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->applyVisibleTo($query, $user, [
-            'branch' => 'id',
-        ]);
-    }
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
 
-    // Branch.php
-    // public function scopeVisibleTo(Builder $query, User $user): Builder
-    // {
-    //     $user->loadMissing('roles');
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-    //     $hasGlobalRole = $user->roles->contains(fn($role) => $role->pivot->scope_id === null);
+        // توسيع الهرمية للأعلى
+        if ($regionIds->isNotEmpty()) {
+            $branchIds = $branchIds->merge(
+                Region::whereIn('id', $regionIds)->pluck('branch_id')
+            )->unique();
+        }
 
-    //     if ($hasGlobalRole) {
-    //         return $query;
-    //     }
+        // if ($centerIds->isNotEmpty()) {
+        //     $branchIds = $branchIds->merge(
+        //         Center::whereIn('id', $centerIds)
+        //             ->join('regions', 'centers.region_id', '=', 'regions.id')
+        //             ->pluck('regions.branch_id')
+        //     )->unique();
+        // }
 
-    //     $morphAlias = array_search(static::class, Relation::morphMap()) ?: static::class;
+        if ($centerIds->isNotEmpty()) {
+            $branchIds = $branchIds->merge(
+                Region::whereIn(
+                    'id',
+                    Center::whereIn('id', $centerIds)->pluck('region_id')
+                )->pluck('branch_id')
+            )->unique();
+        }
 
-    //     $allowedIds = $user->roles
-    //         ->filter(fn($role) => $role->pivot->scope_type === $morphAlias)
-    //         ->pluck('pivot.scope_id');
-    //     // dd($allowedIds);
+        if ($halaqaIds->isNotEmpty()) {
+            $branchIds = $branchIds->merge(
+                Region::whereIn(
+                    'id',
+                    Halaqa::whereIn('id', $halaqaIds)->pluck('reference_id')
+                )->pluck('branch_id')
+            )->unique();
+        }
 
-    //     return $query->whereIn('id', $allowedIds);
-    // }
+        // if ($halaqaIds->isNotEmpty()) {
+        //     $branchIds = $branchIds->merge(
+        //         Halaqa::whereIn('id', $halaqaIds)
+        //             ->where('reference_type', 'region')
+        //             ->join('regions', 'halaqas.reference_id', '=', 'regions.id')
+        //             ->pluck('regions.branch_id')
+        //     )->unique();
+        // }
 
-    public function getHierarchyIds(): array
-    {
-        return [
-            ['id' => $this->id, 'type' => 'branch'],
-        ];
+        if ($branchIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereIn('id', $branchIds);
     }
 }

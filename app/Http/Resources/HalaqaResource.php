@@ -49,9 +49,10 @@ class HalaqaResource extends JsonResource
             | Supervisor and Students Count
             |--------------------------------------------------------------------------
             */
-            'supervisor' => $this->whenLoaded('supervisor', function () {
-                return $this->supervisor->isNotEmpty() ? new UserResource($this->supervisor->first()) : null;
-            }),
+            'supervisor' => $this->whenLoaded(
+                'supervisors',
+                fn() => $this->supervisors->pluck('user')
+            ),
             'students_count' => $this->when(
                 $this->relationLoaded('studentEnrollments') || !$this->relationLoaded('students'),
                 fn() => $this->studentsCount()

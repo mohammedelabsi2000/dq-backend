@@ -45,13 +45,7 @@ class MosqueController extends Controller
             });
         }
 
-        // if ($request->boolean('with_region')) {
-        //     $query->with('region.branch');
-        // }
-
         $mosques = $query->withCount('centers')->get();
-        // $perPage = $request->integer('per_page', 15);
-        // $mosques = $query->withCount('centers')->latest()->paginate($perPage);
 
         return $this->successWithPagination(
             MosqueResource::collection($mosques),

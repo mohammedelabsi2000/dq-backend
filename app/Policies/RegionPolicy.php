@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Branch;
 use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -11,97 +10,28 @@ class RegionPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
-        // dd([
-        //     'user_id' => $user->id,
-        //     'roles' => $user->roles->map(fn($r) => [
-        //         'role_id'    => $r->id,
-        //         'scope_id'   => $r->pivot->scope_id,
-        //         'scope_type' => $r->pivot->scope_type,
-        //         'abilities'  => $r->roleAbilities->map(fn($a) => [
-        //             'ability' => $a->ability,
-        //             'type'    => $a->type,
-        //         ]),
-        //     ]),
-        // ]);
-        return $user->hasAbility('regions.view');
+        return $user->hasPermissionTo('regions.show');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Region  $region
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view($user, Region $region)
+    public function view(User $user, Region $region): bool
     {
-        return $user->hasAbility('regions.view', $region);
+        return $user->hasPermissionTo('regions.show');
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create($user, Branch $branch)
+    public function create(User $user): bool
     {
-        return $user->hasAbility('regions.create', $branch);
+        return $user->hasPermissionTo('regions.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Region  $region
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update($user, Region $region)
+    public function update(User $user, Region $region): bool
     {
-        return $user->hasAbility('regions.update', $region);
+        return $user->hasPermissionTo('regions.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Region  $region
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete($user, Region $region)
+    public function delete(User $user, Region $region): bool
     {
-        return $user->hasAbility('regions.delete', $region);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Region  $region
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore($user, Region $region)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Region  $region
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete($user, Region $region)
-    {
-        //
+        return $user->hasPermissionTo('regions.delete');
     }
 }

@@ -15,11 +15,13 @@ class UserRoleResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'scope_id'   => $this->pivot->scope_id,
-            'scope_type' => $this->pivot->scope_type,
-            'abilities'  => RoleAbilityResource::collection($this->whenLoaded('roleAbilities')),
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'permissions' => $this->whenLoaded(
+                'permissions',
+                fn() =>
+                $this->permissions->pluck('name')
+            ),
         ];
     }
 }

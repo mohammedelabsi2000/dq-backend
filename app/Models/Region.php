@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Contracts\BelongsToHierarchy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Concerns\HasVisibilityScope;
 
-class Region extends Model implements BelongsToHierarchy
+class Region extends Model
 {
-    use HasFactory, HasHierarchyScope;
+    use HasFactory, HasVisibilityScope;
 
     protected $fillable = ['name', 'branch_id', 'notes'];
 
@@ -29,26 +28,41 @@ class Region extends Model implements BelongsToHierarchy
     {
         return $this->hasMany(Center::class);
     }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->applyVisibleTo($query, $user, [
-            'branch' => 'branch_id',
-            'region' => 'id',
-            'center' => function (Builder $q, int $centerId) {
-                // Allow center managers to see their region
-                $q->orWhereHas('centers', function (Builder $subQ) use ($centerId) {
-                    $subQ->where('id', $centerId);
-                });
-            },
-        ]);
-    }
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
 
-    public function getHierarchyIds(): array
-    {
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
 
-        return [
-            ['id' => $this->branch_id, 'type' => 'branch'],
-            ['id' => $this->id,        'type' => 'region'],
-        ];
+        // توسيع من center للأعلى فقط
+        if ($centerIds->isNotEmpty()) {
+            $regionIds = $regionIds->merge(
+                Center::whereIn('id', $centerIds)->pluck('region_id')
+            )->unique();
+        }
+
+        // توسيع من branch للأسفل فقط إذا ما عنده region scope
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty()) {
+            $regionIds = $regionIds->merge(
+                Region::whereIn('branch_id', $branchIds)->pluck('id')
+            )->unique();
+        }
+
+        return $query->where(function (Builder $q) use ($branchIds, $regionIds) {
+            if ($regionIds->isNotEmpty()) {
+                $q->orWhereIn('id', $regionIds);
+            }
+            if ($branchIds->isNotEmpty() && $regionIds->isEmpty()) {
+                $q->orWhereIn('branch_id', $branchIds);
+            }
+            if ($branchIds->isEmpty() && $regionIds->isEmpty()) {
+                $q->whereRaw('1 = 0');
+            }
+        });
     }
 }

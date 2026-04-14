@@ -29,32 +29,16 @@ class AccessTokensController extends Controller
             ? User::where('email', $login)->first()
             : User::where('identity', $login)->first();
 
-        // $user = User::where('email', $request->email)->first();
         if ($user && Hash::check($request->password, $user->password)) {
             $device_name = $request->post('device_name', $request->userAgent());
             $token = $user->createToken($device_name);
 
-            $user->loadMissing('roles.roleAbilities');
-
-            // $abilities = $user->roles
-            //     ->flatMap(fn($role) => $role->roleAbilities)
-            //     ->unique('ability')
-            //     ->values()
-            //     ->map(fn($ability) => [
-            //         'ability' => $ability->ability,
-            //         'type' => $ability->type,
-            //     ]);
-            $abilities = $user->roles
-                ->flatMap(fn($role) => $role->roleAbilities)
-                ->where('type', 'allow') // ✅ فقط الـ allow
-                ->unique('ability')
-                ->pluck('ability') // ✅ فقط الـ string
-                ->values();
-            // $user->makeHidden('roles');
             return $this->success([
-                'token' => $token->plainTextToken,
-                'user' => $user,
-                'abilities' => $abilities,
+                'token'       => $token->plainTextToken,
+                'user'        => $user,
+                'roles'       => $user->getRoleNames(),
+                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+                'scopes'      => $user->scopes,
             ], "تم تسجيل الدخول بنجاح", 201);
         }
 
@@ -65,8 +49,6 @@ class AccessTokensController extends Controller
     public function destroy(Request $request, $token = null)
     {
         $user = Auth::guard('sanctum')->user();
-        // $user = $request->user();
-        // $user = auth()->user();
         if (null === $token) {
             $request->user()->currentAccessToken()->delete();
             return $this->success(null, "تم تسجيل الخروج بنجاح", 200);

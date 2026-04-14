@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\Center;
-use App\Models\Region;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -11,86 +10,28 @@ class CenterPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
-        return $user->hasAbility('centers.view');
+        return $user->hasPermissionTo('centers.show');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Center  $center
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view($user, Center $center)
+    public function view(User $user, Center $center): bool
     {
-        return $user->hasAbility('centers.view', $center);
+        return $user->hasPermissionTo('centers.show');
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create($user, Region $region)
+    public function create(User $user): bool
     {
-        // dd($user->hasAbility('centers.create', $region));
-        return $user->hasAbility('centers.create', $region);
+        return $user->hasPermissionTo('centers.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Center  $center
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update($user, Center $center)
+    public function update(User $user, Center $center): bool
     {
-        return $user->hasAbility('centers.update', $center);
+        return $user->hasPermissionTo('centers.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Center  $center
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete($user, Center $center)
+    public function delete(User $user, Center $center): bool
     {
-        return $user->hasAbility('centers.delete', $center);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Center  $center
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore($user, Center $center)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Center  $center
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete($user, Center $center)
-    {
-        //
+        return $user->hasPermissionTo('centers.delete');
     }
 }

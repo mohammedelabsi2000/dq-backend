@@ -19,8 +19,6 @@ class StoreUserRequest extends DQFormRequest
      */
     public function authorize()
     {
-        // // return auth()->user()->hasAbility('users.create');
-        // logger($this->user()->can('create', User::class));
         return $this->user()->can('create', User::class);
     }
 

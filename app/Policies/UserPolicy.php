@@ -9,89 +9,28 @@ class UserPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
-        return $user->hasAbility('users.view');
+        return $user->hasPermissionTo('users.show');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view($user, User $model)
+    public function view(User $user, User $target): bool
     {
-        return $user->hasAbility('users.view', $model);
+        return $user->hasPermissionTo('users.show');
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create($user)
+    public function create(User $user): bool
     {
-        return $user->hasAbility('users.create');
+        return $user->hasPermissionTo('users.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update($user, User $model)
+    public function update(User $user, User $target): bool
     {
-        return $user->hasAbility('users.update', $model);
+        return $user->hasPermissionTo('users.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete($user, User $model)
+    public function delete(User $user, User $target): bool
     {
-        // لا يمكن حذف نفسك
-        if ($user->id === $model->id) {
-            return false;
-        }
-        return $user->hasAbility('users.delete', $model);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore($user, User $model)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\User  $model
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete($user, User $model)
-    {
-        //
+        return $user->hasPermissionTo('users.delete');
     }
 }

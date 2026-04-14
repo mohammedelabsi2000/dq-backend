@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('role_abilities', function (Blueprint $table) {
+           $table->dropForeign('role_abilities_role_id_foreign');
+        });
+        Schema::dropIfExists('role_user');
+        Schema::dropIfExists('role_abilities');
+        Schema::dropIfExists('roles');
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        //
+    }
+};
