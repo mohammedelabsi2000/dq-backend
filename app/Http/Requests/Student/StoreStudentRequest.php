@@ -15,7 +15,7 @@ class StoreStudentRequest extends BaseStudentRequest
 
     public function rules()
     {
-        return [
+        return array_merge($this->baseRules(), [
             'identity' => ['nullable', 'digits:9'], //, Rule::unique('students', 'identity')],
             'fName' => 'required|string|max:255',
             'sName' => 'nullable|string|max:255',
@@ -53,7 +53,7 @@ class StoreStudentRequest extends BaseStudentRequest
 
     public function messages()
     {
-        return [
+        return array_merge($this->baseMessages(), [
             'identity.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'identity.unique' => 'رقم الهوية مستخدم مسبقاً لطالب آخر.',
 

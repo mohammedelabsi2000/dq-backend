@@ -11,8 +11,8 @@ class BaseStudentRequest extends DQFormRequest
     public function baseRules()
     {
         return [
-            'memorized_juz_id' => 'nullable|integer|exists:custom_juz,id',
-            'completed_juz_id' => 'nullable|integer|exists:custom_juz,id',
+            'memorized_juz' => 'nullable|string',
+            'completed_juz' => 'nullable|string',
             'surah_id' => 'nullable|integer|exists:quran_surahs,id',
             'end_aya' => [
                 'required_with:surah_id',
@@ -35,8 +35,8 @@ class BaseStudentRequest extends DQFormRequest
     public function baseMessages()
     {
         return [
-            'memorized_juz_id.exists' => 'جزء الحفظ غير صحيح',
-            'completed_juz_id.exists' => 'جزء السرد غير صحيح',
+            'memorized_juz.string' => 'الاختبارات يجب أن تكون نصًا',
+            'completed_juz.string' => 'الأجزاء المسرودة المكتملة يجب أن تكون نصًا',
             'surah_id.exists' => 'السورة غير صحيحة',
             'end_aya.integer' => 'رقم الآية يجب أن يكون رقمًا صحيحًا',
             'end_aya.required_with' => 'يجب اختيار رقم الآية عند اختيار سورة',

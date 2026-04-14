@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helpers\ConstantHelper;
+use App\Models\HalaqaStudent;
 use App\Models\PreviousAchievement;
 use App\Models\Student;
 use App\Models\User;
@@ -21,7 +23,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student = Student::create($data);
-            $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Assign student to halaqa if provided
             if ($halaqaId) {
@@ -45,7 +46,6 @@ class StudentService
             unset($data['halaqa_id']);
 
             $student->update($data);
-            $this->updateOrCreatePreviousAchievement($student, $data);
 
             // Handle halaqa assignment if provided
             if ($halaqaId !== null) {
@@ -93,24 +93,6 @@ class StudentService
         }
 
         return $guardian;
-    }
-
-    private function updateOrCreatePreviousAchievement(Student $student, array $data): void
-    {
-        if (
-            isset($data['memorized_juz_id']) ||
-            isset($data['completed_juz_id']) ||
-            isset($data['surah_id'])
-        ) {
-            PreviousAchievement::updateOrCreate([
-                'student_id' => $student->id,
-            ], [
-                'memorized_juz_id' => $data['memorized_juz_id'] ?? null,
-                'completed_juz_id' => $data['completed_juz_id'] ?? null,
-                'surah_id' => $data['surah_id'] ?? null,
-                'end_aya' => $data['end_aya'] ?? null,
-            ]);
-        }
     }
   
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
