@@ -224,7 +224,22 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $this->authorize('view', $student);
+<<<<<<< 48-refactoring03-dry-eager-loading
         $student = $student->load(Student::standardRelations());
+=======
+        $student = $student->load([
+            'mosque',
+            'maritalStatus',
+            'moneyStatus',
+            'guardian',
+            'guardianType',
+            'prefixName',
+            'guardian',
+            'halaqas' => function ($query) {
+                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
+            },
+        ]);
+>>>>>>> main
 
         return $this->success(
             new StudentResource($student),

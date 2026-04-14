@@ -34,7 +34,7 @@ class IdQueryServices
         $data = $response->json();
 
         $personData = null;
-
+        
         if (isset($data['DATA'][0])) {
             $personData = $data['DATA'][0];
         }
