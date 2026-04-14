@@ -167,17 +167,7 @@ class StudentController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-        $students = $query->with([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ])->get();
+        $students = $query->withStandardRelations()->get();
 
         return $this->apiResponse([
             'total' => $total,
@@ -222,17 +212,7 @@ class StudentController extends Controller
             return $this->error($th->getMessage(), 422);
         }
 
-        $student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ]);
+        $student->load(Student::standardRelations());
 
         return $this->success(
             new StudentResource($student),
@@ -244,6 +224,9 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $this->authorize('view', $student);
+<<<<<<< 48-refactoring03-dry-eager-loading
+        $student = $student->load(Student::standardRelations());
+=======
         $student = $student->load([
             'mosque',
             'maritalStatus',
@@ -256,6 +239,7 @@ class StudentController extends Controller
                 $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
             },
         ]);
+>>>>>>> main
 
         return $this->success(
             new StudentResource($student),
@@ -274,18 +258,7 @@ class StudentController extends Controller
         }
 
         return $this->success(
-            new StudentResource($student->load([
-                'mosque',
-                'maritalStatus',
-                'moneyStatus',
-                'guardian',
-                'guardianType',
-                'prefixName',
-                'guardian',
-                'halaqas' => function ($query) {
-                    $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-                },
-            ])),
+            new StudentResource($student->load(Student::standardRelations())),
             'تم تحديث بيانات الطالب بنجاح'
         );
     }
