@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasHierarchyScope;
+use App\Concerns\HasVisibilityScope;
 use App\Contracts\BelongsToHierarchy;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Builder;
