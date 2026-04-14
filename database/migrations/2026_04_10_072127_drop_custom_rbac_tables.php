@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::dropIfExists('role_abilities');
         Schema::dropIfExists('role_user');
+        Schema::dropIfExists('role_abilities');
     }
 
     /**
