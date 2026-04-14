@@ -76,7 +76,7 @@ class StudentService
                 'sName' => $personData['CI_FATHER_ARB'] ?? null,
                 'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
                 'family' => $personData['CI_FAMILY_ARB'] ?? null,
-                'dob' => $personData['CI_BIRTH_DT'] ?? null,
+                'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
                 'gender' => $personData['SEX'] ?? null,
             ];
 
@@ -94,7 +94,7 @@ class StudentService
 
         return $guardian;
     }
-  
+
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
     {
         // Get the default enrollment status ID for "منتظم" (regular)

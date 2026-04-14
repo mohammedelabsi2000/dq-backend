@@ -6,10 +6,8 @@ use Illuminate\Support\Facades\Http;
 
 class IdQueryServices
 {
-    public function __construct()
-    {
+    public function __construct() {}
 
-    }
     public function get($id)
     {
         if (!ctype_digit($id) || strlen($id) != 9) {
@@ -34,7 +32,7 @@ class IdQueryServices
         $data = $response->json();
 
         $personData = null;
-        
+
         if (isset($data['DATA'][0])) {
             $personData = $data['DATA'][0];
         }
