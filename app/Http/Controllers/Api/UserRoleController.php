@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRole\AssignRoleRequest;
 use App\Http\Requests\UserRole\AssignScopeRequest;
-use App\Models\Role;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 
 class UserRoleController extends Controller
 {
@@ -17,7 +17,7 @@ class UserRoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function index(User $user): JsonResponse
+    public function index(User $user)
     {
         // $this->authorize('viewAny', Role::class);
         // $this->authorize('viewAny', $user);
@@ -39,7 +39,7 @@ class UserRoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function assignRoles(AssignRoleRequest $request, User $user): JsonResponse
+    public function assignRoles(AssignRoleRequest $request, User $user)
     {
         // $this->authorize('create', $user);
         // $this->hasPermission('users.roles.update');
@@ -70,13 +70,8 @@ class UserRoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function assignScopes(AssignScopeRequest $request, User $user): JsonResponse
+    public function assignScopes(AssignScopeRequest $request, User $user)
     {
-        // $this->authorize('create', $user);
-        // $this->hasPermission('users.roles.update');
-        // if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
-        //     return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
-        // }
 
         $scopes = $request->scopes; // [['type' => 'branch', 'id' => 5], ...]
 
@@ -89,10 +84,8 @@ class UserRoleController extends Controller
         );
     }
 
-    public function removeScopes(User $user): JsonResponse
+    public function removeScopes(User $user)
     {
-        // $this->authorize('delete', $user);
-        // $this->hasPermission('users.roles.update');
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
@@ -108,10 +101,8 @@ class UserRoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function removeRoles(User $user): JsonResponse
+    public function removeRoles(User $user)
     {
-        // $this->authorize('delete', $user);
-        // $this->hasPermission('users.roles.update');
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }

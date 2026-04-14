@@ -6,15 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Center\StoreCenterRequest;
 use App\Http\Requests\Center\UpdateCenterRequest;
 use App\Http\Resources\CenterResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
-<<<<<<< HEAD
     use ApiResponser; // استخدم الـ Trait
-=======
->>>>>>> 05ac341f871de2fd695bb2a396e1d2fb8616f83b
 
     /**
      * Display a listing of the resource.
