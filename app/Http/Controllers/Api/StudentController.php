@@ -227,6 +227,7 @@ class StudentController extends Controller
         $this->authorize('view', $student);
         $student = $student->load(Student::standardRelations());
 
+
         return $this->success(
             new StudentResource($student),
             'success',

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\Gender;
+use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use App\Models\User;
 use Illuminate\Validation\Rule;
