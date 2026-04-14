@@ -44,4 +44,17 @@ class AssignRoleRequest extends FormRequest
             'scopes.*.id.integer' => 'معرف النطاق يجب أن يكون رقماً',
         ];
     }
+
+    protected function prepareForValidation()
+    {
+        $scopes = [];
+        if ($this->has('scopes')) {
+            foreach ($this->scopes as $scope) {
+                $scope = json_decode($scope, true);
+                array_push($scopes, $scope);
+            }
+        }
+
+        $this->merge(['scopes' => $scopes]);
+    }
 }

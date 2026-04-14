@@ -49,6 +49,14 @@ class UserResource extends JsonResource
                         'type'    => $ability->type,
                     ])
             ),
+            'user_scopes' => $this->scopes,
+            //  $this->when(
+            //     $this->relationLoaded('scopes'),
+            //     fn() => $this->scopes->map(fn($scope) => [
+            //         'scope_type' => $scope->scope_type,
+            //         'scope_id'   => $scope->scope_id,
+            //     ])
+            // ),
 
             'location' => $this->location,
 

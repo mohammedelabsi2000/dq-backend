@@ -39,22 +39,40 @@ class Branch extends Model
             )->unique();
         }
 
+        // if ($centerIds->isNotEmpty()) {
+        //     $branchIds = $branchIds->merge(
+        //         Center::whereIn('id', $centerIds)
+        //             ->join('regions', 'centers.region_id', '=', 'regions.id')
+        //             ->pluck('regions.branch_id')
+        //     )->unique();
+        // }
+
         if ($centerIds->isNotEmpty()) {
             $branchIds = $branchIds->merge(
-                Center::whereIn('id', $centerIds)
-                    ->join('regions', 'centers.region_id', '=', 'regions.id')
-                    ->pluck('regions.branch_id')
+                Region::whereIn(
+                    'id',
+                    Center::whereIn('id', $centerIds)->pluck('region_id')
+                )->pluck('branch_id')
             )->unique();
         }
 
         if ($halaqaIds->isNotEmpty()) {
             $branchIds = $branchIds->merge(
-                Halaqa::whereIn('id', $halaqaIds)
-                    ->where('reference_type', 'region')
-                    ->join('regions', 'halaqas.reference_id', '=', 'regions.id')
-                    ->pluck('regions.branch_id')
+                Region::whereIn(
+                    'id',
+                    Halaqa::whereIn('id', $halaqaIds)->pluck('reference_id')
+                )->pluck('branch_id')
             )->unique();
         }
+
+        // if ($halaqaIds->isNotEmpty()) {
+        //     $branchIds = $branchIds->merge(
+        //         Halaqa::whereIn('id', $halaqaIds)
+        //             ->where('reference_type', 'region')
+        //             ->join('regions', 'halaqas.reference_id', '=', 'regions.id')
+        //             ->pluck('regions.branch_id')
+        //     )->unique();
+        // }
 
         if ($branchIds->isEmpty()) {
             return $query->whereRaw('1 = 0');

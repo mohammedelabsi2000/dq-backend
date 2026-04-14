@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Helpers\ConstantHelper;
+use App\Models\HalaqaStudent;
 use App\Models\PreviousAchievement;
 use App\Models\Student;
 use App\Models\User;
@@ -76,7 +78,7 @@ class StudentService
                 'sName' => $personData['CI_FATHER_ARB'] ?? null,
                 'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
                 'family' => $personData['CI_FAMILY_ARB'] ?? null,
-                'dob' => $personData['CI_BIRTH_DT'] ?? null,
+                // 'dob' => $personData['CI_BIRTH_DT'] ?? null,
                 'gender' => $personData['SEX'] ?? null,
             ];
 
@@ -112,7 +114,7 @@ class StudentService
             ]);
         }
     }
-  
+
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
     {
         // Get the default enrollment status ID for "منتظم" (regular)

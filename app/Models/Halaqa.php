@@ -65,12 +65,13 @@ class Halaqa extends Model
     }
 
     /**
-     * Get the supervisor (محفظ) of this halaqa based on role_user permissions.
+     * Get the supervisor (mobile) of this halaqa based on scoped role assignments.
      */
-    public function supervisor()
+    public function supervisors()
     {
-        return $this->belongsToMany(User::class, 'role_user', 'scope_id', 'authorizable_id')
-            ->where('scope_type', 'halaqas');
+        return $this->hasMany(UserScope::class, 'scope_id')
+            ->where('scope_type', 'halaqa')
+            ->with('user');
     }
 
     /**
@@ -95,24 +96,29 @@ class Halaqa extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // توسيع الهرمية
-        if ($branchIds->isNotEmpty()) {
+        // مدير فرع فقط ← يوسع لكل مناطق الفرع
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
             $regionIds = $regionIds->merge(
                 Region::whereIn('branch_id', $branchIds)->pluck('id')
             )->unique();
+
+            $centerIds = $centerIds->merge(
+                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
+            )->unique();
         }
 
-        if ($regionIds->isNotEmpty()) {
+        // مدير منطقة فقط ← يوسع لمراكز منطقته
+        if ($regionIds->isNotEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
             $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('id')
+                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
             )->unique();
         }
 
         return $query->where(function (Builder $q) use ($regionIds, $centerIds, $halaqaIds) {
             if ($halaqaIds->isNotEmpty()) {
-                $q->orWhereIn('id', $halaqaIds);
+                $q->orWhereIn('halaqas.id', $halaqaIds);
             }
-            if ($regionIds->isNotEmpty()) {
+            if ($regionIds->isNotEmpty() && $centerIds->isEmpty()) {
                 $q->orWhere(function ($q) use ($regionIds) {
                     $q->where('reference_type', 'region')
                         ->whereIn('reference_id', $regionIds);

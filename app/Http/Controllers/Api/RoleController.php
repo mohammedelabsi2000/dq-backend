@@ -10,7 +10,6 @@ use App\Http\Resources\PermissionResource;
 use App\Http\Resources\RoleResource;
 use App\Http\Traits\ApiResponser;
 use App\Traits\QueryFilterTrait;
-use Maatwebsite\Excel\Concerns\ToArray;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -25,8 +24,6 @@ class RoleController extends Controller
      */
     public function index()
     {
-        // $this->authorize('viewAny', Role::class);
-        // $this->hasPermission('roles.show');
         if (!auth()->user()->hasPermissionTo('roles.show', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }

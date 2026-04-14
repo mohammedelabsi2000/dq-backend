@@ -38,16 +38,17 @@ class Center extends Model
         $regionIds = $user->getScopeIds('region');
         $centerIds = $user->getScopeIds('center');
 
-        // توسيع من branch للأسفل
-        if ($branchIds->isNotEmpty()) {
+        // مدير فرع ← يشوف كل مناطق الفرع ثم مراكزها
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
             $regionIds = $regionIds->merge(
                 Region::whereIn('branch_id', $branchIds)->pluck('id')
             )->unique();
         }
 
+        // مدير منطقة ← يشوف مراكز منطقته بس
         if ($regionIds->isNotEmpty()) {
             $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('id')
+                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
             )->unique();
         }
 
@@ -55,6 +56,6 @@ class Center extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereIn('id', $centerIds);
+        return $query->whereIn('centers.id', $centerIds);
     }
 }

@@ -68,16 +68,17 @@ class HalaqaStudent extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // توسيع الهرمية
-        if ($branchIds->isNotEmpty()) {
+        // مدير فرع فقط ← يوسع لكل مناطق الفرع
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
             $regionIds = $regionIds->merge(
                 Region::whereIn('branch_id', $branchIds)->pluck('id')
             )->unique();
         }
 
-        if ($regionIds->isNotEmpty()) {
+        // مدير منطقة فقط ← يوسع لمراكز منطقته
+        if ($regionIds->isNotEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
             $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('id')
+                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
             )->unique();
         }
 
