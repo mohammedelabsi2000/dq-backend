@@ -23,45 +23,34 @@ class User extends Authenticatable implements BelongsToHierarchy
     // protected $appends = ['full_name'];
 
     protected $fillable = [
-        'fName',
-        'sName',
-        'thName',
-        'family',
+        // Auth
         'name',
-        'dob',
-        'mosque_id',
-        'location',
-        'gender',
-        'marital_status_id',
-        'numChildren',
-        'identity',
-        'phone',
-        'whatsapp',
         'email',
         'password',
+        // Personal info
         'fName',
         'sName',
         'thName',
         'family',
-        'dob',
-        'mosque_id',
-        'location',
-        'gender',
-        'marital_status_id',
-        'numChildren',
         'identity',
+        'dob',
+        'gender',
+        'prefix_name_id',
+        // Contact
         'phone',
         'whatsapp',
+        // Location
+        'mosque_id',
+        'location',
+        // Status
+        'marital_status_id',
+        'numChildren',
+        // Job
         'jobname',
         'job_place',
         'job_salary',
+        // Media
         'image',
-        'prefix_name_id',
-        'jobname',
-        'job_place',
-        'job_salary',
-        'prefix_name_id',
-        // 'image_id', // لو حبيت تضيفها لاحقًا
     ];
 
     /**
@@ -244,10 +233,10 @@ class User extends Authenticatable implements BelongsToHierarchy
         $role = Role::where('name', 'محفظ')->first();
 
         // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
-        if(!$role) {
+        if (!$role) {
             return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
         }
-        
+
         return $query->whereHas('roles', function ($q) use ($role) {
             $q->where('role_id', $role->id);
         });
