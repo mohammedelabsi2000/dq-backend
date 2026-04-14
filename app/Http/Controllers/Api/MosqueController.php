@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class MosqueController extends Controller
 {
-    // use ApiResponser, QueryFilterTrait;
     /**
      * Display a listing of the resource.
      *

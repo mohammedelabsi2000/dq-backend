@@ -7,7 +7,6 @@ use App\Http\Requests\UserRole\AssignRoleRequest;
 use App\Http\Requests\UserRole\RemoveRoleRequest;
 use App\Http\Requests\UserRole\SyncRoleRequest;
 use App\Http\Resources\UserRoleResource;
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Models\Center;
 use App\Models\Halaqa;
@@ -15,11 +14,9 @@ use App\Models\Region;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserRole;
-use App\Traits\QueryFilterTrait;
 
 class UserRoleController extends Controller
 {
-    use ApiResponser, QueryFilterTrait;
 
     public function index(User $user)
     {

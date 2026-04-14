@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponser;
 use App\Http\Requests\HalaqaStudent\StoreHalaqaStudentRequest;
 use App\Http\Requests\HalaqaStudent\UpdateHalaqaStudentRequest;
 use App\Http\Resources\HalaqaStudentResource;
@@ -11,7 +10,6 @@ use App\Models\HalaqaStudent;
 
 class HalaqaStudentController extends Controller
 {
-    use ApiResponser;
 
     /**
      * عرض جميع التسجيلات

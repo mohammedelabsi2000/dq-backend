@@ -7,11 +7,9 @@ use App\Models\Grade;
 use App\Http\Requests\Grade\StoreGradeRequest;
 use App\Http\Requests\Grade\UpdateGradeRequest;
 use App\Http\Resources\GradeResource;
-use App\Http\Traits\ApiResponser;
 
 class GradeController extends Controller
 {
-    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
