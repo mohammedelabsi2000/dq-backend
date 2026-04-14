@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\PlanLevel;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class UpdatePlanLevelRequest extends FormRequest
+class UpdatePlanLevelRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

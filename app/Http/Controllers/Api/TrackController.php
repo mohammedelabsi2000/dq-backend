@@ -17,7 +17,7 @@ class TrackController extends Controller
 
         $tracks = $query->latest()->paginate($perPage);
 
-        return $this->apiResponse(
+        return $this->success(
             TrackResource::collection($tracks),
             'تم جلب المسارات بنجاح',
             200
@@ -30,7 +30,7 @@ class TrackController extends Controller
 
         $track = Track::create($request->all());
 
-        return $this->apiResponse(
+        return $this->success(
             new TrackResource($track),
             'تم إنشاء المسار',
             201
@@ -39,7 +39,7 @@ class TrackController extends Controller
 
     public function show(Track $track)
     {
-        return $this->apiResponse(
+        return $this->success(
             new TrackResource($track),
             'تم جلب المسار',
             200
@@ -52,7 +52,7 @@ class TrackController extends Controller
 
         $track->update($request->all());
 
-        return $this->apiResponse(
+        return $this->success(
             new TrackResource($track->fresh()),
             'تم التعديل',
             200
@@ -67,7 +67,7 @@ class TrackController extends Controller
     {
         $track->delete();
 
-        return $this->apiResponse(
+        return $this->success(
             null,
             'تم الحذف',
             200

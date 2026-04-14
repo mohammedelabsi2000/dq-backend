@@ -170,12 +170,12 @@ class StudentController extends Controller
 
         $students = $query->withStandardRelations()->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => StudentResource::collection($students),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            StudentResource::collection($students),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     public function store(StoreStudentRequest $request)
@@ -225,22 +225,8 @@ class StudentController extends Controller
     public function show(Student $student)
     {
         $this->authorize('view', $student);
-<<<<<<< 48-refactoring03-dry-eager-loading
         $student = $student->load(Student::standardRelations());
-=======
-        $student = $student->load([
-            'mosque',
-            'maritalStatus',
-            'moneyStatus',
-            'guardian',
-            'guardianType',
-            'prefixName',
-            'guardian',
-            'halaqas' => function ($query) {
-                $query->withPivot(['from_date', 'to_date', 'enrollment_status_id']);
-            },
-        ]);
->>>>>>> main
+
 
         return $this->success(
             new StudentResource($student),
@@ -251,7 +237,6 @@ class StudentController extends Controller
 
     public function update(UpdateStudentRequest $request, Student $student)
     {
-        // $this->authorize('update', $student);
         try {
             $student = $this->studentService->update($student, $request->validated());
         } catch (\InvalidArgumentException $th) {

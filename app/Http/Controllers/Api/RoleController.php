@@ -13,7 +13,7 @@ class RoleController extends Controller
     /**
      * Display a listing of the resource.
      * 
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -28,12 +28,12 @@ class RoleController extends Controller
         $query = $q['query'];
         $total = $q['count'];
         $roles = $query->with('roleAbilities')->get();
-        return $this->apiResponse([
-            'total' => $total,
-            'skip'  => $q['skip'],
-            'limit' => $q['limit'],
-            'data'  => RoleResource::collection($roles),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            RoleResource::collection($roles),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -52,7 +52,7 @@ class RoleController extends Controller
      * Display the specified resource.
      *
      * @param Role $role
-     * @return RoleResource
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Role $role)
     {

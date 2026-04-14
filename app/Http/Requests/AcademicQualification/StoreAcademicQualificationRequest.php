@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests\AcademicQualification;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use App\Models\AcademicQualification;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class StoreAcademicQualificationRequest extends FormRequest
+class StoreAcademicQualificationRequest extends DQFormRequest
 {
 
     /**

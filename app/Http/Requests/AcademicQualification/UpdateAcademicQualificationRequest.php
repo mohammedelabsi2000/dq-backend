@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\AcademicQualification;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateAcademicQualificationRequest extends FormRequest
+class UpdateAcademicQualificationRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

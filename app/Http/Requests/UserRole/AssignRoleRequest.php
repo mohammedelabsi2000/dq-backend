@@ -7,10 +7,10 @@ use App\Models\Center;
 use App\Models\Halaqa;
 use App\Models\Region;
 use App\Models\UserRole;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class AssignRoleRequest extends FormRequest
+class AssignRoleRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

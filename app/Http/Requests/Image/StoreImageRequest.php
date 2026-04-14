@@ -3,10 +3,10 @@
 namespace App\Http\Requests\Image;
 
 use App\Enums\ImageType;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\DQFormRequest;
 
-class StoreImageRequest extends FormRequest
+class StoreImageRequest extends DQFormRequest
 {
     public function authorize()
     {

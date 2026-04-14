@@ -61,12 +61,12 @@ class CenterController extends Controller
         // dd($centers);
         // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip' => $q['skip'],
-            'limit' => $q['limit'],
-            'data' => CenterResource::collection($centers),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            CenterResource::collection($centers),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     /**
@@ -77,7 +77,6 @@ class CenterController extends Controller
      */
     public function store(StoreCenterRequest $request)
     {
-        // $this->authorize('create', Center::class);
         $center = Center::create($request->validated());
 
         if ($request->boolean('with_mosque')) {
@@ -135,7 +134,6 @@ class CenterController extends Controller
      */
     public function update(UpdateCenterRequest $request, Center $center)
     {
-        // $this->authorize('update', $center);
         $center->update($request->validated());
         // // تحميل العلاقات إذا طلب
         // if ($request->boolean('with_mosque')) {

@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\PersonalCourse;
 
-use Illuminate\Foundation\Http\FormRequest;
 use App\Helpers\ConstantHelper;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class UpdatePersonalCourseRequest extends FormRequest
+class UpdatePersonalCourseRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

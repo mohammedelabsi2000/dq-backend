@@ -41,12 +41,12 @@ class BranchController extends Controller
 
         // $branches = $query->get();
 
-        return $this->apiResponse([
-            'total' => $total,
-            'skip'  => $q['skip'],
-            'limit' => $q['limit'],
-            'data'  => BranchResource::collection($branches),
-        ], 'success', 200);
+        return $this->successWithPagination(
+            BranchResource::collection($branches),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
 
@@ -68,8 +68,10 @@ class BranchController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  int  $id
+     * 
+     * @param Request $request
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Branch $branch)
     {
@@ -88,12 +90,12 @@ class BranchController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param UpdateBranchRequest $request
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-        // $this->authorize('update', $branch);
 
         $branch->update($request->validated());
 
@@ -106,14 +108,15 @@ class BranchController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param Branch $branch
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Branch $branch)
     {
         $this->authorize('delete', $branch);
         // تحقق من وجود مناطق تابعة قبل الحذف
         if ($branch->regions()->exists()) {
-            return $this->errorMessage(
+            return $this->error(
                 'لا يمكن حذف الفرع لأنه يحتوي على مناطق تابعة',
                 400
             );

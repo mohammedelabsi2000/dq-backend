@@ -19,7 +19,7 @@ class GradeController extends Controller
     {
         $data = Grade::get();
 
-        return $this->apiResponse(
+        return $this->success(
             GradeResource::collection($data),
             'success',
             200
@@ -51,7 +51,7 @@ class GradeController extends Controller
      */
     public function show(Grade $grade)
     {
-        return $this->apiResponse(
+        return $this->success(
             new GradeResource($grade),
             'success',
             200

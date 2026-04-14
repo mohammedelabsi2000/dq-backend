@@ -58,11 +58,12 @@ class PlanAssignmentController extends Controller
 
         $students = $students->paginate(50);
 
-        return $this->apiResponse(
+        return $this->successWithPagination(
             [
                 'plan_id' => $plan->id,
                 'students' => $students
             ],
+            [],
             'تم جلب الطلاب بنجاح',
             200
         );
@@ -94,7 +95,7 @@ class PlanAssignmentController extends Controller
             $assigned[] = $assignment;
         }
 
-        return $this->apiResponse(
+        return $this->success(
             PlanAssignmentResource::collection(collect($assigned)->load('student')),
             'تم إسناد الطلاب للخطة بنجاح',
             200

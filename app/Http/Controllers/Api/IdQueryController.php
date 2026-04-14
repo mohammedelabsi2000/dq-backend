@@ -28,11 +28,11 @@ class IdQueryController extends Controller
         try {
             $personData = $this->idQueryServices->get($identity);
         } catch (\InvalidArgumentException $e) {
-            return $this->notFound($e->getMessage());
+            return $this->error($e->getMessage(), 404);
         }
 
-        return $this->apiResponse([
-            'data' => [
+        return $this->success([
+            [
                 'identity ' => $personData['CI_ID_NUM'],
                 'fName' => $personData['CI_FIRST_ARB'],
                 'sName' => $personData['CI_FATHER_ARB'],

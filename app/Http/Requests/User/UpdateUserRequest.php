@@ -4,11 +4,11 @@ namespace App\Http\Requests\User;
 
 use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUserRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

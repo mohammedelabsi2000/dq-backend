@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Role;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
 
-class UpdateRoleRequest extends FormRequest
+class UpdateRoleRequest extends DQFormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
