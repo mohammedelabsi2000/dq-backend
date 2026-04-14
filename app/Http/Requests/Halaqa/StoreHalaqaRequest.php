@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Halaqa;
 
+use App\Enums\HalaqaReferenceType;
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
 use App\Models\Audit;
@@ -10,6 +11,7 @@ use App\Models\Halaqa;
 use App\Models\Region;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreHalaqaRequest extends DQFormRequest
 {
@@ -53,12 +55,12 @@ class StoreHalaqaRequest extends DQFormRequest
     {
         if ($this->filled('center_id')) {
             $this->merge([
-                'reference_type' => 'center',
+                'reference_type' => HalaqaReferenceType::Center,
                 'reference_id' => (int) $this->center_id,
             ]);
         } elseif ($this->filled('region_id')) {
             $this->merge([
-                'reference_type' => 'region',
+                'reference_type' => HalaqaReferenceType::Region,
                 'reference_id' => (int) $this->region_id,
             ]);
         }
@@ -80,10 +82,7 @@ class StoreHalaqaRequest extends DQFormRequest
 
             'reference_type' => [
                 'required',
-                Rule::in([
-                    'center',
-                    'region'
-                ])
+                new Enum(HalaqaReferenceType::class)
             ],
             'reference_id' => [
                 'required',
@@ -126,7 +125,7 @@ class StoreHalaqaRequest extends DQFormRequest
 
             // reference_type
             'reference_type.required' => 'نوع المرجع مطلوب.',
-            'reference_type.in' => 'نوع المرجع المحدد غير صالح.',
+            'reference_type.enum' => 'نوع المرجع المحدد غير صالح.',
 
             // reference_id
             'reference_id.required' => 'المعرف مطلوب.',

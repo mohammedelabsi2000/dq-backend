@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Concerns\HasHierarchyScope;
 use App\Contracts\BelongsToHierarchy;
+use App\Enums\Gender;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +57,7 @@ class Student extends Model implements BelongsToHierarchy
 
     protected $casts = [
         'dob' => 'date',
+        'gender' => Gender::class
     ];
 
     public static $usesAudit = true;
@@ -96,6 +98,10 @@ class Student extends Model implements BelongsToHierarchy
             $this->thName,
             $this->family,
         ]));
+    }
+    public function getGenderTextAttribute()
+    {
+        return $this->gender?->label() ?? 'غير محدد';
     }
 
     public function mosque()
@@ -250,91 +256,4 @@ class Student extends Model implements BelongsToHierarchy
     {
         return $query->with(self::standardRelations());
     }
-
-    // public function scopeVisibleTo(Builder $query, User $user): Builder
-    // {
-    //     $user->loadMissing('roles');
-
-    //     // مدير عام → يشوف الكل
-    //     if ($user->isGlobalAdmin()) {
-    //         return $query;
-    //     }
-
-    //     $roles = $user->roles;
-
-    //     if ($roles->isEmpty()) {
-    //         return $query->whereRaw('1 = 0');
-    //     }
-
-    //     $branchIds = $roles->where('pivot.scope_type', 'branch')->pluck('pivot.scope_id');
-    //     $regionIds = $roles->where('pivot.scope_type', 'region')->pluck('pivot.scope_id');
-    //     $centerIds = $roles->where('pivot.scope_type', 'center')->pluck('pivot.scope_id');
-    //     $halaqaIds = $roles->where('pivot.scope_type', 'halaqa')->pluck('pivot.scope_id');
-
-    //     return $query->where(function (Builder $q) use ($branchIds, $regionIds, $centerIds, $halaqaIds) {
-
-    //         // طلاب حلقة محددة
-    //         if ($halaqaIds->isNotEmpty()) {
-    //             $q->orWhereHas(
-    //                 'halaqas',
-    //                 fn($q) =>
-    //                 $q->whereIn('halaqas.id', $halaqaIds)
-    //             );
-    //         }
-
-    //         // طلاب حلقات مركز محدد
-    //         if ($centerIds->isNotEmpty()) {
-    //             $q->orWhereHas(
-    //                 'halaqas',
-    //                 fn($q) =>
-    //                 $q->where('reference_type', 'center')
-    //                     ->whereIn('reference_id', $centerIds)
-    //             );
-    //         }
-
-    //         // طلاب حلقات منطقة محددة
-    //         if ($regionIds->isNotEmpty()) {
-    //             $q->orWhereHas(
-    //                 'halaqas',
-    //                 fn($q) =>
-    //                 $q->where('reference_type', 'region')
-    //                     ->whereIn('reference_id', $regionIds)
-    //             );
-
-    //             $centerIdsFromRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
-    //             if ($centerIdsFromRegion->isNotEmpty()) {
-    //                 $q->orWhereHas(
-    //                     'halaqas',
-    //                     fn($q) =>
-    //                     $q->where('reference_type', 'center')
-    //                         ->whereIn('reference_id', $centerIdsFromRegion)
-    //                 );
-    //             }
-    //         }
-
-    //         // طلاب حلقات فرع محدد
-    //         if ($branchIds->isNotEmpty()) {
-    //             $regionIdsFromBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
-
-    //             if ($regionIdsFromBranch->isNotEmpty()) {
-    //                 $q->orWhereHas(
-    //                     'halaqas',
-    //                     fn($q) =>
-    //                     $q->where('reference_type', 'region')
-    //                         ->whereIn('reference_id', $regionIdsFromBranch)
-    //                 );
-
-    //                 $centerIdsFromBranch = Center::whereIn('region_id', $regionIdsFromBranch)->pluck('id');
-    //                 if ($centerIdsFromBranch->isNotEmpty()) {
-    //                     $q->orWhereHas(
-    //                         'halaqas',
-    //                         fn($q) =>
-    //                         $q->where('reference_type', 'center')
-    //                             ->whereIn('reference_id', $centerIdsFromBranch)
-    //                     );
-    //                 }
-    //             }
-    //         }
-    //     });
-    // }
 }

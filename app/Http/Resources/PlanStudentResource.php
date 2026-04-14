@@ -18,7 +18,7 @@ class PlanStudentResource extends JsonResource
             'id' => $this->id,
             'plan_id' => $this->plan_id,
             'student_id' => $this->student_id,
-            'assignment_type' => $this->assignment_type,
+            'assignment_type' => $this->assignment_type?->label(),
             'criteria' => $this->criteria,
 
             // بيانات الطالب المرتبط

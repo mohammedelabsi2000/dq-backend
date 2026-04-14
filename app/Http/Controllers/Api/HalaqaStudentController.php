@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\HalaqaReferenceType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\HalaqaStudent\StoreHalaqaStudentRequest;
 use App\Http\Requests\HalaqaStudent\UpdateHalaqaStudentRequest;
@@ -41,7 +42,7 @@ class HalaqaStudentController extends Controller
         // Filter by center (through halaqa)
         if (request()->filled('center_id')) {
             $query->whereHas('halaqa', function ($q) {
-                $q->whereHasMorph('reference', ['center'], function ($centerQuery) {
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) {
                     $centerQuery->where('id', request()->integer('center_id'));
                 });
             });
@@ -53,11 +54,11 @@ class HalaqaStudentController extends Controller
             $query->whereHas('halaqa', function ($q) use ($regionId) {
                 $q->where(function ($hq) use ($regionId) {
                     // Halaqas directly under this region
-                    $hq->whereHasMorph('reference', ['region'], function ($regionQuery) use ($regionId) {
+                    $hq->whereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($regionId) {
                         $regionQuery->where('id', $regionId);
                     })
                         // Halaqas under centers in this region
-                        ->orWhereHasMorph('reference', ['center'], function ($centerQuery) use ($regionId) {
+                        ->orWhereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($regionId) {
                             $centerQuery->where('region_id', $regionId);
                         });
                 });

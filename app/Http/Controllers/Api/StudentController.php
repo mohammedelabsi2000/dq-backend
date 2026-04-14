@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\HalaqaReferenceType;
 use App\Models\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\ImportStudentRequest;
@@ -36,13 +37,13 @@ class StudentController extends Controller
                 $q->whereHas('halaqas', function ($hq) use ($branchId) {
                     $hq->where(function ($hqQuery) use ($branchId) {
                         // Halaqas under centers in this branch
-                        $hqQuery->whereHasMorph('reference', ['center'], function ($centerQuery) use ($branchId) {
+                        $hqQuery->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($branchId) {
                             $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
                                 $regionQuery->where('branch_id', $branchId);
                             });
                         })
                             // Halaqas directly under regions in this branch
-                            ->orWhereHasMorph('reference', ['region'], function ($regionQuery) use ($branchId) {
+                            ->orWhereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($branchId) {
                                 $regionQuery->where('branch_id', $branchId);
                             });
                     });
@@ -69,7 +70,7 @@ class StudentController extends Controller
             $query->where(function ($q) use ($centerId) {
                 // Students in halaqas under this center
                 $q->whereHas('halaqas', function ($hq) use ($centerId) {
-                    $hq->whereHasMorph('reference', ['center'], function ($centerQuery) use ($centerId) {
+                    $hq->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($centerId) {
                         $centerQuery->where('id', $centerId);
                     });
                 })

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Halaqa;
 
+use App\Enums\HalaqaReferenceType;
 use App\Helpers\ConstantHelper;
 use App\Http\Requests\DQFormRequest;
 use App\Models\Center;
@@ -9,6 +10,7 @@ use App\Models\Halaqa;
 use App\Models\Region;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateHalaqaRequest extends DQFormRequest
 {
@@ -28,8 +30,8 @@ class UpdateHalaqaRequest extends DQFormRequest
         if ($referenceType && $referenceId) {
             // تحديد النموذج بناءً على نوع المرجع
             $modelMap = [
-                'center' => Center::class,
-                'region' => Region::class,
+                HalaqaReferenceType::Center => Center::class,
+                HalaqaReferenceType::Region => Region::class,
             ];
 
             if (isset($modelMap[$referenceType])) {
@@ -53,12 +55,12 @@ class UpdateHalaqaRequest extends DQFormRequest
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => 'region',
+                'reference_type' => HalaqaReferenceType::Region,
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => 'center',
+                'reference_type' => HalaqaReferenceType::Center,
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }
@@ -79,10 +81,7 @@ class UpdateHalaqaRequest extends DQFormRequest
             'reference_type' => [
                 'sometimes',
                 'required',
-                Rule::in([
-                    'center',
-                    'region',
-                ])
+                new Enum(HalaqaReferenceType::class)
             ],
 
             'reference_id' => [
@@ -130,7 +129,7 @@ class UpdateHalaqaRequest extends DQFormRequest
             'description.string' => 'الوصف يجب أن يكون نص.',
 
             'reference_type.required' => 'نوع المرجع مطلوب.',
-            'reference_type.in' => 'نوع المرجع غير صالح.',
+            'reference_type.enum' => 'نوع المرجع غير صالح.',
 
             'reference_id.required' => 'معرف المرجع مطلوب.',
             'reference_id.integer' => 'معرف المرجع يجب أن يكون رقم صحيح.',

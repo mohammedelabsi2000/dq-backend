@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AuditEvent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,4 +22,8 @@ class Audit extends Model
     ];
 
     // protected $guarded = [];
+
+    protected $casts = [
+        'event' => AuditEvent::class
+    ];
 }
