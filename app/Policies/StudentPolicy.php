@@ -10,85 +10,28 @@ class StudentPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
-        return $user->hasAbility('students.view');
+        return $user->hasPermissionTo('students.show');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Student  $student
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function view($user, Student $student)
+    public function view(User $user, Student $student): bool
     {
-        return $user->hasAbility('students.view', $student);
+        return $user->hasPermissionTo('students.show');
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function create($user)
+    public function create(User $user): bool
     {
-        return $user->hasAbility('students.create');
+        return $user->hasPermissionTo('students.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Student  $student
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function update($user, Student $student)
+    public function update(User $user, Student $student): bool
     {
-        return $user->hasAbility('students.update', $student);
+        return $user->hasPermissionTo('students.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Student  $student
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function delete($user, Student $student)
+    public function delete(User $user, Student $student): bool
     {
-        return $user->hasAbility('students.delete', $student);
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Student  $student
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function restore($user, Student $student)
-    {
-        //
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @param  \App\Models\Student  $student
-     * @return \Illuminate\Auth\Access\Response|bool
-     */
-    public function forceDelete($user, Student $student)
-    {
-        //
+        return $user->hasPermissionTo('students.delete');
     }
 }

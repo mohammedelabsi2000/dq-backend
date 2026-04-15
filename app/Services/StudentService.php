@@ -76,7 +76,7 @@ class StudentService
                 'sName' => $personData['CI_FATHER_ARB'] ?? null,
                 'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
                 'family' => $personData['CI_FAMILY_ARB'] ?? null,
-                'dob' => $personData['CI_BIRTH_DT'] ?? null,
+                'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
                 'gender' => $personData['SEX'] ?? null,
             ];
 
@@ -94,6 +94,25 @@ class StudentService
 
         return $guardian;
     }
+
+    private function updateOrCreatePreviousAchievement(Student $student, array $data): void
+    {
+        if (
+            isset($data['memorized_juz_id']) ||
+            isset($data['completed_juz_id']) ||
+            isset($data['surah_id'])
+        ) {
+            PreviousAchievement::updateOrCreate([
+                'student_id' => $student->id,
+            ], [
+                'memorized_juz_id' => $data['memorized_juz_id'] ?? null,
+                'completed_juz_id' => $data['completed_juz_id'] ?? null,
+                'surah_id' => $data['surah_id'] ?? null,
+                'end_aya' => $data['end_aya'] ?? null,
+            ]);
+        }
+    }
+
   
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
     {

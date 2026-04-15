@@ -185,27 +185,6 @@ class HalaqaStudentController extends Controller
             ),
             'تم تسجيل الطلاب في الحلقة بنجاح'
         );
-        // التحقق هل الطالب مسجل حالياً في حلقة
-        /* $existingEnrollment = HalaqaStudent::where('student_id', $validated['student_id'])
-             ->whereNull('to_date')
-             ->first();
-
-         if ($existingEnrollment) {
-             return $this->error(
-                 'الطالب مسجل حالياً في حلقة أخرى ولا يمكن تسجيله في أكثر من حلقة بنفس الوقت. استخدم التعديل لنقله إلى حلقة أخرى.',
-                 422
-             );
-         }
-
-         $student = HalaqaStudent::create($validated);
-
-         return $this->success(
-             new HalaqaStudentResource(
-                 $student->load(['halaqa', 'student', 'enrollment_status'])
-             ),
-             'تم تسجيل الطالب في الحلقة بنجاح',
-             201
-         );*/
     }
     /**
      * تعديل تسجيل موجود

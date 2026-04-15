@@ -30,7 +30,45 @@ class HalaqaController extends Controller
 
         $filteredQuery = (new HalaqaFilter($query, $request))->apply();
 
-        $q = $this->applyFilters($filteredQuery, [
+        // Filter by specific center
+        if ($request->filled('center_id')) {
+            $query->whereHasMorph(
+                'reference',
+                [HalaqaReferenceType::Center],
+                function ($query) {
+                    $query->where('id', request()->integer('center_id'));
+                }
+            );
+        }
+
+        // Filter by specific region
+        if ($request->filled('region_id')) {
+            $regionId = $request->integer('region_id');
+            $query->where(function ($q) use ($regionId) {
+                // Halaqas directly under this region
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($regionId) {
+                    $regionQuery->where('id', $regionId);
+                })
+                    // Halaqas under centers in this region
+                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($regionId) {
+                        $centerQuery->where('region_id', $regionId);
+                    });
+            });
+        }
+        // Filter by reference type
+        if ($request->filled('reference_type')) {
+            $query->where('reference_type', $request->input('reference_type'));
+        }
+
+        if ($request->filled('type_id')) {
+            $query->where('type_id', $request->integer('type_id'));
+        }
+
+        if ($request->boolean('with_students')) {
+            $query->with('students');
+        }
+
+        $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
         ]);
@@ -41,7 +79,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type', 'supervisor'])->get();
+        $halaqas = $query->with(['reference', 'type', 'supervisors.user'])->get();
 
         return $this->successWithPagination(
             HalaqaResource::collection($halaqas),
@@ -82,7 +120,7 @@ class HalaqaController extends Controller
     public function show(Request $request, Halaqa $halaqa)
     {
         $this->authorize('view', $halaqa);
-        $halaqa->load(['type', 'reference', 'supervisor']);
+        $halaqa->load(['type', 'reference', 'supervisors.user']);
 
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');

@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
-use App\Contracts\BelongsToHierarchy;
 use App\Enums\Gender;
 use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,10 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use App\Concerns\HasVisibilityScope;
 
-class Student extends Model implements BelongsToHierarchy
+class Student extends Model
 {
-    use HasFactory, SoftDeletes, Auditable, HasHierarchyScope;
+    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
 
     protected $fillable = [
         'identity',
@@ -151,105 +150,39 @@ class Student extends Model implements BelongsToHierarchy
             ->withTimestamps();
     }
 
-    public function getHierarchyIds(): array
-    {
-        // تحميل halaqas مع العلاقات المطلوبة فقط
-        $this->loadMissing([
-            'halaqas' => function ($query) {
-                $query->with(['reference'])
-                    ->select('halaqas.*');  // تجنب تحميل بيانات pivot
-            }
-        ]);
-
-        $ids = [];
-
-        foreach ($this->halaqas as $halaqa) {
-            $ids[] = ['id' => $halaqa->id, 'type' => 'halaqa'];
-
-            if ($halaqa->reference_type === 'center') {
-                $center = $halaqa->reference;
-
-                if ($center) {
-                    $ids[] = ['id' => $center->id, 'type' => 'center'];
-                    if ($center->region_id) {
-                        $ids[] = ['id' => $center->region_id, 'type' => 'region'];
-
-                        // تحميل region للحصول على branch_id
-                        $center->loadMissing('region');
-                        if ($center->region) {
-                            $ids[] = ['id' => $center->region->branch_id, 'type' => 'branch'];
-                        }
-                    }
-                }
-            } elseif ($halaqa->reference_type === 'region') {
-                $region = $halaqa->reference;
-
-                if ($region) {
-                    $ids[] = ['id' => $region->id, 'type' => 'region'];
-                    if ($region->branch_id) {
-                        $ids[] = ['id' => $region->branch_id, 'type' => 'branch'];
-                    }
-                }
-            }
-        }
-
-        $ids[] = ['id' => $this->id, 'type' => 'student'];
-
-        return array_values(array_unique($ids, SORT_REGULAR));
-    }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $this->applyVisibleTo($query, $user, [
-            'halaqa' => fn($q, $scopeId) => $q->orWhereHas(
-                'halaqas',
-                fn($q) => $q->where('halaqas.id', $scopeId)
-            ),
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
 
-            'center' => fn($q, $scopeId) => $q->orWhereHas(
-                'halaqas',
-                fn($q) => $q->where('reference_type', 'center')
-                    ->where('reference_id', $scopeId)
-            ),
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-            'region' => fn($q, $scopeId) => $q->orWhere(function ($q) use ($scopeId) {
-                $q->orWhereHas(
-                    'halaqas',
-                    fn($q) => $q->where('reference_type', 'region')
-                        ->where('reference_id', $scopeId)
-                );
+        // مدير فرع فقط ← يوسع لكل مناطق الفرع
+        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
+            $regionIds = $regionIds->merge(
+                Region::whereIn('branch_id', $branchIds)->pluck('id')
+            )->unique();
+        }
 
-                $centerIds = Center::where('region_id', $scopeId)->pluck('id');
-                if ($centerIds->isNotEmpty()) {
-                    $q->orWhereHas(
-                        'halaqas',
-                        fn($q) => $q->where('reference_type', 'center')
-                            ->whereIn('reference_id', $centerIds)
-                    );
-                }
-            }),
+        // جمع المساجد المسموح بها عبر المناطق
+        $mosqueIds = collect();
 
-            'branch' => fn($q, $scopeId) => $q->orWhere(function ($q) use ($scopeId) {
-                $regionIds = Region::where('branch_id', $scopeId)->pluck('id');
+        if ($regionIds->isNotEmpty()) {
+            $mosqueIds = $mosqueIds->merge(
+                Mosque::whereIn('region_id', $regionIds)->pluck('id')
+            )->unique();
+        }
 
-                if ($regionIds->isNotEmpty()) {
-                    $q->orWhereHas(
-                        'halaqas',
-                        fn($q) => $q->where('reference_type', 'region')
-                            ->whereIn('reference_id', $regionIds)
-                    );
+        if ($mosqueIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
 
-                    $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
-                    if ($centerIds->isNotEmpty()) {
-                        $q->orWhereHas(
-                            'halaqas',
-                            fn($q) => $q->where('reference_type', 'center')
-                                ->whereIn('reference_id', $centerIds)
-                        );
-                    }
-                }
-            }),
-        ]);
+        return $query->whereIn('mosque_id', $mosqueIds);
     }
 
     public function scopeWithStandardRelations($query)

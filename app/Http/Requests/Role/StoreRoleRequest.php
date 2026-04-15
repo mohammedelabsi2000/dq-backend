@@ -2,37 +2,23 @@
 
 namespace App\Http\Requests\Role;
 
-use App\Models\Role;
-use Illuminate\Validation\Rule;
 use App\Http\Requests\DQFormRequest;
 
 class StoreRoleRequest extends DQFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     *
-     * @return bool
-     */
-    public function authorize()
+    public function authorize(): bool
     {
-        return $this->user()->can('create', Role::class);
+        // return $this->user()->can('create', Role::class);
+        return $this->user()->hasPermissionTo('roles.create', 'sanctum');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, mixed>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'name'        => 'required|string|unique:roles,name',
             'give_all'    => 'boolean',
             'abilities'   => 'array',
-            // 'abilities.*' => Rule::in(array_keys(config('abilities'))),
-            'abilities.*' => Rule::in(
-                collect(config('abilities'))->flatten(1)->pluck('ability')->toArray()
-            ),
+            'abilities.*' => 'integer|exists:permissions,id',
         ];
     }
 
@@ -42,7 +28,7 @@ class StoreRoleRequest extends DQFormRequest
             'name.required'      => 'اسم الدور مطلوب',
             'name.unique'        => 'اسم الدور موجود مسبقاً',
             'abilities.array'    => 'الصلاحيات يجب أن تكون مصفوفة',
-            'abilities.*.in'     => 'إحدى الصلاحيات غير صالحة',
+            'abilities.*.exists' => 'إحدى الصلاحيات غير موجودة',
         ];
     }
 }

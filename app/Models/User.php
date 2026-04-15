@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasHierarchyScope;
-use App\Concerns\HasRoles;
+use App\Concerns\HasVisibilityScope;
 use App\Contracts\BelongsToHierarchy;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,10 +13,13 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements BelongsToHierarchy
+class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasHierarchyScope;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasVisibilityScope;
+
+    protected $guard_name = 'sanctum';
 
     // مميز الموديلات اللي تستخدم audit يتم قرائته داخل AppServiceProvider.php
     public static $usesAudit = true;
@@ -161,16 +164,6 @@ class User extends Authenticatable implements BelongsToHierarchy
         return $this->person_type . ' #' . $this->person_id;
     }
 
-    /* public function getFullNameAttribute()
-    {
-        return trim(preg_replace('/\s+/', ' ', "{$this->fName} {$this->sName} {$this->thName} {$this->family}"));
-
-        // if ($this->person) {
-        //     return "{$this->person->fName} {$this->person->sName} {$this->person->thName} {$this->person->family}";
-        // }
-        // return $this->person_type . ' #' . $this->person_id;
-    } */
-
     public function getGenderTextAttribute()
     {
         return $this->gender?->label() ?? 'غير محدد';
@@ -185,11 +178,16 @@ class User extends Authenticatable implements BelongsToHierarchy
     {
         return $this->morphMany(PersonalCourse::class, 'person');
     }
-    public function getHierarchyIds(): array
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes Management
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopes()
     {
-        return [
-            ['id' => $this->id, 'type' => 'user'],
-        ];
+        return $this->hasMany(UserScope::class);
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
@@ -216,5 +214,22 @@ class User extends Authenticatable implements BelongsToHierarchy
         return $query->whereHas('roles', function ($q) use ($role) {
             $q->where('role_id', $role->id);
         });
+    }
+
+    public function syncScopes(array $scopes)
+    {
+        $this->scopes()->delete();
+
+        foreach ($scopes as $scope) {
+            $this->scopes()->create([
+                'scope_type' => $scope['type'],
+                'scope_id' => $scope['id'],
+            ]);
+        }
+    }
+
+    public function clearScopes()
+    {
+        $this->scopes()->delete();
     }
 }

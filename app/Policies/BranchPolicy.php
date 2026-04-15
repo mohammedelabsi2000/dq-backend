@@ -3,7 +3,6 @@
 namespace App\Policies;
 
 use App\Models\Branch;
-use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BranchPolicy
@@ -18,7 +17,10 @@ class BranchPolicy
      */
     public function viewAny($user)
     {
-        return $user->hasAbility('branches.view');
+        // return $user->hasAbility('branches.show');
+        // dd($user);
+        // dd($user->hasPermissionTo('branches.show', 'sanctum'));
+        return $user->hasPermissionTo('branches.show');
     }
 
     /**
@@ -30,7 +32,8 @@ class BranchPolicy
      */
     public function view($user, Branch $branch)
     {
-        return $user->hasAbility('branches.view', $branch);
+        // return $user->hasAbility('branches.show', $branch);
+        return $user->hasPermissionTo('branches.show');
     }
 
     /**
@@ -41,7 +44,8 @@ class BranchPolicy
      */
     public function create($user)
     {
-        return $user->hasAbility('branches.create');
+        // return $user->hasAbility('branches.create');
+        return $user->hasPermissionTo('branches.create');
     }
 
     /**
@@ -53,7 +57,8 @@ class BranchPolicy
      */
     public function update($user, Branch $branch)
     {
-        return $user->hasAbility('branches.update', $branch);
+        // return $user->hasAbility('branches.update', $branch);
+        return $user->hasPermissionTo('branches.update');
     }
 
     /**
@@ -65,7 +70,8 @@ class BranchPolicy
      */
     public function delete($user, Branch $branch)
     {
-        return $user->hasAbility('branches.delete', $branch);
+        // return $user->hasAbility('branches.delete', $branch);
+        return $user->hasPermissionTo('branches.delete');
     }
 
     /**
@@ -77,7 +83,8 @@ class BranchPolicy
      */
     public function restore($user, Branch $branch)
     {
-        //
+        // return $user->hasAbility('branches.restore', $branch);
+        return $user->hasPermissionTo('branches.restore');
     }
 
     /**
@@ -89,6 +96,7 @@ class BranchPolicy
      */
     public function forceDelete($user, Branch $branch)
     {
-        //
+        // return $user->hasAbility('branches.forceDelete', $branch);
+        return $user->hasPermissionTo('branches.forceDelete');
     }
 }

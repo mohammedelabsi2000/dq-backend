@@ -18,7 +18,7 @@ class PersonalCoursePolicy
      */
     public function viewAny($user)
     {
-        return $user->hasAbility('users.view') || $user->hasAbility('students.view');
+        return $user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show');
     }
 
     /**
@@ -41,11 +41,11 @@ class PersonalCoursePolicy
         }
 
         if ($course->person_type === 'user') {
-            return $user->hasAbility('users.view');
+            return $user->hasPermissionTo('users.certificates.show');
         }
 
         if ($course->person_type === 'student') {
-            return $user->hasAbility('students.view', $course->person);
+            return $user->hasPermissionTo('students.certificates.show', $course->person);
         }
 
         return false;
@@ -59,7 +59,7 @@ class PersonalCoursePolicy
      */
     public function create($user)
     {
-        return $user->hasAbility('users.create') || $user->hasAbility('students.create');
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**
@@ -82,11 +82,11 @@ class PersonalCoursePolicy
         // }
 
         if ($course->person_type === 'user') {
-            return $user->hasAbility('users.update');
+            return $user->hasPermissionTo('users.certificates.update');
         }
 
         if ($course->person_type === 'student') {
-            return $user->hasAbility('students.update', $course->person);
+            return $user->hasPermissionTo('students.certificates.update', $course->person);
         }
 
         return false;
@@ -112,11 +112,11 @@ class PersonalCoursePolicy
         // }
 
         if ($course->person_type === 'user') {
-            return $user->hasAbility('users.delete');
+            return $user->hasPermissionTo('users.certificates.delete');
         }
 
         if ($course->person_type === 'student') {
-            return $user->hasAbility('students.delete', $course->person);
+            return $user->hasPermissionTo('students.certificates.delete', $course->person);
         }
 
         return false;

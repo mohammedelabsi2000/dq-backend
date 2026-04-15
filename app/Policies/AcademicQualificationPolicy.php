@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\AcademicQualification;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -18,7 +19,7 @@ class AcademicQualificationPolicy
      */
     public function viewAny($user)
     {
-        return $user->hasAbility('users.view') || $user->hasAbility('students.view');
+        return $user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show');
     }
 
     /**
@@ -41,11 +42,11 @@ class AcademicQualificationPolicy
         }
 
         if ($qualification->person_type === 'user') {
-            return $user->hasAbility('users.view');
+            return $user->hasPermissionTo('users.certificates.show');
         }
 
         if ($qualification->person_type === 'student') {
-            return $user->hasAbility('students.view', $qualification->person);
+            return $user->hasPermissionTo('students.certificates.show', $qualification->person);
         }
 
         return false;
@@ -62,18 +63,18 @@ class AcademicQualificationPolicy
     {
         // إذا تم تمرير person، تحقق من صلاحياته
         if ($person) {
-            if ($person instanceof \App\Models\User) {
-                return $user->hasAbility('users.create') ||
-                    ($user->id === $person->id && $user->hasAbility('users.create'));
+            if ($person instanceof User) {
+                return $user->hasPermissionTo('users.certificates.create') ||
+                    ($user->id === $person->id && $user->hasPermissionTo('users.certificates.create'));
             }
 
-            if ($person instanceof \App\Models\Student) {
-                return $user->hasAbility('students.create', $person);
+            if ($person instanceof Student) {
+                return $user->hasPermissionTo('students.certificates.create', $person);
             }
         }
 
         // خلاف ذلك، تحقق من الصلاحية العامة
-        return $user->hasAbility('users.create') || $user->hasAbility('students.create');
+        return $user->hasPermissionTo('users.certificates.create') || $user->hasPermissionTo('students.certificates.create');
     }
 
     /**
@@ -88,11 +89,11 @@ class AcademicQualificationPolicy
         $qualification->loadMissing('person');
 
         if ($qualification->person_type === 'user') {
-            return $user->hasAbility('users.update');
+            return $user->hasPermissionTo('users.certificates.update');
         }
 
         if ($qualification->person_type === 'student') {
-            return $user->hasAbility('students.update', $qualification->person);
+            return $user->hasPermissionTo('students.certificates.update', $qualification->person);
         }
 
         return false;
@@ -110,11 +111,11 @@ class AcademicQualificationPolicy
         $qualification->loadMissing('person');
 
         if ($qualification->person_type === 'user') {
-            return $user->hasAbility('users.delete');
+            return $user->hasPermissionTo('users.certificates.delete');
         }
 
         if ($qualification->person_type === 'student') {
-            return $user->hasAbility('students.delete', $qualification->person);
+            return $user->hasPermissionTo('students.certificates.delete', $qualification->person);
         }
 
         return false;

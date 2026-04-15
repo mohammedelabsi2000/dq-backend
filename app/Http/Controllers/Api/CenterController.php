@@ -7,11 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Center\StoreCenterRequest;
 use App\Http\Requests\Center\UpdateCenterRequest;
 use App\Http\Resources\CenterResource;
+use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use Illuminate\Http\Request;
 
 class CenterController extends Controller
 {
+    use ApiResponser; // استخدم الـ Trait
 
     /**
      * Display a listing of the resource.
@@ -35,6 +37,28 @@ class CenterController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
+
+        if ($request->filled('mosque_id')) {
+            $query->where('mosque_id', $request->integer('mosque_id'));
+        }
+
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->integer('region_id'));
+        }
+
+        if ($request->filled('branch_id')) {
+            $query->whereHas('region', function ($q) use ($request) {
+                $q->where('branch_id', $request->integer('branch_id'));
+            });
+        }
+
+        if ($request->boolean('with_relations')) {
+            $query->with(['region.branch', 'mosque']);
+        }
+
+        // if ($request->boolean('with_mosque')) {
+        //     $query->with('mosque');
+        // }
         $centers = $query->get();
 
         return $this->successWithPagination(

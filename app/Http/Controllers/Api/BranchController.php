@@ -16,13 +16,13 @@ class BranchController extends Controller
     {
         $this->authorize('viewAny', Branch::class);
 
-        // $query = Branch::query();
         $query = Branch::query()->visibleTo(auth()->user());
+        // $query = Branch::query();
+
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
-            'limit'         => '*',
         ]);
 
         $query = $q['query'];
@@ -91,7 +91,6 @@ class BranchController extends Controller
      */
     public function update(UpdateBranchRequest $request, Branch $branch)
     {
-
         $branch->update($request->validated());
 
         return $this->success(

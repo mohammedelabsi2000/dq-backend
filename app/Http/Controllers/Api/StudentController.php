@@ -28,7 +28,6 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Student::class);
-        // $query = Student::query();
         $query = Student::query()->visibleTo(auth()->user());
 
         $filteredQuery = (new StudentFilter($query, $request))->apply();
@@ -83,6 +82,7 @@ class StudentController extends Controller
         try {
             $student = $this->studentService->create($request->validated());
         } catch (\InvalidArgumentException $th) {
+            logger($th);
             return $this->error($th->getMessage(), 422);
         }
 
@@ -99,6 +99,7 @@ class StudentController extends Controller
     {
         $this->authorize('view', $student);
         $student = $student->load(Student::standardRelations());
+
 
         return $this->success(
             new StudentResource($student),
@@ -140,6 +141,7 @@ class StudentController extends Controller
      */
     public function import(ImportStudentRequest $request)
     {
+        $this->authorize('create', Student::class);
         try {
             Excel::import(
                 new StudentsImport($request->except('file')),

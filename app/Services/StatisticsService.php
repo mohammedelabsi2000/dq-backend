@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\{
-    User,
+    // User,
     Student,
     Halaqa,
     Branch,
@@ -26,7 +26,7 @@ class StatisticsService
     {
         return Cache::remember('statistics', 5, function () {
             return [
-                'users_count' => User::onlyTeachers()->count(),
+                // 'users_count' => User::onlyTeachers()->count(),
                 'students_count' => Student::count(),
                 'halaqat_count' => Halaqa::count(),
                 'branches_count' => Branch::count(),
