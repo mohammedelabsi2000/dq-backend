@@ -25,7 +25,7 @@ class CenterController extends Controller
         $query = Center::query()->visibleTo(auth()->user());
 
         $query = (new CenterFilter($query, $request))->apply();
-        
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -62,10 +62,6 @@ class CenterController extends Controller
         if ($request->boolean('with_region')) {
             $center->load('region');
         }
-        // // تحميل العلاقات إذا طلب
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         return $this->success(
             new CenterResource($center),
@@ -84,9 +80,6 @@ class CenterController extends Controller
     public function show(Request $request, Center $center)
     {
         $this->authorize('view', $center);
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
@@ -105,17 +98,13 @@ class CenterController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param Request $request
+     * @param UpdateCenterRequest $request
      * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateCenterRequest $request, Center $center)
     {
         $center->update($request->validated());
-        // // تحميل العلاقات إذا طلب
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
@@ -139,12 +128,6 @@ class CenterController extends Controller
      */
     public function destroy(Center $center)
     {
-        // if ($center->halaqat()->exists()) {
-        //     return $this->errorMessage(
-        //         'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
-        //         400
-        //     );
-        // }
         $this->authorize('delete', $center);
 
         $center->delete();
