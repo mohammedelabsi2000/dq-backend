@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CustomJuz;
 
+use App\Models\Quran\CustomJuz;
 use Illuminate\Support\Facades\DB;
 
 class StoreCustomJuzRequest extends BaseCustomJuzRequest
@@ -13,7 +14,7 @@ class StoreCustomJuzRequest extends BaseCustomJuzRequest
      */
     public function authorize()
     {
-        return true;
+        return $this->user()->can('create', CustomJuz::class);
     }
 
     /**

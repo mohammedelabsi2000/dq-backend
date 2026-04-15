@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\Mosque;
 
-use App\Http\Traits\ApiResponser;
 use App\Models\Mosque;
 use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class StoreMosqueRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -17,8 +15,7 @@ class StoreMosqueRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $region = Region::findOrFail($this->input('region_id'));
-        return $this->user()->can('create', [Mosque::class, $region]);
+        return $this->user()->can('create', Mosque::class);
     }
 
     /**

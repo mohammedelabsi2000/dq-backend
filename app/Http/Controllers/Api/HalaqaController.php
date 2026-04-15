@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HalaqaReferenceType;
+use App\Filters\HalaqaFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Halaqa\StoreHalaqaRequest;
 use App\Http\Requests\Halaqa\UpdateHalaqaRequest;
 use App\Http\Resources\HalaqaResource;
+use App\Models\Center;
 use App\Models\Halaqa;
+use App\Models\Region;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
@@ -25,22 +28,7 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user());
 
-        // Filter by branch (through both center and region)
-        if ($request->filled('branch_id')) {
-            $branchId = $request->integer('branch_id');
-            $query->where(function ($q) use ($branchId) {
-                // Halaqas under centers in this branch
-                $q->whereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($branchId) {
-                    $centerQuery->whereHas('region', function ($regionQuery) use ($branchId) {
-                        $regionQuery->where('branch_id', $branchId);
-                    });
-                })
-                    // Halaqas directly under regions in this branch
-                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($branchId) {
-                        $regionQuery->where('branch_id', $branchId);
-                    });
-            });
-        }
+        $filteredQuery = (new HalaqaFilter($query, $request))->apply();
 
         // Filter by specific center
         if ($request->filled('center_id')) {
@@ -84,6 +72,10 @@ class HalaqaController extends Controller
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
         ]);
+
+        if ($request->boolean('with_students')) {
+            $filteredQuery->with('students');
+        }
 
         $query = $q['query'];
         $total = $q['count'];

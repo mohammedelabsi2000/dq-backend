@@ -41,7 +41,7 @@ class UserResource extends JsonResource
             'abilities' => $this->when(
                 $this->relationLoaded('roles'),
                 fn() => $this->roles
-                    ->flatMap(fn($role) => $role->roleAbilities)
+                    ->flatMap(fn($role) => $role->permissions)
                     ->unique('ability')
                     ->values()
                     ->map(fn($ability) => [

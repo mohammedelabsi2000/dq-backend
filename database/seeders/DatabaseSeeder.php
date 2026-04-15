@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Role;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -20,7 +18,9 @@ class DatabaseSeeder extends Seeder
             ConstantTypeSeeder::class,
             // BranchRegionMosqueSeeder::class,
             UserSeeder::class,
-            RoleSeeder::class,
+            PermissionSeeder::class,
+            QuranSeeder::class,
+            // RoleSeeder::class,
             // StudentSeeder::class,
             // GradeSeeder::class,
             // PlanSeeder::class,

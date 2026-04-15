@@ -12,11 +12,11 @@ class CustomJuzController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', CustomJuz::class);
         $query = CustomJuz::query();
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'sort_order',
-            'limit' => '*',
         ]);
 
         $juz = $query->get();
@@ -34,8 +34,10 @@ class CustomJuzController extends Controller
         $juz = CustomJuz::create($request->validated());
         return $this->success($juz, 'تم إنشاء الجزء بنجاح');
     }
+
     public function show(CustomJuz $juz)
     {
+        $this->authorize('view', $juz);
         return $this->success($juz);
     }
 
@@ -47,6 +49,7 @@ class CustomJuzController extends Controller
 
     public function destroy(CustomJuz $juz)
     {
+        $this->authorize('delete', $juz);
         $juz = $juz->delete();
 
         return $this->success($juz, 'تم حذف الجزء بنجاح');

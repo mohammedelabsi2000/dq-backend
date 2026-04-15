@@ -14,9 +14,7 @@ class RemoveRoleRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $target = $this->route('user');
-        return $this->user()->can('remove', [UserRole::class, $target]);
-        // return true; --- IGNORE ---
+        return $this->user()->hasPermissionTo('users.roles.update', 'sanctum');
     }
 
     /**

@@ -8,7 +8,6 @@ class StoreRoleRequest extends DQFormRequest
 {
     public function authorize(): bool
     {
-        // return $this->user()->can('create', Role::class);
         return $this->user()->hasPermissionTo('roles.create', 'sanctum');
     }
 

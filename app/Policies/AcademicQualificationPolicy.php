@@ -31,25 +31,7 @@ class AcademicQualificationPolicy
      */
     public function view($user, AcademicQualification $qualification)
     {
-        $qualification->loadMissing('person');
-
-        // صاحب الشهادة يشوف شهادته دائماً
-        if (
-            $qualification->person_type === 'user' &&
-            $qualification->person_id === $user->id
-        ) {
-            return true;
-        }
-
-        if ($qualification->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.show');
-        }
-
-        if ($qualification->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.show', $qualification->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show');
     }
 
     /**
@@ -61,20 +43,7 @@ class AcademicQualificationPolicy
      */
     public function create($user, $person = null)
     {
-        // إذا تم تمرير person، تحقق من صلاحياته
-        if ($person) {
-            if ($person instanceof User) {
-                return $user->hasPermissionTo('users.certificates.create') ||
-                    ($user->id === $person->id && $user->hasPermissionTo('users.certificates.create'));
-            }
-
-            if ($person instanceof Student) {
-                return $user->hasPermissionTo('students.certificates.create', $person);
-            }
-        }
-
-        // خلاف ذلك، تحقق من الصلاحية العامة
-        return $user->hasPermissionTo('users.certificates.create') || $user->hasPermissionTo('students.certificates.create');
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**
@@ -86,17 +55,7 @@ class AcademicQualificationPolicy
      */
     public function update($user, AcademicQualification $qualification)
     {
-        $qualification->loadMissing('person');
-
-        if ($qualification->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.update');
-        }
-
-        if ($qualification->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.update', $qualification->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**
@@ -108,17 +67,7 @@ class AcademicQualificationPolicy
      */
     public function delete($user, AcademicQualification $qualification)
     {
-        $qualification->loadMissing('person');
-
-        if ($qualification->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.delete');
-        }
-
-        if ($qualification->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.delete', $qualification->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**

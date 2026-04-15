@@ -2,13 +2,11 @@
 
 namespace App\Http\Requests\Branch;
 
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Http\Requests\DQFormRequest;
 
 class StoreBranchRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *

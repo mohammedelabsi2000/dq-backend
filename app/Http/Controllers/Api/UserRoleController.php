@@ -19,9 +19,6 @@ class UserRoleController extends Controller
 
     public function index(User $user)
     {
-        // $this->authorize('viewAny', Role::class);
-        // $this->authorize('viewAny', $user);
-        // $this->hasPermission('users.roles.update');
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
@@ -41,12 +38,6 @@ class UserRoleController extends Controller
 
     public function assignRoles(AssignRoleRequest $request, User $user)
     {
-        // $this->authorize('create', $user);
-        // $this->hasPermission('users.roles.update');
-        // if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
-        //     return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
-        // }
-
         $roles = Role::whereIn('id', $request->role_ids)
             ->where('guard_name', 'sanctum')
             ->get();

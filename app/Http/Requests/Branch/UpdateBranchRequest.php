@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests\Branch;
 
-use App\Http\Traits\ApiResponser;
 use App\Http\Requests\DQFormRequest;
 
 class UpdateBranchRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -15,9 +13,7 @@ class UpdateBranchRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $branch = $this->route('branch'); // الحصول على الفرع من الرابط
-
-        return $this->user()->can('update', $branch);
+        return $this->user()->can('update', $this->route('branch'));
     }
 
     /**

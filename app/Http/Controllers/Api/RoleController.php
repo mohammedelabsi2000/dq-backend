@@ -32,7 +32,7 @@ class RoleController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $roles = $query->with('roleAbilities')->get();
+        $roles = $query->with('permissions')->get();
         return $this->successWithPagination(
             RoleResource::collection($roles),
             ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],

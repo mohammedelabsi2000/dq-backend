@@ -16,34 +16,7 @@ class UpdateHalaqaRequest extends DQFormRequest
 {
     public function authorize()
     {
-        $halaqa = $this->route('halaqa');
-
-        // التحقق من صلاحية تعديل الحلقة الحالية
-        if (!$this->user()->can('update', $halaqa)) {
-            return false;
-        }
-
-        // إذا تم تغيير المرجع، تحقق من الصلاحية الجديدة
-        $referenceType = $this->input('reference_type');
-        $referenceId = $this->input('reference_id');
-
-        if ($referenceType && $referenceId) {
-            // تحديد النموذج بناءً على نوع المرجع
-            $modelMap = [
-                HalaqaReferenceType::Center => Center::class,
-                HalaqaReferenceType::Region => Region::class,
-            ];
-
-            if (isset($modelMap[$referenceType])) {
-                $modelClass = $modelMap[$referenceType];
-                $newReference = $modelClass::findOrFail($referenceId);
-
-                // التحقق من صلاحية الإنشاء في المرجع الجديد
-                return $this->user()->can('create', [Halaqa::class, $newReference]);
-            }
-        }
-
-        return true;
+        return $this->user()->can('update', $this->route('halaqa'));
     }
 
     /**
@@ -55,12 +28,12 @@ class UpdateHalaqaRequest extends DQFormRequest
     {
         if (!$this->input('center_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Region,
+                'reference_type' => HalaqaReferenceType::Region->code(),
                 'reference_id' => intval($this->input('region_id')),
             ]);
         } else {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Center,
+                'reference_type' => HalaqaReferenceType::Center->code(),
                 'reference_id' => intval($this->input('center_id')),
             ]);
         }

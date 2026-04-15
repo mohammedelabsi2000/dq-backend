@@ -190,31 +190,31 @@ class User extends Authenticatable
         return $this->hasMany(UserScope::class);
     }
 
-    public function scopeVisibleTo(Builder $query, User $user): Builder
-    {
-        return $this->applyVisibleTo($query, $user, [
-            'branch' => fn(Builder $q, $id) =>
-                $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
-            'region' => fn(Builder $q, $id) =>
-                $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
-            'mosque' => 'mosque_id',
-            'user' => 'id',
-        ]);
-    }
+    // public function scopeVisibleTo(Builder $query, User $user): Builder
+    // {
+    //     return $this->applyVisibleTo($query, $user, [
+    //         'branch' => fn(Builder $q, $id) =>
+    //         $q->orWhereHas('mosque.region', fn($r) => $r->where('branch_id', $id)),
+    //         'region' => fn(Builder $q, $id) =>
+    //         $q->orWhereHas('mosque', fn($m) => $m->where('region_id', $id)),
+    //         'mosque' => 'mosque_id',
+    //         'user' => 'id',
+    //     ]);
+    // }
 
-    public function scopeOnlyTeachers(Builder $query)
-    {
-        $role = Role::where('name', 'محفظ')->first();
+    // public function scopeOnlyTeachers(Builder $query)
+    // {
+    //     $role = Role::where('name', 'محفظ')->first();
 
-        // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
-        if (!$role) {
-            return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
-        }
+    //     // If the "محفظ" role doesn't exist, we return an empty result instead of throwing an error
+    //     if (!$role) {
+    //         return $query->whereRaw('0 = 1'); // لا يوجد دور "محفظ"، لذا لا نعيد أي مستخدم
+    //     }
 
-        return $query->whereHas('roles', function ($q) use ($role) {
-            $q->where('role_id', $role->id);
-        });
-    }
+    //     return $query->whereHas('roles', function ($q) use ($role) {
+    //         $q->where('role_id', $role->id);
+    //     });
+    // }
 
     public function syncScopes(array $scopes)
     {

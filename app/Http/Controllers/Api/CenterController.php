@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\CenterFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Center\StoreCenterRequest;
 use App\Http\Requests\Center\UpdateCenterRequest;
@@ -24,6 +25,8 @@ class CenterController extends Controller
     {
         $this->authorize('viewAny', Center::class);
         $query = Center::query()->visibleTo(auth()->user());
+
+        $query = (new CenterFilter($query, $request))->apply();
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
@@ -57,8 +60,6 @@ class CenterController extends Controller
         //     $query->with('mosque');
         // }
         $centers = $query->get();
-        // dd($centers);
-        // $centers = $query->withCount('halaqat')->latest()->paginate($perPage);
 
         return $this->successWithPagination(
             CenterResource::collection($centers),
@@ -85,10 +86,6 @@ class CenterController extends Controller
         if ($request->boolean('with_region')) {
             $center->load('region');
         }
-        // // تحميل العلاقات إذا طلب
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         return $this->success(
             new CenterResource($center),
@@ -100,15 +97,13 @@ class CenterController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param Request $request
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request, Center $center)
     {
         $this->authorize('view', $center);
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
@@ -127,17 +122,13 @@ class CenterController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param UpdateCenterRequest $request
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateCenterRequest $request, Center $center)
     {
         $center->update($request->validated());
-        // // تحميل العلاقات إذا طلب
-        // if ($request->boolean('with_mosque')) {
-        //     $center->load('mosque');
-        // }
 
         if ($request->boolean('with_mosque')) {
             $center->load('mosque.region.branch');
@@ -156,17 +147,11 @@ class CenterController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param Center $center
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Center $center)
     {
-        // if ($center->halaqat()->exists()) {
-        //     return $this->errorMessage(
-        //         'لا يمكن حذف المركز لأنه يحتوي على حلقات تابعة',
-        //         400
-        //     );
-        // }
         $this->authorize('delete', $center);
 
         $center->delete();

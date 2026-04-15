@@ -22,28 +22,7 @@ class StoreHalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $reference = null;
-        if ($this->input('center_id')) {
-            $reference = Center::find($this->input('center_id'));
-        } elseif ($this->input('region_id')) {
-            $reference = Region::find($this->input('region_id'));
-        }
-        return $this->user()->can('create', [Halaqa::class, $reference]);
-
-        // نجيب الـ reference (Region أو Center)
-        // $referenceType = $this->input('reference_type');
-        // $referenceId   = $this->input('reference_id');
-
-        // $reference = match ($referenceType) {
-        //     'region' => Region::findOrFail($referenceId),
-        //     'center' => Center::findOrFail($referenceId),
-        //     // default  => abort(422, 'Invalid reference type'),
-
-        //     default  => abort(422, 'Invalid reference type'),
-        // };
-
-        // return $this->user()->can('create', [Halaqa::class, $reference]);
-        // return true;
+        return $this->user()->can('create', Halaqa::class);
     }
 
     /**
@@ -55,12 +34,12 @@ class StoreHalaqaRequest extends DQFormRequest
     {
         if ($this->filled('center_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Center,
+                'reference_type' => HalaqaReferenceType::Center->code(),
                 'reference_id' => (int) $this->center_id,
             ]);
         } elseif ($this->filled('region_id')) {
             $this->merge([
-                'reference_type' => HalaqaReferenceType::Region,
+                'reference_type' => HalaqaReferenceType::Region->code(),
                 'reference_id' => (int) $this->region_id,
             ]);
         }

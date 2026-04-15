@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\Region;
 
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class StoreRegionRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -17,9 +15,7 @@ class StoreRegionRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $branch = Branch::findOrFail($this->input('branch_id'));
-
-        return $this->user()->can('create', [Region::class, $branch]);
+        return $this->user()->can('create', Region::class);
     }
 
     /**

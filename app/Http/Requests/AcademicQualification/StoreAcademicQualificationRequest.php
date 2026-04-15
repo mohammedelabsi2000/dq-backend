@@ -19,18 +19,7 @@ class StoreAcademicQualificationRequest extends DQFormRequest
      */
     public function authorize()
     {
-        // الحصول على الشخص المراد إنشاء شهادة له
-        $personType = $this->input('person_type');
-        $personId = $this->input('person_id');
-
-        $person = null;
-        if ($personType === 'student') {
-            $person = Student::find($personId);
-        } elseif ($personType === 'user') {
-            $person = User::find($personId);
-        }
-
-        return $this->user()->can('create', [AcademicQualification::class, $person]);
+        return $this->user()->can('create', AcademicQualification::class);
     }
 
     /**

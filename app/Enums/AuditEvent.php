@@ -29,6 +29,6 @@ enum AuditEvent: string implements HasLabelAndCode
     public function label(): string
     {
         $locale = auth()->user()?->locale ?? app()->getLocale();
-        return $this->labels()[$locale] ?? $this->labels()['en'];
+        return $this->labels()[$locale] ?? $this->labels()['ar'];
     }
 }
