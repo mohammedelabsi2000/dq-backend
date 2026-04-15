@@ -25,30 +25,11 @@ class PersonalCoursePolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\PersonalCourse  $personalCourse
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view($user, PersonalCourse $course)
+    public function view($user)
     {
-        $course->loadMissing('person');
-
-        // صاحب الدورة يشوفها دائماً
-        if (
-            $course->person_type === 'user' &&
-            $course->person_id === $user->id
-        ) {
-            return true;
-        }
-
-        if ($course->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.show');
-        }
-
-        if ($course->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.show', $course->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show');
     }
 
     /**
@@ -66,70 +47,31 @@ class PersonalCoursePolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\PersonalCourse  $personalCourse
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update($user, PersonalCourse $course)
+    public function update($user)
     {
-        $course->loadMissing('person');
-
-        // صاحب الدورة يشوفها دائماً
-        // if (
-        //     $course->person_type === 'user' &&
-        //     $course->person_id === $user->id
-        // ) {
-        //     return true;
-        // }
-
-        if ($course->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.update');
-        }
-
-        if ($course->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.update', $course->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\PersonalCourse  $personalCourse
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete($user, PersonalCourse $course)
+    public function delete($user)
     {
-        $course->loadMissing('person');
-
-        // صاحب الدورة يشوفها دائماً
-        // if (
-        //     $course->person_type === 'user' &&
-        //     $course->person_id === $user->id
-        // ) {
-        //     return true;
-        // }
-
-        if ($course->person_type === 'user') {
-            return $user->hasPermissionTo('users.certificates.delete');
-        }
-
-        if ($course->person_type === 'student') {
-            return $user->hasPermissionTo('students.certificates.delete', $course->person);
-        }
-
-        return false;
+        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\PersonalCourse  $personalCourse
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore($user, PersonalCourse $personalCourse)
+    public function restore($user)
     {
         //
     }

@@ -8,14 +8,15 @@ use Illuminate\Http\Request;
 
 class ConstantFilter extends BaseFilter
 {
-    public function __construct(private Builder|QueryBuilder $query, private Request $request)
+    public function __construct(Builder|QueryBuilder $query, Request $request)
     {
+        parent::__construct($query, $request);
     }
 
     public function apply()
     {
-        /** @var Builder|QueryBuilder $query */
-        /** @var Request $request */
+        // /** @var Builder|QueryBuilder $query */
+        // /** @var Request $request */
 
         $query = $this->query;
         $request = $this->request;

@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\Center;
 
-use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class UpdateCenterRequest extends DQFormRequest
 {
-    use ApiResponser;
 
     /**
      * Determine if the user is authorized to make this request.

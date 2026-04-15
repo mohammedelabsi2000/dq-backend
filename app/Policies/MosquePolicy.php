@@ -26,12 +26,11 @@ class MosquePolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Mosque  $mosque
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view($user, Mosque $mosque)
+    public function view($user)
     {
-        return $user->hasPermissionTo('mosques.show', $mosque);
+        return $user->hasPermissionTo('mosques.show');
     }
 
     /**
@@ -40,43 +39,40 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user, Region $region)
+    public function create($user)
     {
-        return $user->hasPermissionTo('mosques.create', $region);
+        return $user->hasPermissionTo('mosques.create');
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Mosque  $mosque
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update($user, Mosque $mosque)
+    public function update($user)
     {
-        return $user->hasPermissionTo('mosques.update', $mosque);
+        return $user->hasPermissionTo('mosques.update');
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Mosque  $mosque
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete($user, Mosque $mosque)
+    public function delete($user)
     {
-        return $user->hasPermissionTo('mosques.delete', $mosque);
+        return $user->hasPermissionTo('mosques.delete');
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Mosque  $mosque
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore($user, Mosque $mosque)
+    public function restore($user)
     {
         //
     }

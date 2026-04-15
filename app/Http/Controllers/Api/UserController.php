@@ -77,7 +77,7 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
-        $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.roleAbilities']);
+        $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.permissions']);
         return $this->success(
             new UserResource($user),
             'بيانات المستخدم',

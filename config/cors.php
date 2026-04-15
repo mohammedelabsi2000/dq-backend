@@ -25,7 +25,7 @@ return [
         'http://10.10.10.16:9090',
         'http://localhost:9090',
         'http://10.10.10.43:9090',
-        'http://10.10.10.76:9090',
+        'http://10.10.10.26:9090',
     ],
 
     'allowed_origins_patterns' => [],

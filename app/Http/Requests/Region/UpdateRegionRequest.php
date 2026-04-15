@@ -2,14 +2,12 @@
 
 namespace App\Http\Requests\Region;
 
-use App\Http\Traits\ApiResponser;
 use App\Models\Branch;
 use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class UpdateRegionRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
@@ -75,18 +76,26 @@ class PermissionSeeder extends Seeder
         // creating all permissions for both sanctum and web guards
         foreach ($permissions as $permission) {
             Permission::firstOrCreate([
-                'name'       => $permission['name'],
-                'title'      => $permission['title'],
+                'name' => $permission['name'],
+                'title' => $permission['title'],
                 'guard_name' => 'sanctum',
             ]);
         }
 
         // Create admin role with all permissions for both guards
         $adminRole = Role::firstOrCreate([
-            'name'       => 'مدير الدائرة',
+            'name' => 'مدير الدائرة',
             'guard_name' => 'sanctum',
         ]);
 
+
+
         $adminRole->syncPermissions(Permission::all());
+
+        // Assign admin role to first user (equivalent to: INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES ('1', 'user', '1'))
+        $firstUser = User::find(1);
+        if ($firstUser) {
+            $firstUser->assignRole($adminRole);
+        }
     }
 }

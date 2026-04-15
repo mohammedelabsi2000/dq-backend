@@ -3,13 +3,11 @@
 namespace App\Http\Requests\Center;
 
 use App\Http\Requests\DQFormRequest;
-use App\Http\Traits\ApiResponser;
 use App\Models\Center;
 use App\Models\Region;
 
 class StoreCenterRequest extends DQFormRequest
 {
-    use ApiResponser;
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -17,10 +15,15 @@ class StoreCenterRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $region = Region::findOrFail($this->input('region_id'));
+        // $region = Region::findOrFail($this->input('region_id'));
         // dd($this->user()->can('create', [Center::class, $region]));
+        return $this->user()->hasPermissionTo('centers.create', 'sanctum');
 
-        return $this->user()->can('create', [Center::class, $region]);
+        // return $this->user()->can('create', Center::class);
+        // return $this->user()->can("create");
+        // $this->authorize('viewAny', Center::class);
+        // return $this->user()->can();
+
     }
 
     /**
