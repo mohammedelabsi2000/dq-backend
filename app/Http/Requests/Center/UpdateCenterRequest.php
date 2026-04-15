@@ -16,20 +16,7 @@ class UpdateCenterRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $center = $this->route('center'); // الحصول على المركز من الرابط
-
-        // التحقق من صلاحية تعديل المركز الحالي
-        if (!$this->user()->can('update', $center)) {
-            return false;
-        }
-
-        // إذا تم تغيير المنطقة، تحقق من صلاحية الإنشاء في المنطقة الجديدة
-        if ($this->has('region_id') && $this->input('region_id') != $center->region_id) {
-            $newRegion = Region::findOrFail($this->input('region_id'));
-            return $this->user()->can('create', [Center::class, $newRegion]);
-        }
-
-        return true;
+        return $this->user()->can('update', $this->route('center'));
     }
 
     /**
@@ -39,11 +26,6 @@ class UpdateCenterRequest extends DQFormRequest
      */
     public function rules()
     {
-        // return [
-        //     'name' => ['sometimes', 'required', 'string', 'max:255'],
-        //     'notes' => ['sometimes', 'nullable', 'string'],
-        //     'mosque_id' => ['sometimes', 'required', 'integer', 'exists:mosques,id'],
-        // ];
         return [
             'name'      => 'sometimes|required|string|max:255',
             'region_id' => 'sometimes|required|exists:regions,id',

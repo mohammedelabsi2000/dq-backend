@@ -15,20 +15,7 @@ class UpdateMosqueRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $mosque = $this->route('mosque'); // الحصول على المسجد من الرابط
-
-        // التحقق من صلاحية تعديل المسجد الحالي
-        if (!$this->user()->can('update', $mosque)) {
-            return false;
-        }
-
-        // إذا تم تغيير المنطقة، تحقق من صلاحية الإنشاء في المنطقة الجديدة
-        if ($this->has('region_id') && $this->input('region_id') != $mosque->region_id) {
-            $newRegion = Region::findOrFail($this->input('region_id'));
-            return $this->user()->can('create', [Mosque::class, $newRegion]);
-        }
-
-        return true;
+        return $this->user()->can('update', $this->route('mosque'));
     }
 
     /**

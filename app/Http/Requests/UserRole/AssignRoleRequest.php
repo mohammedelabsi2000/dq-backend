@@ -10,7 +10,6 @@ class AssignRoleRequest extends DQFormRequest
 {
     public function authorize(): bool
     {
-        // return $this->user()->can('create', Role::class);
         return $this->user()->hasPermissionTo('users.roles.update', 'sanctum');
     }
 

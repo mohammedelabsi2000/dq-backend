@@ -15,15 +15,7 @@ class StoreCenterRequest extends DQFormRequest
      */
     public function authorize()
     {
-        // $region = Region::findOrFail($this->input('region_id'));
-        // dd($this->user()->can('create', [Center::class, $region]));
-        return $this->user()->hasPermissionTo('centers.create', 'sanctum');
-
-        // return $this->user()->can('create', Center::class);
-        // return $this->user()->can("create");
-        // $this->authorize('viewAny', Center::class);
-        // return $this->user()->can();
-
+        return $this->user()->can('create', Center::class);
     }
 
     /**
@@ -33,11 +25,6 @@ class StoreCenterRequest extends DQFormRequest
      */
     public function rules()
     {
-        // return [
-        //     'name' => ['required', 'string', 'max:255'],
-        //     'notes' => ['nullable', 'string'],
-        //     'mosque_id' => ['required', 'integer', 'exists:mosques,id'],
-        // ];
         return [
             'name'      => 'required|string|max:255',
             'region_id' => 'required|exists:regions,id',

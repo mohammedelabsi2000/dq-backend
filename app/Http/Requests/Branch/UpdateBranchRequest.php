@@ -13,9 +13,7 @@ class UpdateBranchRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $branch = $this->route('branch'); // الحصول على الفرع من الرابط
-
-        return $this->user()->can('update', $branch);
+        return $this->user()->can('update', $this->route('branch'));
     }
 
     /**

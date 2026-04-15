@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Models\Branch;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BranchPolicy
@@ -17,9 +16,6 @@ class BranchPolicy
      */
     public function viewAny($user)
     {
-        // return $user->hasAbility('branches.show');
-        // dd($user);
-        // dd($user->hasPermissionTo('branches.show', 'sanctum'));
         return $user->hasPermissionTo('branches.show');
     }
 
@@ -27,12 +23,10 @@ class BranchPolicy
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view($user, Branch $branch)
+    public function view($user)
     {
-        // return $user->hasAbility('branches.show', $branch);
         return $user->hasPermissionTo('branches.show');
     }
 
@@ -44,7 +38,6 @@ class BranchPolicy
      */
     public function create($user)
     {
-        // return $user->hasAbility('branches.create');
         return $user->hasPermissionTo('branches.create');
     }
 
@@ -52,12 +45,10 @@ class BranchPolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update($user, Branch $branch)
+    public function update($user)
     {
-        // return $user->hasAbility('branches.update', $branch);
         return $user->hasPermissionTo('branches.update');
     }
 
@@ -65,12 +56,10 @@ class BranchPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete($user, Branch $branch)
+    public function delete($user)
     {
-        // return $user->hasAbility('branches.delete', $branch);
         return $user->hasPermissionTo('branches.delete');
     }
 
@@ -78,25 +67,15 @@ class BranchPolicy
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore($user, Branch $branch)
-    {
-        // return $user->hasAbility('branches.restore', $branch);
-        return $user->hasPermissionTo('branches.restore');
-    }
+    public function restore($user) {}
 
     /**
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Branch  $branch
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete($user, Branch $branch)
-    {
-        // return $user->hasAbility('branches.forceDelete', $branch);
-        return $user->hasPermissionTo('branches.forceDelete');
-    }
+    public function forceDelete($user) {}
 }

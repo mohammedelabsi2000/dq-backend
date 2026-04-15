@@ -9,7 +9,6 @@ class UpdateRoleRequest extends DQFormRequest
 {
     public function authorize(): bool
     {
-        // return $this->user()->can('update', $this->route('role'));
         return $this->user()->hasPermissionTo('roles.update', 'sanctum');
     }
 

@@ -28,7 +28,7 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view($user)
+    public function view($user, Mosque $mosque)
     {
         return $user->hasPermissionTo('mosques.show');
     }
@@ -50,7 +50,7 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update($user)
+    public function update($user, Mosque $mosque)
     {
         return $user->hasPermissionTo('mosques.update');
     }
@@ -61,7 +61,7 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete($user)
+    public function delete($user, Mosque $mosque)
     {
         return $user->hasPermissionTo('mosques.delete');
     }
@@ -72,7 +72,7 @@ class MosquePolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore($user)
+    public function restore($user, Mosque $mosque)
     {
         //
     }

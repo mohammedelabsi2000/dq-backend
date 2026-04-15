@@ -15,20 +15,7 @@ class UpdateRegionRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $region = $this->route('region'); // الحصول على المنطقة من الرابط
-
-        // التحقق من صلاحية تعديل المنطقة الحالية
-        if (!$this->user()->can('update', $region)) {
-            return false;
-        }
-
-        // إذا تم تغيير الفرع، تحقق من صلاحية الإنشاء في الفرع الجديد
-        if ($this->has('branch_id') && $this->input('branch_id') != $region->branch_id) {
-            $newBranch = Branch::findOrFail($this->input('branch_id'));
-            return $this->user()->can('create', [Region::class, $newBranch]);
-        }
-
-        return true;
+        return $this->user()->can('update', $this->route('region'));
     }
 
     /**

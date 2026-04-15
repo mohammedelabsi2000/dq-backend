@@ -16,34 +16,7 @@ class UpdateHalaqaRequest extends DQFormRequest
 {
     public function authorize()
     {
-        $halaqa = $this->route('halaqa');
-
-        // التحقق من صلاحية تعديل الحلقة الحالية
-        if (!$this->user()->can('update', $halaqa)) {
-            return false;
-        }
-
-        // إذا تم تغيير المرجع، تحقق من الصلاحية الجديدة
-        $referenceType = $this->input('reference_type');
-        $referenceId = $this->input('reference_id');
-
-        if ($referenceType && $referenceId) {
-            // تحديد النموذج بناءً على نوع المرجع
-            $modelMap = [
-                HalaqaReferenceType::Center->code() => Center::class,
-                HalaqaReferenceType::Region->code() => Region::class,
-            ];
-
-            if (isset($modelMap[$referenceType])) {
-                $modelClass = $modelMap[$referenceType];
-                $newReference = $modelClass::findOrFail($referenceId);
-
-                // التحقق من صلاحية الإنشاء في المرجع الجديد
-                return $this->user()->can('create', [Halaqa::class, $newReference]);
-            }
-        }
-
-        return true;
+        return $this->user()->can('update', $this->route('halaqa'));
     }
 
     /**

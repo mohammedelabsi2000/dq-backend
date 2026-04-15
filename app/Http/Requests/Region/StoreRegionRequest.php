@@ -15,9 +15,7 @@ class StoreRegionRequest extends DQFormRequest
      */
     public function authorize()
     {
-        $branch = Branch::findOrFail($this->input('branch_id'));
-
-        return $this->user()->can('create', [Region::class, $branch]);
+        return $this->user()->can('create', Region::class);
     }
 
     /**
