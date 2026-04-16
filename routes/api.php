@@ -80,8 +80,8 @@ Route::middleware('auth:sanctum')->group(function () {
 //     Route::post('logout', [AuthController::class, 'logout']);
 //     Route::get('profile', [AuthController::class, 'profile']);
 // });
-Route::apiResource('plans', PlanController::class);
-Route::apiResource('attendances', AttendanceController::class);
+// Route::apiResource('plans', PlanController::class);
+// Route::apiResource('attendances', AttendanceController::class);
 
 // Route::prefix('attendances')->group(function () {
 //     Route::get('/', [AttendanceController::class, 'index']);
