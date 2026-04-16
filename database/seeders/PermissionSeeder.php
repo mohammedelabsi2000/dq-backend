@@ -88,8 +88,6 @@ class PermissionSeeder extends Seeder
             'guard_name' => 'sanctum',
         ]);
 
-
-
         $adminRole->syncPermissions(Permission::all());
 
         // Assign admin role to first user (equivalent to: INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES ('1', 'user', '1'))
