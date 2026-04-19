@@ -49,13 +49,24 @@ class AccessTokensController extends Controller
     public function destroy(Request $request, $token = null)
     {
         $user = Auth::guard('sanctum')->user();
+
         if (null === $token) {
             $request->user()->currentAccessToken()->delete();
             return $this->success(null, "تم تسجيل الخروج بنجاح", 200);
         }
 
         $personalAccessToken = PersonalAccessToken::findToken($token);
-        if ($user->id == $personalAccessToken->tokenable_id && get_class($user) == $personalAccessToken->tokenable_type) {
+
+        if (!$personalAccessToken) {
+            return $this->error("التوكن غير موجود!", 404, null);
+        }
+
+        // ✅ بدل مقارنة الـ class name، قارن الـ tokenable_id فقط
+        // أو استخدم is() للمقارنة الصحيحة
+        if (
+            $personalAccessToken->tokenable_id == $user->id
+            && $personalAccessToken->tokenable()->getModel() instanceof \App\Models\User
+        ) {
             $personalAccessToken->delete();
             return $this->success($user, "تم تسجيل الخروج بنجاح", 200);
         }
