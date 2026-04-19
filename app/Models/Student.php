@@ -189,4 +189,26 @@ class Student extends Model
     {
         return $query->with(self::standardRelations());
     }
+
+    public function scopeByGuardian($query, $guardianId)
+    {
+        return $query->where('guardian_id', $guardianId);
+    }
+
+    public function scopeByMosque($query, $mosqueId)
+    {
+        return $query->where('mosque_id', $mosqueId);
+    }
+
+    public function getAge()
+    {
+        $today = now();
+        $age = $today->diffInYears($this->dob);
+        return $age;
+    }
+
+    public function isActiveInHalaqa($halaqaId)
+    {
+        return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('to_date')->exists();
+    }
 }
