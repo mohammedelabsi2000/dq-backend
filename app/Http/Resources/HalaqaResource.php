@@ -49,7 +49,7 @@ class HalaqaResource extends JsonResource
             | Supervisor and Students Count
             |--------------------------------------------------------------------------
             */
-            'supervisor' => $this->whenLoaded(
+            'supervisors' => $this->whenLoaded(
                 'supervisors',
                 fn() => $this->supervisors->pluck('user')
             ),

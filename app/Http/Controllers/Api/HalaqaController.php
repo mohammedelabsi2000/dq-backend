@@ -34,7 +34,7 @@ class HalaqaController extends Controller
         if ($request->filled('center_id')) {
             $query->whereHasMorph(
                 'reference',
-                [HalaqaReferenceType::Center],
+                [HalaqaReferenceType::Center->value],
                 function ($query) {
                     $query->where('id', request()->integer('center_id'));
                 }
@@ -46,11 +46,11 @@ class HalaqaController extends Controller
             $regionId = $request->integer('region_id');
             $query->where(function ($q) use ($regionId) {
                 // Halaqas directly under this region
-                $q->whereHasMorph('reference', [HalaqaReferenceType::Region], function ($regionQuery) use ($regionId) {
+                $q->whereHasMorph('reference', [HalaqaReferenceType::Region->value], function ($regionQuery) use ($regionId) {
                     $regionQuery->where('id', $regionId);
                 })
                     // Halaqas under centers in this region
-                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Center], function ($centerQuery) use ($regionId) {
+                    ->orWhereHasMorph('reference', [HalaqaReferenceType::Center->value], function ($centerQuery) use ($regionId) {
                         $centerQuery->where('region_id', $regionId);
                     });
             });
