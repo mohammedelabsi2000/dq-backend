@@ -20,7 +20,7 @@ class RoleController extends Controller
     public function index()
     {
         if (!auth()->user()->hasPermissionTo('roles.show', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         $query = Role::query();
@@ -77,7 +77,7 @@ class RoleController extends Controller
         // $this->authorize('view', $role);
         // $this->hasPermission('roles.show');
         if (!auth()->user()->hasPermissionTo('roles.show', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         return $this->success(new RoleResource($role->load('permissions')), 'بيانات الدور');
@@ -121,7 +121,7 @@ class RoleController extends Controller
         // $this->authorize('delete', $role);
         // $this->hasPermission('roles.delete');
         if (!auth()->user()->hasPermissionTo('roles.delete', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         $role->delete();
@@ -137,7 +137,7 @@ class RoleController extends Controller
     public function abilities()
     {
         if (!auth()->user()->hasPermissionTo('roles.show', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         $permissions = Permission::where('guard_name', 'sanctum')
