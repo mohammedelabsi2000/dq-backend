@@ -200,7 +200,7 @@ class Student extends Model
         return $query->where('mosque_id', $mosqueId);
     }
 
-    public function getAge()
+    public function getAgeAttribute()
     {
         $today = now();
         $age = $today->diffInYears($this->dob);

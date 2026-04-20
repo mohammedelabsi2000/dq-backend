@@ -254,7 +254,7 @@ class StudentTest extends TestCase
         $student = Student::factory()->create(['dob' => '2000-01-01']);
 
         // Assuming current date is 2026-01-01 for testing
-        $this->assertEquals(26, $student->getAge());
+        $this->assertEquals(26, $student->age);
     }
 
     public function test_is_active_in_halaqa_method()
