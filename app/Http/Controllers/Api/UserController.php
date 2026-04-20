@@ -51,7 +51,7 @@ class UserController extends Controller
         if ($user) {
             return $this->error(
                 'المستخدم موجود مسبقاً',
-                409
+                422
             );
         } else {
             $data = $request->validated();
