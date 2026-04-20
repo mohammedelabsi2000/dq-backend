@@ -186,21 +186,12 @@ class ConstantTypeSeeder extends Seeder
             unset($typeData['constants']);
 
             $constantType = ConstantType::firstOrCreate([
-<<<<<<< 59-testing09-feature-tests-remaining-crud-controllers
-                ...$typeData,
-            ]);
-
-            foreach ($constants as $constant) {
-                Constant::firstOrCreate([
-                    ...$constant,
-=======
                 'name' => $typeData['name']
             ], $typeData);
 
             foreach ($constants as $constant) {
                 Constant::firstOrCreate([
                     'name' => $constant['name'],
->>>>>>> main
                     'constant_type_id' => $constantType->id,
                 ], $constant);
             }
