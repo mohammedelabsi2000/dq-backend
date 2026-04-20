@@ -2,11 +2,11 @@
 
 namespace Tests\Traits;
 
+use App\Models\ConstantType;
 use App\Models\User;
 use Database\Seeders\ConstantTypeSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\PermissionSeeder;
-use Database\Seeders\QuranSeeder;
 use Spatie\Permission\Models\Role;
 
 trait SeedsTestData
@@ -21,7 +21,7 @@ trait SeedsTestData
         $this->seed(UserSeeder::class);
         $this->seed(PermissionSeeder::class);
         // $this->seed(QuranSeeder::class);
-
+        
         $this->adminUser = User::find(1);
     }
 }

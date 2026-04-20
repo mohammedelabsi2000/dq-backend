@@ -14,13 +14,14 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // إنشاء مستخدم مسؤول
-        User::create([
+        User::firstOrCreate([
+            'email' => 'admin@tahfeez.dq'
+        ], [
             'fName' => 'رائد',
             'sName' => 'علي',
             'thName' => 'حسن',
             'family' => 'المدهون',
             'name' => 'admin',
-            'email' => 'admin@tahfeez.dq',
             'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'gender' => 'ذكر',

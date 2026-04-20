@@ -14,7 +14,7 @@ class DqModel extends Model
 
     // Read this property in AppServiceProvider to determine if audit should be enabled for this model
     public static $usesAudit = true;
-
+    
     /**
      * Get the user that created the model.
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
