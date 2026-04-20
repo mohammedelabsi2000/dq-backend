@@ -25,7 +25,7 @@ class IdQueryController extends Controller
         try {
             $personData = $this->idQueryServices->get($identity);
         } catch (\InvalidArgumentException $e) {
-            return $this->error($e->getMessage(), 404);
+            return $this->error($e->getMessage(), 422);
         }
 
         return $this->success([
