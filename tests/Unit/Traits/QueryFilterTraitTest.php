@@ -7,6 +7,7 @@ use App\Traits\QueryFilterTrait;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class QueryFilterTraitTest extends TestCase
@@ -15,9 +16,21 @@ class QueryFilterTraitTest extends TestCase
 
     private object $controller;
 
+    // protected function setUp(): void
+    // {
+    //     parent::setUp();
+
+    //     $this->controller = new class {
+    //         use QueryFilterTrait;
+    //     };
+    // }
     protected function setUp(): void
     {
         parent::setUp();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Branch::query()->forceDelete();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->controller = new class {
             use QueryFilterTrait;
@@ -58,9 +71,12 @@ class QueryFilterTraitTest extends TestCase
 
     public function test_apply_filters_no_limit()
     {
-        $this->freshRequest();
+
+        Branch::query()->forceDelete();
 
         Branch::factory()->count(25)->create();
+        $this->freshRequest();
+
 
         $result = $this->controller->applyFilters(Branch::query(), ['limit' => '*']);
         $rows   = $result['query']->get();
@@ -178,6 +194,8 @@ class QueryFilterTraitTest extends TestCase
 
     public function test_apply_filters_count_before_pagination()
     {
+
+        Branch::query()->forceDelete();
         Branch::factory()->count(15)->create();
 
         $this->freshRequest(['skip' => 0, 'limit' => 5]);
@@ -209,6 +227,7 @@ class QueryFilterTraitTest extends TestCase
 
     public function test_apply_filters_a_returns_array()
     {
+        Branch::query()->forceDelete();
         Branch::factory()->count(5)->create();
 
         $this->freshRequest();
