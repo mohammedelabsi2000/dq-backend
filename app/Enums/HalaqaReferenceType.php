@@ -3,6 +3,8 @@
 namespace App\Enums;
 
 use App\Contracts\HasLabelAndCode;
+use App\Models\Center;
+use App\Models\Region;
 
 enum HalaqaReferenceType: string implements HasLabelAndCode
 {
@@ -26,5 +28,13 @@ enum HalaqaReferenceType: string implements HasLabelAndCode
     {
         $locale = auth()->user()?->locale ?? app()->getLocale();
         return $this->labels()[$locale] ?? $this->labels()['ar'];
+    }
+
+    public function model(): ?string
+    {
+        return match ($this) {
+            self::Center => Center::class,
+            self::Region => Region::class,
+        };
     }
 }
