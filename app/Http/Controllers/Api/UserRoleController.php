@@ -20,7 +20,7 @@ class UserRoleController extends Controller
     public function index(User $user)
     {
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         return $this->success([
@@ -78,7 +78,7 @@ class UserRoleController extends Controller
     public function removeScopes(User $user)
     {
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         $user->clearScopes();
@@ -95,7 +95,7 @@ class UserRoleController extends Controller
     public function removeRoles(User $user)
     {
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
-            return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
         $user->syncRoles([]);

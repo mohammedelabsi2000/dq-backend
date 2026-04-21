@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Gender;
 use App\Models\Constant;
 use App\Models\Mosque;
 use App\Models\User;
@@ -40,7 +41,7 @@ class UserFactory extends Factory
             'dob' => $this->faker->dateTimeBetween('-60 years', '-18 years'),
             'mosque_id' => Mosque::inRandomOrder()->first()->id ?? null,
             'location' => $this->faker->address(),
-            'gender' => $this->faker->randomElement(['ذكر', 'أنثى']),
+            'gender' => fake()->randomElement(Gender::cases())->value,
             'marital_status_id' => Constant::where('constant_type_id', function ($q) {
                 $q->select('id')->from('constant_types')->where('name', 'marital_status');
             })->inRandomOrder()->first()->id ?? null,

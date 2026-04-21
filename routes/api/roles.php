@@ -11,13 +11,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Roles CRUD
     Route::apiResource('roles', RoleController::class);
 
-    // ->middleware([
-    //     'index' => 'permission:roles.show',
-    //     'show' => 'permission:roles.show',
-    //     'store' => 'permission:roles.create',
-    //     'update' => 'permission:roles.update',
-    //     'destroy' => 'permission:roles.delete',
-    // ])
 
     Route::prefix('users/{user}')->group(function () {
 
