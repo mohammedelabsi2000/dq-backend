@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Gender;
+use App\Helpers\ConstantHelper;
 use App\Models\Constant;
 use App\Models\Mosque;
 use App\Models\User;
@@ -52,9 +53,9 @@ class UserFactory extends Factory
             'jobname' => $this->faker->jobTitle(),
             'job_place' => $this->faker->company(),
             'job_salary' => $this->faker->optional()->randomFloat(2, 1000, 50000),
-            'prefix_name_id' => Constant::where('constant_type_id', function ($q) {
-                $q->select('id')->from('constant_types')->where('name', 'prefix_name');
-            })->inRandomOrder()->first()->id ?? null,
+            'prefix_name_id' => fake()->randomElement(
+                ConstantHelper::getConstantIdsByType('prefix_name')
+            ),
         ];
     }
 
