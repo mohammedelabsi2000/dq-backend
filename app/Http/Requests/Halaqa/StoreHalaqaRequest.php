@@ -67,7 +67,6 @@ class StoreHalaqaRequest extends DQFormRequest
                 'required',
                 'integer',
                 function ($attribute, $value, $fail) {
-                    // $type = $this->reference_type;
                     $type = Relation::getMorphedModel($this->reference_type);
                     if (!$type || !class_exists($type)) {
                         $fail('نوع المرجع غير صالح.');

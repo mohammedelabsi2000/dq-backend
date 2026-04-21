@@ -74,8 +74,6 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        // $this->authorize('view', $role);
-        // $this->hasPermission('roles.show');
         if (!auth()->user()->hasPermissionTo('roles.show', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
@@ -118,8 +116,6 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        // $this->authorize('delete', $role);
-        // $this->hasPermission('roles.delete');
         if (!auth()->user()->hasPermissionTo('roles.delete', 'sanctum')) {
             return $this->errorMessage('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
@@ -142,10 +138,6 @@ class RoleController extends Controller
 
         $permissions = Permission::where('guard_name', 'sanctum')
             ->get();
-        // ->groupBy(fn($p) => explode('.', $p->name)[0])
-        // ->map(fn($items, $key) => [$key => $items])
-        // ->values();
-
 
         return $this->success(PermissionResource::collection($permissions), 'الصلاحيات', 200);
     }

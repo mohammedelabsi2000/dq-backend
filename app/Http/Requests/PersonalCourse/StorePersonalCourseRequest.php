@@ -39,11 +39,6 @@ class StorePersonalCourseRequest extends DQFormRequest
             ],
             'person_id' => 'required',
             'person_type' => 'required|string',
-
-            // Validation للملفات المتعددة
-            // 'images' => 'nullable|array',
-            // 'images.*' => 'file|mimes:pdf|max:5120',
-
             'certificate_file' => 'nullable|file|mimes:pdf|max:5120',
         ];
     }
@@ -72,13 +67,6 @@ class StorePersonalCourseRequest extends DQFormRequest
             'type_id.in' => 'نوع الدورة غير صالح.',
             'person_id.required' => 'معرف الشخص مطلوب.',
             'person_type.required' => 'نوع الشخص مطلوب.',
-
-            // Custom messages للملفات المتعددة 
-            // 'images.array' => 'الصور يجب أن تكون مصفوفة.',
-            // 'images.*.file' => 'كل عنصر في الصور يجب أن يكون ملفًا.',
-            // 'images.*.mimes' => 'كل ملف في الصور يجب أن يكون من نوع PDF.',
-            // 'images.*.max' => 'كل ملف في الصور يجب أن لا يتجاوز 5 ميجابايت.',
-
             'certificate_file.file' => 'الملف يجب أن يكون ملفاً صالحاً.',
             'certificate_file.mimes' => 'يجب أن يكون الملف بصيغة PDF فقط.',
             'certificate_file.max' => 'حجم الملف يجب ألا يتجاوز 5 ميجابايت.',

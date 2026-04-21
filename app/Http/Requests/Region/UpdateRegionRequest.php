@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Region;
 
-use App\Models\Branch;
-use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class UpdateRegionRequest extends DQFormRequest

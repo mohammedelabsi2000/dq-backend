@@ -13,7 +13,6 @@ class ImageResource extends JsonResource
             'id' => $this->id,
             'file_name' => $this->file_name,
             'file_url' => asset('storage/' . $this->file_path),
-            // 'file_url' => Storage::url('app/public/'),
             'mime_type' => $this->mime_type,
             'file_size' => $this->file_size,
             'image_type' => $this->image_type?->label(),
