@@ -34,9 +34,11 @@ class UserResource extends JsonResource
             'job_salary' => $this->job_salary,
 
             // العلاقات
-            'mosque' => new MosqueResource($this->whenLoaded('mosque')),
+            'mosque' => $this->whenLoaded('mosque', function () {
+                return new MosqueResource($this->mosque);
+            }, null),
             'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
-            'prefix_name' => new ConstantResource($this->whenLoaded('prefixName')),
+            'prefix_name' => new ConstantResource($this->whenLoaded('prefix')),
             'roles' => UserRoleResource::collection($this->whenLoaded('roles')),
             'abilities' => $this->when(
                 $this->relationLoaded('roles'),
@@ -46,7 +48,7 @@ class UserResource extends JsonResource
                     ->values()
                     ->map(fn($ability) => [
                         'ability' => $ability->ability,
-                        'type'    => $ability->type,
+                        'type' => $ability->type,
                     ])
             ),
             'user_scopes' => $this->scopes,

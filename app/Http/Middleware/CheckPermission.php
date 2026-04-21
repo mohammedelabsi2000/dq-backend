@@ -20,7 +20,7 @@ class CheckPermission
     public function handle(Request $request, Closure $next, string $permission)
     {
         if (!$request->user() || !$request->user()->can($permission)) {
-            return $this->errorMessage('غير مصرح - لا تملك الصلاحية للوصول إلى هذا الرابط', 403);
+            return $this->error('غير مصرح - لا تملك الصلاحية للوصول إلى هذا الرابط', 403);
         }
 
         return $next($request);
