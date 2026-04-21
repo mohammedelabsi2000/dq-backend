@@ -7,6 +7,7 @@ use App\Helpers\ConstantHelper;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Constant;
+use App\Models\Halaqa;
 use App\Models\Mosque;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -37,7 +38,7 @@ class StudentFactory extends Factory
             ConstantHelper::getConstantIdsByType('money_status')
         );
         $prefixNameId = fake()->randomElement(
-            ConstantHelper::getConstantIdsByType('name_prefix')
+            ConstantHelper::getConstantIdsByType('prefix_name')
         );
         $guardianTypeId = fake()->randomElement(
             ConstantHelper::getConstantIdsByType('guardian_type')
@@ -125,5 +126,27 @@ class StudentFactory extends Factory
         return $this->state(fn(array $attributes) => [
             'mosque_id' => $mosqueId,
         ]);
+    }
+
+    /**
+     * @param int|null $halaqaId
+     * @return static
+     */
+    public function withHalaqa(?int $halaqaId = null): static
+    {
+        return $this->afterCreating(function (Student $student) use ($halaqaId) {
+            $statusId = fake()->randomElement(
+                ConstantHelper::getConstantIdsByType('enrollment_status')
+            );
+            if (!$halaqaId) {
+                $halaqa = Halaqa::factory()->create();
+                $halaqaId = $halaqa->id;
+            }
+            $student->halaqas()->attach($halaqaId, [
+                'enrollment_status_id' => $statusId,
+                'from_date' => now(),
+            ]);
+
+        });
     }
 }
