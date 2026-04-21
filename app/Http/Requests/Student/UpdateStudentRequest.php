@@ -87,7 +87,6 @@ class UpdateStudentRequest extends BaseStudentRequest
             'prefix_name_id.in' => 'اللقب المحدد غير صحيح.',
 
             'guardian_id.digits' => 'رقم هوية ولي الأمر يجب أن يكون 9 أرقام.',
-            // 'guardian_id.exists' => 'رقم هوية ولي الأمر غير موجود في النظام.',
 
             'guardian_type_id.in' => 'نوع ولي الأمر المحدد غير صحيح.',
 

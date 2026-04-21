@@ -52,18 +52,10 @@ class UserResource extends JsonResource
                     ])
             ),
             'user_scopes' => $this->scopes,
-            //  $this->when(
-            //     $this->relationLoaded('scopes'),
-            //     fn() => $this->scopes->map(fn($scope) => [
-            //         'scope_type' => $scope->scope_type,
-            //         'scope_id'   => $scope->scope_id,
-            //     ])
-            // ),
+
 
             'location' => $this->location,
 
-            // لو عندك صورة بعدين
-            // 'image' => new ImageResource($this->whenLoaded('image')),
         ];
     }
 }

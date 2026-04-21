@@ -13,14 +13,13 @@ class PlanLevelFactory extends Factory
 
     public function definition(): array
     {
-        $timeUnitId = Constant::where('constant_type_id', function($q) {
+        $timeUnitId = Constant::where('constant_type_id', function ($q) {
             $q->select('id')->from('constant_types')->where('name', 'time_unit');
         })->inRandomOrder()->first()->id ?? Constant::factory();
-        
+
         return [
             'name' => 'Level ' . $this->faker->word(),
             'plan_id' => Plan::factory(),
-            // 'level_order' => $this->faker->unique()->numberBetween(1, 10),
             'time_of_level' => $this->faker->optional()->numberBetween(30, 180),
             'time_unit_id' => $timeUnitId,
             'max_time' => $this->faker->optional()->numberBetween(180, 360),

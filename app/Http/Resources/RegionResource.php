@@ -24,8 +24,6 @@ class RegionResource extends JsonResource
             }, null),
             'mosques_count' => $this->whenCounted('mosques'),
             'mosques'       => MosqueResource::collection($this->whenLoaded('mosques')),
-            // 'created_at'    => $this->created_at->format('Y-m-d H:i:s'),
-            // 'updated_at'    => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }

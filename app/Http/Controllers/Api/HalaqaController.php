@@ -8,9 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Halaqa\StoreHalaqaRequest;
 use App\Http\Requests\Halaqa\UpdateHalaqaRequest;
 use App\Http\Resources\HalaqaResource;
-use App\Models\Center;
 use App\Models\Halaqa;
-use App\Models\Region;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller

@@ -76,7 +76,6 @@ class MosqueController extends Controller
                     'name' => $request->input('name'),
                     'region_id' => $request->input('region_id'),
                     'mosque_id' => $mosque->id,
-                    // 'notes' => $request->input('notes'),
                 ];
                 $center = Center::create($centerData);
             }
@@ -115,26 +114,6 @@ class MosqueController extends Controller
     {
         $this->authorize('view', $mosque);
 
-        // تحميل العلاقات حسب الطلب
-        // if ($request->boolean('with_region')) {
-        //     $mosque->load('region');
-        // }
-
-        // if ($request->boolean('with_centers')) {
-        //     $mosque->load('centers');
-        // }
-
-        // if ($request->boolean('with_users')) {
-        //     $mosque->load('users');
-        // }
-
-        // if ($request->boolean('with_centers_count')) {
-        //     $mosque->loadCount('centers');
-        // }
-
-        // if ($request->boolean('with_users_count')) {
-        //     $mosque->loadCount('users');
-        // }
         if ($request->boolean('with_region')) {
             $mosque->load('region.branch');
         }
@@ -230,14 +209,6 @@ class MosqueController extends Controller
                 400
             );
         }
-
-        // // تحقق من وجود مستخدمين تابعين قبل الحذف
-        // if ($mosque->users()->exists()) {
-        //     return $this->error(
-        //         'لا يمكن حذف المسجد لأنه يحتوي على مستخدمين تابعين',
-        //         400
-        //     );
-        // }
 
         $mosque->delete();
 

@@ -41,8 +41,6 @@ class RegionController extends Controller
         }
 
         $regions = $query->withCount('mosques')->get();
-        // $perPage = $request->integer('per_page', 15);
-        // $regions = $query->withCount('mosques')->latest()->paginate($perPage);
 
         return $this->successWithPagination(
             RegionResource::collection($regions),

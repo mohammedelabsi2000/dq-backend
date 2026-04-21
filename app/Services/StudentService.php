@@ -66,10 +66,7 @@ class StudentService
             $gurdianData = [];
 
             $personData = $idQueryServices->get($identity);
-            /* try {
-            } catch (\InvalidArgumentException $e) {
-                return $this->notFound("لايوجد بيانات لرقم هوية ولي الأمر {$identity}");
-            } */
+
 
             $gurdianData = [
                 'fName' => $personData['CI_FIRST_ARB'] ?? null,
@@ -113,7 +110,7 @@ class StudentService
         }
     }
 
-  
+
     public function assignStudentToHalaqa(Student $student, int $halaqaId): void
     {
         // Get the default enrollment status ID for "منتظم" (regular)

@@ -2,8 +2,6 @@
 
 namespace App\Http\Requests\Center;
 
-use App\Models\Center;
-use App\Models\Region;
 use App\Http\Requests\DQFormRequest;
 
 class UpdateCenterRequest extends DQFormRequest

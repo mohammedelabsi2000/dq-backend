@@ -14,8 +14,6 @@ class BranchFactory extends Factory
         return [
             'name' => $this->faker->company() . ' Branch',
             'notes' => $this->faker->optional()->sentence(),
-            // 'max_replacement_limit' => $this->faker->numberBetween(10, 100),
-            // 'min_replacement_limit' => $this->faker->numberBetween(1, 9),
         ];
     }
 }
