@@ -44,7 +44,7 @@ trait QueryFilterTrait
             $orderBy = strtolower($orderBy) === 'asec' ? 'asc' : $orderBy;
             $query = $query->orderBy($orderColumn, $orderBy);
         }
-        
+
         // Pagination (skip/limit)
         $skip = $options['skip'] ?? request()->get('skip', 0);
         $limit = request()->get('limit');
