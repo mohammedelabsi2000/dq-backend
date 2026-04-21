@@ -167,9 +167,14 @@ class UserControllerTest extends TestCase
     /** @test */
     public function test_store_rejects_duplicate_identity()
     {
-        User::factory()->create(['identity' => '123456789']);
+        $identity = '123456789';
+        
+        User::where('identity', $identity)->first()
+            ?? User::factory()->create([
+                'identity' => $identity,
+            ]);
 
-        $data = User::factory()->make(['identity' => '123456789'])->toArray();
+        $data = User::factory()->make(['identity' => $identity])->toArray();
         $data['password'] = 'password123';
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
