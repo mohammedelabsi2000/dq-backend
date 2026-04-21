@@ -48,10 +48,10 @@ class AssignRoleRequest extends DQFormRequest
     protected function prepareForValidation()
     {
         $scopes = [];
+
         if ($this->has('scopes')) {
             foreach ($this->scopes as $scope) {
-                $scope = json_decode($scope, true);
-                array_push($scopes, $scope);
+                $scopes[] = is_string($scope) ? json_decode($scope, true) : $scope;
             }
         }
 

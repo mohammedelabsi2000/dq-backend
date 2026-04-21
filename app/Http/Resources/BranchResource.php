@@ -21,9 +21,6 @@ class BranchResource extends JsonResource
             'regions_count'         => $this->whenCounted('regions'),
             'regions'               => RegionResource::collection($this->whenLoaded('regions')),
             'created_at'            => $this->created_at->format('Y-m-d H:i:s'),
-
-            // 'updated_at'            => $this->updated_at->format('Y-m-d H:i:s'),
-
         ];
     }
 }

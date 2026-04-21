@@ -47,7 +47,6 @@ class AcademicQualificationResource extends JsonResource
             // الحقول الأساسية
             'detail' => $this->detail,
             'date_graduate' => $this->date_graduate,
-            // 'date_graduate_formatted' => $this->date_graduate?->format('Y'),
             'certificate_link' => $this->certificate_link,
             'educational_institution' => $this->educational_institution,
             'notes' => $this->notes,

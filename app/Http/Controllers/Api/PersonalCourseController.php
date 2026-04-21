@@ -71,7 +71,6 @@ class PersonalCourseController extends Controller
                 'disk' => 'public',
                 'mime_type' => $file->getMimeType(),
                 'file_size' => $file->getSize(),
-                // 'image_type' => $validated['image_type'] ?? null,
             ]);
         }
         return $this->success(

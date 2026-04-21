@@ -18,7 +18,10 @@ class MosqueResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'notes'         => $this->notes,
-            'region'        => new RegionResource($this->region),
+            // 'region'        => new RegionResource($this->region),
+            'region' => $this->whenLoaded('region', function () {
+                return new RegionResource($this->region);
+            }, null),
             'centers_count' => $this->whenCounted('centers'),
             'centers'       => CenterResource::collection($this->whenLoaded('centers')),
             'created_at'    => $this->created_at->format('Y-m-d H:i:s'),

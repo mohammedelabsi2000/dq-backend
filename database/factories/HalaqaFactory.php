@@ -36,7 +36,7 @@ class HalaqaFactory extends Factory
         $typeId = $this->faker->randomElement(
             ConstantHelper::getConstantIdsByType('halaqa_types')
         );
-        
+
         return [
             'name' => $this->faker->name(),
             'location' => $this->faker->optional()->address(),
