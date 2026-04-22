@@ -58,11 +58,6 @@ class PersonalCourseResource extends JsonResource
             // إحصائيات إضافية (إذا كانت محملة)
             'related_courses_count' => $this->when($this->related_courses_count !== null, $this->related_courses_count),
 
-            // التواريخ
-            // 'created_at' => $this->created_at ? $this->created_at->format('Y-m-d H:i:s') : null,
-            // 'created_at_formatted' => $this->created_at ? $this->created_at->format('d/m/Y') : null,
-            // 'updated_at' => $this->updated_at ? $this->updated_at->format('Y-m-d H:i:s') : null,
-
             'images' => $this->whenLoaded('images', function () {
                 return new ImageResource($this->images);
             }),

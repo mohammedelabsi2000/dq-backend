@@ -38,11 +38,7 @@ class StudentSeeder extends Seeder
      */
     private function ensureRequiredDataExists(): void
     {
-        /* // التأكد من وجود مساجد
-        if (Mosque::count() === 0) {
-            $this->command->info('جاري إنشاء مساجد افتراضية...');
-            \Database\Seeders\MosqueSeeder::class;
-        } */
+
 
         // التأكد من وجود المستخدمين (أولياء الأمور)
         if (User::count() === 0) {
@@ -60,21 +56,18 @@ class StudentSeeder extends Seeder
     private function ensureConstantsExist(): void
     {
         $requiredTypes = [
-            // 'marital_status' => ['أعزب', 'متزوج', 'مطلق', 'أرمل'],
             'money_status' => ['ميسور', 'متوسط', 'محتاج', 'فقير'],
             'name_prefix' => ['السيد', 'السيدة', 'الآنسة', 'الدكتور', 'المهندس'],
             'guardian_type' => ['أب', 'أم', 'جد', 'جدة', 'أخ', 'أخت', 'عم', 'خال'],
         ];
 
         foreach ($requiredTypes as $type => $values) {
-            // if (Constant::where('constant_type_id', $type)->count() === 0) {
             if (Constant::whereHas('constantType', fn($q) => $q->where('name', $type))->count() === 0) {
                 $this->command->info("جاري إنشاء ثوابت {$type}...");
                 foreach ($values as $value) {
                     Constant::create([
                         'constant_type_id' => ConstantType::where('name', 'like', $type)->value('id'),
                         'name' => $value,
-                        // 'order' => array_search($value, $values) + 1,
                     ]);
                 }
             }

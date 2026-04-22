@@ -91,7 +91,6 @@ class StoreStudentRequest extends BaseStudentRequest
 
             'guardian_id.required' => 'رقم هوية ولي الأمر مطلوب.',
             'guardian_id.digits' => 'رقم هوية ولي الأمر يجب أن يكون 9 أرقام.',
-            // 'guardian_id.exists' => 'رقم هوية ولي الأمر غير موجود في النظام.',
 
             'guardian_type_id.required' => 'صلة القرابة مطلوبة.',
             'guardian_type_id.in' => 'صلة القرابة المحددة غير صحيحة.',

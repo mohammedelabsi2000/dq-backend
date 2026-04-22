@@ -15,9 +15,6 @@ class ConstantFilter extends BaseFilter
 
     public function apply()
     {
-        // /** @var Builder|QueryBuilder $query */
-        // /** @var Request $request */
-
         $query = $this->query;
         $request = $this->request;
 

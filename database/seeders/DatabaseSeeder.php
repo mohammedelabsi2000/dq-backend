@@ -16,14 +16,9 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $this->call([
             ConstantTypeSeeder::class,
-            // BranchRegionMosqueSeeder::class,
             UserSeeder::class,
             PermissionSeeder::class,
             QuranSeeder::class,
-            // RoleSeeder::class,
-            // StudentSeeder::class,
-            // GradeSeeder::class,
-            // PlanSeeder::class,
         ]);
     }
 }

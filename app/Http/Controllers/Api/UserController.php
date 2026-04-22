@@ -21,13 +21,12 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('viewAny', User::class);
-        // $query = User::query()->visibleTo(auth()->user());
         $query = User::query();
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
         ]);
-        
+
         $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
 
         return $this->successWithPagination(
@@ -51,7 +50,7 @@ class UserController extends Controller
         if ($user) {
             return $this->error(
                 'المستخدم موجود مسبقاً',
-                409
+                422
             );
         } else {
             $data = $request->validated();

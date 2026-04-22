@@ -15,7 +15,8 @@ class UserSeeder extends Seeder
     {
         // إنشاء مستخدم مسؤول
         User::firstOrCreate([
-            'email' => 'admin@tahfeez.dq'
+            'email' => 'admin@tahfeez.dq',
+            'identity' => '100000000',
         ], [
             'fName' => 'رائد',
             'sName' => 'علي',
@@ -26,31 +27,7 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             'gender' => 'ذكر',
             'phone' => '0555555555',
-            'identity' => '100000000',
             'mosque_id' => Mosque::first()->id ?? null,
-            // 'created_by' => 1,
-            // 'updated_by' => 1,
         ]);
-
-        // إنشاء 50 مستخدم عادي
-        /* User::factory(50)
-            ->create()
-            ->each(function ($user) {
-                // لكل مستخدم 1-3 مؤهلات أكاديمية
-                AcademicQualification::factory()
-                    ->count(fake()->numberBetween(1, 3))
-                    ->create([
-                        'person_id' => $user->id,
-                        'person_type' => 'user',
-                    ]);
-
-                // لكل مستخدم 0-5 دورات
-                PersonalCourse::factory()
-                    ->count(fake()->numberBetween(0, 5))
-                    ->create([
-                        'person_id' => $user->id,
-                        'person_type' => 'user',
-                    ]);
-            }); */
     }
 }

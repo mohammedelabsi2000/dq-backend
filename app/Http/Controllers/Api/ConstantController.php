@@ -12,7 +12,6 @@ use App\Models\Constant;
 use App\Models\ConstantType;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-use function PHPSTORM_META\type;
 
 class ConstantController extends Controller
 {
@@ -26,7 +25,7 @@ class ConstantController extends Controller
     {
         $this->authorize('viewAny', Constant::class);
         $query = Constant::query();
-        
+
         $query = (new ConstantFilter($query, $request))->apply();
 
         // لإرجاع قائمة بالثوابت من نوع مخصص
