@@ -41,14 +41,26 @@ class StudentService
                 $this->findOrCreateGuardian($data['guardian_id'], $student->fName);
             }
 
-            // Extract halaqa_id from data if present
+            // // Extract halaqa_id from data if present
+            // $halaqaId = $data['halaqa_id'] ?? null;
+            // unset($data['halaqa_id']);
+
+            // $student->update($data);
+
+            // // Handle halaqa assignment if provided
+            // if ($halaqaId !== null) {
+            //     $this->updateStudentHalaqaAssignment($student, $halaqaId);
+            // }
+
+            // ✅ نتحقق إن كان halaqa_id موجوداً في الـ data (حتى لو null)
+            $hasHalaqaKey = array_key_exists('halaqa_id', $data);
             $halaqaId = $data['halaqa_id'] ?? null;
             unset($data['halaqa_id']);
 
             $student->update($data);
 
-            // Handle halaqa assignment if provided
-            if ($halaqaId !== null) {
+            // ✅ ندخل هنا إن مُرِّر halaqa_id سواء كان null أو قيمة
+            if ($hasHalaqaKey) {
                 $this->updateStudentHalaqaAssignment($student, $halaqaId);
             }
 
