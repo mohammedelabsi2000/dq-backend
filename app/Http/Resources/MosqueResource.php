@@ -15,17 +15,15 @@ class MosqueResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'            => $this->id,
-            'name'          => $this->name,
-            'notes'         => $this->notes,
+            'id' => $this->id,
+            'name' => $this->name,
+            'notes' => $this->notes,
             // 'region'        => new RegionResource($this->region),
-            'region' => $this->whenLoaded('region', function () {
-                return new RegionResource($this->region);
-            }, null),
+            'region' => new RegionResource($this->region),
             'centers_count' => $this->whenCounted('centers'),
-            'centers'       => CenterResource::collection($this->whenLoaded('centers')),
-            'created_at'    => $this->created_at->format('Y-m-d H:i:s'),
-            'updated_at'    => $this->updated_at->format('Y-m-d H:i:s'),
+            'centers' => CenterResource::collection($this->whenLoaded('centers')),
+            'created_at' => $this->created_at->format('Y-m-d H:i:s'),
+            'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ];
     }
 }
