@@ -50,7 +50,7 @@ trait QueryFilterTrait
         $limit = request()->get('limit');
 
         if ($limit === null || $limit === '') {
-            $limit = $options['limit'] ?? 10;
+            $limit = $options['limit'] ?? '*';
         }
 
         if ($limit != '*') {
