@@ -209,6 +209,6 @@ class Student extends Model
 
     public function isActiveInHalaqa($halaqaId)
     {
-        return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('to_date')->exists();
+        return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('halaqa_students.to_date')->exists();
     }
 }

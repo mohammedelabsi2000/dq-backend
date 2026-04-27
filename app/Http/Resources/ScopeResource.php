@@ -15,8 +15,8 @@ class ScopeResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'scope_type' => $this->scope_type,
-            'scope_id'   => $this->scope_id,
+            'type' => $this->scope_type,
+            'id'   => $this->scope_id,
         ];
     }
 }

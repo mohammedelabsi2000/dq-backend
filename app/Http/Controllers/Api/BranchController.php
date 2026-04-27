@@ -22,6 +22,7 @@ class BranchController extends Controller
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
+            'limit'         => '*',
         ]);
 
         $query = $q['query'];

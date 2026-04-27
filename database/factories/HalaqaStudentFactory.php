@@ -29,7 +29,9 @@ class HalaqaStudentFactory extends Factory
             'student_id' => Student::factory(),
             'from_date' => $fromDate,
             'to_date' => $this->faker->optional(0.3)->dateTimeBetween($fromDate, '+1 year'),
-            'status_id' => Constant::where('type', 'enrollment_status')->inRandomOrder()->first() ?? Constant::factory(),
+            'enrollment_status_id' => Constant::whereHas('constantType', fn($q) => $q->where('name', 'enrollment_status'))
+                ->inRandomOrder()
+                ->first()?->id ?? Constant::factory(),
         ];
     }
 
