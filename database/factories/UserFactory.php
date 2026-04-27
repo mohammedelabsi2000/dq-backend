@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Gender;
+use App\Helpers\ConstantHelper;
 use App\Models\Constant;
 use App\Models\Mosque;
 use App\Models\User;
@@ -42,9 +43,9 @@ class UserFactory extends Factory
             'mosque_id' => Mosque::inRandomOrder()->first()->id ?? null,
             'location' => $this->faker->address(),
             'gender' => fake()->randomElement(Gender::cases())->value,
-            'marital_status_id' => Constant::where('constant_type_id', function ($q) {
-                $q->select('id')->from('constant_types')->where('name', 'marital_status');
-            })->inRandomOrder()->first()->id ?? null,
+            'marital_status_id' => fake()->randomElement(
+                ConstantHelper::getConstantIdsByType('marital_status')
+            ),
             'numChildren' => $this->faker->numberBetween(0, 8),
             'identity' => $this->faker->unique()->numerify('#########'),
             'phone' => $this->faker->unique()->phoneNumber(),

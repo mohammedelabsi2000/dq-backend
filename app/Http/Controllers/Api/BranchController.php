@@ -18,6 +18,7 @@ class BranchController extends Controller
 
         $query = Branch::query()->visibleTo(auth()->user());
 
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
