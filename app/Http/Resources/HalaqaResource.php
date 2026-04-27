@@ -43,6 +43,8 @@ class HalaqaResource extends JsonResource
             'students' => StudentResource::collection(
                 $this->whenLoaded('students')
             ),
+            'from_date' => $this->from_date,
+            'to_date' => $this->to_date,
 
             /*
             |--------------------------------------------------------------------------

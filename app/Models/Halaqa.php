@@ -15,14 +15,16 @@ class Halaqa extends Model
 
     protected $table = 'halaqas';
 
-    protected $fillable = [
+    /* protected $fillable = [
         'name',
         'location',
         'description',
         'reference_type',
         'reference_id',
         'type_id',
-    ];
+    ]; */
+
+    protected $guarded = ['center_id', 'region_id'];
 
     protected $casts = [
         'reference_type' => HalaqaReferenceType::class,

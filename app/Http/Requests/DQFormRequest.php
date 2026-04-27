@@ -23,4 +23,24 @@ class DQFormRequest extends FormRequest
             $this->error('حدث خطأ في التحقق من البيانات', 422, $validator->errors())
         );
     }
+
+    /**
+     * Check if the request is a store request.
+     *
+     * @return bool
+     */
+    public function isStore()
+    {
+        return $this->isMethod('POST');
+    }
+
+    /**
+     * Check if the request is an update request.
+     *
+     * @return bool
+     */
+    public function isUpdate()
+    {
+        return $this->isMethod('PUT') || $this->isMethod('PATCH');
+    }
 }
