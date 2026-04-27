@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Enums\Gender;
-use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

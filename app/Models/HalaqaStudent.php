@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Concerns\HasVisibilityScope;
-use App\Traits\Searchable;
+use App\Concerns\Searchable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

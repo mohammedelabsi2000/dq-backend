@@ -98,7 +98,7 @@ class UserControllerTest extends TestCase
             ->getJson('/api/users?search=Mohammed');
 
         $response->assertOk();
-        $this->assertStringContainsString('Mohammed', $response->json('data.0.fName'));
+        $this->assertStringContainsString('Mohammed', $response->json('data.0.full_name'));
     }
 
     /** @test */

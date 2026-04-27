@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Traits\QueryFilterTrait;
-use App\Traits\Searchable;
+use App\Concerns\Searchable;
+use App\Http\Traits\QueryFilterTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,7 +14,7 @@ class DqModel extends Model
 
     // Read this property in AppServiceProvider to determine if audit should be enabled for this model
     public static $usesAudit = true;
-    
+
     /**
      * Get the user that created the model.
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
