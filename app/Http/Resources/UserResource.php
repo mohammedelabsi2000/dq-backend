@@ -34,9 +34,7 @@ class UserResource extends JsonResource
             'job_salary' => $this->job_salary,
 
             // العلاقات
-            'mosque' => $this->whenLoaded('mosque', function () {
-                return new MosqueResource($this->mosque);
-            }, null),
+            'mosque' => new MosqueResource($this->mosque),
             'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
             'prefix_name' => new ConstantResource($this->whenLoaded('prefix')),
             'roles' => UserRoleResource::collection($this->whenLoaded('roles')),

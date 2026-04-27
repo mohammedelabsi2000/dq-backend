@@ -24,8 +24,6 @@ return new class extends Migration {
             // created, updated, deleted, restored
 
             $table->morphs('auditable');
-            // auditable_id
-            // auditable_type
 
             $table->json('old_values')->nullable();
             $table->json('new_values')->nullable();

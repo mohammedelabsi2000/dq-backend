@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace App\Concerns;
 
 trait Searchable
 {
@@ -36,7 +36,6 @@ trait Searchable
                     }
                 });
             }
-
         });
         return $query;
     }

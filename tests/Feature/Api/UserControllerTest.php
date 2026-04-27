@@ -98,7 +98,7 @@ class UserControllerTest extends TestCase
             ->getJson('/api/users?search=Mohammed');
 
         $response->assertOk();
-        $this->assertStringContainsString('Mohammed', $response->json('data.0.fName'));
+        $this->assertStringContainsString('Mohammed', $response->json('data.0.full_name'));
     }
 
     /** @test */
@@ -118,6 +118,7 @@ class UserControllerTest extends TestCase
     public function test_store_creates_user_successfully()
     {
         $data = User::factory()->make()->toArray();
+        unset($data['full_name']);
         $data['password'] = 'password123';
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -139,7 +140,7 @@ class UserControllerTest extends TestCase
                     'family',
                     'email',
                     'phone',
-                    'gender'
+                    'gender',
                 ]
             ]);
 
@@ -168,7 +169,10 @@ class UserControllerTest extends TestCase
     public function test_store_rejects_duplicate_identity()
     {
         $identity = '123456789';
+<<<<<<< 54-testing04-unit-tests-services
 
+=======
+>>>>>>> main
         User::where('identity', $identity)->first()
             ?? User::factory()->create([
                 'identity' => $identity,
@@ -191,6 +195,7 @@ class UserControllerTest extends TestCase
     {
         $data = User::factory()->make()->toArray();
         $data['password'] = 'secret123';
+        unset($data['full_name']);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
             ->postJson('/api/users', $data);
