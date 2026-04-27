@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRole\AssignRoleRequest;
 use App\Http\Requests\UserRole\AssignScopeRequest;
 use App\Models\User;
+use App\Services\UserRoleService;
 use Spatie\Permission\Models\Role;
 
 class UserRoleController extends Controller
 {
+
+    public function __construct(protected UserRoleService $userRoleService) {}
 
     /*
     |--------------------------------------------------------------------------
@@ -26,7 +29,7 @@ class UserRoleController extends Controller
         return $this->success([
             'roles'       => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name'),
-            'scopes'      => $user->scopes,
+            'scopes'      => $user->scopes()->whereNull('to_date')->get(),
         ], 'الأدوار المخصصة للمستخدم');
     }
 
@@ -36,17 +39,32 @@ class UserRoleController extends Controller
     |--------------------------------------------------------------------------
     */
 
+    // public function assignRoles(AssignRoleRequest $request, User $user)
+    // {
+    //     $roles = Role::whereIn('id', $request->role_ids)
+    //         ->where('guard_name', 'sanctum')
+    //         ->get();
+
+    //     $user->syncRoles($roles);
+
+    //     if ($request->has('scopes')) {
+    //         $user->syncScopes($request->scopes);
+    //     }
+
+    //     return $this->success(
+    //         $user->getRoleNames(),
+    //         'تم تنسيب الأدوار بنجاح',
+    //         201
+    //     );
+    // }
+
     public function assignRoles(AssignRoleRequest $request, User $user)
     {
-        $roles = Role::whereIn('id', $request->role_ids)
-            ->where('guard_name', 'sanctum')
-            ->get();
-
-        $user->syncRoles($roles);
-
-        if ($request->has('scopes')) {
-            $user->syncScopes($request->scopes);
-        }
+        $this->userRoleService->assignRolesWithScopes(
+            $user,
+            $request->role_ids,
+            $request->scopes ?? []
+        );
 
         return $this->success(
             $user->getRoleNames(),
