@@ -37,6 +37,8 @@ class HalaqaFactory extends Factory
             ConstantHelper::getConstantIdsByType('halaqa_types')
         );
 
+        $fromDate = $this->faker->optional()->date();
+
         return [
             'name' => $this->faker->name(),
             'location' => $this->faker->optional()->address(),
@@ -44,6 +46,10 @@ class HalaqaFactory extends Factory
             'reference_type' => $referenceType->code(),
             'reference_id' => $referenceId,
             'type_id' => $typeId,
+            'from_date' => $fromDate,
+            'to_date' => $fromDate
+                ? $this->faker->optional()->dateTimeBetween($fromDate, '+1 year')?->format('Y-m-d')
+                : $this->faker->optional()->date(),
         ];
     }
 }

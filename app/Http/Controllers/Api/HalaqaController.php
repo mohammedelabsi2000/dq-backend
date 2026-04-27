@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\HalaqaReferenceType;
 use App\Filters\HalaqaFilter;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Halaqa\StoreHalaqaRequest;
-use App\Http\Requests\Halaqa\UpdateHalaqaRequest;
+use App\Http\Requests\Halaqa\HalaqaRequest;
 use App\Http\Resources\HalaqaResource;
 use App\Models\Halaqa;
 use Illuminate\Http\Request;
@@ -90,10 +89,10 @@ class HalaqaController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param HalaqaRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreHalaqaRequest $request)
+    public function store(HalaqaRequest $request)
     {
         $halaqa = Halaqa::create($request->validated());
 
@@ -131,12 +130,13 @@ class HalaqaController extends Controller
     }
 
     /**
-     * Summary of update
-     * @param UpdateHalaqaRequest $request
+     * Update the specified resource in storage.
+     *
+     * @param HalaqaRequest $request
      * @param Halaqa $halaqa
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(UpdateHalaqaRequest $request, Halaqa $halaqa)
+    public function update(HalaqaRequest $request, Halaqa $halaqa)
     {
         $halaqa->update($request->validated());
 
