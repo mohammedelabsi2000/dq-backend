@@ -18,10 +18,7 @@ class RegionResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'notes'         => $this->notes,
-            // 'branch'        => new BranchResource($this->branch),
-            'branch' => $this->whenLoaded('branch', function () {
-                return new BranchResource($this->branch);
-            }, null),
+            'branch'        => new BranchResource($this->branch),
             'mosques_count' => $this->whenCounted('mosques'),
             'mosques'       => MosqueResource::collection($this->whenLoaded('mosques')),
         ];

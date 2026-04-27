@@ -17,12 +17,12 @@ class BranchController extends Controller
         $this->authorize('viewAny', Branch::class);
 
         $query = Branch::query()->visibleTo(auth()->user());
-        // $query = Branch::query();
 
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
+            'limit'         => '*',
         ]);
 
         $query = $q['query'];

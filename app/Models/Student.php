@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use App\Concerns\Auditable;
 use App\Enums\Gender;
-use App\Traits\Auditable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -209,6 +209,6 @@ class Student extends Model
 
     public function isActiveInHalaqa($halaqaId)
     {
-        return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('to_date')->exists();
+        return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('halaqa_students.to_date')->exists();
     }
 }
