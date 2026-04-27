@@ -1,5 +1,6 @@
 <?php
-namespace App\Traits;
+
+namespace App\Concerns;
 
 use App\Enums\AuditEvent;
 use App\Models\Audit;

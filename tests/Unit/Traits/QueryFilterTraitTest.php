@@ -3,10 +3,8 @@
 namespace Tests\Unit\Traits;
 
 use App\Models\Branch;
-use App\Traits\QueryFilterTrait;
-use Database\Seeders\PermissionSeeder;
+use App\Http\Traits\QueryFilterTrait;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
