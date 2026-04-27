@@ -51,7 +51,7 @@ class UserResource extends JsonResource
                         'type' => $ability->type,
                     ])
             ),
-            'user_scopes' => $this->scopes,
+            'user_scopes' => ScopeResource::collection($this->scopes),
 
 
             'location' => $this->location,
