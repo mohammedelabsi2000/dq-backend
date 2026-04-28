@@ -43,15 +43,21 @@ class UserScope extends Model
     |--------------------------------------------------------------------------
     */
 
-    // الـ scopes النشطة فقط
     public function scopeActive($query)
     {
-        return $query->whereNull('to_date');
+        $now = now();
+
+        return $query
+            ->where(function ($q) use ($now) {
+                $q->whereNull('from_date')
+                    ->orWhere('from_date', '<=', $now);
+            })
+            ->whereNull('to_date');
     }
 
-    // الـ scopes المنتهية
     public function scopeInactive($query)
     {
-        return $query->whereNotNull('to_date');
+        return $query->whereNotNull('to_date')
+            ->where('to_date', '<', now());
     }
 }

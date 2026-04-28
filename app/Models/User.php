@@ -189,7 +189,6 @@ class User extends Authenticatable
     // public function syncScopes(array $scopes)
     // {
     //     $this->scopes()->delete();
-
     //     foreach ($scopes as $scope) {
     //         $this->scopes()->create([
     //             'scope_type' => $scope['type'],
