@@ -21,7 +21,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('viewAny', User::class);
-        $query = User::query();
+        $query = User::query()->visibleTo(auth()->user());
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
