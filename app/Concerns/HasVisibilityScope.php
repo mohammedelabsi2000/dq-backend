@@ -25,9 +25,14 @@ trait HasVisibilityScope
     */
 
     // مستخدم بدون scopes = مدير عام يشوف الكل
+    // public function isGlobalAdmin(): bool
+    // {
+    //     return $this->scopes()->doesntExist();
+    // }
+
     public function isGlobalAdmin(): bool
     {
-        return $this->scopes()->doesntExist();
+        return $this->scopes()->active()->doesntExist();
     }
 
     /*
@@ -36,10 +41,18 @@ trait HasVisibilityScope
     |--------------------------------------------------------------------------
     */
 
+    // public function getScopeIds(string $type): Collection
+    // {
+    //     return $this->scopes()
+    //         ->where('scope_type', $type)
+    //         ->pluck('scope_id');
+    // }
+
     public function getScopeIds(string $type): Collection
     {
         return $this->scopes()
             ->where('scope_type', $type)
+            ->active()
             ->pluck('scope_id');
     }
 
