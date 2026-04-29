@@ -38,31 +38,57 @@ class Region extends Model
         $branchIds = $user->getScopeIds('branch');
         $regionIds = $user->getScopeIds('region');
         $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-        // توسيع من center للأعلى فقط
+        // محفظ حلقة ← يرى منطقة حلقته فقط للاطلاع
+        if ($halaqaIds->isNotEmpty()) {
+            $halaqas = Halaqa::whereIn('id', $halaqaIds)
+                ->select('reference_type', 'reference_id')
+                ->get();
+
+            $resolvedRegionIds = collect();
+
+            $fromRegion = $halaqas->where('reference_type', 'region')->pluck('reference_id');
+            $fromCenter = $halaqas->where('reference_type', 'center')->pluck('reference_id');
+
+            if ($fromRegion->isNotEmpty()) {
+                $resolvedRegionIds = $resolvedRegionIds->merge($fromRegion);
+            }
+
+            if ($fromCenter->isNotEmpty()) {
+                $resolvedRegionIds = $resolvedRegionIds->merge(
+                    Center::whereIn('id', $fromCenter)->pluck('region_id')
+                );
+            }
+
+            $resolvedRegionIds = $resolvedRegionIds->unique();
+
+            return $resolvedRegionIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('id', $resolvedRegionIds);
+        }
+
+        // مدير مركز ← يرى منطقة مركزه فقط
         if ($centerIds->isNotEmpty()) {
-            $regionIds = $regionIds->merge(
-                Center::whereIn('id', $centerIds)->pluck('region_id')
-            )->unique();
+            $resolvedRegionIds = Center::whereIn('id', $centerIds)
+                ->pluck('region_id')
+                ->unique();
+
+            return $resolvedRegionIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('id', $resolvedRegionIds);
         }
 
-        // توسيع من branch للأسفل فقط إذا ما عنده region scope
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
+        // مدير منطقة ← مناطقه فقط
+        if ($regionIds->isNotEmpty()) {
+            return $query->whereIn('id', $regionIds);
         }
 
-        return $query->where(function (Builder $q) use ($branchIds, $regionIds) {
-            if ($regionIds->isNotEmpty()) {
-                $q->orWhereIn('id', $regionIds);
-            }
-            if ($branchIds->isNotEmpty() && $regionIds->isEmpty()) {
-                $q->orWhereIn('branch_id', $branchIds);
-            }
-            if ($branchIds->isEmpty() && $regionIds->isEmpty()) {
-                $q->whereRaw('1 = 0');
-            }
-        });
+        // مدير فرع ← كل مناطق فرعه
+        if ($branchIds->isNotEmpty()) {
+            return $query->whereIn('branch_id', $branchIds);
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }

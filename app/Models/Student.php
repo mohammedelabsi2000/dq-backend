@@ -162,27 +162,88 @@ class Student extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير فرع فقط ← يوسع لكل مناطق الفرع
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
+        // محفظ حلقة ← طلاب حلقته فقط
+        if ($halaqaIds->isNotEmpty()) {
+            return $query->whereHas(
+                'halaqaEnrollments',
+                fn($q) =>
+                $q->whereIn('halaqa_id', $halaqaIds)
+            );
         }
 
-        // جمع المساجد المسموح بها عبر المناطق
-        $mosqueIds = collect();
+        // مدير مركز ← طلاب حلقات مركزه
+        if ($centerIds->isNotEmpty()) {
+            $halaqaIds = Halaqa::where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIds)
+                ->pluck('id');
 
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas(
+                'halaqaEnrollments',
+                fn($q) =>
+                $q->whereIn('halaqa_id', $halaqaIds)
+            );
+        }
+
+        // مدير منطقة ← طلاب حلقات منطقته (مباشرة أو عبر مراكزها)
         if ($regionIds->isNotEmpty()) {
-            $mosqueIds = $mosqueIds->merge(
-                Mosque::whereIn('region_id', $regionIds)->pluck('id')
-            )->unique();
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            $halaqaIds = Halaqa::where(function ($q) use ($regionIds, $centerIds) {
+                $q->where(function ($q) use ($regionIds) {
+                    $q->where('reference_type', 'region')
+                        ->whereIn('reference_id', $regionIds);
+                })->orWhere(function ($q) use ($centerIds) {
+                    if ($centerIds->isNotEmpty()) {
+                        $q->where('reference_type', 'center')
+                            ->whereIn('reference_id', $centerIds);
+                    }
+                });
+            })->pluck('id');
+
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas(
+                'halaqaEnrollments',
+                fn($q) =>
+                $q->whereIn('halaqa_id', $halaqaIds)
+            );
         }
 
-        if ($mosqueIds->isEmpty()) {
-            return $query->whereRaw('1 = 0');
+        // مدير فرع ← يوسع لمناطق الفرع ثم حلقاتها
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            $halaqaIds = Halaqa::where(function ($q) use ($regionIds, $centerIds) {
+                $q->where(function ($q) use ($regionIds) {
+                    $q->where('reference_type', 'region')
+                        ->whereIn('reference_id', $regionIds);
+                })->orWhere(function ($q) use ($centerIds) {
+                    if ($centerIds->isNotEmpty()) {
+                        $q->where('reference_type', 'center')
+                            ->whereIn('reference_id', $centerIds);
+                    }
+                });
+            })->pluck('id');
+
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas(
+                'halaqaEnrollments',
+                fn($q) =>
+                $q->whereIn('halaqa_id', $halaqaIds)
+            );
         }
 
-        return $query->whereIn('mosque_id', $mosqueIds);
+        return $query->whereRaw('1 = 0');
     }
 
     public function scopeWithStandardRelations($query)
