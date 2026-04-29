@@ -146,18 +146,6 @@ class ConstantTypeSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'name_prefix',
-                'description' => 'بادئة الاسم',
-                'notes' => '',
-                'constants' => [
-                    ['name' => 'السيد', 'notes' => null, 'is_active' => true],
-                    ['name' => 'السيدة', 'notes' => null, 'is_active' => true],
-                    ['name' => 'الآنسة', 'notes' => null, 'is_active' => true],
-                    ['name' => 'الدكتور', 'notes' => null, 'is_active' => true],
-                    ['name' => 'المهندس', 'notes' => null, 'is_active' => true],
-                ]
-            ],
-            [
                 'name' => 'enrollment_status',
                 'description' => 'حالة تسجيل الطالب في الحلقة',
                 'notes' => '',
