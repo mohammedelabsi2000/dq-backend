@@ -25,7 +25,7 @@ class StudentFilter extends BaseFilter
     {
         // Apply common location filters
         $query = $this->applyLocationFilters($this->query, $this->request);
-        
+
         // Apply student-specific filters
         $query = $this->applyFilters([
             'halaqa_id' => 'filterByHalaqa',
@@ -37,12 +37,12 @@ class StudentFilter extends BaseFilter
             'age_max' => 'filterByAgeMax',
             'guardian_id' => 'filterByGuardianId'
         ]);
-        
+
         // Apply boolean filters
         $query = $this->applyBooleanFilters([
             'has_halaqa' => 'filterByHasHalaqa'
         ]);
-        
+
         return $query;
     }
 
@@ -57,7 +57,7 @@ class StudentFilter extends BaseFilter
 
     protected function filterByGender(Builder|QueryBuilder $query): Builder|QueryBuilder
     {
-        return $query->where('gender', $this->request->input('gender'));
+        return $query->where('gender', 'LIKE', $this->request->input('gender'));
     }
 
 
