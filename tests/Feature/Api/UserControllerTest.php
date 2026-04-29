@@ -169,7 +169,6 @@ class UserControllerTest extends TestCase
     public function test_store_rejects_duplicate_identity()
     {
         $identity = '123456789';
-
         User::where('identity', $identity)->first()
             ?? User::factory()->create([
                 'identity' => $identity,
