@@ -253,20 +253,25 @@ class User extends Authenticatable
         return $this->hasMany(UserScope::class);
     }
 
-    public function syncScopes(array $scopes)
+    // الـ scopes النشطة فقط
+    public function activeScopes()
     {
-        $this->scopes()->delete();
-
-        foreach ($scopes as $scope) {
-            $this->scopes()->create([
-                'scope_type' => $scope['type'],
-                'scope_id' => $scope['id'],
-            ]);
-        }
+        return $this->hasMany(UserScope::class)->whereNull('to_date');
     }
 
-    public function clearScopes()
-    {
-        $this->scopes()->delete();
-    }
+    // public function syncScopes(array $scopes)
+    // {
+    //     $this->scopes()->delete();
+    //     foreach ($scopes as $scope) {
+    //         $this->scopes()->create([
+    //             'scope_type' => $scope['type'],
+    //             'scope_id' => $scope['id'],
+    //         ]);
+    //     }
+    // }
+
+    // public function clearScopes()
+    // {
+    //     $this->scopes()->delete();
+    // }
 }
