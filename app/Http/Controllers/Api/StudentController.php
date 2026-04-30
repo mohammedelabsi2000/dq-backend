@@ -82,7 +82,6 @@ class StudentController extends Controller
         try {
             $student = $this->studentService->create($request->validated());
         } catch (\InvalidArgumentException $th) {
-            logger($th);
             return $this->error($th->getMessage(), 422);
         }
 

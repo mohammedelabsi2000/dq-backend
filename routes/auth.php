@@ -14,7 +14,7 @@ use App\Http\Controllers\Auth\{
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
+/* Route::middleware('guest')->group(function () {
     // Register
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
@@ -61,4 +61,4 @@ Route::middleware('auth')->group(function () {
     // Logout
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
-});
+}); */

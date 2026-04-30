@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\{
     CourseController,
     GradeController,
     HalaqaController,
+    HalaqaStatusController,
     HalaqaStudentController,
     IdQueryController,
     ImageController,
@@ -51,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Halaqa students assignment
     Route::apiResource('halaqa-students', HalaqaStudentController::class);
+
+    // Halaqa statuses management
+    Route::apiResource('halaqa-statuses', HalaqaStatusController::class);
 
     // Academic qualifications management
     Route::apiResource('academic-qualifications', AcademicQualificationController::class);

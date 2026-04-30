@@ -92,13 +92,13 @@ class HalaqaRequest extends DQFormRequest
 
         return [
             'center_id' => [
-                $isStore ? 'nullable' : 'sometimes',
+                'nullable',
                 'integer',
                 'exists:centers,id',
             ],
 
             'region_id' => [
-                $isStore ? 'nullable' : 'sometimes',
+                'nullable',
                 'integer',
                 'exists:regions,id',
             ],
@@ -111,13 +111,13 @@ class HalaqaRequest extends DQFormRequest
             ],
 
             'location' => [
-                $isStore ? 'nullable' : 'sometimes',
+                'nullable',
                 'string',
                 'max:255',
             ],
 
             'description' => [
-                $isStore ? 'nullable' : 'sometimes',
+                'nullable',
                 'string',
             ],
 

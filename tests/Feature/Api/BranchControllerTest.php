@@ -6,11 +6,9 @@ use Tests\TestCase;
 use App\Models\User;
 use App\Models\Branch;
 use App\Models\Region;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BranchControllerTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected User $adminUser;
     protected User $regularUser;

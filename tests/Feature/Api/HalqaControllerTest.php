@@ -11,13 +11,10 @@ use App\Models\Center;
 use App\Models\Halaqa;
 use App\Models\Student;
 use App\Enums\HalaqaReferenceType;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 class HalaqaControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected User $adminUser;
     protected User $regularUser;
     protected Branch $branch;
@@ -164,8 +161,9 @@ class HalaqaControllerTest extends TestCase
             'reference_type' => HalaqaReferenceType::Region,
         ]);
 
+        // limit=* is important here because it means get all records
         $response = $this->actingAs($this->adminUser, 'sanctum')
-            ->getJson('/api/halaqas?reference_type=' . HalaqaReferenceType::Center->value);
+            ->getJson('/api/halaqas?limit=*&reference_type=' . HalaqaReferenceType::Center->value);
 
         $response->assertStatus(200);
 

@@ -3,6 +3,7 @@
 namespace Tests\Traits;
 
 use App\Models\ConstantType;
+use App\Models\Halaqa;
 use App\Models\User;
 use Database\Seeders\ConstantTypeSeeder;
 use Database\Seeders\UserSeeder;
@@ -23,5 +24,8 @@ trait SeedsTestData
         // $this->seed(QuranSeeder::class);
         
         $this->adminUser = User::find(1);
+        $this->adminUser->assignRole('مدير الدائرة');
+
+        Halaqa::factory()->count(5)->withStatuses(random_int(1, 5))->create();
     }
 }

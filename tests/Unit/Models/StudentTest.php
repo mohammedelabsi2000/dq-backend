@@ -10,13 +10,9 @@ use App\Models\Mosque;
 use App\Models\Halaqa;
 use App\Models\Constant;
 use Tests\TestCase;
-use Tests\Traits\SeedsTestData;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class StudentTest extends TestCase
 {
-    use RefreshDatabase, SeedsTestData;
-
     protected function setUp(): void
     {
         parent::setUp();
