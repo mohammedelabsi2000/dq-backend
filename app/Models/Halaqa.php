@@ -103,43 +103,60 @@ class Halaqa extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير فرع فقط ← يوسع لكل مناطق الفرع
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
-
-            $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
-            )->unique();
+        // محفظ حلقة ← حلقته فقط
+        if ($halaqaIds->isNotEmpty()) {
+            return $query->whereIn('id', $halaqaIds);
         }
 
-        // مدير منطقة فقط ← يوسع لمراكز منطقته
-        if ($regionIds->isNotEmpty() && $centerIds->isEmpty() && $halaqaIds->isEmpty()) {
-            $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
-            )->unique();
+        // مدير مركز ← حلقات مركزه فقط
+        if ($centerIds->isNotEmpty()) {
+            return $query->where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIds);
         }
 
-        return $query->where(function (Builder $q) use ($regionIds, $centerIds, $halaqaIds) {
-            if ($halaqaIds->isNotEmpty()) {
-                $q->orWhereIn('halaqas.id', $halaqaIds);
-            }
-            if ($regionIds->isNotEmpty() && $centerIds->isEmpty()) {
-                $q->orWhere(function ($q) use ($regionIds) {
+        // مدير منطقة ← حلقات منطقته (مباشرة + عبر مراكزها)
+        if ($regionIds->isNotEmpty()) {
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            return $query->where(function (Builder $q) use ($regionIds, $centerIds) {
+                $q->where(function ($q) use ($regionIds) {
                     $q->where('reference_type', 'region')
                         ->whereIn('reference_id', $regionIds);
                 });
+                if ($centerIds->isNotEmpty()) {
+                    $q->orWhere(function ($q) use ($centerIds) {
+                        $q->where('reference_type', 'center')
+                            ->whereIn('reference_id', $centerIds);
+                    });
+                }
+            });
+        }
+
+        // مدير فرع ← حلقات كل مناطق فرعه (مباشرة + عبر مراكزها)
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            if ($regionIds->isEmpty() && $centerIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
             }
-            if ($centerIds->isNotEmpty()) {
-                $q->orWhere(function ($q) use ($centerIds) {
-                    $q->where('reference_type', 'center')
-                        ->whereIn('reference_id', $centerIds);
-                });
-            }
-            if ($halaqaIds->isEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-                $q->whereRaw('1 = 0');
-            }
-        });
+
+            return $query->where(function (Builder $q) use ($regionIds, $centerIds) {
+                if ($regionIds->isNotEmpty()) {
+                    $q->orWhere(function ($q) use ($regionIds) {
+                        $q->where('reference_type', 'region')
+                            ->whereIn('reference_id', $regionIds);
+                    });
+                }
+                if ($centerIds->isNotEmpty()) {
+                    $q->orWhere(function ($q) use ($centerIds) {
+                        $q->where('reference_type', 'center')
+                            ->whereIn('reference_id', $centerIds);
+                    });
+                }
+            });
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }

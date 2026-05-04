@@ -30,7 +30,13 @@ class AccessTokensController extends Controller
             : User::where('identity', $login)->first();
 
         if ($user && Hash::check($request->password, $user->password)) {
+
             $device_name = $request->post('device_name', $request->userAgent());
+
+            // if (!$user->is_approved) {
+            //     return $this->error('حسابك قيد المراجعة، انتظر اعتماد المسؤول', 403);
+            // }
+
             $token = $user->createToken($device_name);
 
             return $this->success([

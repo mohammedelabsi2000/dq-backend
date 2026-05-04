@@ -42,30 +42,59 @@ class UserController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      */
+    // public function store(StoreUserRequest $request)
+    // {
+    //     $user = User::where('identity', $request['identity'])
+    //         ->first();
+
+    //     if ($user) {
+    //         return $this->error(
+    //             'المستخدم موجود مسبقاً',
+    //             422
+    //         );
+    //     } else {
+    //         $data = $request->validated();
+    //         $data['password'] = Hash::make($request['password']);
+
+    //         $user = User::withTrashed()->updateOrCreate([
+    //             'identity' => $data['identity']
+    //         ], $data);
+
+    //         return $this->success(
+    //             new UserResource($user),
+    //             'تم إنشاء المستخدم بنجاح',
+    //             201
+    //         );
+    //     }
+    // }
     public function store(StoreUserRequest $request)
     {
-        $user = User::where('identity', $request['identity'])
+        // نبحث في الكل — معتمد وغير معتمد ومحذوف
+        $existing = User::withTrashed()
+            ->where('identity', $request->identity)
             ->first();
 
-        if ($user) {
-            return $this->error(
-                'المستخدم موجود مسبقاً',
-                422
-            );
-        } else {
-            $data = $request->validated();
-            $data['password'] = Hash::make($request['password']);
-
-            $user = User::withTrashed()->updateOrCreate([
-                'identity' => $data['identity']
-            ], $data);
-
-            return $this->success(
-                new UserResource($user),
-                'تم إنشاء المستخدم بنجاح',
-                201
-            );
+        if ($existing && !$existing->trashed()) {
+            return $this->error('المستخدم موجود مسبقاً', 422);
         }
+
+        $data               = $request->validated();
+        $data['password']   = Hash::make($request->password);
+        $data['is_approved'] = false;
+
+        $user = User::withTrashed()->updateOrCreate(
+            ['identity' => $data['identity']],
+            $data
+        );
+
+        // رفع طلب الاعتماد تلقائياً
+        $user->submitForApproval(auth()->user());
+
+        return $this->success(
+            new UserResource($user),
+            'تم إنشاء المستخدم وإرساله للاعتماد',
+            201
+        );
     }
 
     /**

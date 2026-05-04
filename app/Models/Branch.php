@@ -32,13 +32,14 @@ class Branch extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // توسيع الهرمية للأعلى
+        // صعود من region ← branch
         if ($regionIds->isNotEmpty()) {
             $branchIds = $branchIds->merge(
                 Region::whereIn('id', $regionIds)->pluck('branch_id')
             )->unique();
         }
 
+        // صعود من center ← region ← branch
         if ($centerIds->isNotEmpty()) {
             $branchIds = $branchIds->merge(
                 Region::whereIn(
@@ -48,13 +49,32 @@ class Branch extends Model
             )->unique();
         }
 
+        // صعود من halaqa ← branch (مع مراعاة reference_type)
         if ($halaqaIds->isNotEmpty()) {
-            $branchIds = $branchIds->merge(
-                Region::whereIn(
-                    'id',
-                    Halaqa::whereIn('id', $halaqaIds)->pluck('reference_id')
-                )->pluck('branch_id')
-            )->unique();
+            $halaqas = Halaqa::whereIn('id', $halaqaIds)
+                ->select('reference_type', 'reference_id')
+                ->get();
+
+            // حلقات مرتبطة بمنطقة مباشرة
+            $fromRegion = $halaqas->where('reference_type', 'region')->pluck('reference_id');
+
+            // حلقات مرتبطة بمركز ← نصعد لمنطقته أولاً
+            $fromCenter = $halaqas->where('reference_type', 'center')->pluck('reference_id');
+
+            if ($fromRegion->isNotEmpty()) {
+                $branchIds = $branchIds->merge(
+                    Region::whereIn('id', $fromRegion)->pluck('branch_id')
+                )->unique();
+            }
+
+            if ($fromCenter->isNotEmpty()) {
+                $branchIds = $branchIds->merge(
+                    Region::whereIn(
+                        'id',
+                        Center::whereIn('id', $fromCenter)->pluck('region_id')
+                    )->pluck('branch_id')
+                )->unique();
+            }
         }
 
         if ($branchIds->isEmpty()) {

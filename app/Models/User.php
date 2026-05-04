@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Concerns\HasHierarchyScope;
+use App\Concerns\HasApproval;
 use App\Concerns\HasVisibilityScope;
-use App\Contracts\BelongsToHierarchy;
+use App\Enums\ApprovalLevel;
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasVisibilityScope;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes, HasRoles, HasVisibilityScope, HasApproval;
 
     protected $guard_name = 'sanctum';
 
@@ -54,6 +54,7 @@ class User extends Authenticatable
         'job_salary',
         // Media
         'image',
+        'is_approved',
     ];
 
     /**
@@ -72,6 +73,7 @@ class User extends Authenticatable
         'dob' => 'date',
         'job_salary' => 'decimal:2',
         'gender' => Gender::class,
+        'is_approved' => 'boolean',
     ];
 
     /*
@@ -170,77 +172,166 @@ class User extends Authenticatable
     }
 
 
+    // public function scopeVisibleTo(Builder $query, User $user): Builder
+    // {
+    //     if ($user->isGlobalAdmin()) {
+    //         return $query;
+    //     }
+
+    //     $branchIds  = $user->getScopeIds('branch');
+    //     $regionIds  = $user->getScopeIds('region');
+    //     $centerIds  = $user->getScopeIds('center');
+    //     $halaqaIds  = $user->getScopeIds('halaqa');
+
+    //     // مدير حلقة فقط ← لا يرى أي مستخدم
+    //     if ($halaqaIds->isNotEmpty() && $branchIds->isEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
+    //         return $query->whereRaw('1 = 0');
+    //     }
+
+    //     // توسيع من branch ← regions
+    //     if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
+    //         $regionIds = $regionIds->merge(
+    //             Region::whereIn('branch_id', $branchIds)->pluck('id')
+    //         )->unique();
+    //     }
+
+    //     // جمع mosque_ids عبر الهرمية
+    //     $mosqueIds = collect();
+
+    //     if ($regionIds->isNotEmpty()) {
+    //         $mosqueIds = $mosqueIds->merge(
+    //             Mosque::whereIn('region_id', $regionIds)->pluck('id')
+    //         )->unique();
+    //     }
+
+    //     if ($centerIds->isNotEmpty()) {
+    //         $mosqueIds = $mosqueIds->merge(
+    //             Mosque::whereIn(
+    //                 'id',
+    //                 Center::whereIn('id', $centerIds)->pluck('mosque_id')
+    //             )->pluck('id')
+    //         )->unique();
+    //     }
+
+    //     // جمع user_ids عبر UserScope
+    //     $scopedUserIds = collect();
+
+    //     if ($branchIds->isNotEmpty()) {
+    //         $scopedUserIds = $scopedUserIds->merge(
+    //             UserScope::where('scope_type', 'branch')
+    //                 ->whereIn('scope_id', $branchIds)
+    //                 ->pluck('user_id')
+    //         );
+    //     }
+
+    //     if ($regionIds->isNotEmpty()) {
+    //         $scopedUserIds = $scopedUserIds->merge(
+    //             UserScope::where('scope_type', 'region')
+    //                 ->whereIn('scope_id', $regionIds)
+    //                 ->pluck('user_id')
+    //         );
+    //     }
+
+    //     if ($centerIds->isNotEmpty()) {
+    //         $scopedUserIds = $scopedUserIds->merge(
+    //             UserScope::where('scope_type', 'center')
+    //                 ->whereIn('scope_id', $centerIds)
+    //                 ->pluck('user_id')
+    //         );
+    //     }
+
+    //     $scopedUserIds = $scopedUserIds->unique();
+
+    //     // إذا ما في شيء على الإطلاق
+    //     if ($mosqueIds->isEmpty() && $scopedUserIds->isEmpty()) {
+    //         return $query->whereRaw('1 = 0');
+    //     }
+
+    //     return $query->where(function (Builder $q) use ($mosqueIds, $scopedUserIds) {
+    //         if ($mosqueIds->isNotEmpty()) {
+    //             $q->orWhereIn('mosque_id', $mosqueIds);
+    //         }
+    //         if ($scopedUserIds->isNotEmpty()) {
+    //             $q->orWhereIn('id', $scopedUserIds);
+    //         }
+    //     });
+    // }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->isGlobalAdmin()) {
             return $query;
         }
 
-        $branchIds  = $user->getScopeIds('branch');
-        $regionIds  = $user->getScopeIds('region');
-        $centerIds  = $user->getScopeIds('center');
-        $halaqaIds  = $user->getScopeIds('halaqa');
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير حلقة فقط ← لا يرى أي مستخدم
-        if ($halaqaIds->isNotEmpty() && $branchIds->isEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-            return $query->whereRaw('1 = 0');
-        }
-
-        // توسيع من branch ← regions
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
-        }
-
-        // جمع mosque_ids عبر الهرمية
-        $mosqueIds = collect();
-
-        if ($regionIds->isNotEmpty()) {
-            $mosqueIds = $mosqueIds->merge(
-                Mosque::whereIn('region_id', $regionIds)->pluck('id')
-            )->unique();
-        }
-
+        // مدير مركز — يرى فقط من scope_type = center في مراكزه
         if ($centerIds->isNotEmpty()) {
-            $mosqueIds = $mosqueIds->merge(
-                Mosque::whereIn(
-                    'id',
-                    Center::whereIn('id', $centerIds)->pluck('mosque_id')
-                )->pluck('id')
-            )->unique();
+            $scopedUserIds = UserScope::where('scope_type', 'center')
+                ->whereIn('scope_id', $centerIds)
+                ->whereNull('to_date')
+                ->pluck('user_id');
+
+            if ($scopedUserIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereIn('id', $scopedUserIds);
         }
 
-        // جمع user_ids عبر UserScope
-        $scopedUserIds = collect();
+        // مدير منطقة — يرى من scope_type = region + center في منطقته
+        if ($regionIds->isNotEmpty()) {
+            $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
 
+            $scopedUserIds = UserScope::whereNull('to_date')
+                ->where(function ($q) use ($regionIds, $centerIdsInRegion) {
+                    $q->where(function ($q) use ($regionIds) {
+                        $q->where('scope_type', 'region')
+                            ->whereIn('scope_id', $regionIds);
+                    })->orWhere(function ($q) use ($centerIdsInRegion) {
+                        $q->where('scope_type', 'center')
+                            ->whereIn('scope_id', $centerIdsInRegion);
+                    });
+                })
+                ->pluck('user_id');
+
+            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+
+            return $this->buildUserVisibilityQuery($query, $mosqueIds, $scopedUserIds);
+        }
+
+        // مدير فرع — يرى الكل في فرعه
         if ($branchIds->isNotEmpty()) {
-            $scopedUserIds = $scopedUserIds->merge(
-                UserScope::where('scope_type', 'branch')
-                    ->whereIn('scope_id', $branchIds)
-                    ->pluck('user_id')
-            );
+            $regionIdsInBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $centerIdsInBranch = Center::whereIn('region_id', $regionIdsInBranch)->pluck('id');
+            $mosqueIds = Mosque::whereIn('region_id', $regionIdsInBranch)->pluck('id');
+
+            $scopedUserIds = UserScope::whereNull('to_date')
+                ->where(function ($q) use ($branchIds, $regionIdsInBranch, $centerIdsInBranch) {
+                    $q->where(function ($q) use ($branchIds) {
+                        $q->where('scope_type', 'branch')
+                            ->whereIn('scope_id', $branchIds);
+                    })->orWhere(function ($q) use ($regionIdsInBranch) {
+                        $q->where('scope_type', 'region')
+                            ->whereIn('scope_id', $regionIdsInBranch);
+                    })->orWhere(function ($q) use ($centerIdsInBranch) {
+                        $q->where('scope_type', 'center')
+                            ->whereIn('scope_id', $centerIdsInBranch);
+                    });
+                })
+                ->pluck('user_id');
+
+            return $this->buildUserVisibilityQuery($query, $mosqueIds, $scopedUserIds);
         }
 
-        if ($regionIds->isNotEmpty()) {
-            $scopedUserIds = $scopedUserIds->merge(
-                UserScope::where('scope_type', 'region')
-                    ->whereIn('scope_id', $regionIds)
-                    ->pluck('user_id')
-            );
-        }
+        return $query->whereRaw('1 = 0');
+    }
 
-        if ($centerIds->isNotEmpty()) {
-            $scopedUserIds = $scopedUserIds->merge(
-                UserScope::where('scope_type', 'center')
-                    ->whereIn('scope_id', $centerIds)
-                    ->pluck('user_id')
-            );
-        }
-
-        $scopedUserIds = $scopedUserIds->unique();
-
-        // إذا ما في شيء على الإطلاق
+    private function buildUserVisibilityQuery(Builder $query, $mosqueIds, $scopedUserIds): Builder
+    {
         if ($mosqueIds->isEmpty() && $scopedUserIds->isEmpty()) {
             return $query->whereRaw('1 = 0');
         }
@@ -255,22 +346,39 @@ class User extends Authenticatable
         });
     }
 
+    public function approvalLevel(): ?ApprovalLevel
+    {
+        if ($this->isGlobalAdmin()) {
+            return ApprovalLevel::Admin;
+        }
+
+        if ($this->getScopeIds('branch')->isNotEmpty()) {
+            return ApprovalLevel::Branch;
+        }
+
+        if ($this->getScopeIds('region')->isNotEmpty()) {
+            return ApprovalLevel::Region;
+        }
+
+        return null;
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Scopes Management
     |--------------------------------------------------------------------------
     */
 
-    public function scopes()
-    {
-        return $this->hasMany(UserScope::class);
-    }
+    // public function scopes()
+    // {
+    //     return $this->hasMany(UserScope::class);
+    // }
 
-    // الـ scopes النشطة فقط
-    public function activeScopes()
-    {
-        return $this->hasMany(UserScope::class)->whereNull('to_date');
-    }
+    // // الـ scopes النشطة فقط
+    // public function activeScopes()
+    // {
+    //     return $this->hasMany(UserScope::class)->whereNull('to_date');
+    // }
 
     // public function syncScopes(array $scopes)
     // {
