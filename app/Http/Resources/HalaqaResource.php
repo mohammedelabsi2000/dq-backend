@@ -54,10 +54,10 @@ class HalaqaResource extends JsonResource
             */
             'supervisors' => $this->whenLoaded(
                 'supervisors',
-                fn() => $this->supervisors->pluck('user')
+                fn() => $this->supervisors->first()?->user
             ),
             'students_count' => $this->when(
-                $this->relationLoaded('studentEnrollments') || !$this->relationLoaded('students'),
+                $this->relationLoaded('studentEnrollments') || $this->relationLoaded('students'),
                 fn() => $this->studentsCount()
             ),
 
