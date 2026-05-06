@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\HalaqaReferenceType;
+use App\Exports\FailedRowsExport;
 use App\Filters\StudentFilter;
+use App\Imports\Student\ValidateStudentsImport;
 use App\Models\Student;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\ImportStudentRequest;
+use App\Http\Requests\Student\ImportStudentWithRelationRequest;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Http\Requests\Student\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
 use App\Imports\StudentsImport;
+use App\Imports\Student\StudentWithRelationsImport;
 use App\Services\StudentService;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
@@ -150,6 +155,86 @@ class StudentController extends Controller
         } catch (\InvalidArgumentException $e) {
             return $this->error($e->getMessage(), 422);
         }
+
+        return $this->success(
+            null,
+            'تم استيراد البيانات بنجاح'
+        );
+    }
+
+
+    public function importWithRelations(Request $request)
+    {
+
+        // Validate the request to ensure a file is provided and is of the correct type
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'file' => 'required|file|mimes:xlsx,xls',
+            ],
+            [
+                'file.required' => 'الرجاء رفع ملف',
+                'file.file' => 'المدخل يجب أن يكون ملف',
+                'file.mimes' => 'يجب أن يكون الملف من نوع: xlsx أو xls',
+            ]
+        );
+
+        if ($validator->fails()) {
+            throw new HttpResponseException(
+                $this->error(
+                    'حدث خطأ في التحقق من البيانات',
+                    422,
+                    $validator->errors()
+                )
+            );
+        }
+
+        // Extend the maximum execution time to 3 minutes to allow for large imports
+        set_time_limit(180);
+
+        /* $import = new ValidateStudentsImport($request);
+        Excel::import($import, $request->file);
+
+        if (!empty($import->errors)) {
+            return $this->error(
+                'لم يتم استيراد البيانات بسبب وجود أخطاء في بعض الصفوف. يرجى مراجعة الأخطاء وتصحيحها ثم إعادة المحاولة.',
+                422,
+                $import->errors
+            );
+        } */
+
+
+        try {
+            $import = new StudentWithRelationsImport($request);
+            Excel::import($import, $request->file);
+        } catch (\Throwable $th) {
+            return $this->error($th->getMessage(), 422);
+        }
+
+        // إذا في أخطاء
+        /* if (!empty($import->failedRows)) {
+
+            $fileName = 'failed-rows-' . now()->timestamp . '.xlsx';
+            $faledRowsExport = new FailedRowsExport($import->failedRows, $import->headings);
+
+            Excel::store(
+                $faledRowsExport,
+                $fileName,
+                'public'
+            );
+
+            Excel::download(
+                $faledRowsExport,
+                $fileName,
+                \Maatwebsite\Excel\Excel::XLSX
+            );
+
+            return $this->success(
+                ['file_url' => asset('storage/' . $fileName)],
+                'تم استيراد البيانات بنجاح لكن في بعض الصفوف فيها أخطاء. تم توفير ملف للأخطاء.',
+            );
+
+        } */
 
         return $this->success(
             null,
