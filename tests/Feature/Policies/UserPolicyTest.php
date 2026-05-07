@@ -5,13 +5,10 @@ namespace Tests\Feature\Policies;
 use App\Models\User;
 use App\Policies\UserPolicy;
 use Database\Seeders\PermissionSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class UserPolicyTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected UserPolicy $policy;
 
     protected function setUp(): void

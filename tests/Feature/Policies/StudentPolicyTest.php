@@ -9,13 +9,10 @@ use App\Models\Student;
 use App\Models\User;
 use App\Policies\StudentPolicy;
 use Database\Seeders\PermissionSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class StudentPolicyTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected StudentPolicy $policy;
 
     protected function setUp(): void

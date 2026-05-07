@@ -13,7 +13,10 @@ class CenterFactory extends Factory
 
     public function definition(): array
     {
-        $regionId = Region::inRandomOrder()->value('id');
+        $region = Region::query()->inRandomOrder()->first()
+            ?? Region::factory()->create();
+
+        $regionId = $region->id;
 
         return [
             'name' => $this->faker->company() . ' Center',

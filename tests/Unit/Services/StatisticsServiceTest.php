@@ -10,15 +10,11 @@ use App\Models\Region;
 use App\Models\Student;
 use App\Services\StatisticsService;
 use Database\Seeders\ConstantTypeSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class StatisticsServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
-    protected $seed = false;
 
     private StatisticsService $service;
 

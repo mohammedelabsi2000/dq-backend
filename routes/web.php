@@ -14,13 +14,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return 'Welcome to DQ Tahfiz API';
 });
 
 // Public Routes
-Route::get('/', function () {
+/* Route::get('/', function () {
     return redirect()->route('login');
-});
+}); */
 
 // Authentication Routes
 require __DIR__ . '/auth.php';
