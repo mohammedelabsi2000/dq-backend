@@ -8,12 +8,9 @@ use App\Models\Branch;
 use App\Models\Region;
 use App\Models\Mosque;
 use App\Models\Center;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CenterControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected User $adminUser;
     protected User $regularUser;
     protected Branch $branch;

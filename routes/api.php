@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\{
     CourseController,
     GradeController,
     HalaqaController,
+    HalaqaStatusController,
     HalaqaStudentController,
     IdQueryController,
     ImageController,
@@ -59,11 +60,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::prefix('students')->group(function () {
         Route::post('import', [StudentController::class, 'import']);
+        Route::post('import-with-relations', [StudentController::class, 'importWithRelations']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
     });
 
     // Halaqa students assignment
     Route::apiResource('halaqa-students', HalaqaStudentController::class);
+
+    // Halaqa statuses management
+    Route::apiResource('halaqa-statuses', HalaqaStatusController::class);
 
     // Academic qualifications management
     Route::apiResource('academic-qualifications', AcademicQualificationController::class);

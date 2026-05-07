@@ -7,13 +7,9 @@ use App\Models\Mosque;
 use App\Models\User;
 use App\Models\Role;
 use Tests\TestCase;
-use Tests\Traits\SeedsTestData;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class UserTest extends TestCase
 {
-    use RefreshDatabase, SeedsTestData;
-
     protected function setUp(): void
     {
         parent::setUp();

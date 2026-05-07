@@ -47,6 +47,10 @@ class HalaqaResource extends JsonResource
             'from_date' => $this->from_date,
             'to_date' => $this->to_date,
 
+            'last_status' => $this->whenLoaded('lastStatus', function () {
+                return new HalaqaStatusResource($this->lastStatus);
+            }),
+
             /*
             |--------------------------------------------------------------------------
             | Supervisor and Students Count
