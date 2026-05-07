@@ -37,25 +37,32 @@ class Center extends Model
         $branchIds = $user->getScopeIds('branch');
         $regionIds = $user->getScopeIds('region');
         $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير فرع ← يشوف كل مناطق الفرع ثم مراكزها
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
-        }
-
-        // مدير منطقة ← يشوف مراكز منطقته بس
-        if ($regionIds->isNotEmpty()) {
-            $centerIds = $centerIds->merge(
-                Center::whereIn('region_id', $regionIds)->pluck('centers.id')
-            )->unique();
-        }
-
-        if ($centerIds->isEmpty()) {
+        // محفظ حلقة ← لا يرى أي مركز
+        if ($halaqaIds->isNotEmpty()) {
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereIn('centers.id', $centerIds);
+        // مدير مركز ← مراكزه فقط
+        if ($centerIds->isNotEmpty()) {
+            return $query->whereIn('id', $centerIds);
+        }
+
+        // مدير منطقة ← مراكز منطقته
+        if ($regionIds->isNotEmpty()) {
+            return $query->whereIn('region_id', $regionIds);
+        }
+
+        // مدير فرع ← يوسع لمناطق الفرع ثم مراكزها
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
+
+            return $regionIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('region_id', $regionIds);
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }

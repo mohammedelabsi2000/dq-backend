@@ -539,34 +539,46 @@ class StudentControllerTest extends TestCase
     /** @test */
     public function test_scoped_user_sees_only_their_students()
     {
-        // Create students in branch manager's branch
+        // إنشاء مركز وحلقة ضمن الفرع
+        $center = Center::factory()->create(['region_id' => $this->region->id]);
+        $halaqa = Halaqa::factory()->create([
+            'reference_type' => 'center',
+            'reference_id'   => $center->id,
+        ]);
+
+        // إنشاء طلاب وتسجيلهم في الحلقة
         $branchStudents = Student::factory(5)->create(['mosque_id' => $this->mosque->id]);
+        foreach ($branchStudents as $student) {
+            HalaqaStudent::factory()->create([
+                'halaqa_id'   => $halaqa->id,
+                'student_id'  => $student->id,
+                'to_date'     => null,
+            ]);
+        }
 
-        // Create students in different branch
-        $anotherBranch = Branch::factory()->create(['name' => 'فرع جدة']);
-        $anotherRegion = Region::factory()->create([
-            'name' => 'منطقة جدة',
-            'branch_id' => $anotherBranch->id
+        // إنشاء طلاب في فرع آخر بدون تسجيل في حلقة الفرع الأول
+        $anotherBranch  = Branch::factory()->create();
+        $anotherRegion  = Region::factory()->create(['branch_id' => $anotherBranch->id]);
+        $anotherCenter  = Center::factory()->create(['region_id' => $anotherRegion->id]);
+        $anotherHalaqa  = Halaqa::factory()->create([
+            'reference_type' => 'center',
+            'reference_id'   => $anotherCenter->id,
         ]);
-        $anotherMosque = Mosque::factory()->create([
-            'name' => 'مسجد جدة',
-            'region_id' => $anotherRegion->id
-        ]);
+        $anotherMosque  = Mosque::factory()->create(['region_id' => $anotherRegion->id]);
+        $otherStudents  = Student::factory(5)->create(['mosque_id' => $anotherMosque->id]);
+        foreach ($otherStudents as $student) {
+            HalaqaStudent::factory()->create([
+                'halaqa_id'  => $anotherHalaqa->id,
+                'student_id' => $student->id,
+                'to_date'    => null,
+            ]);
+        }
 
-        $otherBranchStudents = Student::factory(5)->create(['mosque_id' => $anotherMosque->id]);
-
-        $role = Role::firstOrCreate([
-            'name' => 'branch_manager',
-            'guard_name' => 'sanctum'
-        ]);
-
+        $role = Role::firstOrCreate(['name' => 'branch_manager', 'guard_name' => 'sanctum']);
         $role->syncPermissions(Permission::where('name', 'like', 'students.%')->get());
-
-
         $this->branchManagerUser->syncRoles([$role]);
         $this->branchManagerUser->syncScopes([['type' => 'branch', 'id' => $this->branch->id]]);
 
-        // Query as branch manager
         $response = $this->actingAs($this->branchManagerUser, 'sanctum')
             ->getJson('/api/students');
 

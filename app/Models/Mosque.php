@@ -40,20 +40,39 @@ class Mosque extends Model
 
         $branchIds = $user->getScopeIds('branch');
         $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير فرع فقط ← يوسع لكل مناطق الفرع
-        if ($branchIds->isNotEmpty() && $regionIds->isEmpty()) {
-            $regionIds = $regionIds->merge(
-                Region::whereIn('branch_id', $branchIds)->pluck('id')
-            )->unique();
-        }
-
-        if ($regionIds->isEmpty()) {
+        // محفظ حلقة ← لا يرى أي مسجد
+        if ($halaqaIds->isNotEmpty()) {
             return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereHas('region', function ($q) use ($regionIds) {
-            $q->whereIn('regions.id', $regionIds);
-        });
+        // مدير مركز ← مسجد مركزه فقط
+        if ($centerIds->isNotEmpty()) {
+            $mosqueIds = Center::whereIn('id', $centerIds)
+                ->whereNotNull('mosque_id')
+                ->pluck('mosque_id');
+
+            return $mosqueIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('id', $mosqueIds);
+        }
+
+        // مدير منطقة ← مساجد منطقته
+        if ($regionIds->isNotEmpty()) {
+            return $query->whereIn('region_id', $regionIds);
+        }
+
+        // مدير فرع ← يوسع لمناطق الفرع ثم مساجدها
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
+
+            return $regionIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('region_id', $regionIds);
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }
