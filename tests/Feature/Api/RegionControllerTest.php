@@ -7,12 +7,9 @@ use App\Models\User;
 use App\Models\Branch;
 use App\Models\Region;
 use App\Models\Mosque;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class RegionControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected User $adminUser;
     protected User $regularUser;
     protected Branch $branch;

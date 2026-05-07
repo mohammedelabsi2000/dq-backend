@@ -30,6 +30,8 @@ class Halaqa extends Model
         'reference_type' => HalaqaReferenceType::class,
     ];
 
+    protected $with = ['lastStatus'];
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -79,6 +81,14 @@ class Halaqa extends Model
         return $this->hasMany(UserScope::class, 'scope_id')
             ->where('scope_type', 'halaqa')
             ->with('user');
+    }
+
+    public function statuses(){
+        return $this->hasMany(HalaqaStatus::class,'halaqa_id');
+    }
+
+    public function lastStatus(){
+        return $this->hasOne(HalaqaStatus::class,'halaqa_id')->latestOfMany('from_date');
     }
 
     /**

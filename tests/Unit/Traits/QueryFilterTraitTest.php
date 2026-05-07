@@ -4,13 +4,11 @@ namespace Tests\Unit\Traits;
 
 use App\Models\Branch;
 use App\Http\Traits\QueryFilterTrait;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class QueryFilterTraitTest extends TestCase
 {
-    use RefreshDatabase;
 
     private object $controller;
 
