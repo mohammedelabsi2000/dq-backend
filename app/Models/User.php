@@ -166,96 +166,16 @@ class User extends Authenticatable
     {
         return $this->morphMany(AcademicQualification::class, 'person');
     }
+
     public function personalCourses()
     {
         return $this->morphMany(PersonalCourse::class, 'person');
     }
 
-
-    // public function scopeVisibleTo(Builder $query, User $user): Builder
-    // {
-    //     if ($user->isGlobalAdmin()) {
-    //         return $query;
-    //     }
-
-    //     $branchIds  = $user->getScopeIds('branch');
-    //     $regionIds  = $user->getScopeIds('region');
-    //     $centerIds  = $user->getScopeIds('center');
-    //     $halaqaIds  = $user->getScopeIds('halaqa');
-
-    //     // مدير حلقة فقط ← لا يرى أي مستخدم
-    //     if ($halaqaIds->isNotEmpty() && $branchIds->isEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-    //         return $query->whereRaw('1 = 0');
-    //     }
-
-    //     // توسيع من branch ← regions
-    //     if ($branchIds->isNotEmpty() && $regionIds->isEmpty() && $centerIds->isEmpty()) {
-    //         $regionIds = $regionIds->merge(
-    //             Region::whereIn('branch_id', $branchIds)->pluck('id')
-    //         )->unique();
-    //     }
-
-    //     // جمع mosque_ids عبر الهرمية
-    //     $mosqueIds = collect();
-
-    //     if ($regionIds->isNotEmpty()) {
-    //         $mosqueIds = $mosqueIds->merge(
-    //             Mosque::whereIn('region_id', $regionIds)->pluck('id')
-    //         )->unique();
-    //     }
-
-    //     if ($centerIds->isNotEmpty()) {
-    //         $mosqueIds = $mosqueIds->merge(
-    //             Mosque::whereIn(
-    //                 'id',
-    //                 Center::whereIn('id', $centerIds)->pluck('mosque_id')
-    //             )->pluck('id')
-    //         )->unique();
-    //     }
-
-    //     // جمع user_ids عبر UserScope
-    //     $scopedUserIds = collect();
-
-    //     if ($branchIds->isNotEmpty()) {
-    //         $scopedUserIds = $scopedUserIds->merge(
-    //             UserScope::where('scope_type', 'branch')
-    //                 ->whereIn('scope_id', $branchIds)
-    //                 ->pluck('user_id')
-    //         );
-    //     }
-
-    //     if ($regionIds->isNotEmpty()) {
-    //         $scopedUserIds = $scopedUserIds->merge(
-    //             UserScope::where('scope_type', 'region')
-    //                 ->whereIn('scope_id', $regionIds)
-    //                 ->pluck('user_id')
-    //         );
-    //     }
-
-    //     if ($centerIds->isNotEmpty()) {
-    //         $scopedUserIds = $scopedUserIds->merge(
-    //             UserScope::where('scope_type', 'center')
-    //                 ->whereIn('scope_id', $centerIds)
-    //                 ->pluck('user_id')
-    //         );
-    //     }
-
-    //     $scopedUserIds = $scopedUserIds->unique();
-
-    //     // إذا ما في شيء على الإطلاق
-    //     if ($mosqueIds->isEmpty() && $scopedUserIds->isEmpty()) {
-    //         return $query->whereRaw('1 = 0');
-    //     }
-
-    //     return $query->where(function (Builder $q) use ($mosqueIds, $scopedUserIds) {
-    //         if ($mosqueIds->isNotEmpty()) {
-    //             $q->orWhereIn('mosque_id', $mosqueIds);
-    //         }
-    //         if ($scopedUserIds->isNotEmpty()) {
-    //             $q->orWhereIn('id', $scopedUserIds);
-    //         }
-    //     });
-    // }
+    public function activeScopes()
+    {
+        return $this->hasMany(UserScope::class)->whereNull('to_date');
+    }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
@@ -348,51 +268,10 @@ class User extends Authenticatable
 
     public function approvalLevel(): ?ApprovalLevel
     {
-        if ($this->isGlobalAdmin()) {
-            return ApprovalLevel::Admin;
-        }
-
-        if ($this->getScopeIds('branch')->isNotEmpty()) {
-            return ApprovalLevel::Branch;
-        }
-
-        if ($this->getScopeIds('region')->isNotEmpty()) {
-            return ApprovalLevel::Region;
-        }
-
+        if ($this->isGlobalAdmin())                      return ApprovalLevel::Admin;
+        if ($this->getScopeIds('branch')->isNotEmpty())  return ApprovalLevel::Branch;
+        if ($this->getScopeIds('region')->isNotEmpty())  return ApprovalLevel::Region;
+        if ($this->getScopeIds('center')->isNotEmpty())  return null; // مدير المركز — يبدأ من Region
         return null;
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Scopes Management
-    |--------------------------------------------------------------------------
-    */
-
-    // public function scopes()
-    // {
-    //     return $this->hasMany(UserScope::class);
-    // }
-
-    // // الـ scopes النشطة فقط
-    // public function activeScopes()
-    // {
-    //     return $this->hasMany(UserScope::class)->whereNull('to_date');
-    // }
-
-    // public function syncScopes(array $scopes)
-    // {
-    //     $this->scopes()->delete();
-    //     foreach ($scopes as $scope) {
-    //         $this->scopes()->create([
-    //             'scope_type' => $scope['type'],
-    //             'scope_id' => $scope['id'],
-    //         ]);
-    //     }
-    // }
-
-    // public function clearScopes()
-    // {
-    //     $this->scopes()->delete();
-    // }
 }

@@ -1,6 +1,6 @@
 <?php
-
 // app/Concerns/HasApproval.php
+
 namespace App\Concerns;
 
 use App\Enums\ApprovalLevel;
@@ -11,32 +11,30 @@ use Illuminate\Database\Eloquent\Builder;
 
 trait HasApproval
 {
-    // protected static function bootHasApproval(): void
-    // {
-    //     // إخفاء غير المعتمدين تلقائياً في كل query
-    //     static::addGlobalScope('approved', function (Builder $builder) {
-    //         $builder->where('is_approved', true);
-    //     });
-    // }
-
     public function approvalRequest()
     {
         return $this->morphOne(ApprovalRequest::class, 'approvable');
     }
 
-    public function submitForApproval(User $requester): ApprovalRequest
+    public function submitForApproval(User $requester): ?ApprovalRequest
     {
+        if ($this->approvalRequest()->exists()) {
+            throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
+        }
+
+        $startingLevel = ApprovalLevel::startingLevelForUser($requester);
+
+        // المدير العام → اعتماد فوري بدون مراحل
+        if ($startingLevel === null) {
+            $this->update(['is_approved' => true]);
+            return null;
+        }
+
         return $this->approvalRequest()->create([
-            'current_level' => ApprovalLevel::Region,
+            'current_level' => $startingLevel,
             'status'        => ApprovalStatus::Pending,
             'requested_by'  => $requester->id,
         ]);
-    }
-
-    // لعرض المعلقة والمرفوضة (للمسؤولين)
-    public static function withPending(): Builder
-    {
-        return static::withoutGlobalScope('approved');
     }
 
     public function isPending(): bool
@@ -44,8 +42,18 @@ trait HasApproval
         return $this->approvalRequest?->status === ApprovalStatus::Pending;
     }
 
+    public function isApproved(): bool
+    {
+        return $this->is_approved === true;
+    }
+
     public function isRejected(): bool
     {
         return $this->approvalRequest?->status === ApprovalStatus::Rejected;
+    }
+
+    public static function withPending(): Builder
+    {
+        return static::withoutGlobalScope('approved');
     }
 }

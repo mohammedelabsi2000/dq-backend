@@ -37,6 +37,10 @@ class UserResource extends JsonResource
             'mosque' => new MosqueResource($this->mosque),
             'marital_status' => new ConstantResource($this->whenLoaded('maritalStatus')),
             'prefix_name' => new ConstantResource($this->whenLoaded('prefix')),
+            'role_name' => $this->when(
+                $this->relationLoaded('roles'),
+                fn() => $this->roles->first()?->name ?? null
+            ),
             'roles' => UserRoleResource::collection($this->whenLoaded('roles')),
             'abilities' => $this->when(
                 $this->relationLoaded('roles'),
@@ -59,9 +63,18 @@ class UserResource extends JsonResource
             'location' => $this->location,
             'approval' => [
                 'is_approved'      => $this->is_approved,
-                'status'           => $this->approvalRequest?->status?->label(),
-                'current_level'    => $this->approvalRequest?->current_level?->label(),
-                'rejection_reason' => $this->approvalRequest?->rejection_reason,
+                'status'           => $this->when(
+                    $this->relationLoaded('approvalRequest'),
+                    fn() => $this->approvalRequest?->status?->label()
+                ),
+                'current_level'    => $this->when(
+                    $this->relationLoaded('approvalRequest'),
+                    fn() => $this->approvalRequest?->current_level?->label()
+                ),
+                'rejection_reason' => $this->when(
+                    $this->relationLoaded('approvalRequest'),
+                    fn() => $this->approvalRequest?->rejection_reason
+                ),
             ],
 
         ];

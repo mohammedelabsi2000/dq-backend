@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\AcademicQualification;
+use App\Models\ApprovalRequest;
 use App\Models\Branch;
 use App\Models\Center;
 use App\Models\Constant;
@@ -15,6 +16,7 @@ use App\Models\Student;
 use App\Models\User;
 use App\Models\UserRole;
 use App\Policies\AcademicQualificationPolicy;
+use App\Policies\ApprovalPolicy;
 use App\Policies\BranchPolicy;
 use App\Policies\CenterPolicy;
 use App\Policies\ConstantPolicy;
@@ -48,6 +50,7 @@ class AuthServiceProvider extends ServiceProvider
         Mosque::class => MosquePolicy::class,
         Constant::class => ConstantPolicy::class,
         HalaqaStudent::class => HalaqaStudentPolicy::class,
+        ApprovalRequest::class => ApprovalPolicy::class,
     ];
 
     /**

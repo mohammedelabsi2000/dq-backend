@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ApprovalLevel;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\StudentResource;
 
@@ -59,6 +60,31 @@ class HalaqaResource extends JsonResource
             'students_count' => $this->when(
                 $this->relationLoaded('studentEnrollments') || $this->relationLoaded('students'),
                 fn() => $this->studentsCount()
+            ),
+
+            'approval' => $this->when(
+                $this->relationLoaded('approvalRequest'),
+                fn() => $this->approvalRequest ? [
+                    'is_approved'      => $this->is_approved,
+                    'status'           => $this->approvalRequest->status->label(),
+                    'current_level'    => $this->approvalRequest->current_level->label(),
+                    'rejection_reason' => $this->approvalRequest->rejection_reason,
+                    'requested_at'     => $this->approvalRequest->created_at?->format('Y-m-d H:i'),
+                    'logs' => $this->when(
+                        $this->approvalRequest->relationLoaded('logs'),
+                        fn() => $this->approvalRequest->logs->map(fn($log) => [
+                            'level'      => ApprovalLevel::from($log->level)->label(),
+                            'action'     => $log->action === 'approved' ? 'موافقة' : 'رفض',
+                            'acted_by'   => $log->actor?->full_name ?? $log->actor?->name,
+                            'notes'      => $log->notes,
+                            'created_at' => $log->created_at?->format('Y-m-d H:i'),
+                        ])
+                    ),
+                ] : [
+                    'is_approved'   => $this->is_approved,
+                    'status'        => null,
+                    'current_level' => null,
+                ]
             ),
 
             /*

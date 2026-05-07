@@ -21,7 +21,7 @@ class UserController extends Controller
     public function index()
     {
         $this->authorize('viewAny', User::class);
-        $query = User::query()->visibleTo(auth()->user());
+        $query = User::query()->where('is_approved', true)->visibleTo(auth()->user());
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
@@ -88,13 +88,25 @@ class UserController extends Controller
         );
 
         // رفع طلب الاعتماد تلقائياً
-        $user->submitForApproval(auth()->user());
+        // $user->submitForApproval(auth()->user());
+        try {
+            $approvalRequest = $user->submitForApproval(auth()->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
+        }
 
-        return $this->success(
-            new UserResource($user),
-            'تم إنشاء المستخدم وإرساله للاعتماد',
-            201
-        );
+        $user->load('approvalRequest');
+
+        // return $this->success(
+        //     new UserResource($user),
+        //     'تم إنشاء المستخدم وإرساله للاعتماد',
+        //     201
+        // );
+        $message = $approvalRequest === null
+            ? 'تم إنشاء المستخدم وتفعيله مباشرة'    // المدير العام — اعتماد فوري
+            : 'تم إنشاء المستخدم وإرساله للاعتماد'; // بقية المديرين
+
+        return $this->success(new UserResource($user), $message, 201);
     }
 
     /**
@@ -105,7 +117,14 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
-        $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.permissions']);
+        $user = $user->load([
+            'mosque',
+            'maritalStatus',
+            'prefix',
+            'roles.permissions',
+            'approvalRequest.logs.actor',
+            'activeScopes'
+        ]);
         return $this->success(
             new UserResource($user),
             'بيانات المستخدم',
