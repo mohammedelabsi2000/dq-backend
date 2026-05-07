@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('students', StudentController::class);
     Route::prefix('students')->group(function () {
         Route::post('import', [StudentController::class, 'import']);
+        Route::post('import-with-relations', [StudentController::class, 'importWithRelations']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
     });
 
