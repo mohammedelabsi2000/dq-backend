@@ -17,7 +17,7 @@ class ConstantFactory extends Factory
             'constant_type_id' => ConstantType::factory(),
             'parent_id' => null,
             'is_active' => $this->faker->boolean(90),
-            'notes' => $this->faker->optional()->sentence(),
+            'notes' => $this->faker->optional()->text(),
             'created_by' => 1,
             'updated_by' => 1,
         ];

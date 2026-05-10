@@ -5,14 +5,11 @@ namespace Tests\Feature\Api;
 use App\Models\User;
 use App\Models\Mosque;
 use App\Models\Constant;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
-use Tests\Traits\SeedsTestData;
 
 class UserControllerTest extends TestCase
 {
-    use RefreshDatabase, SeedsTestData;
 
     protected function setUp(): void
     {

@@ -12,13 +12,11 @@ use App\Models\Region;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\StudentService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class StudentServiceTest extends TestCase
 {
-    use RefreshDatabase;
 
     private StudentService $service;
 

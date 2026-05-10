@@ -6,12 +6,10 @@ use App\Models\Branch;
 use App\Models\User;
 use App\Policies\BranchPolicy;
 use Database\Seeders\PermissionSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class BranchPolicyTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected BranchPolicy $policy;
 

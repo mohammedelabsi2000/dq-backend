@@ -8,6 +8,11 @@ class IdQueryServices
 {
     public function __construct() {}
 
+    /**
+      * @param string $id
+      * @return array
+      * @throws \InvalidArgumentException
+      */
     public function get($id)
     {
         if (!ctype_digit($id) || strlen($id) != 9) {
