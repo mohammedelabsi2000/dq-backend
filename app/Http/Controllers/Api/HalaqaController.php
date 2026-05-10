@@ -93,15 +93,15 @@ class HalaqaController extends Controller
         // $halaqa = Halaqa::create($request->validated());
         $halaqa = Halaqa::create([
             ...$request->validated(),
-            'is_approved' => false, // ← دائماً false عند الإنشاء
+            // 'is_approved' => false, // ← دائماً false عند الإنشاء
         ]);
 
         // إرسال طلب الاعتماد
-        try {
-            $approvalRequest = $halaqa->submitForApproval(auth()->user());
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 422);
-        }
+        // try {
+        //     $approvalRequest = $halaqa->submitForApproval(auth()->user());
+        // } catch (\Exception $e) {
+        //     return $this->error($e->getMessage(), 422);
+        // }
 
         if ($request->boolean('with_type')) {
             $halaqa->load('type');
@@ -109,9 +109,12 @@ class HalaqaController extends Controller
 
         $halaqa->load(['type', 'reference', 'approvalRequest']);
 
-        $message = $approvalRequest === null
-            ? 'تم إنشاء الحلقة وتفعيلها مباشرة'    // المدير العام
-            : 'تم إنشاء الحلقة وإرسالها للاعتماد';
+        // $message = $approvalRequest === null
+        //     ? 'تم إنشاء الحلقة وتفعيلها مباشرة'    // المدير العام
+        //     : 'تم إنشاء الحلقة وإرسالها للاعتماد';
+
+        $message = 'تم إنشاء الحلقة';
+
 
         return $this->success(new HalaqaResource($halaqa), $message, 201);
     }
