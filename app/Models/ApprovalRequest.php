@@ -21,6 +21,7 @@ class ApprovalRequest extends Model
         'status',
         'requested_by',
         'rejection_reason',
+        'notes',
     ];
 
     protected $casts = [
@@ -75,7 +76,7 @@ class ApprovalRequest extends Model
             if ($nextLevel === null) {
                 // اعتماد نهائي
                 $this->update(['status' => ApprovalStatus::Approved]);
-                $this->approvable->update(['is_approved' => true]);
+                $this->approvable->update(['is_approved' => true, 'is_active'   => true,]);
             } else {
                 // الانتقال للمرحلة التالية
                 $this->update(['current_level' => $nextLevel]);
@@ -114,7 +115,7 @@ class ApprovalRequest extends Model
     //     ]);
     // }
 
-    public function resubmit(): void
+    public function resubmit(?string $notes = null): void
     {
         if ($this->status !== ApprovalStatus::Rejected) {
             throw new \Exception('لا يمكن إعادة إرسال طلب غير مرفوض.');
@@ -127,7 +128,36 @@ class ApprovalRequest extends Model
             'status'           => ApprovalStatus::Pending,
             'current_level'    => $firstLevel ?? ApprovalLevel::Region,
             'rejection_reason' => null,
+            'notes'            => $notes ?? $this->notes,
         ]);
+    }
+
+    // app/Models/ApprovalRequest.php
+
+    public function cancel(User $actor): void
+    {
+        if ($this->status !== ApprovalStatus::Rejected) {
+            throw new \Exception('لا يمكن إلغاء طلب غير مرفوض.');
+        }
+
+        // فقط مقدم الطلب يمكنه الإلغاء
+        if ($this->requested_by !== $actor->id) {
+            throw new \Exception('ليس لديك صلاحية إلغاء هذا الطلب.');
+        }
+
+        DB::transaction(function () use ($actor) {
+            $this->logs()->create([
+                'level'    => $this->current_level,
+                'action'   => 'cancelled',
+                'acted_by' => $actor->id,
+                'notes'    => 'تم إلغاء الطلب من قبل مقدمه.',
+            ]);
+
+            $this->update(['status' => ApprovalStatus::Cancelled]);
+
+            // soft delete للكيان
+            $this->approvable?->delete();
+        });
     }
 
     // app/Models/ApprovalRequest.php

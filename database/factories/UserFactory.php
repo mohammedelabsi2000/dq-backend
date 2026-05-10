@@ -56,6 +56,8 @@ class UserFactory extends Factory
             'prefix_name_id' => fake()->randomElement(
                 ConstantHelper::getConstantIdsByType('prefix_name')
             ),
+            'is_approved' => true,
+            'is_active' => true,
         ];
     }
 

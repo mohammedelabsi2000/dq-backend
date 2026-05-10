@@ -25,7 +25,7 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->where('is_approved', true)->visibleTo(auth()->user());
 
-        $filteredQuery = (new HalaqaFilter($query, $request))->apply();
+        $query = (new HalaqaFilter($query, $request))->apply();
 
         // Filter by specific center
         if ($request->filled('center_id')) {
@@ -69,10 +69,6 @@ class HalaqaController extends Controller
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
         ]);
-
-        if ($request->boolean('with_students')) {
-            $filteredQuery->with('students');
-        }
 
         $query = $q['query'];
         $total = $q['count'];

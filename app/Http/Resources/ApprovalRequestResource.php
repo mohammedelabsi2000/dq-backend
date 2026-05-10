@@ -17,6 +17,7 @@ class ApprovalRequestResource extends JsonResource
             'current_level'    => $this->current_level->value,
             'current_level_label' => $this->current_level->label(),
             'rejection_reason' => $this->rejection_reason,
+            'notes'            => $this->notes,
             'requested_at'     => $this->created_at?->format('Y-m-d H:i'),
 
             // نوع الطلب

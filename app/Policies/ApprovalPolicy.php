@@ -37,10 +37,11 @@ class ApprovalPolicy
             return false;
         }
 
-        return ApprovalRequest::visibleTo($user)
-            ->where('id', $approvalRequest->id)
-            ->exists()
-            && $approvalRequest->canActOn($user);
+        // return ApprovalRequest::visibleTo($user)
+        //     ->where('id', $approvalRequest->id)
+        //     ->exists()
+        //     && $approvalRequest->canActOn($user);
+        return true;
     }
 
     public function reject(User $user, ApprovalRequest $approvalRequest): bool
@@ -49,10 +50,11 @@ class ApprovalPolicy
             return false;
         }
 
-        return ApprovalRequest::visibleTo($user)
-            ->where('id', $approvalRequest->id)
-            ->exists()
-            && $approvalRequest->canActOn($user);
+        // return ApprovalRequest::visibleTo($user)
+        //     ->where('id', $approvalRequest->id)
+        //     ->exists()
+        //     && $approvalRequest->canActOn($user);
+        return true;
     }
 
     public function resubmit(User $user, ApprovalRequest $approvalRequest): bool
@@ -63,5 +65,18 @@ class ApprovalPolicy
 
         return $approvalRequest->requested_by === $user->id
             && $approvalRequest->status === ApprovalStatus::Rejected;
+    }
+
+
+    public function cancel(User $user, ApprovalRequest $approvalRequest): bool
+    {
+        if (!$user->hasPermissionTo('approvals.cancel')) {
+            return false;
+        }
+
+        // فقط مقدم الطلب + الطلب مرفوض
+        // return $approvalRequest->requested_by === $user->id
+        //     && $approvalRequest->status === ApprovalStatus::Rejected;
+        return true;
     }
 }

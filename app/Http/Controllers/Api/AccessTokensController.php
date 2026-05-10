@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -89,18 +90,29 @@ class AccessTokensController extends Controller
                 default             => 'حسابك غير مفعّل، تواصل مع المسؤول.',
             };
 
-            return $this->error($message, 403, null);
+            return $this->error($message, 422, null);
+        }
+
+        if (!$user->is_active) {
+            return $this->error('حسابك موقوف. تواصل مع المسؤول للاستفسار.', 422, null);
         }
 
         $device_name = $request->post('device_name', $request->userAgent());
         $token       = $user->createToken($device_name);
 
+        // return $this->success([
+        //     'token'       => $token->plainTextToken,
+        //     'user'        => $user,
+        //     'roles'       => $user->getRoleNames(),
+        //     'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+        //     'scopes'      => $user->scopes,
+        // ], 'تم تسجيل الدخول بنجاح', 201);
         return $this->success([
             'token'       => $token->plainTextToken,
-            'user'        => $user,
+            'user'        => new UserResource($user),
             'roles'       => $user->getRoleNames(),
             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
-            'scopes'      => $user->scopes,
+            'scopes'      => $user->activeScopes,
         ], 'تم تسجيل الدخول بنجاح', 201);
     }
 

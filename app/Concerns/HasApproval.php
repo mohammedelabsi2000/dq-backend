@@ -16,17 +16,42 @@ trait HasApproval
         return $this->morphOne(ApprovalRequest::class, 'approvable');
     }
 
-    public function submitForApproval(User $requester): ?ApprovalRequest
+    // public function submitForApproval(User $requester): ?ApprovalRequest
+    // {
+    //     if ($this->approvalRequest()->exists()) {
+    //         throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
+    //     }
+
+    //     $startingLevel = ApprovalLevel::startingLevelForUser($requester);
+
+    //     // المدير العام → اعتماد فوري بدون مراحل
+    //     if ($startingLevel === null) {
+    //         $this->update(['is_approved' => true]);
+    //         return null;
+    //     }
+
+    //     return $this->approvalRequest()->create([
+    //         'current_level' => $startingLevel,
+    //         'status'        => ApprovalStatus::Pending,
+    //         'requested_by'  => $requester->id,
+    //     ]);
+    // }
+
+    public function submitForApproval(User $requester, ?string $notes = null): ?ApprovalRequest
     {
-        if ($this->approvalRequest()->exists()) {
+        // نتحقق فقط من الطلبات غير الملغاة
+        $exists = $this->approvalRequest()
+            ->whereNotIn('status', [ApprovalStatus::Cancelled])
+            ->exists();
+
+        if ($exists) {
             throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
         }
 
         $startingLevel = ApprovalLevel::startingLevelForUser($requester);
 
-        // المدير العام → اعتماد فوري بدون مراحل
         if ($startingLevel === null) {
-            $this->update(['is_approved' => true]);
+            $this->update(['is_approved' => true, 'is_active' => true]);
             return null;
         }
 
@@ -34,6 +59,7 @@ trait HasApproval
             'current_level' => $startingLevel,
             'status'        => ApprovalStatus::Pending,
             'requested_by'  => $requester->id,
+            'notes'         => $notes,
         ]);
     }
 

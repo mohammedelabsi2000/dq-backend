@@ -8,6 +8,7 @@ enum ApprovalStatus: string
     case Pending = 'pending';
     case Approved = 'approved';
     case Rejected = 'rejected';
+    case Cancelled = 'cancelled';
 
     public function label(): string
     {
@@ -15,6 +16,7 @@ enum ApprovalStatus: string
             self::Pending => 'قيد الانتظار',
             self::Approved => 'معتمد',
             self::Rejected => 'مرفوض',
+            self::Cancelled => 'ملغي',
         };
     }
 }

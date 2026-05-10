@@ -67,6 +67,8 @@ class StoreUserRequest extends DQFormRequest
             'jobname' => 'nullable|string|max:255',
             'job_place' => 'nullable|string|max:255',
             'job_salary' => 'nullable|numeric|min:0',
+            'is_approved' => 'nullable|boolean',
+            'notes' => 'nullable|string|max:1000'
         ];
     }
 
@@ -160,6 +162,10 @@ class StoreUserRequest extends DQFormRequest
 
             'job_salary.numeric' => 'الراتب يجب أن يكون رقماً.',
             'job_salary.min' => 'الراتب لا يمكن أن يكون سالباً.',
+
+            'is_approved.boolean' => 'حالة التفعيل يجب أن تكون نعم أو لا.',
+            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
+            'notes.max' => 'الملاحظات يجب ألا تتجاوز 1000 حرف.',
         ];
     }
 }

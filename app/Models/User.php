@@ -55,6 +55,7 @@ class User extends Authenticatable
         // Media
         'image',
         'is_approved',
+        'is_active',
     ];
 
     /**
@@ -74,6 +75,7 @@ class User extends Authenticatable
         'job_salary' => 'decimal:2',
         'gender' => Gender::class,
         'is_approved' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     /*
@@ -188,10 +190,10 @@ class User extends Authenticatable
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // مدير مركز — يرى فقط من scope_type = center في مراكزه
-        if ($centerIds->isNotEmpty()) {
-            $scopedUserIds = UserScope::where('scope_type', 'center')
-                ->whereIn('scope_id', $centerIds)
+        // معلم — يرى فقط المستخدمين في حلقاته
+        if ($halaqaIds->isNotEmpty()) {
+            $scopedUserIds = UserScope::where('scope_type', 'halaqa')
+                ->whereIn('scope_id', $halaqaIds)
                 ->whereNull('to_date')
                 ->pluck('user_id');
 
@@ -202,35 +204,81 @@ class User extends Authenticatable
             return $query->whereIn('id', $scopedUserIds);
         }
 
-        // مدير منطقة — يرى من scope_type = region + center في منطقته
-        if ($regionIds->isNotEmpty()) {
-            $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
+        // مدير مركز — يرى المستخدمين المعينين لمركزه والحلقات التابعة له
+        if ($centerIds->isNotEmpty()) {
+            $halaqaIdsInCenter = Halaqa::where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIds)
+                ->pluck('id');
 
             $scopedUserIds = UserScope::whereNull('to_date')
-                ->where(function ($q) use ($regionIds, $centerIdsInRegion) {
+                ->where(function ($q) use ($centerIds, $halaqaIdsInCenter) {
+                    $q->where(function ($q) use ($centerIds) {
+                        $q->where('scope_type', 'center')
+                            ->whereIn('scope_id', $centerIds);
+                    })->orWhere(function ($q) use ($halaqaIdsInCenter) {
+                        $q->where('scope_type', 'halaqa')
+                            ->whereIn('scope_id', $halaqaIdsInCenter);
+                    });
+                })
+                ->pluck('user_id');
+
+            if ($scopedUserIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereIn('id', $scopedUserIds);
+        }
+
+        // مدير منطقة — يرى المستخدمين المعينين للمنطقة والمراكز والحلقات التابعة لها
+        if ($regionIds->isNotEmpty()) {
+            $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
+            $halaqaIdsInRegion = Halaqa::where('reference_type', 'region')
+                ->whereIn('reference_id', $regionIds)
+                ->pluck('id');
+            $halaqaIdsInCenters = Halaqa::where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIdsInRegion)
+                ->pluck('id');
+            $allHalaqaIds = $halaqaIdsInRegion->merge($halaqaIdsInCenters);
+
+            $scopedUserIds = UserScope::whereNull('to_date')
+                ->where(function ($q) use ($regionIds, $centerIdsInRegion, $allHalaqaIds) {
                     $q->where(function ($q) use ($regionIds) {
                         $q->where('scope_type', 'region')
                             ->whereIn('scope_id', $regionIds);
                     })->orWhere(function ($q) use ($centerIdsInRegion) {
                         $q->where('scope_type', 'center')
                             ->whereIn('scope_id', $centerIdsInRegion);
+                    })->orWhere(function ($q) use ($allHalaqaIds) {
+                        $q->where('scope_type', 'halaqa')
+                            ->whereIn('scope_id', $allHalaqaIds);
                     });
                 })
                 ->pluck('user_id');
 
-            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+            if ($scopedUserIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
 
-            return $this->buildUserVisibilityQuery($query, $mosqueIds, $scopedUserIds);
+            return $query->whereIn('id', $scopedUserIds);
         }
 
-        // مدير فرع — يرى الكل في فرعه
+        // مدير فرع — يرى المستخدمين المعينين للفرع والمناطق والمراكز والحلقات التابعة له
         if ($branchIds->isNotEmpty()) {
             $regionIdsInBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
             $centerIdsInBranch = Center::whereIn('region_id', $regionIdsInBranch)->pluck('id');
-            $mosqueIds = Mosque::whereIn('region_id', $regionIdsInBranch)->pluck('id');
+
+            // Get halaqat in regions directly
+            $halaqaIdsInRegions = Halaqa::where('reference_type', 'region')
+                ->whereIn('reference_id', $regionIdsInBranch)
+                ->pluck('id');
+            // Get halaqat in centers
+            $halaqaIdsInCenters = Halaqa::where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIdsInBranch)
+                ->pluck('id');
+            $allHalaqaIds = $halaqaIdsInRegions->merge($halaqaIdsInCenters);
 
             $scopedUserIds = UserScope::whereNull('to_date')
-                ->where(function ($q) use ($branchIds, $regionIdsInBranch, $centerIdsInBranch) {
+                ->where(function ($q) use ($branchIds, $regionIdsInBranch, $centerIdsInBranch, $allHalaqaIds) {
                     $q->where(function ($q) use ($branchIds) {
                         $q->where('scope_type', 'branch')
                             ->whereIn('scope_id', $branchIds);
@@ -240,31 +288,23 @@ class User extends Authenticatable
                     })->orWhere(function ($q) use ($centerIdsInBranch) {
                         $q->where('scope_type', 'center')
                             ->whereIn('scope_id', $centerIdsInBranch);
+                    })->orWhere(function ($q) use ($allHalaqaIds) {
+                        $q->where('scope_type', 'halaqa')
+                            ->whereIn('scope_id', $allHalaqaIds);
                     });
                 })
                 ->pluck('user_id');
 
-            return $this->buildUserVisibilityQuery($query, $mosqueIds, $scopedUserIds);
+            if ($scopedUserIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereIn('id', $scopedUserIds);
         }
 
         return $query->whereRaw('1 = 0');
     }
 
-    private function buildUserVisibilityQuery(Builder $query, $mosqueIds, $scopedUserIds): Builder
-    {
-        if ($mosqueIds->isEmpty() && $scopedUserIds->isEmpty()) {
-            return $query->whereRaw('1 = 0');
-        }
-
-        return $query->where(function (Builder $q) use ($mosqueIds, $scopedUserIds) {
-            if ($mosqueIds->isNotEmpty()) {
-                $q->orWhereIn('mosque_id', $mosqueIds);
-            }
-            if ($scopedUserIds->isNotEmpty()) {
-                $q->orWhereIn('id', $scopedUserIds);
-            }
-        });
-    }
 
     public function approvalLevel(): ?ApprovalLevel
     {

@@ -62,12 +62,12 @@ class ApprovalController extends Controller
             ->exists();
 
         if (!$isVisible) {
-            return $this->error('ليس لديك صلاحية للوصول لهذا الطلب.', 403);
+            return $this->error('ليس لديك صلاحية للوصول لهذا الطلب.', 422);
         }
 
         // ✅ التحقق أن المستوى الحالي يخصه
         if (!$approvalRequest->canActOn($user)) {
-            return $this->error('هذا الطلب ليس في مرحلتك حالياً.', 403);
+            return $this->error('هذا الطلب ليس في مرحلتك حالياً.', 422);
         }
 
         try {
@@ -117,6 +117,12 @@ class ApprovalController extends Controller
     public function resubmit(Request $request, ApprovalRequest $approvalRequest)
     {
         $this->authorize('resubmit', $approvalRequest);
+        $request->validate([
+            'notes' => 'nullable|string|max:1000',
+        ], [
+            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
+            'notes.max'    => 'الملاحظات يجب ألا تتجاوز 1000 حرف.',
+        ]);
         $user = $request->user();
 
         // فقط مقدم الطلب يمكنه إعادة الإرسال
@@ -128,7 +134,7 @@ class ApprovalController extends Controller
         }
 
         try {
-            $approvalRequest->resubmit();
+            $approvalRequest->resubmit($request->input('notes'));
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 422);
         }
@@ -137,5 +143,18 @@ class ApprovalController extends Controller
             null,
             'تمت إعادة إرسال الطلب بنجاح'
         );
+    }
+
+    public function cancel(Request $request, ApprovalRequest $approvalRequest)
+    {
+        $this->authorize('cancel', $approvalRequest);
+
+        try {
+            $approvalRequest->cancel($request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
+        }
+
+        return $this->success(null, 'تم إلغاء الطلب بنجاح.');
     }
 }

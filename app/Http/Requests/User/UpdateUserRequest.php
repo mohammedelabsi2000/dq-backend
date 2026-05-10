@@ -76,6 +76,7 @@ class UpdateUserRequest extends DQFormRequest
             'jobname' => 'nullable|string|max:255',
             'job_place' => 'nullable|string|max:255',
             'job_salary' => 'nullable|numeric|min:0',
+            'is_approved' => 'nullable|boolean',
         ];
     }
 
@@ -154,6 +155,8 @@ class UpdateUserRequest extends DQFormRequest
 
             'job_salary.numeric' => 'الراتب يجب أن يكون رقماً.',
             'job_salary.min' => 'الراتب لا يمكن أن يكون أقل من صفر.',
+
+            'is_approved.boolean' => 'حالة التفعيل يجب أن تكون نعم أو لا.',
         ];
     }
 }

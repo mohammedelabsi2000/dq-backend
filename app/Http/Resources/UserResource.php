@@ -61,6 +61,8 @@ class UserResource extends JsonResource
 
 
             'location' => $this->location,
+            'is_active'   => $this->is_active,
+            'is_approved' => $this->is_approved,
             'approval' => [
                 'is_approved'      => $this->is_approved,
                 'status'           => $this->when(
