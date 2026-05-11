@@ -35,7 +35,6 @@ class ValidateStudentsImport implements WithHeadingRow, ToCollection
 
                 $this->getKey('hifz_from') => 'nullable|numeric|between:1,30',
                 $this->getKey('hifz_to') => 'nullable|numeric|between:1,30',
-
             ], [
                 $this->getKey('branch') . '.required' => 'اسم الفرع مطلوب',
                 $this->getKey('region') . '.required' => 'اسم المحلية مطلوب',
@@ -52,7 +51,7 @@ class ValidateStudentsImport implements WithHeadingRow, ToCollection
                 $this->getKey('recitation_from') . '.between' => 'السرد من يجب أن يكون بين 1 و 30',
                 $this->getKey('recitation_to') . '.numeric' => 'السرد إلى يجب أن يكون رقمًا',
                 $this->getKey('recitation_to') . '.between' => 'السرد إلى يجب أن يكون بين 1 و 30',
-                
+
                 $this->getKey('hifz_from') . '.numeric' => 'الحفظ من يجب أن يكون رقمًا',
                 $this->getKey('hifz_from') . '.between' => 'الحفظ من يجب أن يكون بين 1 و 30',
                 $this->getKey('hifz_to') . '.numeric' => 'الحفظ إلى يجب أن يكون رقمًا',
