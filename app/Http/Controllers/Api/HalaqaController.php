@@ -23,7 +23,7 @@ class HalaqaController extends Controller
 
         $this->authorize('viewAny', Halaqa::class);
 
-        $query = Halaqa::query()->where('is_approved', true)->visibleTo(auth()->user());
+        $query = Halaqa::query()->visibleTo(auth()->user());
 
         $query = (new HalaqaFilter($query, $request))->apply();
 

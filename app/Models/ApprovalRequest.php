@@ -106,15 +106,6 @@ class ApprovalRequest extends Model
         });
     }
 
-    // public function resubmit(): void
-    // {
-    //     $this->update([
-    //         'status'           => ApprovalStatus::Pending,
-    //         'current_level'    => ApprovalLevel::Region,
-    //         'rejection_reason' => null,
-    //     ]);
-    // }
-
     public function resubmit(?string $notes = null): void
     {
         if ($this->status !== ApprovalStatus::Rejected) {
@@ -131,8 +122,6 @@ class ApprovalRequest extends Model
             'notes'            => $notes ?? $this->notes,
         ]);
     }
-
-    // app/Models/ApprovalRequest.php
 
     public function cancel(User $actor): void
     {
@@ -160,8 +149,6 @@ class ApprovalRequest extends Model
         });
     }
 
-    // app/Models/ApprovalRequest.php
-
     public function canActOn(User $user): bool
     {
         // المستوى الحالي للطلب
@@ -184,227 +171,6 @@ class ApprovalRequest extends Model
     | Scopes
     |--------------------------------------------------------------------------
     */
-
-    /**
-     * يعرض فقط الطلبات المعلقة التي تخص نطاق المدير الحالي ومستواه
-     *
-     * المسار: approvable_id (user_id) ← user_scopes (center) ← centers ← regions ← branches
-     */
-    // public function scopeVisibleTo(Builder $query, User $user): Builder
-    // {
-    //     // المدير العام ← كل الطلبات في مرحلة Admin
-    //     if ($user->isGlobalAdmin()) {
-    //         return $query->where('current_level', ApprovalLevel::Admin)
-    //             ->where('status', ApprovalStatus::Pending);
-    //     }
-
-    //     $branchIds = $user->getScopeIds('branch');
-    //     $regionIds = $user->getScopeIds('region');
-
-    //     // مدير فرع ← طلبات مرحلة Branch من طالبين في فرعه فقط
-    //     if ($branchIds->isNotEmpty()) {
-    //         $regionIdsInBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
-    //         $centerIdsInBranch = Center::whereIn('region_id', $regionIdsInBranch)->pluck('id');
-
-    //         return $query->where('current_level', ApprovalLevel::Branch)
-    //             ->where('status', ApprovalStatus::Pending)
-    //             ->where('approvable_type', 'user')
-    //             ->whereIn('requested_by', function ($sub) use ($branchIds, $regionIdsInBranch, $centerIdsInBranch) {
-    //                 $sub->select('user_id')
-    //                     ->from('user_scopes')
-    //                     ->whereNull('to_date')
-    //                     ->where(function ($q) use ($branchIds, $regionIdsInBranch, $centerIdsInBranch) {
-    //                         $q->where(function ($q) use ($branchIds) {
-    //                             $q->where('scope_type', 'branch')
-    //                                 ->whereIn('scope_id', $branchIds);
-    //                         })->orWhere(function ($q) use ($regionIdsInBranch) {
-    //                             $q->where('scope_type', 'region')
-    //                                 ->whereIn('scope_id', $regionIdsInBranch);
-    //                         })->orWhere(function ($q) use ($centerIdsInBranch) {
-    //                             $q->where('scope_type', 'center')
-    //                                 ->whereIn('scope_id', $centerIdsInBranch);
-    //                         });
-    //                     });
-    //             });
-    //     }
-
-    //     // مدير منطقة ← طلبات مرحلة Region من طالبين في منطقته فقط
-    //     if ($regionIds->isNotEmpty()) {
-    //         $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
-
-    //         return $query->where('current_level', ApprovalLevel::Region)
-    //             ->where('status', ApprovalStatus::Pending)
-    //             ->where('approvable_type', User::class)
-    //             ->whereIn('requested_by', function ($sub) use ($regionIds, $centerIdsInRegion) {
-    //                 $sub->select('user_id')
-    //                     ->from('user_scopes')
-    //                     ->whereNull('to_date')
-    //                     ->where(function ($q) use ($regionIds, $centerIdsInRegion) {
-    //                         $q->where(function ($q) use ($regionIds) {
-    //                             $q->where('scope_type', 'region')
-    //                                 ->whereIn('scope_id', $regionIds);
-    //                         })->orWhere(function ($q) use ($centerIdsInRegion) {
-    //                             $q->where('scope_type', 'center')
-    //                                 ->whereIn('scope_id', $centerIdsInRegion);
-    //                         });
-    //                     });
-    //             });
-    //     }
-
-    //     return $query->whereRaw('1 = 0');
-    // }
-
-    // public function scopeVisibleTo(Builder $query, User $user): Builder
-    // {
-    //     // المدير العام ← كل الطلبات في مرحلة Admin
-    //     if ($user->isGlobalAdmin()) {
-    //         return $query->where('current_level', ApprovalLevel::Admin)
-    //             ->where('status', ApprovalStatus::Pending);
-    //     }
-
-    //     $branchIds = $user->getScopeIds('branch');
-    //     $regionIds = $user->getScopeIds('region');
-
-    //     // ── مدير فرع ─────────────────────────────────────────────────────────
-    //     // يرى طلبات مرحلة Branch التي أرسلها مديرو مناطق أو مراكز تابعة لفرعه
-    //     if ($branchIds->isNotEmpty()) {
-    //         $regionIdsInBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
-    //         $centerIdsInBranch = Center::whereIn('region_id', $regionIdsInBranch)->pluck('id');
-
-    //         $requesterIds = UserScope::whereNull('to_date')
-    //             ->where(function ($q) use ($regionIdsInBranch, $centerIdsInBranch) {
-    //                 $q->where(function ($q) use ($regionIdsInBranch) {
-    //                     $q->where('scope_type', 'region')
-    //                         ->whereIn('scope_id', $regionIdsInBranch);
-    //                 })->orWhere(function ($q) use ($centerIdsInBranch) {
-    //                     $q->where('scope_type', 'center')
-    //                         ->whereIn('scope_id', $centerIdsInBranch);
-    //                 });
-    //             })
-    //             ->pluck('user_id')
-    //             ->unique();
-
-    //         return $query->where('current_level', ApprovalLevel::Branch)
-    //             ->where('status', ApprovalStatus::Pending)
-    //             ->whereIn('requested_by', $requesterIds);
-    //     }
-
-    //     // ── مدير منطقة ───────────────────────────────────────────────────────
-    //     // يرى طلبات مرحلة Region التي أرسلها مديرو مراكز تابعة لمنطقته
-    //     if ($regionIds->isNotEmpty()) {
-    //         $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
-
-    //         $requesterIds = UserScope::whereNull('to_date')
-    //             ->where('scope_type', 'center')
-    //             ->whereIn('scope_id', $centerIdsInRegion)
-    //             ->pluck('user_id')
-    //             ->unique();
-
-    //         return $query->where('current_level', ApprovalLevel::Region)
-    //             ->where('status', ApprovalStatus::Pending)
-    //             ->whereIn('requested_by', $requesterIds);
-    //     }
-
-    //     return $query->whereRaw('1 = 0');
-    // }
-    // public function scopeVisibleTo(Builder $query, User $user, ?string $type = null): Builder
-    // {
-    //     if ($user->isGlobalAdmin()) {
-    //         $q = $query->where(function ($q) {
-    //             // معلق في مرحلة Admin
-    //             $q->where(function ($q) {
-    //                 $q->where('current_level', ApprovalLevel::Admin)
-    //                     ->where('status', ApprovalStatus::Pending);
-    //             })
-    //                 // أو مكتمل (معتمد/مرفوض) في أي مرحلة
-    //                 ->orWhereIn('status', [
-    //                     ApprovalStatus::Approved,
-    //                     ApprovalStatus::Rejected,
-    //                 ]);
-    //         });
-
-    //         if ($type) {
-    //             $q->where('approvable_type', $type);
-    //         }
-
-    //         return $q;
-    //     }
-
-    //     $branchIds = $user->getScopeIds('branch');
-    //     $regionIds = $user->getScopeIds('region');
-
-    //     // ── مدير فرع ─────────────────────────────────────────────────────────
-    //     if ($branchIds->isNotEmpty()) {
-    //         $regionIdsInBranch = Region::whereIn('branch_id', $branchIds)->pluck('id');
-    //         $centerIdsInBranch = Center::whereIn('region_id', $regionIdsInBranch)->pluck('id');
-
-    //         $requesterIds = UserScope::whereNull('to_date')
-    //             ->where(function ($q) use ($regionIdsInBranch, $centerIdsInBranch) {
-    //                 $q->where(function ($q) use ($regionIdsInBranch) {
-    //                     $q->where('scope_type', 'region')
-    //                         ->whereIn('scope_id', $regionIdsInBranch);
-    //                 })->orWhere(function ($q) use ($centerIdsInBranch) {
-    //                     $q->where('scope_type', 'center')
-    //                         ->whereIn('scope_id', $centerIdsInBranch);
-    //                 });
-    //             })
-    //             ->pluck('user_id')
-    //             ->unique();
-
-    //         $q = $query->whereIn('requested_by', $requesterIds)
-    //             ->where(function ($q) {
-    //                 // معلق في مرحلة Branch
-    //                 $q->where(function ($q) {
-    //                     $q->where('current_level', ApprovalLevel::Branch)
-    //                         ->where('status', ApprovalStatus::Pending);
-    //                 })
-    //                     // أو مكتمل (معتمد/مرفوض)
-    //                     ->orWhereIn('status', [
-    //                         ApprovalStatus::Approved,
-    //                         ApprovalStatus::Rejected,
-    //                     ]);
-    //             });
-
-    //         if ($type) {
-    //             $q->where('approvable_type', $type);
-    //         }
-
-    //         return $q;
-    //     }
-
-    //     // ── مدير منطقة ───────────────────────────────────────────────────────
-    //     if ($regionIds->isNotEmpty()) {
-    //         $centerIdsInRegion = Center::whereIn('region_id', $regionIds)->pluck('id');
-
-    //         $requesterIds = UserScope::whereNull('to_date')
-    //             ->where('scope_type', 'center')
-    //             ->whereIn('scope_id', $centerIdsInRegion)
-    //             ->pluck('user_id')
-    //             ->unique();
-
-    //         $q = $query->whereIn('requested_by', $requesterIds)
-    //             ->where(function ($q) {
-    //                 // معلق في مرحلة Region
-    //                 $q->where(function ($q) {
-    //                     $q->where('current_level', ApprovalLevel::Region)
-    //                         ->where('status', ApprovalStatus::Pending);
-    //                 })
-    //                     // أو مكتمل (معتمد/مرفوض)
-    //                     ->orWhereIn('status', [
-    //                         ApprovalStatus::Approved,
-    //                         ApprovalStatus::Rejected,
-    //                     ]);
-    //             });
-
-    //         if ($type) {
-    //             $q->where('approvable_type', $type);
-    //         }
-
-    //         return $q;
-    //     }
-
-    //     return $query->whereRaw('1 = 0');
-    // }
 
     public function scopeVisibleTo(Builder $query, User $user, ?string $type = null): Builder
     {
@@ -465,6 +231,7 @@ class ApprovalRequest extends Model
                             ->whereIn('status', [
                                 ApprovalStatus::Approved,
                                 ApprovalStatus::Rejected,
+                                ApprovalStatus::Pending,
                             ]);
                     });
             });
@@ -504,6 +271,7 @@ class ApprovalRequest extends Model
                             ->whereIn('status', [
                                 ApprovalStatus::Approved,
                                 ApprovalStatus::Rejected,
+                                ApprovalStatus::Pending,
                             ]);
                     });
             });

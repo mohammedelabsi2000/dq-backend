@@ -190,12 +190,12 @@ class Student extends Model
                     );
                 }
                 // غير مسجل في أي حلقة + مسجده ضمن النطاق
-                if ($mosqueIds->isNotEmpty()) {
-                    $q->orWhere(function ($q) use ($mosqueIds) {
-                        $q->whereIn('mosque_id', $mosqueIds)
-                            ->whereDoesntHave('halaqaEnrollments');
-                    });
-                }
+                // if ($mosqueIds->isNotEmpty()) {
+                //     $q->orWhere(function ($q) use ($mosqueIds) {
+                //         $q->whereIn('mosque_id', $mosqueIds)
+                //             ->whereDoesntHave('halaqaEnrollments');
+                //     });
+                // }
             });
         }
 
@@ -220,12 +220,12 @@ class Student extends Model
                         fn($q) => $q->whereIn('halaqa_id', $halaqaIds)
                     );
                 }
-                if ($mosqueIds->isNotEmpty()) {
-                    $q->orWhere(function ($q) use ($mosqueIds) {
-                        $q->whereIn('mosque_id', $mosqueIds)
-                            ->whereDoesntHave('halaqaEnrollments');
-                    });
-                }
+                // if ($mosqueIds->isNotEmpty()) {
+                //     $q->orWhere(function ($q) use ($mosqueIds) {
+                //         $q->whereIn('mosque_id', $mosqueIds)
+                //             ->whereDoesntHave('halaqaEnrollments');
+                //     });
+                // }
             });
         }
 
@@ -251,12 +251,12 @@ class Student extends Model
                         fn($q) => $q->whereIn('halaqa_id', $halaqaIds)
                     );
                 }
-                if ($mosqueIds->isNotEmpty()) {
-                    $q->orWhere(function ($q) use ($mosqueIds) {
-                        $q->whereIn('mosque_id', $mosqueIds)
-                            ->whereDoesntHave('halaqaEnrollments');
-                    });
-                }
+                // if ($mosqueIds->isNotEmpty()) {
+                //     $q->orWhere(function ($q) use ($mosqueIds) {
+                //         $q->whereIn('mosque_id', $mosqueIds)
+                //             ->whereDoesntHave('halaqaEnrollments');
+                //     });
+                // }
             });
         }
 
