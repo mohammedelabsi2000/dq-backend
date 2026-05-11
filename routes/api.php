@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     AcademicQualificationController,
+    ApprovalController,
     AttendanceController,
     BranchController,
     CenterController,
@@ -25,6 +26,7 @@ use App\Http\Controllers\Api\{
     TrackController,
     StatisticsController
 };
+use App\Models\User;
 
 // Load all API route files from the api directory
 foreach (glob(__DIR__ . '/api/*.php') as $file) {
@@ -35,6 +37,17 @@ Route::middleware('auth:sanctum')->group(function () {
     // Constants management
     Route::apiResource('constant_types', ConstantTypeController::class);
     Route::apiResource('constants', ConstantController::class);
+
+    // routes/api.php
+    Route::prefix('approvals')->group(function () {
+        Route::get('pending',                 [ApprovalController::class, 'pending']);
+        Route::post('{approvalRequest}/approve', [ApprovalController::class, 'approve']);
+        Route::post('{approvalRequest}/reject',  [ApprovalController::class, 'reject']);
+
+        // resubmit مرتبط بكل موديل على حدة
+        Route::post('users/{id}/resubmit', [ApprovalController::class, 'resubmit'])
+            ->defaults('model', User::class);
+    });
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
     Route::apiResource('branches', BranchController::class);

@@ -76,7 +76,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type', 'supervisors.user'])->get();
+        $halaqas = $query->with(['reference', 'type', 'students', 'supervisors.user'])->get();
 
         return $this->successWithPagination(
             HalaqaResource::collection($halaqas),

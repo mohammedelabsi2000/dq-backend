@@ -7,53 +7,41 @@ use Illuminate\Support\Collection;
 
 trait HasVisibilityScope
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Relationships
-    |--------------------------------------------------------------------------
-    */
-
     public function scopes()
     {
         return $this->hasMany(UserScope::class);
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Checks
-    |--------------------------------------------------------------------------
-    */
-
-    // مستخدم بدون scopes = مدير عام يشوف الكل
-    // public function isGlobalAdmin(): bool
-    // {
-    //     return $this->scopes()->doesntExist();
-    // }
 
     public function isGlobalAdmin(): bool
     {
         return $this->scopes()->active()->doesntExist();
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Helpers
-    |--------------------------------------------------------------------------
-    */
-
-    // public function getScopeIds(string $type): Collection
-    // {
-    //     return $this->scopes()
-    //         ->where('scope_type', $type)
-    //         ->pluck('scope_id');
-    // }
-
+    /**
+     * جلب الـ scope IDs النشطة حسب النوع
+     * الآن تجمع من كل الأدوار المرتبطة بالمستخدم
+     */
     public function getScopeIds(string $type): Collection
     {
         return $this->scopes()
             ->where('scope_type', $type)
             ->active()
-            ->pluck('scope_id');
+            ->pluck('scope_id')
+            ->unique();    // ← مهم لأن نفس الـ scope قد يتكرر عبر أدوار مختلفة
+    }
+
+    /**
+     * جلب الـ scope IDs النشطة حسب النوع والدور
+     * للاستخدام عند الحاجة للتحقق من دور محدد
+     */
+    public function getScopeIdsByRole(string $type, int $roleId): Collection
+    {
+        return $this->scopes()
+            ->where('scope_type', $type)
+            ->where('role_id', $roleId)
+            ->active()
+            ->pluck('scope_id')
+            ->unique();
     }
 
     public function assignScope(string $scopeType, int $scopeId): void
@@ -75,7 +63,6 @@ trait HasVisibilityScope
 
     public function syncScopes(array $scopes): void
     {
-        // $scopes = [['type' => 'branch', 'id' => 5], ...]
         UserScope::where('user_id', $this->id)->delete();
 
         foreach ($scopes as $scope) {

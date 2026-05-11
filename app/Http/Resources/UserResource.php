@@ -49,12 +49,20 @@ class UserResource extends JsonResource
                         'type' => $ability->type,
                     ])
             ),
-            // 'user_scopes' => $this->scopes,
-            'user_scopes' => ScopeResource::collection($this->scopes),
-            // 'user_scopes' => ScopeResource::collection($this->whenLoaded('scopes')),
+
+            'user_scopes' => ScopeResource::collection(
+                $this->scopes()->whereNull('to_date')->get()
+                    ->flatMap(fn($scope) => $scope->toHierarchyCollection())
+            ),
 
 
             'location' => $this->location,
+            'approval' => [
+                'is_approved'      => $this->is_approved,
+                'status'           => $this->approvalRequest?->status?->label(),
+                'current_level'    => $this->approvalRequest?->current_level?->label(),
+                'rejection_reason' => $this->approvalRequest?->rejection_reason,
+            ],
 
         ];
     }
