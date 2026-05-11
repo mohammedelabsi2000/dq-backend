@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasApproval;
 use App\Concerns\HasVisibilityScope;
 use App\Enums\HalaqaReferenceType;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Halaqa extends Model
 {
-    use HasFactory, SoftDeletes, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope, HasApproval;
 
     protected $table = 'halaqas';
 
@@ -28,6 +29,7 @@ class Halaqa extends Model
 
     protected $casts = [
         'reference_type' => HalaqaReferenceType::class,
+        'is_approved'    => 'boolean',
     ];
 
     protected $with = ['lastStatus'];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Concerns\HasVisibilityScope;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
@@ -13,15 +14,31 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    use HasVisibilityScope;
 
     /**
      * Display a listing of the resource.
      *
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);
-        $query = User::query()->visibleTo(auth()->user());
+
+        $authUser = auth()->user();
+
+        $query = User::query()->where('is_approved', true)->visibleTo(auth()->user());
+
+        // if ($authUser->isGlobalAdmin() && $request->filled('active')) {
+        //     match ($request->input('active')) {
+        //         'false' => $query->where('is_active', false),
+        //         'all'   => null, // بدون فلتر
+        //         default => $query->where('is_active', true),
+        //     };
+        // } else {
+        //     // بقية المديرين → الفعالين فقط دائماً
+        //     $query->where('is_active', true);
+        // }
+
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['full_name', 'identity'],
             'orderColumn' => 'created_at',
@@ -81,6 +98,7 @@ class UserController extends Controller
         $data               = $request->validated();
         $data['password']   = Hash::make($request->password);
         $data['is_approved'] = false;
+        $data['is_active']   = false;
 
         $user = User::withTrashed()->updateOrCreate(
             ['identity' => $data['identity']],
@@ -88,13 +106,24 @@ class UserController extends Controller
         );
 
         // رفع طلب الاعتماد تلقائياً
-        $user->submitForApproval(auth()->user());
+        // $user->submitForApproval(auth()->user());
+        try {
+            $approvalRequest = $user->submitForApproval(auth()->user(), $request->input('notes'));
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 422);
+        }
 
-        return $this->success(
-            new UserResource($user),
-            'تم إنشاء المستخدم وإرساله للاعتماد',
-            201
-        );
+        if ($approvalRequest === null) {
+            $user->update(['is_active' => true]);
+        }
+
+        $user->load('approvalRequest');
+
+        $message = $approvalRequest === null
+            ? 'تم إنشاء المستخدم وتفعيله مباشرة'    // المدير العام — اعتماد فوري
+            : 'تم إنشاء المستخدم وإرساله للاعتماد'; // بقية المديرين
+
+        return $this->success(new UserResource($user), $message, 201);
     }
 
     /**
@@ -105,7 +134,14 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
-        $user = $user->load(['mosque', 'maritalStatus', 'prefix', 'roles.permissions']);
+        $user = $user->load([
+            'mosque',
+            'maritalStatus',
+            'prefix',
+            'roles.permissions',
+            'approvalRequest.logs.actor',
+            'activeScopes'
+        ]);
         return $this->success(
             new UserResource($user),
             'بيانات المستخدم',
@@ -151,5 +187,26 @@ class UserController extends Controller
             null,
             'تم حذف المسخدم بنجاح'
         );
+    }
+
+    public function toggleActive(User $user)
+    {
+        $this->authorize('toggleActive', $user);
+
+        // لا يمكن إيقاف مستخدم غير معتمد
+        if (!$user->is_approved) {
+            return $this->error('لا يمكن تفعيل أو إيقاف مستخدم غير معتمد.', 422);
+        }
+
+        // لا يمكن إيقاف نفسه
+        if ($user->id === auth()->id()) {
+            return $this->error('لا يمكنك إيقاف حسابك بنفسك.', 422);
+        }
+
+        $user->update(['is_active' => !$user->is_active]);
+
+        $message = $user->is_active ? 'تم تفعيل المستخدم بنجاح.' : 'تم إيقاف المستخدم بنجاح.';
+
+        return $this->success(new UserResource($user), $message);
     }
 }

@@ -78,11 +78,13 @@ class HalaqaControllerTest extends TestCase
             'name'           => 'حلقة الفجر',
             'reference_id'   => $this->center->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
         Halaqa::factory()->create([
             'name'           => 'حلقة المغرب',
             'reference_id'   => $this->center->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -106,11 +108,13 @@ class HalaqaControllerTest extends TestCase
             'name'           => 'حلقة المركز الأول',
             'reference_id'   => $this->center->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
         Halaqa::factory()->create([
             'name'           => 'حلقة المركز الثاني',
             'reference_id'   => $otherCenter->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -131,11 +135,13 @@ class HalaqaControllerTest extends TestCase
             'name'           => 'حلقة المنطقة الأولى',
             'reference_id'   => $this->region->id,
             'reference_type' => HalaqaReferenceType::Region,
+            'is_approved'    => true,
         ]);
         Halaqa::factory()->create([
             'name'           => 'حلقة المنطقة الثانية',
             'reference_id'   => $otherRegion->id,
             'reference_type' => HalaqaReferenceType::Region,
+            'is_approved'    => true,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')
@@ -154,11 +160,13 @@ class HalaqaControllerTest extends TestCase
             'name'           => 'حلقة مركز',
             'reference_id'   => $this->center->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
         Halaqa::factory()->create([
             'name'           => 'حلقة منطقة',
             'reference_id'   => $this->region->id,
             'reference_type' => HalaqaReferenceType::Region,
+            'is_approved'    => true,
         ]);
 
         // limit=* is important here because it means get all records
@@ -177,6 +185,7 @@ class HalaqaControllerTest extends TestCase
         Halaqa::factory()->create([
             'reference_id'   => $this->center->id,
             'reference_type' => HalaqaReferenceType::Center,
+            'is_approved'    => true,
         ]);
 
         $response = $this->actingAs($this->adminUser, 'sanctum')

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     AcademicQualificationController,
     ApprovalController,
+    ApprovalController as ApiApprovalController,
     AttendanceController,
     BranchController,
     CenterController,
@@ -38,15 +39,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('constant_types', ConstantTypeController::class);
     Route::apiResource('constants', ConstantController::class);
 
-    // routes/api.php
+    // ── الاعتمادات ──────────────────────────────────────
     Route::prefix('approvals')->group(function () {
-        Route::get('pending',                 [ApprovalController::class, 'pending']);
-        Route::post('{approvalRequest}/approve', [ApprovalController::class, 'approve']);
-        Route::post('{approvalRequest}/reject',  [ApprovalController::class, 'reject']);
-
-        // resubmit مرتبط بكل موديل على حدة
-        Route::post('users/{id}/resubmit', [ApprovalController::class, 'resubmit'])
-            ->defaults('model', User::class);
+        Route::get('/',                         [ApprovalController::class, 'index']);
+        Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
+        Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
+        Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);
+        Route::post('{approvalRequest}/cancel',        [ApprovalController::class, 'cancel']);
     });
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)

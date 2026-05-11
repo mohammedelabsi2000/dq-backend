@@ -25,7 +25,7 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user());
 
-        $filteredQuery = (new HalaqaFilter($query, $request))->apply();
+        $query = (new HalaqaFilter($query, $request))->apply();
 
         // Filter by specific center
         if ($request->filled('center_id')) {
@@ -70,10 +70,6 @@ class HalaqaController extends Controller
             'orderColumn' => 'created_at',
         ]);
 
-        if ($request->boolean('with_students')) {
-            $filteredQuery->with('students');
-        }
-
         $query = $q['query'];
         $total = $q['count'];
         $halaqas = $query->with(['reference', 'type', 'students', 'supervisors.user'])->get();
@@ -94,17 +90,33 @@ class HalaqaController extends Controller
      */
     public function store(HalaqaRequest $request)
     {
-        $halaqa = Halaqa::create($request->validated());
+        // $halaqa = Halaqa::create($request->validated());
+        $halaqa = Halaqa::create([
+            ...$request->validated(),
+            // 'is_approved' => false, // ← دائماً false عند الإنشاء
+        ]);
+
+        // إرسال طلب الاعتماد
+        // try {
+        //     $approvalRequest = $halaqa->submitForApproval(auth()->user());
+        // } catch (\Exception $e) {
+        //     return $this->error($e->getMessage(), 422);
+        // }
 
         if ($request->boolean('with_type')) {
             $halaqa->load('type');
         }
 
-        return $this->success(
-            new HalaqaResource($halaqa),
-            'تم إنشاء الحلقة بنجاح',
-            201
-        );
+        $halaqa->load(['type', 'reference', 'approvalRequest']);
+
+        // $message = $approvalRequest === null
+        //     ? 'تم إنشاء الحلقة وتفعيلها مباشرة'    // المدير العام
+        //     : 'تم إنشاء الحلقة وإرسالها للاعتماد';
+
+        $message = 'تم إنشاء الحلقة';
+
+
+        return $this->success(new HalaqaResource($halaqa), $message, 201);
     }
 
     /**
@@ -117,7 +129,7 @@ class HalaqaController extends Controller
     public function show(Request $request, Halaqa $halaqa)
     {
         $this->authorize('view', $halaqa);
-        $halaqa->load(['type', 'reference', 'supervisors.user']);
+        $halaqa->load(['type', 'reference', 'supervisors.user', 'approvalRequest.logs.actor']);
 
         if ($request->boolean(key: 'with_students')) {
             $halaqa->load('students');

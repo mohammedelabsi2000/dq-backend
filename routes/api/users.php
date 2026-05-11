@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\{UserController, ImageController, UserRoleControlle
 Route::middleware('auth:sanctum')->group(function () {
     // basic CRUD for users
     Route::apiResource('users', UserController::class);
+    Route::put('users/{user}/toggle-active', [UserController::class, 'toggleActive']);
+
 
     // user images (upload/list)
     Route::get('users/{user}/images', [ImageController::class, 'userImages']);

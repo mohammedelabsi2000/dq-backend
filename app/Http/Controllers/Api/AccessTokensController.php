@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,44 +12,108 @@ use Laravel\Sanctum\PersonalAccessToken;
 
 class AccessTokensController extends Controller
 {
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'login' => 'required|string|max:255',
+    //         'password' => 'required|string|min:6',
+    //         'device_name' => 'string|max:255'
+    //     ], [
+    //         'login.required' => 'حقل البريد الإلكتروني أو الهوية مطلوب',
+    //         'password.required' => 'حقل كلمة المرور مطلوب',
+    //         'password.min' => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
+    //     ]);
+
+    //     $login = $request->login;
+
+    //     $user = filter_var($login, FILTER_VALIDATE_EMAIL)
+    //         ? User::where('email', $login)->first()
+    //         : User::where('identity', $login)->first();
+
+    //     if ($user && Hash::check($request->password, $user->password)) {
+
+    //         $device_name = $request->post('device_name', $request->userAgent());
+
+    //         // if (!$user->is_approved) {
+    //         //     return $this->error('حسابك قيد المراجعة، انتظر اعتماد المسؤول', 403);
+    //         // }
+
+    //         $token = $user->createToken($device_name);
+
+    //         return $this->success([
+    //             'token'       => $token->plainTextToken,
+    //             'user'        => $user,
+    //             'roles'       => $user->getRoleNames(),
+    //             'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+    //             'scopes'      => $user->scopes,
+    //         ], "تم تسجيل الدخول بنجاح", 201);
+    //     }
+
+    //     return $this->error("بيانات الدخول غير صحيحة", 401, null);
+    // }
+
     public function store(Request $request)
     {
         $request->validate([
-            'login' => 'required|string|max:255',
-            'password' => 'required|string|min:6',
+            'login'       => 'required|string|max:255',
+            'password'    => 'required|string|min:6',
             'device_name' => 'string|max:255'
         ], [
-            'login.required' => 'حقل البريد الإلكتروني أو الهوية مطلوب',
+            'login.required'    => 'حقل البريد الإلكتروني أو الهوية مطلوب',
             'password.required' => 'حقل كلمة المرور مطلوب',
-            'password.min' => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
+            'password.min'      => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
         ]);
 
         $login = $request->login;
 
-        $user = filter_var($login, FILTER_VALIDATE_EMAIL)
-            ? User::where('email', $login)->first()
-            : User::where('identity', $login)->first();
+        // $user = filter_var($login, FILTER_VALIDATE_EMAIL)
+        //     ? User::where('email', $login)->first()
+        //     : User::where('identity', $login)->first();
 
-        if ($user && Hash::check($request->password, $user->password)) {
+        $user = User::with('approvalRequest')
+            ->where(function ($q) use ($login) {
+                filter_var($login, FILTER_VALIDATE_EMAIL)
+                    ? $q->where('email', $login)
+                    : $q->where('identity', $login);
+            })
+            ->first();
 
-            $device_name = $request->post('device_name', $request->userAgent());
-
-            // if (!$user->is_approved) {
-            //     return $this->error('حسابك قيد المراجعة، انتظر اعتماد المسؤول', 403);
-            // }
-
-            $token = $user->createToken($device_name);
-
-            return $this->success([
-                'token'       => $token->plainTextToken,
-                'user'        => $user,
-                'roles'       => $user->getRoleNames(),
-                'permissions' => $user->getAllPermissions()->pluck('name')->values(),
-                'scopes'      => $user->scopes,
-            ], "تم تسجيل الدخول بنجاح", 201);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return $this->error('بيانات الدخول غير صحيحة', 401, null);
         }
 
-        return $this->error("بيانات الدخول غير صحيحة", 401, null);
+        // ✅ التحقق من الاعتماد
+        if (!$user->is_approved) {
+            $message = match (true) {
+                $user->isPending()  => 'حسابك قيد المراجعة، يرجى الانتظار حتى يتم اعتماده.',
+                $user->isRejected() => 'تم رفض حسابك. تواصل مع المسؤول للاستفسار.',
+                default             => 'حسابك غير مفعّل، تواصل مع المسؤول.',
+            };
+
+            return $this->error($message, 422, null);
+        }
+
+        if (!$user->is_active) {
+            return $this->error('حسابك موقوف. تواصل مع المسؤول للاستفسار.', 422, null);
+        }
+
+        $device_name = $request->post('device_name', $request->userAgent());
+        $token       = $user->createToken($device_name);
+
+        // return $this->success([
+        //     'token'       => $token->plainTextToken,
+        //     'user'        => $user,
+        //     'roles'       => $user->getRoleNames(),
+        //     'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+        //     'scopes'      => $user->scopes,
+        // ], 'تم تسجيل الدخول بنجاح', 201);
+        return $this->success([
+            'token'       => $token->plainTextToken,
+            'user'        => new UserResource($user),
+            'roles'       => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+            'scopes'      => $user->activeScopes,
+        ], 'تم تسجيل الدخول بنجاح', 201);
     }
 
     // To delete token

@@ -33,4 +33,9 @@ class UserPolicy
     {
         return $user->hasPermissionTo('users.delete');
     }
+    public function toggleActive(User $user, User $target): bool
+    {
+        // فقط المدير العام
+        return $user->hasPermissionTo('users.toggle_active');
+    }
 }
