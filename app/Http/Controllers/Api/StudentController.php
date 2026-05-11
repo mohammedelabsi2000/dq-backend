@@ -191,7 +191,7 @@ class StudentController extends Controller
         // Extend the maximum execution time to 3 minutes to allow for large imports
         set_time_limit(180);
 
-        /* $import = new ValidateStudentsImport($request);
+        $import = new ValidateStudentsImport($request);
         Excel::import($import, $request->file);
 
         if (!empty($import->errors)) {
@@ -200,7 +200,7 @@ class StudentController extends Controller
                 422,
                 $import->errors
             );
-        } */
+        }
 
 
         try {
@@ -210,7 +210,7 @@ class StudentController extends Controller
             return $this->error($th->getMessage(), 422);
         }
 
-        // إذا في أخطاء
+        // إذا في أخطاء في الصفوف نرجعها في ملف إكسل
         /* if (!empty($import->failedRows)) {
 
             $fileName = 'failed-rows-' . now()->timestamp . '.xlsx';

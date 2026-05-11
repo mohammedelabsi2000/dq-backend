@@ -2,17 +2,22 @@
 
 namespace App\Services;
 
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 class IdQueryServices
 {
-    public function __construct() {}
+    public function __construct()
+    {
+    }
 
     /**
-      * @param string $id
-      * @return array
-      * @throws \InvalidArgumentException
-      */
+     * @param string $id
+     * @return array
+     * @throws \InvalidArgumentException
+     */
     public function get($id)
     {
         if (!ctype_digit($id) || strlen($id) != 9) {
@@ -47,5 +52,56 @@ class IdQueryServices
         }
 
         return $personData;
+    }
+
+    public function firstOrCreateUser(int $identity, array $data)
+    {
+        $user = User::withTrashed()->where('identity', $identity)->first();
+
+        if ($user) {
+            $user->update($data);
+            return $user;
+        }
+
+        $personData = $this->get($identity);
+
+        $userData = [
+            'identity' => $identity,
+            ...$this->mapping($personData),
+            'email' => $identity . '@tahfiz.com',
+            'password' => Hash::make('12345678'),
+        ];
+
+        $user = User::create(array_merge($userData, $data));
+        return $user;
+    }
+
+    /* public function firstOrCreateStudent(int $identity, array $data)
+    {
+        $student = Student::withTrashed()->where('identity', $identity)->first();
+        if ($student) {
+            $student->update($data);
+            return $student;
+        }
+
+        $student = Student::create(array_merge(['identity' => $identity], $data));
+        return $student;
+    } */
+
+    /**
+     * Transform the data from the ID query API to match the User model fields
+     * @param array $data
+     * @return array
+     */
+    private function mapping(array $data)
+    {
+        return [
+            'fName' => $data['CI_FIRST_ARB'] ?? null,
+            'sName' => $data['CI_FATHER_ARB'] ?? null,
+            'thName' => $data['CI_GRAND_FATHER_ARB'] ?? null,
+            'family' => $data['CI_FAMILY_ARB'] ?? null,
+            'dob' => str_replace('/', '-', $data['CI_BIRTH_DT']) ?? null,
+            'gender' => $data['SEX'] ?? null,
+        ];
     }
 }
