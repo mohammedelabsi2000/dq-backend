@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Http;
 
 class IdQueryServices
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @param string $id
@@ -72,7 +70,10 @@ class IdQueryServices
             'password' => Hash::make('12345678'),
         ];
 
-        $user = User::create(array_merge($userData, $data));
+        $user = User::create(array_merge($userData, $data))->refresh();
+
+        // logger()->info('User created', ['user' => $user->toArray()]);
+
         return $user;
     }
 

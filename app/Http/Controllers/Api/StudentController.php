@@ -85,7 +85,7 @@ class StudentController extends Controller
             }
         }
         try {
-            $student = $this->studentService->create($request->validated());
+            $student = $this->studentService->create($request->validated(), auth()->user());
         } catch (\InvalidArgumentException $th) {
             return $this->error($th->getMessage(), 422);
         }
@@ -115,7 +115,7 @@ class StudentController extends Controller
     public function update(UpdateStudentRequest $request, Student $student)
     {
         try {
-            $student = $this->studentService->update($student, $request->validated());
+            $student = $this->studentService->update($student, $request->validated(), auth()->user());
         } catch (\InvalidArgumentException $th) {
             return $this->error($th->getMessage(), 422);
         }
@@ -147,8 +147,10 @@ class StudentController extends Controller
     {
         $this->authorize('create', Student::class);
         try {
+            $importData = $request->except('file');
+            $importData['user'] = auth()->user();
             Excel::import(
-                new StudentsImport($request->except('file')),
+                new StudentsImport($importData),
                 $request->file
             );
         } catch (\InvalidArgumentException $e) {
@@ -204,7 +206,9 @@ class StudentController extends Controller
 
 
         try {
-            $import = new StudentWithRelationsImport($request);
+            $requestWithUser = $request->all();
+            $requestWithUser['user'] = auth()->user();
+            $import = new StudentWithRelationsImport(new \Illuminate\Http\Request($requestWithUser));
             Excel::import($import, $request->file);
         } catch (\Throwable $th) {
             return $this->error($th->getMessage(), 422);
