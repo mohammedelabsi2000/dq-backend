@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // إنشاء مستخدم مسؤول
-        User::firstOrCreate([
+        User::updateOrCreate([
             'email' => 'admin@tahfeez.dq',
             'identity' => '100000000',
         ], [
@@ -28,6 +28,8 @@ class UserSeeder extends Seeder
             'gender' => 'ذكر',
             'phone' => '0555555555',
             'mosque_id' => Mosque::first()->id ?? null,
+            'is_approved' => '1',
+            'is_active' => '1',
         ]);
     }
 }
