@@ -29,6 +29,9 @@ class StudentsImport implements ToModel, WithHeadingRow
 
         $studentService = new StudentService();
 
+        // Get current user from request context if available
+        $currentUser = $this->request['user'] ?? null;
+
         $student = $studentService->create([
             'identity' => $row['رقم الهوية'],
             'fName' => $row['الاسم'],
@@ -39,7 +42,7 @@ class StudentsImport implements ToModel, WithHeadingRow
             'guardian_id' => $row['رقم هوية ولي الأمر'],
             'mosque_id' => $this->request['mosque_id'],
             'halaqa_id' => $this->request['halaqa_id'],
-        ]);
+        ], $currentUser);
 
         return $student;
     }

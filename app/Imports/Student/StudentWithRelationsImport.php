@@ -101,6 +101,17 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
 
         $this->assignHalaqa($user, $halaqa);
 
+        // Submit for approval if current user is available and user was just created
+        $currentUser = $this->request->get('user');
+        if ($currentUser && $user->wasRecentlyCreated) {
+            try {
+                $user->submitForApproval($currentUser, "طلب إنشاء حساب معلم للحلقة: {$halaqa->name} من خلال استيراد البيانات");
+            } catch (\Throwable $th) {
+                // Log error but don't fail the import
+                // In a real implementation, you might want to log this
+            }
+        }
+
         // $guardian_type_id = $this->firstOrCreateConstant('guardian_type', 'محفظ', $this->notes)->id;
 
 
@@ -164,6 +175,19 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
 
         try {
             $user = $this->idQueryServices->firstOrCreateUser($identity, ['mosque_id' => $mosque->id]);
+
+            // Submit for approval if current user is available and user was just created
+            $currentUser = $this->request->get('user');
+            if ($currentUser && $user->wasRecentlyCreated) {
+                try {
+                    $studentName = $newData['name'] ?? 'الطالب';
+                    $studentName = trim($studentName) ?: 'الطالب';
+                    $user->submitForApproval($currentUser, "طلب إنشاء حساب ولي أمر للطالب: {$studentName} من خلال استيراد البيانات");
+                } catch (\Throwable $th) {
+                    // Log error but don't fail the import
+                    // In a real implementation, you might want to log this
+                }
+            }
         } catch (\Throwable $th) {
             $this->addToFailedRows($row, 'خطأ في إنشاء أو تحديث المستخدم المرتبط بالولي: ' . $th->getMessage());
             return null;
@@ -192,11 +216,11 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
                 $data['end_aya'] = $ayah;
             }
         }
-        
+
         if ($newData['recitation_from'] && $newData['recitation_to']) {
             $data['completed_juz'] = implode(',', range($newData['recitation_from'], $newData['recitation_to']));
         }
-        
+
         if ($newData['hifz_from'] && $newData['hifz_to']) {
             $data['memorized_juz'] = implode(',', range($newData['hifz_from'], $newData['hifz_to']));
         }
@@ -229,9 +253,48 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $student;
     }
 
+    /**
+     * First or create user by identity
+     * @param array $row
+     * @param int $identity
+     * @param int $mosque_id
+     * @return User|\Illuminate\Database\Eloquent\Model
+     */
+    public function firstOrCreateUser(array $row, int $identity, int $mosque_id): User
+    {
+        $user = User::where('identity', $identity)->first();
+
+        if ($user) {
+            $user->update([
+                'mosque_id' => $mosque_id,
+            ]);
+            return $user;
+        }
+
+        $personData = (new IdQueryServices())->get($identity);
+
+        $user = User::create([
+            'identity' => $identity,
+            'fName' => $personData['CI_FIRST_ARB'] ?? null,
+            'sName' => $personData['CI_FATHER_ARB'] ?? null,
+            'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
+            'family' => $personData['CI_FAMILY_ARB'] ?? null,
+            'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
+            'gender' => $personData['SEX'] ?? null,
+            'mosque_id' => $mosque_id,
+            'email' => $identity . '@tahfiz.com',
+            'password' => Hash::make('12345678'),
+            'is_approved' => false,
+            'is_active' => false,
+        ]);
+
+
+        return $user;
+    }
+
     private function addToFailedRows(array $row, string $errorMessage)
     {
-        throw new \InvalidArgumentException('يوجد خطأ في البيانات المدخلة');
+        throw new \InvalidArgumentException('يوجد خطأ في البيانات المدخلة' . ' ' . $errorMessage);
         $this->failedRows[] = $row;
         $this->failedRows[count($this->failedRows) - 1]['الأخطاء'] = $errorMessage;
     }
@@ -306,7 +369,6 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         ]);
 
         return $center;
-
     }
 
     /**

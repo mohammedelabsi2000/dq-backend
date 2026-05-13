@@ -12,11 +12,11 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentService
 {
-    public function create(array $data): Student
+    public function create(array $data, User $requester = null): Student
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($data, $requester) {
 
-            $guardian = $this->findOrCreateGuardian($data['guardian_id'], $data['fName']);
+            $guardian = $this->findOrCreateGuardian($data['guardian_id'], $data['fName'] . ' ' . $data['sName'] . ' ' . $data['thName'] . ' ' . $data['family'], $requester);
 
             // Extract halaqa_id from data if present
             $halaqaId = $data['halaqa_id'] ?? null;
@@ -33,12 +33,12 @@ class StudentService
         });
     }
 
-    public function update(Student $student, array $data): Student
+    public function update(Student $student, array $data, User $requester = null): Student
     {
-        return DB::transaction(function () use ($student, $data) {
+        return DB::transaction(function () use ($student, $data, $requester) {
 
             if (isset($data['guardian_id'])) {
-                $this->findOrCreateGuardian($data['guardian_id'], $student->fName);
+                $this->findOrCreateGuardian($data['guardian_id'], $student->fName . ' ' . $student->sName . ' ' . $student->thName . ' ' . $student->family, $requester);
             }
 
             // // Extract halaqa_id from data if present
@@ -68,19 +68,18 @@ class StudentService
         });
     }
 
-    private function findOrCreateGuardian(string $identity, string $studentName)
+    private function findOrCreateGuardian(string $identity, string $studentName, User $requester = null)
     {
         $guardian = User::withTrashed()->where('identity', $identity)->first();
 
         if (!$guardian) {
             $idQueryServices = new IdQueryServices();
             $personData = null;
-            $gurdianData = [];
+            $guardianData = [];
 
             $personData = $idQueryServices->get($identity);
 
-
-            $gurdianData = [
+            $guardianData = [
                 'fName' => $personData['CI_FIRST_ARB'] ?? null,
                 'sName' => $personData['CI_FATHER_ARB'] ?? null,
                 'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
@@ -94,10 +93,22 @@ class StudentService
                 'email' => $identity . '@dq.com',
                 'password' => Hash::make('12345678'),
                 'identity' => $identity,
-            ], $gurdianData));
+                'is_approved' => false,
+                'is_active' => false,
+            ], $guardianData));
+
+            // Submit guardian for approval if requester is provided
+            if ($requester) {
+                $guardian->submitForApproval($requester, 'طلب إنشاء ولي أمر للطالب: ' . $studentName);
+            }
         } else {
             if ($guardian->trashed()) {
                 $guardian->restore();
+            }
+
+            // If guardian exists but is not approved, submit for approval
+            if (!$guardian->is_approved && $requester && !$guardian->approvalRequest) {
+                $guardian->submitForApproval($requester, 'طلب تفعيل ولي أمر للطالب: ' . $studentName);
             }
         }
 
