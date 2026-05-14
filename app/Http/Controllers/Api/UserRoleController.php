@@ -60,6 +60,10 @@ class UserRoleController extends Controller
 
     public function assignRoles(AssignRoleRequest $request, User $user)
     {
+        if (auth()->id() === $user->id) {
+            return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 422);
+        }
+
         $this->userRoleService->assignRolesWithScopes(
             $user,
             $request->role_ids,
@@ -81,6 +85,9 @@ class UserRoleController extends Controller
 
     public function assignScopes(AssignScopeRequest $request, User $user)
     {
+        if (auth()->id() === $user->id) {
+            return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 403);
+        }
 
         $scopes = $request->scopes; // [['type' => 'branch', 'id' => 5], ...]
 
@@ -95,6 +102,10 @@ class UserRoleController extends Controller
 
     public function removeScopes(User $user)
     {
+        if (auth()->id() === $user->id) {
+            return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 403);
+        }
+
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
@@ -112,6 +123,10 @@ class UserRoleController extends Controller
 
     public function removeRoles(User $user)
     {
+        if (auth()->id() === $user->id) {
+            return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 403);
+        }
+
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
