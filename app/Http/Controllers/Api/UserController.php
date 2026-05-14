@@ -182,6 +182,12 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorize('delete', $user);
+
+        // لا يمكن حذف نفسه
+        if ($user->id === auth()->id()) {
+            return $this->error('لا يمكنك حذف حسابك بنفسك.', 422);
+        }
+
         $user->delete();
         return $this->success(
             null,
