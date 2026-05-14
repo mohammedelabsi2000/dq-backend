@@ -85,22 +85,34 @@ class Halaqa extends Model
             ->with('user');
     }
 
-    public function statuses(){
-        return $this->hasMany(HalaqaStatus::class,'halaqa_id');
+    public function statuses()
+    {
+        return $this->hasMany(HalaqaStatus::class, 'halaqa_id');
     }
 
-    public function lastStatus(){
-        return $this->hasOne(HalaqaStatus::class,'halaqa_id')->latestOfMany('from_date');
+    public function lastStatus()
+    {
+        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('from_date');
     }
 
     /**
      * Get the count of active students in this halaqa.
      */
+    // public function studentsCount()
+    // {
+    //     return $this->studentEnrollments()
+    //         ->whereNull('to_date')
+    //         ->orWhere('to_date', '>=', now())
+    //         ->count();
+    // }
     public function studentsCount()
     {
         return $this->studentEnrollments()
-            ->whereNull('to_date')
-            ->orWhere('to_date', '>=', now())
+            ->whereHas('student')  // ← يستثني المحذوفين تلقائياً
+            ->where(function ($q) {
+                $q->whereNull('to_date')
+                    ->orWhere('to_date', '>=', now());
+            })
             ->count();
     }
 
