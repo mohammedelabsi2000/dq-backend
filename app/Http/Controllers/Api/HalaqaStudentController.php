@@ -28,6 +28,7 @@ class HalaqaStudentController extends Controller
     {
         $this->authorize('viewAny', HalaqaStudent::class);
         $query = HalaqaStudent::query()->visibleTo(auth()->user());
+        $query->whereHas('student');
 
         // Filter by branch (through halaqa)
         if (request()->filled('branch_id')) {
