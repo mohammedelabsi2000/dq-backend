@@ -1,228 +1,56 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\Plan\PlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
-use App\Models\PlanTrack;
-use App\Models\PlanTrackCourse;
-use App\Models\Track;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class PlanController extends Controller
 {
-
-    /**
-     * Display a listing of plans
-     */
-    public function index()
+    public function index(): JsonResponse
     {
-        $query = Plan::query();
+        $plans = Plan::withCount('levels')->latest()->paginate(15);
 
-        $q = $this->applyFilters($query, [
-            'searchColumns' => ['name'],
-            'orderColumn' => 'created_at',
-        ]);
-
-        $query = $q['query'];
-        $total = $q['count'];
-
-        $plans = $query
-            ->with(['planTracks.courses.track'])
-            ->get();
-
-        return $this->successWithPagination(
-            PlanResource::collection($plans),
-            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
-            'success',
-            200
-        );
+        return response()->json(PlanResource::collection($plans)->response()->getData(true));
     }
 
-
-    /**
-     * Store plan
-     */
-    public function store(Request $request)
+    public function store(PlanRequest $request): JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            // 'weight' => 'required|integer',
-            'duration_in_days' => 'required|integer',
-            'grace_period_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $plan = Plan::create($request->validated());
 
-        $plan = Plan::create($data);
-
-        return $this->success(
-            new PlanResource($plan),
-            'تم إنشاء الخطة بنجاح',
-            201
-        );
+        return response()->json(new PlanResource($plan), 201);
     }
 
-
-    /**
-     * Show single plan
-     */
-    public function show(Plan $plan)
+    public function show(Plan $plan): JsonResponse
     {
-        $plan->load(['planTracks.courses.track']);
+        $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackCourses.course');
 
-        return $this->success(
-            new PlanResource($plan),
-            'success',
-            200
-        );
+        return response()->json(new PlanResource($plan));
     }
 
-
-    /**
-     * Update plan
-     */
-    public function update(Request $request, Plan $plan)
+    public function update(PlanRequest $request, Plan $plan): JsonResponse
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            // 'weight' => 'required|integer',
-            'duration_in_days' => 'required|integer',
-            'grace_period_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $plan->update($request->validated());
 
-        $plan->update($data);
-
-        return $this->success(
-            new PlanResource($plan->fresh()),
-            'تم تحديث الخطة بنجاح'
-        );
+        return response()->json(new PlanResource($plan));
     }
 
-
-    /**
-     * Delete plan
-     */
-    public function destroy(Plan $plan)
+    public function destroy(Plan $plan): JsonResponse
     {
         $plan->delete();
 
-        return $this->success(
-            null,
-            'تم حذف الخطة بنجاح'
-        );
+        return response()->json(['message' => 'تم حذف الخطة بنجاح']);
     }
 
-
-    /*
-    ======================================
-    Plan Setup
-    ======================================
-    */
-
-    /**
-     * Get setup data
-     */
-    public function setup(Plan $plan)
+    public function toggleActive(Plan $plan): JsonResponse
     {
-        $tracks = Track::with('courses')->get();
+        $plan->update(['is_active' => !$plan->is_active]);
 
-        $plan->load('planTracks.courses.track');
-
-        return $this->success([
-            'plan' => new PlanResource($plan),
-            'tracks' => $tracks,
-            'plan_tracks' => $plan->planTracks
-        ], 'success');
-    }
-
-
-    /**
-     * Save plan setup
-     */
-    public function saveSetup(Request $request, Plan $plan)
-    {
-        $data = $request->validate([
-            'tracks' => 'required|array'
+        return response()->json([
+            'message'   => $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة',
+            'data'      => new PlanResource($plan),
         ]);
-
-        // حذف القديم
-        $plan->planTracks()->delete();
-
-        foreach ($data['tracks'] as $trackId => $trackData) {
-
-            $planTrack = PlanTrack::create([
-                'plan_id' => $plan->id,
-                'track_id' => $trackId,
-                'is_required' => isset($trackData['is_required']),
-                'weight' => $trackData['weight'] ?? 1
-            ]);
-
-            if (!empty($trackData['courses'])) {
-
-                foreach ($trackData['courses'] as $courseId => $courseData) {
-
-                    PlanTrackCourse::create([
-                        'plan_track_id' => $planTrack->id,
-                        'course_id' => $courseId,
-                        'is_required' => isset($courseData['is_required']),
-                        'order' => $courseData['order'] ?? 1
-                    ]);
-
-                }
-
-            }
-
-        }
-
-        $plan->load('planTracks.courses.track');
-
-        return $this->success(
-            new PlanResource($plan),
-            'تم حفظ إعداد الخطة بنجاح'
-        );
-    }
-
-
-    /**
-     * Show all setups
-     */
-    public function setupIndex()
-    {
-        $plans = Plan::with('planTracks.courses.track')->get();
-
-        return $this->success(
-            PlanResource::collection($plans),
-            'success'
-        );
-    }
-
-
-    /**
-     * Show one setup
-     */
-    public function showSetup(Plan $plan)
-    {
-        $plan->load('planTracks.courses.track');
-
-        return $this->success(
-            new PlanResource($plan),
-            'success'
-        );
-    }
-
-
-    /**
-     * Delete setup
-     */
-    public function deleteSetup(Plan $plan)
-    {
-        $plan->planTracks()->delete();
-
-        return $this->success(
-            null,
-            'تم حذف إعداد الخطة بنجاح'
-        );
     }
 }

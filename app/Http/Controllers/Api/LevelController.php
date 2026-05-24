@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\LevelRequest;
+use App\Http\Resources\LevelResource;
+use App\Models\Level;
+use App\Models\Plan;
+use Illuminate\Http\JsonResponse;
+
+class LevelController extends Controller
+{
+    public function index(Plan $plan): JsonResponse
+    {
+        $levels = $plan->levels()->with('levelTracks.track')->get();
+
+        return response()->json(LevelResource::collection($levels));
+    }
+
+    public function store(LevelRequest $request): JsonResponse
+    {
+        $level = Level::create($request->validated());
+
+        return response()->json(new LevelResource($level->load('plan')), 201);
+    }
+
+    public function show(Level $level): JsonResponse
+    {
+        $level->load('plan', 'levelTracks.track', 'levelTracks.levelTrackCourses.course');
+
+        return response()->json(new LevelResource($level));
+    }
+
+    public function update(LevelRequest $request, Level $level): JsonResponse
+    {
+        $level->update($request->validated());
+
+        return response()->json(new LevelResource($level));
+    }
+
+    public function destroy(Level $level): JsonResponse
+    {
+        $level->delete();
+
+        return response()->json(['message' => 'تم حذف المستوى بنجاح']);
+    }
+
+    public function reorder(Plan $plan): JsonResponse
+    {
+        $items = request()->validate([
+            'items'         => ['required', 'array'],
+            'items.*.id'    => ['required', 'exists:levels,id'],
+            'items.*.order' => ['required', 'integer', 'min:1'],
+        ])['items'];
+
+        foreach ($items as $item) {
+            Level::where('id', $item['id'])
+                ->where('plan_id', $plan->id)
+                ->update(['order' => $item['order']]);
+        }
+
+        return response()->json(['message' => 'تم تحديث الترتيب بنجاح']);
+    }
+}

@@ -1,99 +1,47 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest;
 use App\Http\Resources\CourseResource;
 use App\Models\Course;
-use Illuminate\Http\Request;
+use App\Models\Track;
+use Illuminate\Http\JsonResponse;
 
 class CourseController extends Controller
 {
-
-    /**
-     * Display a listing of courses.
-     */
-    public function index(Request $request)
+    public function index(Track $track): JsonResponse
     {
-        $perPage = $request->integer('per_page', 15);
+        $courses = $track->courses()->latest()->paginate(15);
 
-        $courses = Course::with('track')->latest()->paginate($perPage);
-
-        return $this->success(
-            CourseResource::collection($courses),
-            'تم جلب الدورات بنجاح',
-            200
-        );
+        return response()->json(CourseResource::collection($courses)->response()->getData(true));
     }
 
-    /**
-     * Store a newly created course.
-     */
-    public function store(Request $request)
+    public function store(CourseRequest $request): JsonResponse
     {
-        $request->validate([
-            'track_id' => 'required|exists:tracks,id',
-            'name' => 'required',
-            'book_name' => 'nullable',
-            'hours' => 'required|integer',
-            'max_score' => 'required|integer'
-        ]);
+        $course = Course::create($request->validated());
 
-        $course = Course::create($request->all());
-
-        return $this->success(
-            new CourseResource($course),
-            'تم إنشاء الدورة',
-            201
-        );
+        return response()->json(new CourseResource($course->load('track')), 201);
     }
 
-    /**
-     * Display the specified course.
-     */
-    public function show(Course $course)
+    public function show(Course $course): JsonResponse
     {
         $course->load('track');
 
-        return $this->success(
-            new CourseResource($course),
-            'تم جلب الدورة',
-            200
-        );
+        return response()->json(new CourseResource($course));
     }
 
-    /**
-     * Update the specified course.
-     */
-    public function update(Request $request, Course $course)
+    public function update(CourseRequest $request, Course $course): JsonResponse
     {
-        $request->validate([
-            'track_id' => 'required|exists:tracks,id',
-            'name' => 'required',
-            'hours' => 'required|integer',
-            'max_score' => 'required|integer'
-        ]);
+        $course->update($request->validated());
 
-        $course->update($request->all());
-
-        return $this->success(
-            new CourseResource($course->fresh()),
-            'تم التعديل',
-            200
-        );
+        return response()->json(new CourseResource($course));
     }
 
-    /**
-     * Remove the specified course.
-     */
-    public function destroy(Course $course)
+    public function destroy(Course $course): JsonResponse
     {
         $course->delete();
 
-        return $this->success(
-            null,
-            'تم الحذف',
-            200
-        );
+        return response()->json(['message' => 'تم حذف المساق بنجاح']);
     }
 }

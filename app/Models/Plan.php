@@ -2,36 +2,45 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'name',
-        'weight',
-        'duration_in_days',
-        'grace_period_days',
-        'is_active'
+        'description',
+        'duration',
+        'duration_unit',
+        'is_active',
+        'tolerance',
     ];
 
-    // علاقة: الخطة تحتوي مسارات
-    public function planTracks()
-    {
-        return $this->hasMany(PlanTrack::class);
-    }
-public function assignments()
-{
-    return $this->hasMany(PlanAssignment::class);
-}
+    protected $casts = [
+        'is_active'  => 'boolean',
+        'duration'   => 'integer',
+        'tolerance'  => 'integer',
+        'duration_unit' => 'string',
+    ];
 
-    // علاقة many-to-many مع المسارات
-    public function tracks()
+    // ========================
+    // Relations
+    // ========================
+
+    public function levels(): HasMany
     {
-        return $this->belongsToMany(
-            Track::class,
-            'plan_tracks'
-        )->withPivot('is_required','weight')
-         ->withTimestamps();
+        return $this->hasMany(Level::class)->orderBy('order');
+    }
+
+    // ========================
+    // Scopes
+    // ========================
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }
