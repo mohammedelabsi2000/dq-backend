@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('notes')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+            
+            $table->auditColumns();
         });
     }
 

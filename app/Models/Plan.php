@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -10,21 +11,27 @@ class Plan extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
+    protected $guarded = ['id'];
+    
+    /* protected $fillable = [
         'name',
         'description',
-        'duration',
-        'duration_unit',
-        'is_active',
+        'period_unit',
+        'period',
+        'min_period',
+        'max_period',
         'tolerance',
-    ];
+        'is_active',
+    ]; */
 
-    protected $casts = [
-        'is_active'  => 'boolean',
-        'duration'   => 'integer',
-        'tolerance'  => 'integer',
-        'duration_unit' => 'string',
-    ];
+    /* protected $casts = [
+        'period_unit' => 'string',
+        'period' => 'integer',
+        'min_period' => 'integer',
+        'max_period' => 'integer',
+        'tolerance' => 'integer',
+        'is_active' => 'boolean',
+    ]; */
 
     // ========================
     // Relations
@@ -39,7 +46,7 @@ class Plan extends Model
     // Scopes
     // ========================
 
-    public function scopeActive($query)
+    public function scopeIsActive(Builder $query)
     {
         return $query->where('is_active', true);
     }

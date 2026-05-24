@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class LevelTrackCourseRequest extends FormRequest
+class LevelTrackSubjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -15,7 +15,7 @@ class LevelTrackCourseRequest extends FormRequest
     {
         return [
             'level_track_id' => ['required', 'exists:level_tracks,id'],
-            'course_id'      => ['required', 'exists:courses,id'],
+            'subject_id'     => ['required', 'exists:subjects,id'],
             'is_required'    => ['sometimes', 'boolean'],
             'order'          => ['sometimes', 'integer', 'min:0'],
         ];
@@ -25,7 +25,7 @@ class LevelTrackCourseRequest extends FormRequest
     {
         return [
             'level_track_id' => 'مستوى المسار',
-            'course_id'      => 'المساق',
+            'subject_id'     => 'المساق',
             'is_required'    => 'إلزامي',
             'order'          => 'الترتيب',
         ];

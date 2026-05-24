@@ -13,15 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('level_track_courses', function (Blueprint $table) {
+        Schema::create('level_track_subjects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('level_track_id')->constrained('level_tracks')->cascadeOnDelete();
-            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->foreignId('level_track_id')->constrained('level_tracks');
+            $table->foreignId('subject_id')->constrained('subjects');
             $table->boolean('is_required')->default(true)->comment('إلزامي / اختياري');
             $table->unsignedInteger('order')->nullable();
-            $table->timestamps();
+            $table->decimal('weight', 5, 2)->default(0)->comment('وزن / نسبة المادة داخل المسار');
+            $table->auditColumns();
 
-            $table->unique(['level_track_id', 'course_id']);
+            $table->unique(['level_track_id', 'subject_id']);
         });
     }
 
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('level_track_courses');
+        Schema::dropIfExists('level_track_subjects');
     }
 };

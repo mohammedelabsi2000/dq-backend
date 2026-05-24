@@ -20,9 +20,9 @@ class Track extends Model
     // Relations
     // ========================
 
-    public function courses(): HasMany
+    public function subjects(): HasMany
     {
-        return $this->hasMany(Course::class);
+        return $this->hasMany(Subject::class);
     }
 
     public function levels(): BelongsToMany

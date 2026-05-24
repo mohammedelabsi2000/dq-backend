@@ -12,19 +12,14 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('tracks', function (Blueprint $table) {
-            $table->id(); // id - المعرف
-
+        Schema::create('subjects', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('track_id')->constrained('tracks')->cascadeOnDelete();
             $table->string('name');
-            // name - اسم المسار (الحفظ - القيم...)
-
             $table->text('description')->nullable();
-            // description - وصف المسار
 
-            // audit columns (macro)
             $table->auditColumns();
         });
-
     }
 
     /**
@@ -34,6 +29,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('tracks');
+        Schema::dropIfExists('subjects');
     }
 };

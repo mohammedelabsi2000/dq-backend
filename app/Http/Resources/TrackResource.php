@@ -15,10 +15,10 @@ class TrackResource extends JsonResource
             'notes'         => $this->notes,
             'created_at'    => $this->created_at?->toDateTimeString(),
 
-            'courses'       => CourseResource::collection($this->whenLoaded('courses')),
-            'courses_count' => $this->when(
-                isset($this->courses_count),
-                $this->courses_count
+            'subjects'      => SubjectResource::collection($this->whenLoaded('subjects')),
+            'subjects_count' => $this->when(
+                isset($this->subjects_count),
+                $this->subjects_count
             ),
         ];
     }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Course extends Model
+class Subject extends Model
 {
     use SoftDeletes;
 
@@ -27,14 +27,14 @@ class Course extends Model
         return $this->belongsTo(Track::class);
     }
 
-    public function levelTrackCourses(): HasMany
+    public function levelTrackSubjects(): HasMany
     {
-        return $this->hasMany(LevelTrackCourse::class);
+        return $this->hasMany(LevelTrackSubject::class);
     }
 
     public function levelTracks(): BelongsToMany
     {
-        return $this->belongsToMany(LevelTrack::class, 'level_track_courses')
+        return $this->belongsToMany(LevelTrack::class, 'level_track_subjects')
             ->withPivot('is_required')
             ->withTimestamps();
     }

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -13,16 +12,27 @@ return new class extends Migration
      */
     public function up()
     {
+        // Drop existing tables if they exist to avoid conflicts
+        Schema::dropIfExists('plan_track_courses');
+        Schema::dropIfExists('courses');
+        Schema::dropIfExists('plan_tracks');
+        Schema::dropIfExists('tracks');
+        Schema::dropIfExists('plan_assignments');
+        Schema::dropIfExists('plans');
+        
+        // Create the plans table
         Schema::create('plans', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->enum('duration_unit', ['يوم', 'اسبوع', 'شهر', 'سنة'])->default('شهر')->comment('وحدة المدة: يوم، أسبوع، شهر، سنة');
-            $table->unsignedInteger('duration')->comment('المدة');
+            $table->enum('period_unit', ['يوم', 'اسبوع', 'شهر', 'سنة'])->default('شهر')->comment('وحدة المدة: يوم، أسبوع، شهر، سنة');
+            $table->unsignedInteger('period')->comment('مدة الخطة');
+            $table->unsignedInteger('min_period')->nullable()->comment('أقل مدة');
+            $table->unsignedInteger('max_period')->nullable()->comment('أكثر مدة');
             $table->unsignedInteger('tolerance')->default(0)->comment('السماحية بالأيام');
             $table->boolean('is_active')->default(true)->comment('فعالة / غير فعالة');
-            $table->timestamps();
-            $table->softDeletes();
+            
+            $table->auditColumns();
         });
     }
 

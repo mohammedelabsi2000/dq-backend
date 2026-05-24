@@ -12,7 +12,7 @@ class LevelTrackController extends Controller
 {
     public function index(Level $level): JsonResponse
     {
-        $levelTracks = $level->levelTracks()->with('track', 'levelTrackCourses.course')->get();
+        $levelTracks = $level->levelTracks()->with('track', 'levelTrackSubjects.subject')->get();
 
         return response()->json(LevelTrackResource::collection($levelTracks));
     }
@@ -34,7 +34,7 @@ class LevelTrackController extends Controller
 
     public function show(LevelTrack $levelTrack): JsonResponse
     {
-        $levelTrack->load('level', 'track', 'levelTrackCourses.course');
+        $levelTrack->load('level', 'track', 'levelTrackSubjects.subject');
 
         return response()->json(new LevelTrackResource($levelTrack));
     }

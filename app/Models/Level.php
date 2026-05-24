@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Level extends Model
 {
     use SoftDeletes;
+    protected $guarded = ['id'];
 
-    protected $fillable = [
+    /* protected $fillable = [
         'plan_id',
         'name',
         'order',
@@ -21,15 +22,15 @@ class Level extends Model
         'min_duration',
         'duration_unit',
         'notes',
-    ];
+    ]; */
 
-    protected $casts = [
+    /* protected $casts = [
         'order'         => 'integer',
         'duration'      => 'integer',
         'max_duration'  => 'integer',
         'min_duration'  => 'integer',
         'duration_unit' => 'string',
-    ];
+    ]; */
 
     // ========================
     // Relations

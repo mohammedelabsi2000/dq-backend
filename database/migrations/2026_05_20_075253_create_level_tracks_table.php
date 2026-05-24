@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('level_id')->constrained('levels')->cascadeOnDelete();
             $table->foreignId('track_id')->constrained('tracks')->cascadeOnDelete();
             $table->decimal('weight', 5, 2)->default(0)->comment('وزن / نسبة المسار داخل المستوى');
-            $table->timestamps();
+            $table->auditColumns();
 
             $table->unique(['level_id', 'track_id']);
         });

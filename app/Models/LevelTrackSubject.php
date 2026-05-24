@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LevelTrackCourse extends Model
+class LevelTrackSubject extends Model
 {
     protected $fillable = [
         'level_track_id',
-        'course_id',
+        'subject_id',
         'is_required',
         'order',
     ];
@@ -28,8 +28,8 @@ class LevelTrackCourse extends Model
         return $this->belongsTo(LevelTrack::class);
     }
 
-    public function course(): BelongsTo
+    public function subject(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Subject::class);
     }
 }

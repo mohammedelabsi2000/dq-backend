@@ -25,7 +25,7 @@ class PlanController extends Controller
 
     public function show(Plan $plan): JsonResponse
     {
-        $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackCourses.course');
+        $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
 
         return response()->json(new PlanResource($plan));
     }

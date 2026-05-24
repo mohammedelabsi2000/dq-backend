@@ -33,14 +33,14 @@ class LevelTrack extends Model
         return $this->belongsTo(Track::class);
     }
 
-    public function levelTrackCourses(): HasMany
+    public function levelTrackSubjects(): HasMany
     {
-        return $this->hasMany(LevelTrackCourse::class);
+        return $this->hasMany(LevelTrackSubject::class);
     }
 
-    public function courses(): BelongsToMany
+    public function subjects(): BelongsToMany
     {
-        return $this->belongsToMany(Course::class, 'level_track_courses')
+        return $this->belongsToMany(Subject::class, 'level_track_subjects')
             ->withPivot('is_required')
             ->withTimestamps();
     }

@@ -26,7 +26,7 @@ class LevelController extends Controller
 
     public function show(Level $level): JsonResponse
     {
-        $level->load('plan', 'levelTracks.track', 'levelTracks.levelTrackCourses.course');
+        $level->load('plan', 'levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
 
         return response()->json(new LevelResource($level));
     }

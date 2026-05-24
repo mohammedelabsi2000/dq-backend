@@ -17,7 +17,7 @@ class LevelTrackResource extends JsonResource
 
             'level'              => new LevelResource($this->whenLoaded('level')),
             'track'              => new TrackResource($this->whenLoaded('track')),
-            'level_track_courses' => LevelTrackCourseResource::collection($this->whenLoaded('levelTrackCourses')),
+            'level_track_subjects' => LevelTrackSubjectResource::collection($this->whenLoaded('levelTrackSubjects')),
         ];
     }
 }

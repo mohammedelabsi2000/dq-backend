@@ -11,7 +11,7 @@ class TrackController extends Controller
 {
     public function index(): JsonResponse
     {
-        $tracks = Track::withCount('courses')->latest()->paginate(15);
+        $tracks = Track::withCount('subjects')->latest()->paginate(15);
 
         return response()->json(TrackResource::collection($tracks)->response()->getData(true));
     }
@@ -25,7 +25,7 @@ class TrackController extends Controller
 
     public function show(Track $track): JsonResponse
     {
-        $track->load('courses');
+        $track->load('subjects');
 
         return response()->json(new TrackResource($track));
     }
