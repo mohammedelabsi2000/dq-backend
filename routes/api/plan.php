@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\LevelController;
 use App\Http\Controllers\Api\PlanController;
+use App\Http\Controllers\Api\TrackController;
 use Illuminate\Support\Facades\Route;
 
 // Custom Juz CRUD
