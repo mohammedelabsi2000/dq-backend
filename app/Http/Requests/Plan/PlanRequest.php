@@ -22,7 +22,7 @@ class PlanRequest extends DQFormRequest
             'period' => ['required', 'integer', 'min:1'],
             'min_period' => ['nullable', 'integer', 'min:1'],
             'max_period' => ['nullable', 'integer', 'min:1'],
-            'tolerance' => ['required', 'integer', 'min:0'],
+            'tolerance' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
@@ -33,7 +33,7 @@ class PlanRequest extends DQFormRequest
             'name.required' => 'اسم الخطة مطلوب.',
             'name.string' => 'اسم الخطة يجب أن يكون نصاً.',
             'name.max' => 'اسم الخطة لا يجب أن يتجاوز 255 حرفاً.',
-            
+
             'description.string' => 'الوصف يجب أن يكون نصاً.',
 
             'period_unit.required' => 'وحدة المدة مطلوبة.',
@@ -50,9 +50,10 @@ class PlanRequest extends DQFormRequest
             'max_period.integer' => 'المدة القصوى يجب أن تكون عدداً صحيحاً.',
             'max_period.min' => 'المدة القصوى يجب أن تكون على الأقل 1.',
 
-            'tolerance.required' => 'السماحية مطلوبة.',
+
             'tolerance.integer' => 'السماحية يجب أن تكون عدداً صحيحاً.',
             'tolerance.min' => 'السماحية لا يمكن أن تكون سالبة.',
+
         ];
     }
 

@@ -12,7 +12,7 @@ class PlanController extends Controller
 {
     public function index(): JsonResponse
     {
-        $plans = Plan::withCount('levels')->latest()->paginate(15);
+        $plans = Plan::withCount('levels')->get();
         return $this->successWithPagination(PlanResource::collection($plans));
     }
 

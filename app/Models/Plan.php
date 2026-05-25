@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PeriodUnit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ class Plan extends Model
     use SoftDeletes, HasFactory;
 
     protected $guarded = ['id'];
-    
+
     /* protected $fillable = [
         'name',
         'description',
@@ -24,6 +25,9 @@ class Plan extends Model
         'tolerance',
         'is_active',
     ]; */
+    protected $casts = [
+        'period_unit' => PeriodUnit::class,
+    ];
 
     /* protected $casts = [
         'period_unit' => 'string',
