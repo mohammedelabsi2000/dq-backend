@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use App\Models\Plan;
 use App\Models\PlanLevel;
 use App\Models\Constant;
+use App\Models\Level;
 
 class PlanSeeder extends Seeder
 {
@@ -13,6 +14,10 @@ class PlanSeeder extends Seeder
     {
         Plan::factory()
             ->count(5)
+            ->create();
+
+        Level::factory()
+            ->count(30)
             ->create();
     }
 }

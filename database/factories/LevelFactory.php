@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class LevelFactory extends Factory
 {
+    protected static array $usedOrders = [];
     /**
      * Define the model's default state.
      *
@@ -18,10 +19,28 @@ class LevelFactory extends Factory
     {
         $plan = \App\Models\Plan::inRandomOrder()->first();
 
+        $planId = $plan ? $plan->id : null;
+
+        // تهيئة التتبع لهذه الخطة عند أول استخدام
+        if (!isset(static::$usedOrders[$planId])) {
+            // جلب الأرقام الموجودة مسبقاً في قاعدة البيانات
+            static::$usedOrders[$planId] = $plan
+                ? $plan->levels()->pluck('order')->toArray()
+                : [];
+        }
+
+        // إيجاد أول رقم ترتيب غير مستخدم
+        $order = 1;
+        while (in_array($order, static::$usedOrders[$planId])) {
+            $order++;
+        }
+        // حفظ الرقم المستخدم لتجنب تكراره
+        static::$usedOrders[$planId][] = $order;
+
         return [
             'plan_id' => $plan ? $plan->id : null,
             'name' => $this->faker->sentence(2),
-            'order' => $this->faker->numberBetween(1, $plan->levels()->count() + 1),
+            'order' => $order,
             'period_unit' => $this->faker->randomElement(\App\Enums\PeriodUnit::cases())->value,
             'period' => $this->faker->numberBetween(1, 12),
             'min_period' => $this->faker->optional()->numberBetween(1, 6),
