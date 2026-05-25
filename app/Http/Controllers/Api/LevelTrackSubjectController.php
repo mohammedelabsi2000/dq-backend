@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\LevelTrackSubjectRequest;
 use App\Http\Resources\LevelTrackSubjectResource;
 use App\Models\LevelTrack;

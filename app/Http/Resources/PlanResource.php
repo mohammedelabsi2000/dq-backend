@@ -10,17 +10,18 @@ class PlanResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'          => $this->id,
-            'name'        => $this->name,
+            'id' => $this->id,
+            'name' => $this->name,
             'description' => $this->description,
-            'duration'    => $this->duration,
-            'duration_unit' => $this->duration_unit,
-            'is_active'   => $this->is_active,
-            'tolerance'   => $this->tolerance,
-            'created_at'  => $this->created_at?->toDateTimeString(),
+            'period_unit' => $this->period_unit,
+            'period' => $this->period,
+            'min_period' => $this->min_period,
+            'max_period' => $this->max_period,
+            'tolerance' => $this->tolerance,
+            'is_active' => $this->is_active,
 
             // يُحمَّل فقط إذا كان موجوداً في الـ eager load
-            'levels'      => LevelResource::collection($this->whenLoaded('levels')),
+            'levels' => LevelResource::collection($this->whenLoaded('levels')),
             'levels_count' => $this->when(
                 isset($this->levels_count),
                 $this->levels_count

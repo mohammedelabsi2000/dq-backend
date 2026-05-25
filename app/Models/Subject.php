@@ -12,11 +12,12 @@ class Subject extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
+    protected $guarded = ['id'];
+    /* protected $fillable = [
         'track_id',
         'name',
         'description',
-    ];
+    ]; */
 
     // ========================
     // Relations

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PeriodUnit;
 use App\Models\Plan;
 use App\Models\Constant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -12,19 +13,16 @@ class PlanFactory extends Factory
 
     public function definition(): array
     {
+        $period = $this->faker->numberBetween(1, 12);
         return [
             'name' => $this->faker->unique()->sentence(1),
-            'type_id' => Constant::where('constant_type_id', function($q) {
-                $q->select('id')->from('constant_types')->where('name', 'plan_type');
-            })->inRandomOrder()->first()->id ?? Constant::factory(),
             'description' => $this->faker->paragraph(),
-            'target_group_id' => Constant::where('constant_type_id', function($q) {
-                $q->select('id')->from('constant_types')->where('name', 'target_group');
-            })->inRandomOrder()->first()->id ?? Constant::factory(),
-            'level_numbers' => $this->faker->numberBetween(3, 10),
-            'notes' => $this->faker->optional()->sentence(),
-            'created_by' => 1,
-            'updated_by' => 1,
+            'period_unit' => $this->faker->randomElement(PeriodUnit::cases())->value,
+            'period' => $period,
+            'min_period' => $this->faker->optional()->numberBetween(1, $period),
+            'max_period' => $this->faker->optional()->numberBetween($period, 24),
+            'tolerance' => $this->faker->numberBetween(0, 7),
+            'is_active' => $this->faker->boolean(),
         ];
     }
 }

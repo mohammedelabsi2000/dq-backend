@@ -7,17 +7,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LevelTrackSubject extends Model
 {
-    protected $fillable = [
+    protected $guarded = ['id'];
+    /* protected $fillable = [
         'level_track_id',
         'subject_id',
         'is_required',
         'order',
-    ];
+    ]; */
 
-    protected $casts = [
+    /* protected $casts = [
         'is_required' => 'boolean',
         'order' => 'integer',
-    ];
+    ]; */
 
     // ========================
     // Relations

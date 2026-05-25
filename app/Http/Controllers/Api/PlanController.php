@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Plan\PlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
@@ -12,8 +13,7 @@ class PlanController extends Controller
     public function index(): JsonResponse
     {
         $plans = Plan::withCount('levels')->latest()->paginate(15);
-
-        return response()->json(PlanResource::collection($plans)->response()->getData(true));
+        return $this->successWithPagination(PlanResource::collection($plans));
     }
 
     public function store(PlanRequest $request): JsonResponse
@@ -49,8 +49,8 @@ class PlanController extends Controller
         $plan->update(['is_active' => !$plan->is_active]);
 
         return response()->json([
-            'message'   => $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة',
-            'data'      => new PlanResource($plan),
+            'message' => $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة',
+            'data' => new PlanResource($plan),
         ]);
     }
 }

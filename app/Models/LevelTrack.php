@@ -9,15 +9,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LevelTrack extends Model
 {
-    protected $fillable = [
+    protected $guarded = ['id'];
+    /* protected $fillable = [
         'level_id',
         'track_id',
         'weight',
-    ];
+    ]; */
 
-    protected $casts = [
+    /* protected $casts = [
         'weight' => 'decimal:2',
-    ];
+    ]; */
 
     // ========================
     // Relations

@@ -11,10 +11,11 @@ class Track extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = [
+    protected $guarded = ['id'];
+    /* protected $fillable = [
         'name',
         'notes',
-    ];
+    ]; */
 
     // ========================
     // Relations

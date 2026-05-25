@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PeriodUnit;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -22,10 +23,12 @@ return new class extends Migration {
         
         // Create the plans table
         Schema::create('plans', function (Blueprint $table) {
+            $periodUnits = array_map(fn($unit) => $unit->value, PeriodUnit::cases());
+
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->enum('period_unit', ['يوم', 'اسبوع', 'شهر', 'سنة'])->default('شهر')->comment('وحدة المدة: يوم، أسبوع، شهر، سنة');
+            $table->enum('period_unit', $periodUnits)->default(PeriodUnit::Month->value)->comment('وحدة المدة: يوم، أسبوع، شهر، سنة');
             $table->unsignedInteger('period')->comment('مدة الخطة');
             $table->unsignedInteger('min_period')->nullable()->comment('أقل مدة');
             $table->unsignedInteger('max_period')->nullable()->comment('أكثر مدة');
