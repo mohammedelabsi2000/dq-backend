@@ -20,37 +20,32 @@ class PlanController extends Controller
     {
         $plan = Plan::create($request->validated());
 
-        return response()->json(new PlanResource($plan), 201);
+        return $this->success(new PlanResource($plan), 'تم إنشاء الخطة بنجاح', 201);
     }
 
     public function show(Plan $plan): JsonResponse
     {
         $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
-
-        return response()->json(new PlanResource($plan));
+        return $this->success(new PlanResource($plan));
     }
 
     public function update(PlanRequest $request, Plan $plan): JsonResponse
     {
         $plan->update($request->validated());
-
-        return response()->json(new PlanResource($plan));
+        return $this->success(new PlanResource($plan), 'تم تحديث الخطة بنجاح');
     }
 
     public function destroy(Plan $plan): JsonResponse
     {
         $plan->delete();
 
-        return response()->json(['message' => 'تم حذف الخطة بنجاح']);
+        return $this->success(null, 'تم حذف الخطة بنجاح');
     }
 
     public function toggleActive(Plan $plan): JsonResponse
     {
         $plan->update(['is_active' => !$plan->is_active]);
 
-        return response()->json([
-            'message' => $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة',
-            'data' => new PlanResource($plan),
-        ]);
+        return $this->success(new PlanResource($plan), $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة');
     }
 }

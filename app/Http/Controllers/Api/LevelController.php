@@ -14,43 +14,42 @@ class LevelController extends Controller
     public function index(Plan $plan): JsonResponse
     {
         $levels = $plan->levels()->with('levelTracks.track')->get();
-
-        return response()->json(LevelResource::collection($levels));
+        return $this->success(LevelResource::collection($levels));
     }
 
     public function store(LevelRequest $request): JsonResponse
     {
         $level = Level::create($request->validated());
 
-        return response()->json(new LevelResource($level->load('plan')), 201);
+        return $this->success(new LevelResource($level->load('plan')), 'تم إنشاء المستوى بنجاح', 201);
     }
 
     public function show(Level $level): JsonResponse
     {
         $level->load('plan', 'levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
 
-        return response()->json(new LevelResource($level));
+        return $this->success(new LevelResource($level));
     }
 
     public function update(LevelRequest $request, Level $level): JsonResponse
     {
         $level->update($request->validated());
 
-        return response()->json(new LevelResource($level));
+        return $this->success(new LevelResource($level), 'تم تحديث المستوى بنجاح');
     }
 
     public function destroy(Level $level): JsonResponse
     {
         $level->delete();
 
-        return response()->json(['message' => 'تم حذف المستوى بنجاح']);
+        return $this->success(null, 'تم حذف المستوى بنجاح');
     }
 
     public function reorder(Plan $plan): JsonResponse
     {
         $items = request()->validate([
-            'items'         => ['required', 'array'],
-            'items.*.id'    => ['required', 'exists:levels,id'],
+            'items' => ['required', 'array'],
+            'items.*.id' => ['required', 'exists:levels,id'],
             'items.*.order' => ['required', 'integer', 'min:1'],
         ])['items'];
 
@@ -60,6 +59,6 @@ class LevelController extends Controller
                 ->update(['order' => $item['order']]);
         }
 
-        return response()->json(['message' => 'تم تحديث الترتيب بنجاح']);
+        return $this->success(null, 'تم تحديث الترتيب بنجاح');
     }
 }
