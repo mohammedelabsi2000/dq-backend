@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\PeriodUnit;
+use App\Models\Plan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,13 +18,13 @@ class LevelFactory extends Factory
      */
     public function definition()
     {
-        $plan = \App\Models\Plan::inRandomOrder()->first();
+        $plan = Plan::inRandomOrder()->first();
 
         return [
             'plan_id' => $plan ? $plan->id : null,
             'name' => $this->faker->sentence(2),
-            'order' => $this->faker->numberBetween(1, $plan->levels()->count() + 1),
-            'period_unit' => $this->faker->randomElement(\App\Enums\PeriodUnit::cases())->value,
+            'order' => $plan->levels()->count() + 1,
+            'period_unit' => $this->faker->randomElement(PeriodUnit::cases())->value,
             'period' => $this->faker->numberBetween(1, 12),
             'min_period' => $this->faker->optional()->numberBetween(1, 6),
             'max_period' => $this->faker->optional()->numberBetween(6, 24),
