@@ -15,9 +15,17 @@ return new class extends Migration {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('track_id')->constrained('tracks');
-            $table->string('name');
+            $table->foreignId('subject_type_id')->constrained('constants');
+
+            $table->string('title');
+            $table->string('sub_title')->nullable();
+            $table->string('juzs')->nullable();
+            $table->string('surahs')->nullable();
+            $table->string('verses')->nullable();
+            $table->string('pages')->nullable();
+
             $table->text('description')->nullable();
-            
+            $table->text('notes')->nullable();
 
             $table->auditColumns();
         });

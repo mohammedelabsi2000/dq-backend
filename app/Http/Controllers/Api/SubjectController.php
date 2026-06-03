@@ -16,16 +16,14 @@ class SubjectController extends Controller
         $query = Subject::query();
 
         $q = $this->applyFilters($query, [
-            'searchColumns' => ['name'],
+            'searchColumns' => ['title', 'sub_title'],
             'orderColumn' => 'created_at',
             'limit' => '*',
         ]);
 
         $query = $q['query'];
-        $total = $q['count'];
-
         $subjects = $query->get();
-        unset($q['query'], $q['count']); // إزالة الاستعلام والعدد من المصفوفة لتوفير الذاكرة
+
         return $this->successWithPagination(
             SubjectResource::collection($subjects),
             $q,
@@ -38,7 +36,7 @@ class SubjectController extends Controller
     {
         $subject = Subject::create($request->validated());
 
-        return $this->success(new SubjectResource($subject->load('track')), 201);
+        return $this->success(new SubjectResource($subject->load('track')), 'تم إنشاء المساق بنجاح', 201);
     }
 
     public function show(Subject $subject): JsonResponse
@@ -50,9 +48,11 @@ class SubjectController extends Controller
 
     public function update(SubjectRequest $request, Subject $subject): JsonResponse
     {
-        $subject->update($request->validated());
+        $data = $request->validated();
 
-        return $this->success(new SubjectResource($subject));
+        $subject->update($data);
+
+        return $this->success(new SubjectResource($subject), 'تم تحديث المساق بنجاح', 200);
     }
 
     public function destroy(Subject $subject): JsonResponse

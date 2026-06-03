@@ -31,6 +31,7 @@ trait ApiResponser
      */
     protected function successWithPagination($data, $pagination = [], $message = '', $code = 200)
     {
+        unset($pagination['query'], $pagination['count']);// إزالة الاستعلام والعدد من المصفوفة لتوفير الذاكرة
         $pag = array_merge($pagination, [
             'success' => true,
             'message' => $message,

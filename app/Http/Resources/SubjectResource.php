@@ -11,8 +11,17 @@ class SubjectResource extends JsonResource
         return [
             'id'          => $this->id,
             'track_id'    => $this->track_id,
-            'name'        => $this->name,
+            'subject_type_id' => $this->subject_type_id,
+
+            'title'        => $this->title,
+            'sub_title'    => $this->sub_title,
+            'juzs'         => $this->juzs,
+            'surahs'       => $this->surahs,
+            'verses'       => $this->verses,
+            'pages'        => $this->pages,
+
             'description' => $this->description,
+            'notes'       => $this->notes,
             'created_at'  => $this->created_at?->toDateTimeString(),
 
             'track'       => new TrackResource($this->whenLoaded('track')),

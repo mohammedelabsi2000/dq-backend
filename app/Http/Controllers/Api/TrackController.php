@@ -36,7 +36,8 @@ class TrackController extends Controller
 
     public function store(TrackRequest $request): JsonResponse
     {
-        $track = Track::create($request->validated());
+        $data = $request->validated();
+        $track = Track::create($data);
 
         return $this->success(new TrackResource($track), 'تم إنشاء المسار بنجاح', 201);
     }
@@ -50,9 +51,10 @@ class TrackController extends Controller
 
     public function update(TrackRequest $request, Track $track): JsonResponse
     {
-        $track->update($request->validated());
+        $data = $request->validated();
+        $track->update($data);
 
-        return $this->success(new TrackResource($track), 'تم تحديث المسار بنجاح');
+        return $this->success(new TrackResource($track), 'تم تحديث بيانات المسار بنجاح');
     }
 
     public function destroy(Track $track): JsonResponse
