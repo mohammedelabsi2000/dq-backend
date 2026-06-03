@@ -7,18 +7,31 @@ use App\Http\Requests\Track\TrackRequest;
 use App\Http\Resources\TrackResource;
 use App\Models\Track;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class TrackController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $tracks = Track::withCount('subjects')->latest()->paginate(15);
+        $query = Track::query();
 
-        return $this->successWithPagination(TrackResource::collection($tracks), [
-            'total' => $tracks->total(),
-            'skip' => $tracks->perPage(),
-            'limit' => $tracks->perPage(),
-        ], 'تم جلب المسارات بنجاح');
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'limit' => '*',
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $tracks = $query->withCount('subjects')->get();
+
+        return $this->successWithPagination(
+            TrackResource::collection($tracks),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
     }
 
     public function store(TrackRequest $request): JsonResponse

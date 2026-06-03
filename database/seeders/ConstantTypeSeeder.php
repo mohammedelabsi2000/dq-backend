@@ -185,6 +185,20 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'غير مكفولة', 'notes' => null, 'is_active' => true],
                 ]
             ],
+            [
+                'name' => 'subject_type',
+                'description' => 'أنواع المساقات',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'حفظ وتثبيت', 'const_key' => 'memorization', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'حفظ مقطع محدد', 'const_key' => 'limitedMemorization', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'دورة معرفية', 'const_key' => 'course', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'تفسير', 'const_key' => 'explanation', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'معاني', 'const_key' => 'meanings', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'برنامج رديف', 'const_key' => 'program', 'is_active' => true, 'is_system' => true],
+                    ['name' => 'قيمي / تربوي', 'const_key' => 'evaluation', 'is_active' => true, 'is_system' => true],
+                ]
+            ],
         ];
 
         foreach ($constantTypes as $typeData) {

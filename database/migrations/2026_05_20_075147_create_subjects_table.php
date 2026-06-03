@@ -14,9 +14,10 @@ return new class extends Migration {
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('track_id')->constrained('tracks')->cascadeOnDelete();
+            $table->foreignId('track_id')->constrained('tracks');
             $table->string('name');
             $table->text('description')->nullable();
+            
 
             $table->auditColumns();
         });

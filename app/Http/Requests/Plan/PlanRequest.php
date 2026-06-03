@@ -50,10 +50,10 @@ class PlanRequest extends DQFormRequest
             'max_period.integer' => 'المدة القصوى يجب أن تكون عدداً صحيحاً.',
             'max_period.min' => 'المدة القصوى يجب أن تكون على الأقل 1.',
 
-
             'tolerance.integer' => 'السماحية يجب أن تكون عدداً صحيحاً.',
             'tolerance.min' => 'السماحية لا يمكن أن تكون سالبة.',
 
+            'is_active.boolean' => 'الحالة يجب أن تكون صحيحة أو خاطئة.',
         ];
     }
 
