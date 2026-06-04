@@ -24,7 +24,7 @@ class Track extends Model
 
     public function subjects(): HasMany
     {
-        return $this->hasMany(Subject::class);
+        return $this->hasMany(Subject::class)->withDefault();
     }
 
     public function levels(): BelongsToMany

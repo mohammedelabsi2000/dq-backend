@@ -21,7 +21,7 @@ class Subject extends Model
 
     public function track(): BelongsTo
     {
-        return $this->belongsTo(Track::class);
+        return $this->belongsTo(Track::class)->withDefault();
     }
     
     public function subjectType(): BelongsTo
