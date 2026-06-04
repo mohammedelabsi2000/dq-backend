@@ -8,15 +8,15 @@ use Illuminate\Support\Facades\Route;
 
 // Custom Juz CRUD
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('plans', PlanController::class);
+Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
     Route::post('plans/{plan}/toggle-active', [PlanController::class, 'toggleActive'])->name('plans.toggleActive');
-
+    
     Route::apiResource('tracks', TrackController::class);
-
+    
     Route::apiResource('subjects', SubjectController::class);
     
     Route::get('{plan}/levels', [LevelController::class, 'index'])->name('levels.index');
     Route::apiResource('levels', LevelController::class);
+    Route::apiResource('plans', PlanController::class);
 
 });

@@ -16,6 +16,25 @@ class SubjectRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'title' => $this->name,
+            'subject_type_id' => $this->subject_type,
+
+            'juzs' => $this->selected_juz,
+            'surahs' => $this->selected_surah,
+            'verses' => $this->selected_verse,
+            'pages' => $this->selected_page,
+
+            'sub_title' => collect([
+                $this->courseName,
+                $this->programName,
+                $this->evaluationName,
+            ])->first(fn($value) => filled($value)),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
@@ -61,7 +80,7 @@ class SubjectRequest extends FormRequest
             'verses.*.integer' => 'الآيات يجب أن تكون أعدادًا صحيحة.',
             'pages.array' => 'الصفحات يجب أن تكون مصفوفة.',
             'pages.*.integer' => 'الصفحات يجب أن تكون أعدادًا صحيحة.',
-            
+
             'description.string' => 'الوصف يجب أن يكون نصًا.',
             'notes.string' => 'الملاحظات يجب أن تكون نصًا.',
         ];
@@ -115,4 +134,6 @@ class SubjectRequest extends FormRequest
             }
         });
     }
+
+
 }
