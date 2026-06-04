@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('track_id')->constrained('tracks');
+            $table->foreignId('track_id')->nullable()->constrained('tracks');
             $table->foreignId('subject_type_id')->constrained('constants');
 
             $table->string('title');

@@ -25,6 +25,7 @@ class SubjectResource extends JsonResource
             'created_at'  => $this->created_at?->toDateTimeString(),
 
             'track'       => new TrackResource($this->whenLoaded('track')),
+            'subject_type' => new ConstantResource($this->whenLoaded('subjectType')),
         ];
     }
 }

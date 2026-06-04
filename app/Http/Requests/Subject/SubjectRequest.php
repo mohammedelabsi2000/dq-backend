@@ -19,14 +19,23 @@ class SubjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'track_id' => ['required', 'exists:tracks,id'],
+            'track_id' => ['nullable', 'exists:tracks,id'],
             'subject_type_id' => ['required', Rule::in(ConstantHelper::getConstantIdsByType('subject_type'))],
             'title' => ['required', 'string', 'max:255'],
             'sub_title' => ['nullable', 'string', 'max:255'],
-            'juzs' => ['nullable', 'string'],
-            'surahs' => ['nullable', 'string'],
-            'verses' => ['nullable', 'string'],
-            'pages' => ['nullable', 'string'],
+
+            'juzs' => ['nullable', 'array'],
+            'juzs.*' => ['integer'],
+
+            'surahs' => ['nullable', 'array'],
+            'surahs.*' => ['integer'],
+
+            'verses' => ['nullable', 'array'],
+            'verses.*' => ['integer'],
+
+            'pages' => ['nullable', 'array'],
+            'pages.*' => ['integer'],
+
             'description' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
         ];
@@ -35,7 +44,6 @@ class SubjectRequest extends FormRequest
     public function messages()
     {
         return [
-            'track_id.required' => 'المسار مطلوب.',
             'track_id.exists' => 'المسار المحدد غير موجود.',
             'subject_type_id.required' => 'نوع المساق مطلوب.',
             'subject_type_id.in' => 'نوع المساق المحدد غير موجود.',
@@ -44,10 +52,17 @@ class SubjectRequest extends FormRequest
             'title.max' => 'عنوان المساق لا يمكن أن يتجاوز 255 حرفًا.',
             'sub_title.string' => 'العنوان الفرعي يجب أن يكون نصًا.',
             'sub_title.max' => 'العنوان الفرعي لا يمكن أن يتجاوز 255 حرفًا.',
-            'juzs.string' => 'الأجزاء يجب أن تكون نصًا.',
-            'surahs.string' => 'السور يجب أن تكون نصًا.',
-            'verses.string' => 'الآيات يجب أن تكون نصًا.',
-            'pages.string' => 'الصفحات يجب أن تكون نصًا.',
+
+            'juzs.array' => 'الأجزاء يجب أن تكون مصفوفة.',
+            'juzs.*.integer' => 'الأجزاء يجب أن تكون أعدادًا صحيحة.',
+            'surahs.array' => 'السور يجب أن تكون مصفوفة.',
+            'surahs.*.integer' => 'السور يجب أن تكون أعدادًا صحيحة.',
+            'verses.array' => 'الآيات يجب أن تكون مصفوفة.',
+            'verses.*.integer' => 'الآيات يجب أن تكون أعدادًا صحيحة.',
+            'pages.array' => 'الصفحات يجب أن تكون مصفوفة.',
+            'pages.*.integer' => 'الصفحات يجب أن تكون أعدادًا صحيحة.',
+            
+            'description.string' => 'الوصف يجب أن يكون نصًا.',
             'notes.string' => 'الملاحظات يجب أن تكون نصًا.',
         ];
     }

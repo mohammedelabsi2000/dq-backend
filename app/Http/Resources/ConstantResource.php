@@ -17,6 +17,7 @@ class ConstantResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'const_key' => $this->const_key,
 
             // نوع الثابت (علاقة مباشرة)
             'constant_type_id' => $this->constant_type_id,

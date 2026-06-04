@@ -23,6 +23,11 @@ class Subject extends Model
     {
         return $this->belongsTo(Track::class);
     }
+    
+    public function subjectType(): BelongsTo
+    {
+        return $this->belongsTo(Constant::class);
+    }
 
     public function levelTrackSubjects(): HasMany
     {
