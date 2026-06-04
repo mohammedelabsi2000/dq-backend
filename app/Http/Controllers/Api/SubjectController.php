@@ -22,7 +22,7 @@ class SubjectController extends Controller
         ]);
 
         $query = $q['query'];
-        $subjects = $query->get();
+        $subjects = $query->with('subjectType')->get();
 
         return $this->successWithPagination(
             SubjectResource::collection($subjects),
