@@ -44,7 +44,7 @@ class Plan extends Model
 
     public function levels(): HasMany
     {
-        return $this->hasMany(Level::class)->orderBy('order');
+        return $this->hasMany(Level::class, 'plan_id', 'id')->orderBy('order');
     }
 
     // ========================

@@ -39,7 +39,7 @@ class Level extends Model
 
     public function plan(): BelongsTo
     {
-        return $this->belongsTo(Plan::class);
+        return $this->belongsTo(Plan::class, 'plan_id', 'id');
     }
 
     public function levelTracks(): HasMany

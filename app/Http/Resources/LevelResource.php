@@ -22,6 +22,7 @@ class LevelResource extends JsonResource
 
             'plan'         => new PlanResource($this->whenLoaded('plan')),
             'level_tracks' => LevelTrackResource::collection($this->whenLoaded('levelTracks')),
+            'level_tracks_count' => $this->level_tracks_count,
         ];
     }
 }
