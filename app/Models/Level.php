@@ -50,7 +50,7 @@ class Level extends Model
     public function tracks(): BelongsToMany
     {
         return $this->belongsToMany(Track::class, 'level_tracks')
-            ->withPivot('weight', 'id')
+            ->withPivot('weight', 'order', 'id')
             ->withTimestamps();
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class TrackController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(): JsonResponse
     {
         $query = Track::query();
 

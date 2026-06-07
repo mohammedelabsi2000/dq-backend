@@ -65,15 +65,35 @@ class LevelController extends Controller
      */
     public function store(StoreLevelRequest $request)
     {
-        $level = Level::create($request->validated());
+        $validated = $request->validated();
+        $tracksData = $validated['tracks'] ?? null;
+
+        unset($validated['tracks']);
+
+        $level = Level::create($validated);
+
+        // إضافة المسارات إذا وجدت
+        if ($tracksData && is_array($tracksData)) {
+            foreach ($tracksData as $trackData) {
+                $level->levelTracks()->create([
+                    'track_id' => $trackData['track_id'],
+                    'weight' => $trackData['weight'],
+                    'order' => $trackData['order'],
+                ]);
+            }
+        }
 
         // تحميل العلاقات إذا طلب
         if ($request->boolean('with_plan')) {
             $level->load('plan');
         }
 
+        if ($request->boolean('with_tracks')) {
+            $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
+        }
+
         return $this->success(
-            new LevelResource($level),
+            new LevelResource($level->loadCount('levelTracks')),
             'تم إنشاء المستوى بنجاح',
             201
         );

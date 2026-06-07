@@ -13,13 +13,13 @@ class TrackResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'notes'         => $this->notes,
-            'created_at'    => $this->created_at?->toDateTimeString(),
+            // 'created_at'    => $this->created_at?->toDateTimeString(),
 
-            'subjects'      => SubjectResource::collection($this->whenLoaded('subjects')),
-            'subjects_count' => $this->when(
-                isset($this->subjects_count),
-                $this->subjects_count
-            ),
+            // 'subjects'      => SubjectResource::collection($this->whenLoaded('subjects')),
+            // 'subjects_count' => $this->when(
+            //     isset($this->subjects_count),
+            //     $this->subjects_count
+            // ),
         ];
     }
 }

@@ -42,6 +42,10 @@ class StoreLevelRequest extends DQFormRequest
             'min_period'   => 'nullable|integer|min:1|lte:period',
             'max_period'   => 'nullable|integer|min:1|gte:period',
             'notes'        => 'nullable|string',
+            'tracks'       => 'nullable|array',
+            'tracks.*.track_id' => 'required|integer|exists:tracks,id',
+            'tracks.*.weight'   => 'required|numeric|min:0|max:100',
+            'tracks.*.order'    => 'required|integer|min:1',
         ];
     }
 
@@ -68,6 +72,14 @@ class StoreLevelRequest extends DQFormRequest
             'min_period.lte'       => 'أقل مدة يجب أن تكون أقل من أو تساوي المدة الافتراضية',
             'max_period.min'       => 'أقصى مدة يجب أن تكون رقماً موجباً',
             'max_period.gte'       => 'أقصى مدة يجب أن تكون أكبر من أو تساوي المدة الافتراضية',
+            'tracks.array'         => 'حقل المسارات يجب أن يكون مصفوفة',
+            'tracks.*.track_id.required' => 'حقل معرف المسار مطلوب',
+            'tracks.*.track_id.exists'   => 'المسار المحدد غير موجود',
+            'tracks.*.weight.required'   => 'حقل وزن المسار مطلوب',
+            'tracks.*.weight.min'        => 'وزن المسار يجب أن يكون رقماً موجباً',
+            'tracks.*.weight.max'        => 'وزن المسار يجب أن لا يتجاوز 100',
+            'tracks.*.order.required'    => 'حقل ترتيب المسار مطلوب',
+            'tracks.*.order.min'         => 'ترتيب المسار يجب أن يكون رقماً موجباً',
         ];
     }
 }
