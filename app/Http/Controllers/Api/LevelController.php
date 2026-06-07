@@ -26,8 +26,8 @@ class LevelController extends Controller
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
-            'orderColumn'   => 'order',
-            'limit'         => '*',
+            'orderColumn' => 'order',
+            'limit' => '*',
         ]);
 
         $query = $q['query'];
@@ -38,14 +38,7 @@ class LevelController extends Controller
             $query->where('plan_id', $request->integer('plan_id'));
         }
 
-        // تحميل العلاقات حسب الطلب
-        if ($request->boolean('with_plan')) {
-            $query->with('plan');
-        }
-
-        if ($request->boolean('with_tracks')) {
-            $query->with('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
-        }
+        $query->with('plan','levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
 
         $levels = $query->withCount('levelTracks')->get();
 
@@ -182,8 +175,8 @@ class LevelController extends Controller
         $this->authorize('update', Level::class);
 
         $items = $request->validate([
-            'items'         => ['required', 'array', 'min:1'],
-            'items.*.id'    => ['required', 'integer', 'distinct', 'exists:levels,id'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.id' => ['required', 'integer', 'distinct', 'exists:levels,id'],
             'items.*.order' => ['required', 'integer', 'min:1'],
         ])['items'];
 
