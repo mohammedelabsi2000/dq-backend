@@ -41,8 +41,17 @@ class LevelTrackSubjectRequest extends FormRequest
     private function updateRules(): array
     {
         return [
+            'level_track_id' => ['sometimes', 'exists:level_tracks,id'],
+            'subject_id'     => [
+                'sometimes',
+                'exists:subjects,id',
+                Rule::unique('level_track_subjects')->where(
+                    fn($q) => $q->where('level_track_id', $this->level_track_id)
+                )->ignore($this->route('levelTrackSubject')->id, 'id'),
+            ],
             'order'       => ['sometimes', 'nullable', 'integer', 'min:0'],
             'is_required' => ['sometimes', 'boolean'],
+            'weight'      => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 
