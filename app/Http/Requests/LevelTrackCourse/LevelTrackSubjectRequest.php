@@ -25,7 +25,6 @@ class LevelTrackSubjectRequest extends FormRequest
     private function storeRules(): array
     {
         return [
-<<<<<<< Updated upstream
             'level_track_id' => ['required', 'exists:level_tracks,id'],
             'subject_id'     => [
                 'required',
@@ -54,12 +53,6 @@ class LevelTrackSubjectRequest extends FormRequest
             'order'       => ['sometimes', 'nullable', 'integer', 'min:0'],
             'is_required' => ['sometimes', 'boolean'],
             'weight'      => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
-=======
-            'subjects'               => ['required', 'array', 'min:1'],
-            'subjects.*.subject_id'  => ['required', 'exists:subjects,id', 'distinct'],
-            'subjects.*.order'       => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'subjects.*.is_required' => ['sometimes', 'boolean'],
->>>>>>> Stashed changes
         ];
     }
 
