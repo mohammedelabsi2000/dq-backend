@@ -47,7 +47,7 @@ class LevelController extends Controller
             $query->with('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
         }
 
-        $levels = $query->withCount('levelTracks')->get();
+        $levels = $query->with('levelTracks')->withCount('levelTracks')->get();
 
         return $this->successWithPagination(
             LevelResource::collection($levels),
@@ -132,15 +132,39 @@ class LevelController extends Controller
      */
     public function update(UpdateLevelRequest $request, Level $level)
     {
-        $level->update($request->validated());
+        $validated = $request->validated();
+        $tracksData = $validated['tracks'] ?? null;
+
+        unset($validated['tracks']);
+
+        $level->update($validated);
+
+        // تحديث المسارات إذا وجدت
+        if ($tracksData !== null && is_array($tracksData)) {
+            // حذف المسارات القديمة
+            $level->levelTracks()->delete();
+
+            // إضافة المسارات الجديدة
+            foreach ($tracksData as $trackData) {
+                $level->levelTracks()->create([
+                    'track_id' => $trackData['track_id'],
+                    'weight' => $trackData['weight'],
+                    'order' => $trackData['order'],
+                ]);
+            }
+        }
 
         // تحميل العلاقات إذا طلب
         if ($request->boolean('with_plan')) {
             $level->load('plan');
         }
 
+        if ($request->boolean('with_tracks')) {
+            $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
+        }
+
         return $this->success(
-            new LevelResource($level),
+            new LevelResource($level->loadCount('levelTracks')),
             'تم تحديث المستوى بنجاح'
         );
     }

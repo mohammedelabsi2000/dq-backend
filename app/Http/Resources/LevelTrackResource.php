@@ -13,6 +13,7 @@ class LevelTrackResource extends JsonResource
             'level_id'   => $this->level_id,
             'track_id'   => $this->track_id,
             'weight'     => $this->weight,
+            'order'      => $this->order,
             'created_at' => $this->created_at?->toDateTimeString(),
 
             'level'              => new LevelResource($this->whenLoaded('level')),
