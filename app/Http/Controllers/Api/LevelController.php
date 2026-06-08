@@ -27,6 +27,7 @@ class LevelController extends Controller
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'order',
+            'orderBy' => 'asc',
             'limit' => '*',
         ]);
 
@@ -103,12 +104,7 @@ class LevelController extends Controller
     {
         $this->authorize('view', $level);
 
-        $level->load('plan');
-
-        // تحميل شجرة المسارات حسب الطلب
-        if ($request->boolean('with_tracks')) {
-            $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
-        }
+        $level->load('plan','levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
 
         return $this->success(
             new LevelResource($level->loadCount('levelTracks')),

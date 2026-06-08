@@ -26,8 +26,6 @@ class StoreLevelRequest extends DQFormRequest
      */
     public function rules()
     {
-        logger($this->get('tracks'));
-        // logger($this->get('tracks')[0]['order']);
         return [
             'plan_id' => 'required|integer|exists:plans,id',
             'name' => 'required|string|max:255',
