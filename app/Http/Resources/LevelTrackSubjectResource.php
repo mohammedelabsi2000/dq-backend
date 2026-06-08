@@ -14,6 +14,7 @@ class LevelTrackSubjectResource extends JsonResource
             'subject_id'      => $this->subject_id,
             'is_required'     => $this->is_required,
             'order'           => $this->order,
+            'weight'          => (int) $this->weight,
             'created_at'      => $this->created_at?->toDateTimeString(),
 
             'level_track'     => new LevelTrackResource($this->whenLoaded('levelTrack')),
