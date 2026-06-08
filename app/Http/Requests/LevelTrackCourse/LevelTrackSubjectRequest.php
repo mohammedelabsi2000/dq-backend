@@ -34,6 +34,7 @@ class LevelTrackSubjectRequest extends FormRequest
             ],
             'order'       => ['sometimes', 'nullable', 'integer', 'min:0'],
             'is_required' => ['sometimes', 'boolean'],
+            'weight'      => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 
@@ -52,6 +53,7 @@ class LevelTrackSubjectRequest extends FormRequest
             'subject_id'     => 'المساق',
             'order'          => 'الترتيب',
             'is_required'    => 'مطلوب',
+            'weight'         => 'الوزن',
         ];
     }
 
@@ -66,6 +68,9 @@ class LevelTrackSubjectRequest extends FormRequest
             'order.integer'           => 'الترتيب يجب أن يكون رقماً صحيحاً',
             'order.min'               => 'الترتيب يجب أن يكون أكبر من أو يساوي صفر',
             'is_required.boolean'     => 'حقل مطلوب يجب أن يكون صح أو خطأ',
+            'weight.numeric'          => 'الوزن يجب أن يكون رقماً',
+            'weight.min'              => 'الوزن يجب أن يكون أكبر من أو يساوي صفر',
+            'weight.max'              => 'الوزن يجب أن يكون أقل من أو يساوي 100',
         ];
     }
 }
