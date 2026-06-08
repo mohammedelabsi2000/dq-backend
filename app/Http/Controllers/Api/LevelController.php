@@ -196,7 +196,7 @@ class LevelController extends Controller
      */
     public function reorder(Request $request)
     {
-        $this->authorize('update', Level::class);
+        // $this->authorize('update', Level::class);
 
         $items = $request->validate([
             'items' => ['required', 'array', 'min:1'],

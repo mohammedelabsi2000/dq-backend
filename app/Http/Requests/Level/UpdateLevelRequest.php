@@ -50,7 +50,8 @@ class UpdateLevelRequest extends DQFormRequest
             'max_period'   => 'nullable|integer|min:1|gte:period',
             'notes'        => 'nullable|string',
             'tracks'       => 'nullable|array',
-            'tracks.*.track_id' => 'required|integer|exists:tracks,id',
+            // 'tracks.*.track_id' => 'required|integer|exists:tracks,id',
+            'tracks.*.track_id' => 'required|integer|exists:tracks,id|distinct',
             'tracks.*.weight'   => 'required|numeric|min:0|max:100',
             'tracks.*.order'    => 'required|integer|min:1',
         ];
@@ -82,6 +83,7 @@ class UpdateLevelRequest extends DQFormRequest
             'tracks.array'         => 'حقل المسارات يجب أن يكون مصفوفة',
             'tracks.*.track_id.required' => 'حقل معرف المسار مطلوب',
             'tracks.*.track_id.exists'   => 'المسار المحدد غير موجود',
+            'tracks.*.track_id.distinct' => 'لا يمكن تكرار نفس المسار ضمن المستوى الواحد',
             'tracks.*.weight.required'   => 'حقل وزن المسار مطلوب',
             'tracks.*.weight.min'        => 'وزن المسار يجب أن يكون رقماً موجباً',
             'tracks.*.weight.max'        => 'وزن المسار يجب أن لا يتجاوز 100',
