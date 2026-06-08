@@ -62,7 +62,7 @@ class LevelTrackSubjectRequest extends FormRequest
             'subject_id'     => 'المساق',
             'order'          => 'الترتيب',
             'is_required'    => 'مطلوب',
-            'weight'         => 'الوزن',
+            'weight'         => '2الوزن',
         ];
     }
 
