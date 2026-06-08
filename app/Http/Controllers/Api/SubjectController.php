@@ -34,7 +34,22 @@ class SubjectController extends Controller
 
     public function store(SubjectRequest $request): JsonResponse
     {
-        $subject = Subject::create($request->validated());
+        $data = $request->validated();
+        // Encode numeric arrays as JSON numbers without quotes, so they are stored as JSON arrays in the database
+        $data['juzs'] = json_encode(
+            array_map('intval', $data['juzs'] ?? [])
+        );
+        $data['surahs'] = json_encode(
+            array_map('intval', $data['surahs'] ?? [])
+        );
+        $data['verses'] = json_encode(
+            array_map('intval', $data['verses'] ?? [])
+        );
+        $data['pages'] = json_encode(
+            array_map('intval', $data['pages'] ?? [])
+        );
+
+        $subject = Subject::create($data);
 
         return $this->success(new SubjectResource($subject->load('track')), 'تم إنشاء المساق بنجاح', 201);
     }
@@ -49,6 +64,19 @@ class SubjectController extends Controller
     public function update(SubjectRequest $request, Subject $subject): JsonResponse
     {
         $data = $request->validated();
+
+        $data['juzs'] = json_encode(
+            array_map('intval', $data['juzs'] ?? [])
+        );
+        $data['surahs'] = json_encode(
+            array_map('intval', $data['surahs'] ?? [])
+        );
+        $data['verses'] = json_encode(
+            array_map('intval', $data['verses'] ?? [])
+        );
+        $data['pages'] = json_encode(
+            array_map('intval', $data['pages'] ?? [])
+        );
 
         $subject->update($data);
 

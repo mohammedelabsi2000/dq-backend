@@ -19,29 +19,43 @@ class SubjectRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'title' => $this->name,
-            'subject_type_id' => $this->subject_type,
+            // 'title' => $this->name,
+            // 'subject_type_id' => $this->subject_type,
 
-            'juzs' => $this->selected_juz,
-            'surahs' => $this->selected_surah,
-            'verses' => $this->selected_verse,
-            'pages' => $this->selected_page,
+            // 'juzs' => $this->selected_juz,
+            // 'surahs' => $this->selected_surah,
+            // 'verses' => $this->selected_verse,
+            // 'pages' => $this->selected_page,
 
-            'sub_title' => collect([
-                $this->courseName,
-                $this->programName,
-                $this->evaluationName,
-            ])->first(fn($value) => filled($value)),
+            // 'sub_title' => collect([
+            //     $this->courseName,
+            //     $this->programName,
+            //     $this->evaluationName,
+            // ])->first(fn($value) => filled($value)),
         ]);
     }
 
     public function rules(): array
     {
         return [
-            'track_id' => ['nullable', 'exists:tracks,id'],
+            // 'track_id' => ['nullable', 'exists:tracks,id'],
             'subject_type_id' => ['required', Rule::in(ConstantHelper::getConstantIdsByType('subject_type'))],
             'title' => ['required', 'string', 'max:255'],
-            'sub_title' => ['nullable', 'string', 'max:255'],
+            'sub_title' => [
+                'nullable',
+                Rule::requiredIf(function () {
+                    return in_array(
+                        $this->subject_type_id,
+                        Constant::whereIn('const_key', [
+                            SubjectType::Course,
+                            SubjectType::Evaluation,
+                            SubjectType::Program,
+                        ])->pluck('id')->toArray()
+                    );
+                }),
+                'string',
+                'max:255',
+            ],
 
             'juzs' => ['nullable', 'array'],
             'juzs.*' => ['integer'],
@@ -52,8 +66,8 @@ class SubjectRequest extends FormRequest
             'verses' => ['nullable', 'array'],
             'verses.*' => ['integer'],
 
-            'pages' => ['nullable', 'array'],
-            'pages.*' => ['integer'],
+            // 'pages' => ['nullable', 'array'],
+            // 'pages.*' => ['integer'],
 
             'description' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
@@ -63,12 +77,13 @@ class SubjectRequest extends FormRequest
     public function messages()
     {
         return [
-            'track_id.exists' => 'المسار المحدد غير موجود.',
+            // 'track_id.exists' => 'المسار المحدد غير موجود.',
             'subject_type_id.required' => 'نوع المساق مطلوب.',
             'subject_type_id.in' => 'نوع المساق المحدد غير موجود.',
             'title.required' => 'عنوان المساق مطلوب.',
             'title.string' => 'عنوان المساق يجب أن يكون نصًا.',
             'title.max' => 'عنوان المساق لا يمكن أن يتجاوز 255 حرفًا.',
+            'sub_title.required' => 'العنوان الفرعي مطلوب لهذا النوع من المساق.',
             'sub_title.string' => 'العنوان الفرعي يجب أن يكون نصًا.',
             'sub_title.max' => 'العنوان الفرعي لا يمكن أن يتجاوز 255 حرفًا.',
 
@@ -78,8 +93,8 @@ class SubjectRequest extends FormRequest
             'surahs.*.integer' => 'السور يجب أن تكون أعدادًا صحيحة.',
             'verses.array' => 'الآيات يجب أن تكون مصفوفة.',
             'verses.*.integer' => 'الآيات يجب أن تكون أعدادًا صحيحة.',
-            'pages.array' => 'الصفحات يجب أن تكون مصفوفة.',
-            'pages.*.integer' => 'الصفحات يجب أن تكون أعدادًا صحيحة.',
+            // 'pages.array' => 'الصفحات يجب أن تكون مصفوفة.',
+            // 'pages.*.integer' => 'الصفحات يجب أن تكون أعدادًا صحيحة.',
 
             'description.string' => 'الوصف يجب أن يكون نصًا.',
             'notes.string' => 'الملاحظات يجب أن تكون نصًا.',
@@ -89,7 +104,7 @@ class SubjectRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'track_id' => 'المسار',
+            // 'track_id' => 'المسار',
             'subject_type_id' => 'نوع المساق',
             'title' => 'عنوان المساق',
             'sub_title' => 'عنوان فرعي',
