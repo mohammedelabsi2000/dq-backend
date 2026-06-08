@@ -39,12 +39,19 @@ Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
     // تم تغيير الصياغة هنا لتبدأ بكلمة واضحة 'plan-levels' لتجنب التداخل مع الـ IDs
     Route::get('plan-levels/{plan}', [LevelController::class, 'index'])->name('levels.plan.index');
 
-     Route::prefix('level-tracks/{levelTrack}/subjects')->group(function () {
-        Route::get('/',  [LevelTrackSubjectController::class, 'index']);  // جلب الكل
-        Route::post('/', [LevelTrackSubjectController::class, 'store']);  // إضافة متعددة
-        Route::put('/',  [LevelTrackSubjectController::class, 'update']); // sync كامل
-    });
- 
+    // Level Track Subjects
+    Route::get('level-tracks/{levelTrack}/subjects',          [LevelTrackSubjectController::class, 'index']);
+    Route::post('level-track-subjects',                       [LevelTrackSubjectController::class, 'store']);
     Route::get('level-track-subjects/{levelTrackSubject}',    [LevelTrackSubjectController::class, 'show']);
+    Route::put('level-track-subjects/{levelTrackSubject}',  [LevelTrackSubjectController::class, 'update']);
     Route::delete('level-track-subjects/{levelTrackSubject}', [LevelTrackSubjectController::class, 'destroy']);
+
+    //  Route::prefix('level-tracks/{levelTrack}/subjects')->group(function () {
+    //     Route::get('/',  [LevelTrackSubjectController::class, 'index']);  // جلب الكل
+    //     Route::post('/', [LevelTrackSubjectController::class, 'store']);  // إضافة متعددة
+    //     Route::put('/',  [LevelTrackSubjectController::class, 'update']); // sync كامل
+    // });
+ 
+    // Route::get('level-track-subjects/{levelTrackSubject}',    [LevelTrackSubjectController::class, 'show']);
+    // Route::delete('level-track-subjects/{levelTrackSubject}', [LevelTrackSubjectController::class, 'destroy']);
 });

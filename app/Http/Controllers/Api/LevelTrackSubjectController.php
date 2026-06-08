@@ -16,9 +16,9 @@ class LevelTrackSubjectController extends Controller
     public function index(LevelTrack $levelTrack)
     {
         $subjects = $levelTrack->levelTrackSubjects()
-                               ->with('subject')
-                               ->orderBy('order')
-                               ->get();
+            ->with('subject')
+            ->orderBy('order')
+            ->get();
 
         return $this->success(
             LevelTrackSubjectResource::collection($subjects),
@@ -27,32 +27,16 @@ class LevelTrackSubjectController extends Controller
     }
 
     // ========================
-    // POST /level-tracks/{levelTrack}/subjects
-    // إضافة عدة مساقات دفعة واحدة
+    // POST /level-track-subjects
+    // إضافة مساق واحد
     // ========================
-    public function store(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
+    public function store(LevelTrackSubjectRequest $request)
     {
-        $now = now();
-
-        $toInsert = collect($request->subjects)->map(fn($s) => [
-            'level_track_id' => $levelTrack->id,
-            'subject_id'     => $s['subject_id'],
-            'is_required'    => $s['is_required'] ?? true,
-            'order'          => $s['order'] ?? null,
-            'created_at'     => $now,
-            'updated_at'     => $now,
-        ])->toArray();
-
-        LevelTrackSubject::insert($toInsert);
-
-        $subjects = $levelTrack->levelTrackSubjects()
-                               ->with('subject')
-                               ->orderBy('order')
-                               ->get();
+        $levelTrackSubject = LevelTrackSubject::create($request->validated());
 
         return $this->success(
-            LevelTrackSubjectResource::collection($subjects),
-            'تم إضافة ' . count($toInsert) . ' مساق بنجاح',
+            new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
+            'تم إضافة المساق بنجاح',
             201
         );
     }
@@ -71,57 +55,21 @@ class LevelTrackSubjectController extends Controller
     }
 
     // ========================
-    // PUT /level-tracks/{levelTrack}/subjects
-    // sync كامل للقائمة — إضافة / تعديل / حذف
+    // PATCH /level-track-subjects/{levelTrackSubject}
+    // تعديل سجل واحد
     // ========================
-    public function update(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
+    public function update(LevelTrackSubjectRequest $request, LevelTrackSubject $levelTrackSubject)
     {
-        $incoming = collect($request->subjects);
-
-        $existing = $levelTrack->levelTrackSubjects()
-                               ->get()
-                               ->keyBy('subject_id');
-
-        $incomingIds = $incoming->pluck('subject_id')->toArray();
-        $existingIds = $existing->keys()->toArray();
-
-        $toDelete = array_diff($existingIds, $incomingIds);
-        if (!empty($toDelete)) {
-            $levelTrack->levelTrackSubjects()
-                       ->whereIn('subject_id', $toDelete)
-                       ->delete();
-        }
-
-        foreach ($incoming as $s) {
-            if ($existing->has($s['subject_id'])) {
-                $existing[$s['subject_id']]->update([
-                    'order'       => $s['order'] ?? null,
-                    'is_required' => $s['is_required'] ?? true,
-                ]);
-            } else {
-                LevelTrackSubject::create([
-                    'level_track_id' => $levelTrack->id,
-                    'subject_id'     => $s['subject_id'],
-                    'order'          => $s['order'] ?? null,
-                    'is_required'    => $s['is_required'] ?? true,
-                ]);
-            }
-        }
-
-        $subjects = $levelTrack->levelTrackSubjects()
-                               ->with('subject')
-                               ->orderBy('order')
-                               ->get();
+        $levelTrackSubject->update($request->validated());
 
         return $this->success(
-            LevelTrackSubjectResource::collection($subjects),
-            'تم تحديث المساقات بنجاح'
+            new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
+            'تم تعديل المساق بنجاح'
         );
     }
 
     // ========================
     // DELETE /level-track-subjects/{levelTrackSubject}
-    // حذف مساق واحد
     // ========================
     public function destroy(LevelTrackSubject $levelTrackSubject)
     {
