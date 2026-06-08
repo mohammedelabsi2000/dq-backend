@@ -3,49 +3,133 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LevelTrackSubjectRequest;
+use App\Http\Requests\LevelTrackCourse\LevelTrackSubjectRequest;
 use App\Http\Resources\LevelTrackSubjectResource;
 use App\Models\LevelTrack;
 use App\Models\LevelTrackSubject;
-use Illuminate\Http\JsonResponse;
 
 class LevelTrackSubjectController extends Controller
 {
-    public function index(LevelTrack $levelTrack): JsonResponse
+    // ========================
+    // GET /level-tracks/{levelTrack}/subjects
+    // ========================
+    public function index(LevelTrack $levelTrack)
     {
-        $subjects = $levelTrack->levelTrackSubjects()->with('subject')->get();
+        $subjects = $levelTrack->levelTrackSubjects()
+                               ->with('subject')
+                               ->orderBy('order')
+                               ->get();
 
-        return response()->json(LevelTrackSubjectResource::collection($subjects));
+        return $this->success(
+            LevelTrackSubjectResource::collection($subjects),
+            'بيانات المساقات'
+        );
     }
 
-    public function store(LevelTrackSubjectRequest $request): JsonResponse
+    // ========================
+    // POST /level-tracks/{levelTrack}/subjects
+    // إضافة عدة مساقات دفعة واحدة
+    // ========================
+    public function store(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
     {
-        $levelTrackSubject = LevelTrackSubject::create($request->validated());
+        $now = now();
 
-        return response()->json(
-            new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
+        $toInsert = collect($request->subjects)->map(fn($s) => [
+            'level_track_id' => $levelTrack->id,
+            'subject_id'     => $s['subject_id'],
+            'is_required'    => $s['is_required'] ?? true,
+            'order'          => $s['order'] ?? null,
+            'created_at'     => $now,
+            'updated_at'     => $now,
+        ])->toArray();
+
+        LevelTrackSubject::insert($toInsert);
+
+        $subjects = $levelTrack->levelTrackSubjects()
+                               ->with('subject')
+                               ->orderBy('order')
+                               ->get();
+
+        return $this->success(
+            LevelTrackSubjectResource::collection($subjects),
+            'تم إضافة ' . count($toInsert) . ' مساق بنجاح',
             201
         );
     }
 
-    public function show(LevelTrackSubject $levelTrackSubject): JsonResponse
+    // ========================
+    // GET /level-track-subjects/{levelTrackSubject}
+    // ========================
+    public function show(LevelTrackSubject $levelTrackSubject)
     {
         $levelTrackSubject->load('subject', 'levelTrack.level', 'levelTrack.track');
 
-        return response()->json(new LevelTrackSubjectResource($levelTrackSubject));
+        return $this->success(
+            new LevelTrackSubjectResource($levelTrackSubject),
+            'بيانات المساق'
+        );
     }
 
-    public function update(LevelTrackSubjectRequest $request, LevelTrackSubject $levelTrackSubject): JsonResponse
+    // ========================
+    // PUT /level-tracks/{levelTrack}/subjects
+    // sync كامل للقائمة — إضافة / تعديل / حذف
+    // ========================
+    public function update(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
     {
-        $levelTrackSubject->update($request->validated());
+        $incoming = collect($request->subjects);
 
-        return response()->json(new LevelTrackSubjectResource($levelTrackSubject));
+        $existing = $levelTrack->levelTrackSubjects()
+                               ->get()
+                               ->keyBy('subject_id');
+
+        $incomingIds = $incoming->pluck('subject_id')->toArray();
+        $existingIds = $existing->keys()->toArray();
+
+        $toDelete = array_diff($existingIds, $incomingIds);
+        if (!empty($toDelete)) {
+            $levelTrack->levelTrackSubjects()
+                       ->whereIn('subject_id', $toDelete)
+                       ->delete();
+        }
+
+        foreach ($incoming as $s) {
+            if ($existing->has($s['subject_id'])) {
+                $existing[$s['subject_id']]->update([
+                    'order'       => $s['order'] ?? null,
+                    'is_required' => $s['is_required'] ?? true,
+                ]);
+            } else {
+                LevelTrackSubject::create([
+                    'level_track_id' => $levelTrack->id,
+                    'subject_id'     => $s['subject_id'],
+                    'order'          => $s['order'] ?? null,
+                    'is_required'    => $s['is_required'] ?? true,
+                ]);
+            }
+        }
+
+        $subjects = $levelTrack->levelTrackSubjects()
+                               ->with('subject')
+                               ->orderBy('order')
+                               ->get();
+
+        return $this->success(
+            LevelTrackSubjectResource::collection($subjects),
+            'تم تحديث المساقات بنجاح'
+        );
     }
 
-    public function destroy(LevelTrackSubject $levelTrackSubject): JsonResponse
+    // ========================
+    // DELETE /level-track-subjects/{levelTrackSubject}
+    // حذف مساق واحد
+    // ========================
+    public function destroy(LevelTrackSubject $levelTrackSubject)
     {
         $levelTrackSubject->delete();
 
-        return response()->json(['message' => 'تم حذف المساق من المستوى بنجاح']);
+        return $this->success(
+            null,
+            'تم حذف المساق من المسار بنجاح'
+        );
     }
 }
