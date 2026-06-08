@@ -32,7 +32,7 @@ class LevelTrackSubjectController extends Controller
     // ========================
     public function store(LevelTrackSubjectRequest $request)
     {
-        $now = now();
+        $levelTrackSubject = LevelTrackSubject::create($request->validated());
 
         return $this->success(
             new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
@@ -60,7 +60,7 @@ class LevelTrackSubjectController extends Controller
     // ========================
     public function update(LevelTrackSubjectRequest $request, LevelTrackSubject $levelTrackSubject)
     {
-        $incoming = collect($request->subjects);
+        $levelTrackSubject->update($request->validated());
 
         return $this->success(
             new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
