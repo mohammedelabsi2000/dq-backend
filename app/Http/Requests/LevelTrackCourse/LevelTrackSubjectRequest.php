@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\LevelTrackCourse;
 
-use App\Models\LevelTrackSubject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -56,31 +55,6 @@ class LevelTrackSubjectRequest extends FormRequest
         ];
     }
 
-    // منع التكرار عند الإضافة (store فقط)
-    public function withValidator($validator): void
-    {
-        if ($this->getMethod() !== 'POST') {
-            return;
-        }
-
-        $validator->after(function ($validator) {
-            $levelTrack = $this->route('levelTrack');
-
-            $alreadyAdded = LevelTrackSubject::where('level_track_id', $levelTrack->id)
-                                             ->pluck('subject_id')
-                                             ->toArray();
-
-            foreach ((array) $this->subjects as $index => $subject) {
-                if (isset($subject['subject_id']) && in_array($subject['subject_id'], $alreadyAdded)) {
-                    $validator->errors()->add(
-                        "subjects.{$index}.subject_id",
-                        'هذا المساق مضاف مسبقاً لهذا المسار'
-                    );
-                }
-            }
-        });
-    }
-
     public function attributes(): array
     {
         return [
@@ -88,7 +62,7 @@ class LevelTrackSubjectRequest extends FormRequest
             'subject_id'     => 'المساق',
             'order'          => 'الترتيب',
             'is_required'    => 'مطلوب',
-            'weight'         => 'الوزن',
+            'weight'         => '2الوزن',
         ];
     }
 
@@ -108,4 +82,8 @@ class LevelTrackSubjectRequest extends FormRequest
             'weight.max'              => 'الوزن يجب أن يكون أقل من أو يساوي 100',
         ];
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0ba45339cf5759ac8147e4cd4d03082059d35df9
