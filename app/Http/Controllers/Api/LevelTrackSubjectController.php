@@ -16,15 +16,9 @@ class LevelTrackSubjectController extends Controller
     public function index(LevelTrack $levelTrack)
     {
         $subjects = $levelTrack->levelTrackSubjects()
-<<<<<<< Updated upstream
-            ->with('subject')
-            ->orderBy('order')
-            ->get();
-=======
                                ->with('subject')
                                ->orderBy('order')
                                ->get();
->>>>>>> Stashed changes
 
         return $this->success(
             LevelTrackSubjectResource::collection($subjects),
@@ -33,25 +27,13 @@ class LevelTrackSubjectController extends Controller
     }
 
     // ========================
-<<<<<<< Updated upstream
-    // POST /level-track-subjects
-    // إضافة مساق واحد
-    // ========================
-    public function store(LevelTrackSubjectRequest $request)
-=======
     // POST /level-tracks/{levelTrack}/subjects
     // إضافة عدة مساقات دفعة واحدة
     // ========================
     public function store(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
->>>>>>> Stashed changes
     {
         $now = now();
 
-<<<<<<< Updated upstream
-        return $this->success(
-            new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
-            'تم إضافة المساق بنجاح',
-=======
         $toInsert = collect($request->subjects)->map(fn($s) => [
             'level_track_id' => $levelTrack->id,
             'subject_id'     => $s['subject_id'],
@@ -71,7 +53,6 @@ class LevelTrackSubjectController extends Controller
         return $this->success(
             LevelTrackSubjectResource::collection($subjects),
             'تم إضافة ' . count($toInsert) . ' مساق بنجاح',
->>>>>>> Stashed changes
             201
         );
     }
@@ -90,25 +71,13 @@ class LevelTrackSubjectController extends Controller
     }
 
     // ========================
-<<<<<<< Updated upstream
-    // PATCH /level-track-subjects/{levelTrackSubject}
-    // تعديل سجل واحد
-    // ========================
-    public function update(LevelTrackSubjectRequest $request, LevelTrackSubject $levelTrackSubject)
-=======
     // PUT /level-tracks/{levelTrack}/subjects
     // sync كامل للقائمة — إضافة / تعديل / حذف
     // ========================
     public function update(LevelTrackSubjectRequest $request, LevelTrack $levelTrack)
->>>>>>> Stashed changes
     {
         $incoming = collect($request->subjects);
 
-<<<<<<< Updated upstream
-        return $this->success(
-            new LevelTrackSubjectResource($levelTrackSubject->load('subject', 'levelTrack')),
-            'تم تعديل المساق بنجاح'
-=======
         $existing = $levelTrack->levelTrackSubjects()
                                ->get()
                                ->keyBy('subject_id');
@@ -147,16 +116,12 @@ class LevelTrackSubjectController extends Controller
         return $this->success(
             LevelTrackSubjectResource::collection($subjects),
             'تم تحديث المساقات بنجاح'
->>>>>>> Stashed changes
         );
     }
 
     // ========================
     // DELETE /level-track-subjects/{levelTrackSubject}
-<<<<<<< Updated upstream
-=======
     // حذف مساق واحد
->>>>>>> Stashed changes
     // ========================
     public function destroy(LevelTrackSubject $levelTrackSubject)
     {

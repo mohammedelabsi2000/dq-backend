@@ -84,7 +84,6 @@ class LevelTrackSubjectRequest extends FormRequest
     public function attributes(): array
     {
         return [
-<<<<<<< Updated upstream
             'level_track_id' => 'مسار المستوى',
             'subject_id'     => 'المساق',
             'order'          => 'الترتيب',
@@ -107,24 +106,6 @@ class LevelTrackSubjectRequest extends FormRequest
             'weight.numeric'          => 'الوزن يجب أن يكون رقماً',
             'weight.min'              => 'الوزن يجب أن يكون أكبر من أو يساوي صفر',
             'weight.max'              => 'الوزن يجب أن يكون أقل من أو يساوي 100',
-=======
-            'subjects'               => 'المساقات',
-            'subjects.*.subject_id'  => 'المساق',
-            'subjects.*.order'       => 'الترتيب',
-            'subjects.*.is_required' => 'مطلوب',
->>>>>>> Stashed changes
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'subjects.*.subject_id.exists'   => 'المساق المحدد غير موجود',
-            'subjects.*.subject_id.required' => 'حقل المساق مطلوب',
-            'subjects.*.subject_id.distinct' => 'لا يمكن إضافة نفس المساق مرتين في نفس الطلب',
-            'subjects.required'              => 'يجب إضافة مساق واحد على الأقل',
-            'subjects.*.order.integer'       => 'الترتيب يجب أن يكون رقماً صحيحاً',
-            'subjects.*.is_required.boolean' => 'حقل مطلوب يجب أن يكون صح أو خطأ',
         ];
     }
 }
