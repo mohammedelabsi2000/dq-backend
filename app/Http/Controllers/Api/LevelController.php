@@ -26,8 +26,8 @@ class LevelController extends Controller
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
-            'orderColumn' => 'order',
-            'orderBy' => 'asc',
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc',
             'limit' => '*',
         ]);
 
@@ -119,45 +119,117 @@ class LevelController extends Controller
      * @param Level $level
      * @return \Illuminate\Http\JsonResponse
      */
+    // public function update(UpdateLevelRequest $request, Level $level)
+    // {
+    //     $validated = $request->validated();
+    //     $tracksData = $validated['tracks'] ?? null;
+
+    //     unset($validated['tracks']);
+
+    //     $level->update($validated);
+
+    //     // تحديث المسارات إذا وجدت
+    //     if ($tracksData !== null && is_array($tracksData)) {
+    //         // حذف المسارات القديمة
+    //         $level->levelTracks()->delete();
+
+    //         // إضافة المسارات الجديدة
+    //         foreach ($tracksData as $trackData) {
+    //             $level->levelTracks()->create([
+    //                 'track_id' => $trackData['track_id'],
+    //                 'weight' => $trackData['weight'],
+    //                 'order' => $trackData['order'],
+    //             ]);
+    //         }
+    //     }
+
+    //     // تحميل العلاقات إذا طلب
+    //     if ($request->boolean('with_plan')) {
+    //         $level->load('plan');
+    //     }
+
+    //     if ($request->boolean('with_tracks')) {
+    //         $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
+    //     }
+
+    //     return $this->success(
+    //         new LevelResource($level->loadCount('levelTracks')),
+    //         'تم تحديث المستوى بنجاح'
+    //     );
+    // }
+
     public function update(UpdateLevelRequest $request, Level $level)
-    {
-        $validated = $request->validated();
-        $tracksData = $validated['tracks'] ?? null;
+{
+    $validated = $request->validated();
+    $tracksData = $validated['tracks'] ?? null;
 
-        unset($validated['tracks']);
+    unset($validated['tracks']);
 
-        $level->update($validated);
+    $level->update($validated);
 
-        // تحديث المسارات إذا وجدت
-        if ($tracksData !== null && is_array($tracksData)) {
-            // حذف المسارات القديمة
-            $level->levelTracks()->delete();
+    if ($tracksData !== null && is_array($tracksData)) {
 
-            // إضافة المسارات الجديدة
-            foreach ($tracksData as $trackData) {
+        $incoming = collect($tracksData);
+        $existing = $level->levelTracks()->get()->keyBy('track_id');
+
+        $incomingTrackIds = $incoming->pluck('track_id')->toArray();
+        $existingTrackIds = $existing->keys()->toArray();
+
+        $toDelete = array_diff($existingTrackIds, $incomingTrackIds);
+
+        // التحقق من وجود مساقات مرتبطة قبل الحذف
+        if (!empty($toDelete)) {
+            $tracksWithSubjects = $level->levelTracks()
+                ->whereIn('track_id', $toDelete)
+                ->whereHas('levelTrackSubjects')
+                ->with('track:id,name')
+                ->get();
+
+            if ($tracksWithSubjects->isNotEmpty()) {
+                $names = $tracksWithSubjects->pluck('track.name')->join('، ');
+
+                return $this->error(
+                    "لا يمكن حذف المسارات التالية لأنها تحتوي على مساقات مرتبطة: {$names}",
+                    422
+                );
+            }
+
+            $level->levelTracks()
+                  ->whereIn('track_id', $toDelete)
+                  ->delete();
+        }
+
+        // تحديث الموجود أو إضافة الجديد
+        foreach ($incoming as $trackData) {
+            if ($existing->has($trackData['track_id'])) {
+                $existing[$trackData['track_id']]->update([
+                    'weight' => $trackData['weight'],
+                    'order'  => $trackData['order'],
+                ]);
+            } else {
                 $level->levelTracks()->create([
                     'track_id' => $trackData['track_id'],
-                    'weight' => $trackData['weight'],
-                    'order' => $trackData['order'],
+                    'weight'   => $trackData['weight'],
+                    'order'    => $trackData['order'],
                 ]);
             }
         }
-
-        // تحميل العلاقات إذا طلب
-        if ($request->boolean('with_plan')) {
-            $level->load('plan');
-        }
-
-        if ($request->boolean('with_tracks')) {
-            $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
-        }
-
-        return $this->success(
-            new LevelResource($level->loadCount('levelTracks')),
-            'تم تحديث المستوى بنجاح'
-        );
     }
 
+    // تحميل العلاقات إذا طلب
+    if ($request->boolean('with_plan')) {
+        $level->load('plan');
+    }
+
+    if ($request->boolean('with_tracks')) {
+        $level->load('levelTracks.track', 'levelTracks.levelTrackSubjects.subject');
+    }
+
+    return $this->success(
+        new LevelResource($level->loadCount('levelTracks')),
+        'تم تحديث المستوى بنجاح'
+    );
+}
     /**
      * Remove the specified resource from storage.
      *

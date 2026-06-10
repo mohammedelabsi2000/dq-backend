@@ -7,29 +7,55 @@ use App\Http\Requests\LevelTrackCourse\LevelTrackSubjectRequest;
 use App\Http\Resources\LevelTrackSubjectResource;
 use App\Models\LevelTrack;
 use App\Models\LevelTrackSubject;
+use Illuminate\Http\Request;
 
 class LevelTrackSubjectController extends Controller
 {
-    // ========================
-    // GET /level-tracks/{levelTrack}/subjects
-    // ========================
-    public function index(LevelTrack $levelTrack)
+    /**
+     * Display a listing of the level track subjects.
+     *
+     * GET /level-tracks/{levelTrack}/subjects
+     *
+     * @param Request $request
+     * @param LevelTrack $levelTrack
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request, LevelTrack $levelTrack)
     {
-        $subjects = $levelTrack->levelTrackSubjects()
-            ->with('subject')
-            ->orderBy('order')
-            ->get();
+        // $this->authorize('viewAny', LevelTrackSubject::class);
 
-        return $this->success(
+        $query = $levelTrack->levelTrackSubjects();
+
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc',
+            'limit' => '*',
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $query->with('subject');
+
+        $subjects = $query->get();
+
+        return $this->successWithPagination(
             LevelTrackSubjectResource::collection($subjects),
-            'بيانات المساقات'
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
         );
     }
 
-    // ========================
-    // POST /level-track-subjects
-    // إضافة مساق واحد
-    // ========================
+    /**
+     * Store a newly created resource in storage.
+     *
+     * POST /level-track-subjects
+     *
+     * @param LevelTrackSubjectRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(LevelTrackSubjectRequest $request)
     {
         $levelTrackSubject = LevelTrackSubject::create($request->validated());
@@ -41,11 +67,19 @@ class LevelTrackSubjectController extends Controller
         );
     }
 
-    // ========================
-    // GET /level-track-subjects/{levelTrackSubject}
-    // ========================
-    public function show(LevelTrackSubject $levelTrackSubject)
+    /**
+     * Display the specified resource.
+     *
+     * GET /level-track-subjects/{levelTrackSubject}
+     *
+     * @param Request $request
+     * @param LevelTrackSubject $levelTrackSubject
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Request $request, LevelTrackSubject $levelTrackSubject)
     {
+        // $this->authorize('view', $levelTrackSubject);
+
         $levelTrackSubject->load('subject', 'levelTrack.level', 'levelTrack.track');
 
         return $this->success(
@@ -54,10 +88,15 @@ class LevelTrackSubjectController extends Controller
         );
     }
 
-    // ========================
-    // PATCH /level-track-subjects/{levelTrackSubject}
-    // تعديل سجل واحد
-    // ========================
+    /**
+     * Update the specified resource in storage.
+     *
+     * PATCH /level-track-subjects/{levelTrackSubject}
+     *
+     * @param LevelTrackSubjectRequest $request
+     * @param LevelTrackSubject $levelTrackSubject
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(LevelTrackSubjectRequest $request, LevelTrackSubject $levelTrackSubject)
     {
         $levelTrackSubject->update($request->validated());
@@ -68,11 +107,18 @@ class LevelTrackSubjectController extends Controller
         );
     }
 
-    // ========================
-    // DELETE /level-track-subjects/{levelTrackSubject}
-    // ========================
+    /**
+     * Remove the specified resource from storage.
+     *
+     * DELETE /level-track-subjects/{levelTrackSubject}
+     *
+     * @param LevelTrackSubject $levelTrackSubject
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(LevelTrackSubject $levelTrackSubject)
     {
+        // $this->authorize('delete', $levelTrackSubject);
+
         $levelTrackSubject->delete();
 
         return $this->success(

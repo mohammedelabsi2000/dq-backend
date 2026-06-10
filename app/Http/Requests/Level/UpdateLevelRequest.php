@@ -44,6 +44,7 @@ class UpdateLevelRequest extends DQFormRequest
                         return $query->where('plan_id', $planId);
                     }),
             ],
+            'weight'       => 'sometimes|required|integer|min:1',
             'period_unit'  => 'sometimes|required|in:day,week,month,year',
             'period'       => 'sometimes|required|integer|min:1',
             'min_period'   => 'nullable|integer|min:1|lte:period',
@@ -72,6 +73,8 @@ class UpdateLevelRequest extends DQFormRequest
             'order.required'       => 'حقل الترتيب مطلوب',
             'order.min'            => 'الترتيب يجب أن يكون رقماً موجباً',
             'order.unique'         => 'الترتيب مستخدم بالفعل ضمن هذه الخطة، يرجى اختيار ترتيب آخر',
+            'weight.required'      => 'حقل الوزن مطلوب',
+            'weight.min'           => 'الوزن يجب أن يكون رقماً موجباً',
             'period_unit.required' => 'حقل وحدة المدة مطلوب',
             'period_unit.in'       => 'وحدة المدة يجب أن تكون: يوم، أسبوع، شهر، أو سنة',
             'period.required'      => 'حقل المدة مطلوب',

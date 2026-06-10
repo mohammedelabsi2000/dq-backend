@@ -15,6 +15,7 @@ class LevelResource extends JsonResource
             'plan_label'   => $this->plan?->name,
             'name'         => $this->name,
             'order'        => $this->order,
+            'weight'       => $this->weight,
             'period_unit' => $this->period_unit,
             'period_unit_label' => PeriodUnit::from($this->period_unit)->label(),
             'period'       => $this->period,
@@ -25,6 +26,31 @@ class LevelResource extends JsonResource
 
             'plan'         => new PlanResource($this->whenLoaded('plan')),
             'tracks' => LevelTrackResource::collection($this->whenLoaded('levelTracks')),
+            // المسارات الفعلية لكل مستوى (بدون كيان LevelTrack)،
+            // ولكل مسار مساقاته الفعلية (بدون كيان LevelTrackSubject)
+            // 'tracks' => $this->whenLoaded('levelTracks', function () {
+            //     return $this->levelTracks
+            //         ->map(function ($levelTrack) {
+            //             $track = $levelTrack->track;
+
+            //             if (! $track) {
+            //                 return null;
+            //             }
+
+            //             // إرفاق مساقات هذا المسار داخل هذا المستوى
+            //             $track->setRelation(
+            //                 'subjects',
+            //                 $levelTrack->levelTrackSubjects
+            //                     ->map(fn ($levelTrackSubject) => $levelTrackSubject->subject)
+            //                     ->filter()
+            //                     ->values()
+            //             );
+
+            //             return new TrackResource($track);
+            //         })
+            //         ->filter()
+            //         ->values();
+            // }),
             'level_tracks_count' => $this->level_tracks_count,
         ];
     }

@@ -37,6 +37,7 @@ class StoreLevelRequest extends DQFormRequest
                     return $query->where('plan_id', $this->input('plan_id'));
                 }),
             ],
+            'weight' => 'required|integer|min:1',
             'period_unit' => 'required|in:day,week,month,year',
             'period' => 'required|integer|min:1',
             'min_period' => 'nullable|integer|min:1|lte:period',
@@ -65,6 +66,8 @@ class StoreLevelRequest extends DQFormRequest
             'order.required' => 'حقل الترتيب مطلوب',
             'order.min' => 'الترتيب يجب أن يكون رقماً موجباً',
             'order.unique' => 'الترتيب مستخدم بالفعل ضمن هذه الخطة، يرجى اختيار ترتيب آخر',
+            'weight.required' => 'حقل الوزن مطلوب',
+            'weight.min' => 'الوزن يجب أن يكون رقماً موجباً',
             'period_unit.required' => 'حقل وحدة المدة مطلوب',
             'period_unit.in' => 'وحدة المدة يجب أن تكون: يوم، أسبوع، شهر، أو سنة',
             'period.required' => 'حقل المدة مطلوب',

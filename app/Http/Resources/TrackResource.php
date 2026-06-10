@@ -13,6 +13,8 @@ class TrackResource extends JsonResource
             'id'            => $this->id,
             'name'          => $this->name,
             'notes'         => $this->notes,
+            // مساقات المسار (تُملأ من المستوى عبر LevelResource)
+            'subjects'      => SubjectResource::collection($this->whenLoaded('subjects')),
             // 'created_at'    => $this->created_at?->toDateTimeString(),
 
             // 'subjects'      => SubjectResource::collection($this->whenLoaded('subjects')),

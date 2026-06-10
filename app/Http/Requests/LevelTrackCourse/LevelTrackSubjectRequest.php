@@ -41,7 +41,7 @@ class LevelTrackSubjectRequest extends FormRequest
     private function updateRules(): array
     {
         return [
-            'level_track_id' => ['sometimes', 'exists:level_tracks,id'],
+            // 'level_track_id' => ['sometimes', 'exists:level_tracks,id'],
             'subject_id'     => [
                 'sometimes',
                 'exists:subjects,id',
@@ -82,8 +82,4 @@ class LevelTrackSubjectRequest extends FormRequest
             'weight.max'              => 'الوزن يجب أن يكون أقل من أو يساوي 100',
         ];
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 0ba45339cf5759ac8147e4cd4d03082059d35df9
