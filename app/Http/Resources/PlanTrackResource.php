@@ -15,8 +15,8 @@ class PlanTrackResource extends JsonResource
             'is_required' => $this->is_required,
             'weight' => $this->weight,
 
-            'courses' => $this->whenLoaded('courses', function () {
-                return PlanTrackCourseResource::collection($this->courses);
+            'subjects' => $this->whenLoaded('subjects', function () {
+                return PlanTrackSubjectResource::collection($this->subjects);
             }),
         ];
     }

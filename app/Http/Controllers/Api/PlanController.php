@@ -3,34 +3,47 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Plan\PlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
-use App\Models\PlanTrack;
-use App\Models\PlanTrackCourse;
-use App\Models\Track;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PlanController extends Controller
 {
-
     /**
-     * Display a listing of plans
+     * Display a listing of the plans.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        // $this->authorize('viewAny', Plan::class);
+
         $query = Plan::query();
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
+            'orderBy' => 'desc',
+            'limit' => '*',
         ]);
 
         $query = $q['query'];
         $total = $q['count'];
 
-        $plans = $query
-            ->with(['planTracks.courses.track'])
-            ->get();
+        // فلترة حسب حالة التفعيل
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_levels')) {
+            $query->with('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
+        }
+
+        $plans = $query->withCount('levels')->get();
 
         return $this->successWithPagination(
             PlanResource::collection($plans),
@@ -40,72 +53,107 @@ class PlanController extends Controller
         );
     }
 
-
     /**
-     * Store plan
+     * Store a newly created resource in storage.
+     *
+     * @param PlanRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(PlanRequest $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            // 'weight' => 'required|integer',
-            'duration_in_days' => 'required|integer',
-            'grace_period_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $plan = Plan::create($request->validated());
 
-        $plan = Plan::create($data);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_levels')) {
+            $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
+        }
 
         return $this->success(
-            new PlanResource($plan),
+            new PlanResource($plan->loadCount('levels')),
             'تم إنشاء الخطة بنجاح',
             201
         );
     }
 
-
     /**
-     * Show single plan
+     * Display the specified resource.
+     *
+     * @param Request $request
+     * @param Plan $plan
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show(Plan $plan)
+    // public function show(Request $request, Plan $plan)
+    // {
+    //     // $this->authorize('view', $plan);
+
+    //     $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
+
+    //     return $this->success(
+    //         new PlanResource($plan->loadCount('levels')),
+    //         'بيانات الخطة'
+    //     );
+    // }
+    public function show(Request $request, Plan $plan)
     {
-        $plan->load(['planTracks.courses.track']);
+        // $this->authorize('view', $plan);
+
+        // تحميل الخطة مع مستوياتها، ومسارات كل مستوى ومواده، مع أعداد العلاقات
+        $plan->load([
+            'levels' => function ($query) {
+                $query->withCount('levelTracks')
+                    ->with([
+                        'levelTracks.track',
+                        'levelTracks.levelTrackSubjects.subject',
+                    ]);
+            },
+        ])->loadCount('levels');
 
         return $this->success(
             new PlanResource($plan),
-            'success',
-            200
+            'بيانات الخطة'
         );
     }
 
-
     /**
-     * Update plan
+     * Update the specified resource in storage.
+     *
+     * @param PlanRequest $request
+     * @param Plan $plan
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Plan $plan)
+    public function update(PlanRequest $request, Plan $plan)
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            // 'weight' => 'required|integer',
-            'duration_in_days' => 'required|integer',
-            'grace_period_days' => 'nullable|integer',
-            'is_active' => 'boolean',
-        ]);
+        $plan->update($request->validated());
 
-        $plan->update($data);
+        // تحميل العلاقات إذا طلب
+        if ($request->boolean('with_levels')) {
+            $plan->load('levels.levelTracks.track', 'levels.levelTracks.levelTrackSubjects.subject');
+        }
 
         return $this->success(
-            new PlanResource($plan->fresh()),
+            new PlanResource($plan->loadCount('levels')),
             'تم تحديث الخطة بنجاح'
         );
     }
 
-
     /**
-     * Delete plan
+     * Remove the specified resource from storage.
+     *
+     * @param Plan $plan
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Plan $plan)
     {
+        // $this->authorize('delete', $plan);
+
+        // تحقق من وجود مستويات تابعة قبل الحذف
+        if ($plan->levels()->exists()) {
+            return $this->error(
+                'لا يمكن حذف الخطة لأنها تحتوي على مستويات تابعة',
+                400
+            );
+        }
+
         $plan->delete();
 
         return $this->success(
@@ -114,115 +162,47 @@ class PlanController extends Controller
         );
     }
 
-
-    /*
-    ======================================
-    Plan Setup
-    ======================================
-    */
-
     /**
-     * Get setup data
+     * Toggle the active state of the plan.
+     *
+     * @param Plan $plan
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function setup(Plan $plan)
+    public function toggleActive(Plan $plan)
     {
-        $tracks = Track::with('courses')->get();
+        $plan->update(['is_active' => !$plan->is_active]);
 
-        $plan->load('planTracks.courses.track');
-
-        return $this->success([
-            'plan' => new PlanResource($plan),
-            'tracks' => $tracks,
-            'plan_tracks' => $plan->planTracks
-        ], 'success');
+        return $this->success(
+            new PlanResource($plan),
+            $plan->is_active ? 'تم تفعيل الخطة' : 'تم تعطيل الخطة'
+        );
     }
 
-
     /**
-     * Save plan setup
+     * Reorder a set of plans.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function saveSetup(Request $request, Plan $plan)
+    public function reorder(Request $request)
     {
-        $data = $request->validate([
-            'tracks' => 'required|array'
-        ]);
+        // $this->authorize('update', Plan::class);
 
-        // حذف القديم
-        $plan->planTracks()->delete();
+        $items = $request->validate([
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.id' => ['required', 'integer', 'distinct', 'exists:plans,id'],
+            'items.*.order' => ['required', 'integer', 'min:1'],
+        ])['items'];
 
-        foreach ($data['tracks'] as $trackId => $trackData) {
-
-            $planTrack = PlanTrack::create([
-                'plan_id' => $plan->id,
-                'track_id' => $trackId,
-                'is_required' => isset($trackData['is_required']),
-                'weight' => $trackData['weight'] ?? 1
-            ]);
-
-            if (!empty($trackData['courses'])) {
-
-                foreach ($trackData['courses'] as $courseId => $courseData) {
-
-                    PlanTrackCourse::create([
-                        'plan_track_id' => $planTrack->id,
-                        'course_id' => $courseId,
-                        'is_required' => isset($courseData['is_required']),
-                        'order' => $courseData['order'] ?? 1
-                    ]);
-
-                }
-
+        DB::transaction(function () use ($items) {
+            foreach ($items as $item) {
+                Plan::whereKey($item['id'])->update(['order' => $item['order']]);
             }
-
-        }
-
-        $plan->load('planTracks.courses.track');
-
-        return $this->success(
-            new PlanResource($plan),
-            'تم حفظ إعداد الخطة بنجاح'
-        );
-    }
-
-
-    /**
-     * Show all setups
-     */
-    public function setupIndex()
-    {
-        $plans = Plan::with('planTracks.courses.track')->get();
-
-        return $this->success(
-            PlanResource::collection($plans),
-            'success'
-        );
-    }
-
-
-    /**
-     * Show one setup
-     */
-    public function showSetup(Plan $plan)
-    {
-        $plan->load('planTracks.courses.track');
-
-        return $this->success(
-            new PlanResource($plan),
-            'success'
-        );
-    }
-
-
-    /**
-     * Delete setup
-     */
-    public function deleteSetup(Plan $plan)
-    {
-        $plan->planTracks()->delete();
+        });
 
         return $this->success(
             null,
-            'تم حذف إعداد الخطة بنجاح'
+            'تم تحديث الترتيب بنجاح'
         );
     }
 }

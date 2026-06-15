@@ -2,36 +2,57 @@
 
 namespace App\Models;
 
+use App\Enums\PeriodUnit;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Plan extends Model
 {
-    protected $fillable = [
+    use SoftDeletes, HasFactory;
+
+    protected $guarded = ['id'];
+
+    /* protected $fillable = [
         'name',
-        'weight',
-        'duration_in_days',
-        'grace_period_days',
-        'is_active'
+        'description',
+        'period_unit',
+        'period',
+        'min_period',
+        'max_period',
+        'tolerance',
+        'is_active',
+    ]; */
+    protected $casts = [
+        'period_unit' => PeriodUnit::class,
     ];
 
-    // علاقة: الخطة تحتوي مسارات
-    public function planTracks()
-    {
-        return $this->hasMany(PlanTrack::class);
-    }
-public function assignments()
-{
-    return $this->hasMany(PlanAssignment::class);
-}
+    /* protected $casts = [
+        'period_unit' => 'string',
+        'period' => 'integer',
+        'min_period' => 'integer',
+        'max_period' => 'integer',
+        'tolerance' => 'integer',
+        'is_active' => 'boolean',
+    ]; */
 
-    // علاقة many-to-many مع المسارات
-    public function tracks()
+    // ========================
+    // Relations
+    // ========================
+
+    public function levels(): HasMany
     {
-        return $this->belongsToMany(
-            Track::class,
-            'plan_tracks'
-        )->withPivot('is_required','weight')
-         ->withTimestamps();
+        return $this->hasMany(Level::class, 'plan_id', 'id')->orderBy('order');
+    }
+
+    // ========================
+    // Scopes
+    // ========================
+
+    public function scopeIsActive(Builder $query)
+    {
+        return $query->where('is_active', true);
     }
 }

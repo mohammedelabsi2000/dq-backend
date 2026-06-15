@@ -5,18 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PlanTrackCourse extends Model
+class PlanTrackSubject extends Model
 {
     protected $fillable = [
         'plan_track_id',
-        'course_id',
+        'subject_id',
         'order',
         'is_required'
     ];
 
-    public function course()
+    public function subject()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Subject::class);
     }
 
     public function planTrack()

@@ -50,7 +50,7 @@ class ConstantController extends Controller
             $query = $q['query'];
             $total = $q['count'];
 
-            $constants = $query->get(['id', 'name']);
+            $constants = $query->get(['id', 'name', 'const_key']);
             return $this->successWithPagination(
                 $constants,
                 ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],

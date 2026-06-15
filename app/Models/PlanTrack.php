@@ -24,11 +24,11 @@ class PlanTrack extends Model
         return $this->belongsTo(Track::class);
     }
 
-    public function courses()
+    public function subjects()
     {
         return $this->belongsToMany(
-            Course::class,
-            'plan_track_courses'
+            Subject::class,
+            'plan_track_subjects'
         )->withPivot('order','is_required')
          ->withTimestamps();
     }

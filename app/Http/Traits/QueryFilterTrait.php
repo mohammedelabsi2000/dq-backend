@@ -63,6 +63,7 @@ trait QueryFilterTrait
             'skip' => $skip,
             'limit' => $limit,
             'count' => $count,
+            'total' => $count, // for backward compatibility
         ];
     }
 

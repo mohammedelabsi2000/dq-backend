@@ -55,6 +55,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('centers', CenterController::class);
     Route::apiResource('halaqas', HalaqaController::class);
 
+
+
     // Students management
     Route::apiResource('students', StudentController::class);
     Route::prefix('students')->group(function () {

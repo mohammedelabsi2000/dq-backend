@@ -3,74 +3,63 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Track\TrackRequest;
 use App\Http\Resources\TrackResource;
 use App\Models\Track;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TrackController extends Controller
 {
-
-    public function index(Request $request)
+    public function index(): JsonResponse
     {
         $query = Track::query();
-        $perPage = $request->integer('per_page', 15);
 
-        $tracks = $query->latest()->paginate($perPage);
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'limit' => '*',
+        ]);
 
-        return $this->success(
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $tracks = $query->withCount('subjects')->get();
+
+        return $this->successWithPagination(
             TrackResource::collection($tracks),
-            'تم جلب المسارات بنجاح',
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
             200
         );
     }
 
-    public function store(Request $request)
+    public function store(TrackRequest $request): JsonResponse
     {
-        $request->validate(['name' => 'required']);
+        $data = $request->validated();
+        $track = Track::create($data);
 
-        $track = Track::create($request->all());
-
-        return $this->success(
-            new TrackResource($track),
-            'تم إنشاء المسار',
-            201
-        );
+        return $this->success(new TrackResource($track), 'تم إنشاء المسار بنجاح', 201);
     }
 
-    public function show(Track $track)
+    public function show(Track $track): JsonResponse
     {
-        return $this->success(
-            new TrackResource($track),
-            'تم جلب المسار',
-            200
-        );
+        $track->load('subjects');
+
+        return $this->success(new TrackResource($track), 'تم جلب المسار بنجاح');
     }
 
-    public function update(Request $request, Track $track)
+    public function update(TrackRequest $request, Track $track): JsonResponse
     {
-        $request->validate(['name' => 'required']);
+        $data = $request->validated();
+        $track->update($data);
 
-        $track->update($request->all());
-
-        return $this->success(
-            new TrackResource($track->fresh()),
-            'تم التعديل',
-            200
-        );
+        return $this->success(new TrackResource($track), 'تم تحديث بيانات المسار بنجاح');
     }
 
-
-    /**
-     * Remove the specified track.
-     */
-    public function destroy(Track $track)
+    public function destroy(Track $track): JsonResponse
     {
         $track->delete();
-
-        return $this->success(
-            null,
-            'تم الحذف',
-            200
-        );
+        return $this->success(null, 'تم حذف المسار بنجاح');
     }
 }
