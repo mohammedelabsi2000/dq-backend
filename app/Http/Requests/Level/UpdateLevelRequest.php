@@ -15,8 +15,8 @@ class UpdateLevelRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return true;
-        // return $this->user()->can('update', Level::class);
+        // return $this->user()->hasPermissionTo('levels.update');
+        return $this->user()->can('update', $this->route('level'));
     }
 
     /**

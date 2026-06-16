@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Track;
 
+use App\Models\Track;
 use Illuminate\Foundation\Http\FormRequest;
 use Override;
 
@@ -9,6 +10,14 @@ class TrackRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        $method = $this->getMethod();
+        if ($method === 'POST') {
+            return $this->user()->can('create', Track::class);
+            // return $this->user()->hasPermissionTo('tracks.create');
+        } elseif (in_array($method, ['PUT', 'PATCH'])) {
+            return $this->user()->can('update', $this->route('track'));
+            // return $this->user()->hasPermissionTo('tracks.update');
+        }
         return true;
     }
 

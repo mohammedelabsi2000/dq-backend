@@ -13,6 +13,8 @@ class TrackController extends Controller
 {
     public function index(): JsonResponse
     {
+        $this->authorize('viewAny', Track::class);
+
         $query = Track::query();
 
         $q = $this->applyFilters($query, [
@@ -44,6 +46,8 @@ class TrackController extends Controller
 
     public function show(Track $track): JsonResponse
     {
+        $this->authorize('view', $track);
+
         $track->load('subjects');
 
         return $this->success(new TrackResource($track), 'تم جلب المسار بنجاح');
@@ -59,6 +63,8 @@ class TrackController extends Controller
 
     public function destroy(Track $track): JsonResponse
     {
+        $this->authorize('delete', $track);
+
         $track->delete();
         return $this->success(null, 'تم حذف المسار بنجاح');
     }
