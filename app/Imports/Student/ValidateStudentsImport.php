@@ -59,10 +59,13 @@ class ValidateStudentsImport implements WithHeadingRow, ToCollection
             ]);
 
             if ($validator->fails()) {
+                $message = 'خطأ في بيانات الطالب: ' . ($row[$this->getKey('name')] ?? 'غير معروف') . ' صف رقم ' . ($index + 2);
+                $errorMessages = $validator->errors()->all();
+                $errorMessages[0] = $message . ' - ' . $errorMessages[0];
                 $this->errors = [
                     // 'row' => $index + 2,
-                    'message' => 'خطأ في بيانات الطالب: ' . ($row[$this->getKey('name')] ?? 'غير معروف') . ' صف رقم ' . ($index + 2),
-                    'errors' => $validator->errors()->all(),
+                    'message' => $message,
+                    'errors' => $errorMessages,
                     // 'values' => $row,
                 ];
                 return;
