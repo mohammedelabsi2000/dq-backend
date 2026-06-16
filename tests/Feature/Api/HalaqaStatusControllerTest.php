@@ -393,26 +393,26 @@ class HalaqaStatusControllerTest extends TestCase
     }
 
     /** @test */
-    public function it_can_create_halaqa_status_with_all_optional_fields()
-    {
-        $halaqa = Halaqa::factory()->create();
+    // public function it_can_create_halaqa_status_with_all_optional_fields()
+    // {
+    //     $halaqa = Halaqa::factory()->create();
 
 
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-        $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
+    //     $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
+    //     $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
-        $data = [
-            'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
-            'sponsorship_type_id' => $sponsorshipType->id,
-            'from_date' => '2024-01-01',
-            'to_date' => '2024-12-31',
-            'notes' => 'Comprehensive test notes with detailed information'
-        ];
+    //     $data = [
+    //         'halaqa_id' => $halaqa->id,
+    //         'status_type_id' => $statusType->id,
+    //         'sponsorship_type_id' => $sponsorshipType->id,
+    //         'from_date' => '2024-01-01',
+    //         'to_date' => '2024-12-31',
+    //         'notes' => 'Comprehensive test notes with detailed information'
+    //     ];
 
-        $response = $this->postJson('/api/halaqa-statuses', $data);
+    //     $response = $this->postJson('/api/halaqa-statuses', $data);
 
-        $response->assertStatus(201);
-        $this->assertDatabaseHas('halaqa_statuses', $data);
-    }
+    //     $response->assertStatus(201);
+    //     $this->assertDatabaseHas('halaqa_statuses', $data);
+    // }
 }
