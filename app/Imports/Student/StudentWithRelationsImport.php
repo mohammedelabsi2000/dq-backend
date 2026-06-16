@@ -204,13 +204,13 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         if ($newData['surah']) {
             $Surah = Surah::where('name_ar', $newData['surah'])->first();
             if (!$Surah) {
-                $this->addToFailedRows($row, 'السورة غير موجودة في النظام');
+                $this->addToFailedRows($row, 'السورة(' . $newData['surah'] . ') غير موجودة في النظام');
                 return null;
             }
             $data['surah_id'] = $Surah->id;
             $ayah = $newData['ayah'];
             if ($ayah && $ayah > $Surah->verses_count) {
-                $this->addToFailedRows($row, 'الآية غير موجودة في السورة المحددة');
+                $this->addToFailedRows($row, 'الآية(' . $newData['ayah'] . ') غير موجودة في السورة(' . $newData['surah'] . ') المحددة');
                 return null;
             } elseif ($ayah) {
                 $data['end_aya'] = $ayah;
