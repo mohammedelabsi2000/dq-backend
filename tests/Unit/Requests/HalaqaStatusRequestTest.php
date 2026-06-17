@@ -87,7 +87,7 @@ class HalaqaStatusRequestTest extends TestCase
         $this->assertEquals('يجب اختيار الحلقة.', $messages['halaqa_id.required']);
         $this->assertEquals('الحلقة المحددة غير موجودة.', $messages['halaqa_id.exists']);
         $this->assertEquals('نوع حالة الحلقة غير صالح.', $messages['status_type_id.in']);
-        $this->assertEquals(' غير صالح.', $messages['sponsorship_type_id.in']);
+        $this->assertEquals('نوع الكفالة غير صالح.', $messages['sponsorship_type_id.in']);
         $this->assertEquals('تاريخ البداية مطلوب.', $messages['from_date.required']);
         $this->assertEquals('تاريخ البداية يجب أن يكون تاريخاً صحيحاً.', $messages['from_date.date']);
         $this->assertEquals('تاريخ النهاية يجب أن يكون تاريخ صحيح.', $messages['to_date.date']);
