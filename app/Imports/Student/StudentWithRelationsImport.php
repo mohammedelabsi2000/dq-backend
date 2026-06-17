@@ -3,7 +3,6 @@
 namespace App\Imports\Student;
 
 use App\Enums\HalaqaReferenceType;
-use App\Imports\Student\Concerns\HasColumnMap;
 use App\Models\Branch;
 use App\Models\Center;
 use App\Models\Constant;
@@ -18,73 +17,70 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\IdQueryServices;
 use App\Services\UserRoleService;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithLimit;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Concerns\Importable;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimit */
+class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue, WithChunkReading/* , WithLimit */
 {
-    use HasColumnMap;
-    protected Request $request;
-    public array $headings = [];
-    public array $failedRows = [];
-    public array $errors = [];
-    private $notes = 'تم الإنشاء من خلال استيراد البيانات. يرجى مراجعة البيانات والتأكد من صحتها.';
-    private IdQueryServices $idQueryServices;
+    use Queueable, Importable;
 
-    public function __construct(Request $request)
+    private $notes = 'تم الإنشاء من خلال استيراد البيانات. يرجى مراجعة البيانات والتأكد من صحتها.';
+    private array $map = [
+        'الفرع' => 'branch',
+        'المحلية' => 'region',
+        'المسجد/ المركز' => 'mosque',
+        'اسم الطالب رباعيًا' => 'name',
+        'رقم هوية الطالب' => 'student_identity',
+        'تاريخ الميلاد' => 'dob',
+        'نوع الكفالة' => 'sponsor_type',
+        'جهة الكفالة' => 'sponsor_entity',
+        'اسم المعلم رباعيًا' => 'teacher_name',
+        'رقم هوية المعلم' => 'teacher_identity',
+        'عدد أجزاء الحفظ' => 'hifz_parts',
+        'السورة' => 'surah',
+        'الاية' => 'ayah',
+        'عدد أجزاء السرد' => 'recitation_parts',
+        'السرد من' => 'recitation_from',
+        'السرد إلى' => 'recitation_to',
+        'الحفظ من' => 'hifz_from',
+        'الحفظ إلى' => 'hifz_to',
+    ];
+
+    public function __construct(private int $userId)
     {
-        $this->request = $request;
-        $this->idQueryServices = new IdQueryServices();
     }
 
-    /* public function limit(): int
+    public function __serialize()
     {
-        return 240; // عدد الصفوف
-    } */
+        return [
+            'userId' => $this->userId,
+            'notes' => $this->notes,
+        ];
+    }
 
-    /**
-     * @param array $row
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
-     */
+    public function __unserialize(array $data): void
+    {
+        $this->userId = $data['userId'] ?? null;
+        $this->notes = $data['notes'] ?? 'تم الإنشاء من خلال استيراد البيانات. يرجى مراجعة البيانات والتأكد من صحتها.';
+    }
+
+    public function chunkSize(): int
+    {
+        return 500;
+    }
+
     public function model(array $row)
     {
-        if (empty($this->headings)) {
-            $this->headings = array_keys($row);
-            if (!in_array('الأخطاء', $this->headings)) {
-                $this->headings[] = 'الأخطاء';
-            }
-        }
-
         $newData = [];
         foreach ($row as $key => $value) {
-            $newKey = $this->map[$key] ?? $key; // لو ما في mapping خليه زي ما هو
+            $newKey = $this->map[$key] ?? $key;
             $newData[$newKey] = $value;
         }
-
-        /* if (!$newData['branch']) {
-            $this->addToFailedRows($row, 'اسم الفرع مطلوب');
-            return null; // ما في فرع، ما نقدر نكمل
-        }
-        if (!$newData['region']) {
-            $this->addToFailedRows($row, 'اسم المحلية مطلوب');
-            return null; // ما في محلية، ما نقدر نكمل
-        }
-        if (!$newData['mosque']) {
-            $this->addToFailedRows($row, 'اسم المسجد/المركز مطلوب');
-            return null; // ما في مسجد، ما نقدر نكمل
-        }
-        if (!$newData['teacher_identity']) {
-            $this->addToFailedRows($row, 'رقم هوية المعلم مطلوب');
-            return null; // ما في معلم، ما نقدر نكمل
-        }
-        if (!$newData['student_identity']) {
-            $this->addToFailedRows($row, 'رقم هوية الطالب مطلوب');
-            return null; // ما في هوية للطالب، ما نقدر نكمل
-        } */
 
         $branch = $this->addBranch($newData['branch']);
         $region = $this->addRegion($newData['region'], $branch);
@@ -92,29 +88,26 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         $center = $this->addCenter($newData['mosque'], $region, $mosque);
 
         try {
-            $user = $this->idQueryServices->firstOrCreateUser($newData['teacher_identity'], ['mosque_id' => $mosque->id]);
+            $idQueryServices = new IdQueryServices();
+            $user = $idQueryServices->firstOrCreateUser($newData['teacher_identity'], ['mosque_id' => $mosque->id]);
         } catch (\Throwable $th) {
             $this->addToFailedRows($row, 'خطأ في إنشاء أو تحديث المستخدم المرتبط بالمعلم: ' . $th->getMessage());
             return null;
         }
+
+
         $halaqa = $this->addHalaqa($user->full_name . ' - ' . $newData['mosque'], $center);
 
         $this->assignHalaqa($user, $halaqa);
 
-        // Submit for approval if current user is available and user was just created
-        $currentUser = $this->request->get('user');
+        $currentUser = User::find($this->userId);
         if ($currentUser && $user->wasRecentlyCreated) {
             try {
                 $user->submitForApproval($currentUser, "طلب إنشاء حساب معلم للحلقة: {$halaqa->name} من خلال استيراد البيانات");
             } catch (\Throwable $th) {
-                // Log error but don't fail the import
-                // In a real implementation, you might want to log this
+                //
             }
         }
-
-        // $guardian_type_id = $this->firstOrCreateConstant('guardian_type', 'محفظ', $this->notes)->id;
-
-
 
         $student = $this->firstOrCreateStudent($row, $newData, $mosque);
 
@@ -139,13 +132,11 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return null;
     }
 
-    /**
-     * Summary of firstOrCreateConstant
-     * @param string $constant_type
-     * @param string $name
-     * @param string|null $notes
-     * @return Constant|\Illuminate\Database\Eloquent\Model
-     */
+    public function addToFailedRows(array $row, string $errorMessage)
+    {
+        throw new \InvalidArgumentException('يوجد خطأ في البيانات المدخلة' . ' ' . $errorMessage);
+    }
+
     public function firstOrCreateConstant(string $constant_type, string $name, ?string $notes = null)
     {
         $constant_type_id = ConstantType::firstOrCreate(
@@ -161,12 +152,6 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $constant;
     }
 
-    /**
-     * First or create student by identity
-     * @param array $row
-     * @param array $newData
-     * @param Mosque $mosque
-     */
     public function firstOrCreateStudent(array $row, array $newData, Mosque $mosque)
     {
         $guardian_type_id = $this->firstOrCreateConstant('guardian_type', 'بنفسه', $this->notes)->id;
@@ -174,18 +159,17 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         $identity = $newData['student_identity'];
 
         try {
-            $user = $this->idQueryServices->firstOrCreateUser($identity, ['mosque_id' => $mosque->id]);
+            $idQueryServices = new IdQueryServices();
+            $user = $idQueryServices->firstOrCreateUser($identity, ['mosque_id' => $mosque->id]);
 
-            // Submit for approval if current user is available and user was just created
-            $currentUser = $this->request->get('user');
+            $currentUser = User::find($this->userId);
             if ($currentUser && $user->wasRecentlyCreated) {
                 try {
                     $studentName = $newData['name'] ?? 'الطالب';
                     $studentName = trim($studentName) ?: 'الطالب';
                     $user->submitForApproval($currentUser, "طلب إنشاء حساب ولي أمر للطالب: {$studentName} من خلال استيراد البيانات");
                 } catch (\Throwable $th) {
-                    // Log error but don't fail the import
-                    // In a real implementation, you might want to log this
+                    //
                 }
             }
         } catch (\Throwable $th) {
@@ -204,13 +188,13 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         if ($newData['surah']) {
             $Surah = Surah::where('name_ar', $newData['surah'])->first();
             if (!$Surah) {
-                $this->addToFailedRows($row, 'السورة غير موجودة في النظام');
+                $this->addToFailedRows($row, 'السورة(' . $newData['surah'] . ') غير موجودة في النظام');
                 return null;
             }
             $data['surah_id'] = $Surah->id;
             $ayah = $newData['ayah'];
             if ($ayah && $ayah > $Surah->verses_count) {
-                $this->addToFailedRows($row, 'الآية غير موجودة في السورة المحددة');
+                $this->addToFailedRows($row, 'الآية(' . $newData['ayah'] . ') غير موجودة في السورة(' . $newData['surah'] . ') المحددة');
                 return null;
             } elseif ($ayah) {
                 $data['end_aya'] = $ayah;
@@ -253,13 +237,6 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $student;
     }
 
-    /**
-     * First or create user by identity
-     * @param array $row
-     * @param int $identity
-     * @param int $mosque_id
-     * @return User|\Illuminate\Database\Eloquent\Model
-     */
     public function firstOrCreateUser(array $row, int $identity, int $mosque_id): User
     {
         $user = User::where('identity', $identity)->first();
@@ -292,19 +269,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $user;
     }
 
-    private function addToFailedRows(array $row, string $errorMessage)
-    {
-        throw new \InvalidArgumentException('يوجد خطأ في البيانات المدخلة' . ' ' . $errorMessage);
-        $this->failedRows[] = $row;
-        $this->failedRows[count($this->failedRows) - 1]['الأخطاء'] = $errorMessage;
-    }
-
-    /**
-     * Add a new branch
-     * @param string $branch_name
-     * @return Branch
-     */
-    private function addBranch(string $branch_name)
+    public function addBranch(string $branch_name)
     {
         $branch = Branch::firstOrCreate([
             'name' => $branch_name,
@@ -315,13 +280,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $branch;
     }
 
-    /**
-     * Add a new region
-     * @param string $region_name
-     * @param Branch $branch
-     * @return Region
-     */
-    private function addRegion(string $region_name, Branch $branch)
+    public function addRegion(string $region_name, Branch $branch)
     {
         $region = Region::firstOrCreate([
             'name' => $region_name,
@@ -333,13 +292,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $region;
     }
 
-    /**
-     * Add a new mosque
-     * @param string $mosque_name
-     * @param Region $region
-     * @return Mosque
-     */
-    private function addMosque(string $mosque_name, Region $region)
+    public function addMosque(string $mosque_name, Region $region)
     {
         $mosque = Mosque::firstOrCreate([
             'name' => $mosque_name,
@@ -351,14 +304,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $mosque;
     }
 
-    /**
-     * Add a new center
-     * @param string $center_name
-     * @param Region $region
-     * @param Mosque $mosque
-     * @return Center
-     */
-    private function addCenter(string $center_name, Region $region, Mosque $mosque)
+    public function addCenter(string $center_name, Region $region, Mosque $mosque)
     {
         $center = Center::firstOrCreate([
             'name' => $center_name,
@@ -371,13 +317,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
         return $center;
     }
 
-    /**
-     * Add a new halaqa
-     * @param string $halaqa_name
-     * @param Center $center
-     * @return Halaqa
-     */
-    private function addHalaqa(string $halaqa_name, Center $center)
+    public function addHalaqa(string $halaqa_name, Center $center)
     {
         $halaqa_type_id = $this->firstOrCreateConstant('halaqa_type', 'حفظ', $this->notes)->id;
 
@@ -392,14 +332,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow/* , WithLimi
 
         return $halaqa;
     }
-
-    /**
-     * Assign halaqa to teacher user
-     * @param User $user
-     * @param Halaqa $halaqa
-     * @return void
-     */
-    private function assignHalaqa(User $user, Halaqa $halaqa)
+    public function assignHalaqa(User $user, Halaqa $halaqa)
     {
         $role = Role::firstOrCreate(['name' => 'معلم', 'guard_name' => 'sanctum'], ['notes' => $this->notes]);
 
