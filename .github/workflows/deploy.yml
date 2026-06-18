@@ -35,22 +35,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-docker-${{ hashFiles('docker/Dockerfile.dev', 'composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
-
       - name: Build app image with cache
-        run: |
-          docker buildx build \
-            --file docker/Dockerfile.dev \
-            --tag dq-tahfiz-api-app:latest \
-            --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
-            --load .
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.dev
+          tags: dq-tahfiz-api-app:latest
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Start containers
         run: |
@@ -69,12 +62,6 @@ jobs:
       - name: Run tests
         run: |
           docker compose exec -T app php artisan test
-
-      - name: Move cache
-        if: always()
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
 
       - name: Cleanup
         if: always()
@@ -100,13 +87,13 @@ jobs:
           port: 22
           script: |
             cd ${{ secrets.APP_PATH }}
-            chmod -R 775 storage bootstrap/cache
-            chmod -R 775 storage storage
+            sudo chmod -R 775 storage bootstrap/cache
+            sudo chmod -R 775 storage storage
             git pull origin ${{ github.ref_name }}
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            chmod -R 775 storage bootstrap/cache
+            sudo chmod -R 775 storage bootstrap/cache
             php artisan queue:restart
