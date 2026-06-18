@@ -22,6 +22,7 @@ class HalaqaControllerTest extends TestCase
     protected Mosque $mosque;
     protected Center $center;
     protected int $typeId;
+    protected int $statusTypeId;
 
     protected function setUp(): void
     {
@@ -211,6 +212,7 @@ class HalaqaControllerTest extends TestCase
                 'reference_id'   => $this->center->id,
                 'reference_type' => HalaqaReferenceType::Center->value,
                 'type_id'        => $this->typeId,
+                'status_type_id' => $this->statusTypeId,
             ]);
 
         $response->assertStatus(201)
@@ -231,6 +233,7 @@ class HalaqaControllerTest extends TestCase
                 'reference_id'   => $this->region->id,
                 'reference_type' => HalaqaReferenceType::Region->value,
                 'type_id'        => $this->typeId,
+                'status_type_id' => $this->statusTypeId,
             ]);
 
         $response->assertStatus(201);
@@ -319,6 +322,7 @@ class HalaqaControllerTest extends TestCase
                 'name'           => 'الاسم الجديد',
                 'center_id'      => $this->center->id, // استخدم center_id ليتم معالجته في prepareForValidation
                 'type_id'        => $halaqa->type_id,
+                'status_type_id' => $this->statusTypeId,
             ]);
 
         $response->assertStatus(200)
@@ -425,6 +429,8 @@ class HalaqaControllerTest extends TestCase
         $this->seed(\Database\Seeders\ConstantTypeSeeder::class);
         $type = \App\Models\ConstantType::where('name', 'halaqa_types')->first();
         $this->typeId = $type->constants()->first()->id;
+        $statusType = \App\Models\ConstantType::where('name', 'status_type')->first();
+        $this->statusTypeId = $statusType->constants()->first()->id;
 
         $this->branch = Branch::factory()->create();
         $this->region = Region::factory()->create(['branch_id' => $this->branch->id]);
