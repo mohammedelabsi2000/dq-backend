@@ -154,6 +154,10 @@ class HalaqaRequest extends DQFormRequest
                 'required',
                 Rule::in(ConstantHelper::getConstantIdsByType('halaqa_types')),
             ],
+            'status_type_id' => [
+                'required',
+                Rule::in(ConstantHelper::getConstantIdsByType('status_type')),
+            ],
 
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date',],

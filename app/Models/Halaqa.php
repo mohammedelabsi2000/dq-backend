@@ -92,7 +92,7 @@ class Halaqa extends Model
 
     public function lastStatus()
     {
-        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('from_date');
+        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('from_date')->with(['statusType', 'sponsorshipType']);
     }
 
     /**
