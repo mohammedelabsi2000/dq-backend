@@ -20,7 +20,7 @@ class LevelController extends Controller
      */
     public function index(Request $request)
     {
-        // $this->authorize('viewAny', Level::class);
+        $this->authorize('viewAny', Level::class);
 
         $query = Level::query();
 
@@ -160,7 +160,7 @@ class LevelController extends Controller
 
     public function update(UpdateLevelRequest $request, Level $level)
 {
-    $validated = $request->validated();
+        $validated = $request->validated();
     $tracksData = $validated['tracks'] ?? null;
 
     unset($validated['tracks']);
@@ -264,7 +264,7 @@ class LevelController extends Controller
      */
     public function reorder(Request $request)
     {
-        // $this->authorize('update', Level::class);
+        $this->authorize('reorder', Level::class);
 
         $items = $request->validate([
             'items' => ['required', 'array', 'min:1'],

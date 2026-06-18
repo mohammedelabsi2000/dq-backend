@@ -137,12 +137,6 @@ class StudentController extends Controller
         );
     }
 
-    /**
-     * Import students from an Excel file.
-     *
-     * @param  \App\Http\Requests\Student\ImportStudentRequest  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function import(ImportStudentRequest $request)
     {
         $this->authorize('create', Student::class);
@@ -190,9 +184,6 @@ class StudentController extends Controller
             );
         }
 
-        // Extend the maximum execution time to 3 minutes to allow for large imports
-        set_time_limit(180);
-
         $import = new ValidateStudentsImport($request);
         Excel::import($import, $request->file);
 
@@ -206,38 +197,13 @@ class StudentController extends Controller
 
 
         try {
-            $requestWithUser = $request->all();
-            $requestWithUser['user'] = auth()->user();
-            $import = new StudentWithRelationsImport(new \Illuminate\Http\Request($requestWithUser));
-            Excel::import($import, $request->file);
+            $userId =  auth()->id();
+            $filePath = $request->file('file')->storeAs('imports', 'students-with-relations-' . now()->timestamp . '.xlsx', 'public');
+            $filePath = public_path('storage/' . $filePath);
+            (new StudentWithRelationsImport($userId))->queue($filePath);
         } catch (\Throwable $th) {
             return $this->error($th->getMessage(), 422);
         }
-
-        // إذا في أخطاء في الصفوف نرجعها في ملف إكسل
-        /* if (!empty($import->failedRows)) {
-
-            $fileName = 'failed-rows-' . now()->timestamp . '.xlsx';
-            $faledRowsExport = new FailedRowsExport($import->failedRows, $import->headings);
-
-            Excel::store(
-                $faledRowsExport,
-                $fileName,
-                'public'
-            );
-
-            Excel::download(
-                $faledRowsExport,
-                $fileName,
-                \Maatwebsite\Excel\Excel::XLSX
-            );
-
-            return $this->success(
-                ['file_url' => asset('storage/' . $fileName)],
-                'تم استيراد البيانات بنجاح لكن في بعض الصفوف فيها أخطاء. تم توفير ملف للأخطاء.',
-            );
-
-        } */
 
         return $this->success(
             null,

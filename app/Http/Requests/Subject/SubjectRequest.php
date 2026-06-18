@@ -5,6 +5,7 @@ namespace App\Http\Requests\Subject;
 use App\Enums\SubjectType;
 use App\Helpers\ConstantHelper;
 use App\Models\Constant;
+use App\Models\Subject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Override;
@@ -13,6 +14,14 @@ class SubjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        $method = $this->getMethod();
+        if ($method === 'POST') {
+            // return $this->user()->hasPermissionTo('subjects.create');
+            return $this->user()->can('create', Subject::class);
+        } elseif (in_array($method, ['PUT', 'PATCH'])) {
+            // return $this->user()->hasPermissionTo('subjects.update');
+            return $this->user()->can('update', $this->route('subject'));
+        }
         return true;
     }
 

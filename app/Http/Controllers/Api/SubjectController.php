@@ -13,6 +13,8 @@ class SubjectController extends Controller
 {
     public function index(): JsonResponse
     {
+        $this->authorize('viewAny', Subject::class);
+
         $query = Subject::query();
 
         $q = $this->applyFilters($query, [
@@ -56,6 +58,8 @@ class SubjectController extends Controller
 
     public function show(Subject $subject): JsonResponse
     {
+        $this->authorize('view', $subject);
+
         $subject->load('track');
 
         return $this->success(new SubjectResource($subject));
@@ -85,6 +89,8 @@ class SubjectController extends Controller
 
     public function destroy(Subject $subject): JsonResponse
     {
+        $this->authorize('delete', $subject);
+
         $subject->delete();
 
         return $this->success(null, 'تم حذف المساق بنجاح', 200);

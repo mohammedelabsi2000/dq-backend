@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\LevelTrackCourse;
 
+use App\Models\LevelTrackSubject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,6 +10,14 @@ class LevelTrackSubjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        $method = $this->getMethod();
+        if ($method === 'POST') {
+            // return $this->user()->hasPermissionTo('level_track_subjects.create');
+            return $this->user()->can('create', LevelTrackSubject::class);
+        } elseif (in_array($method, ['PUT', 'PATCH'])) {
+            // return $this->user()->hasPermissionTo('level_track_subjects.update');
+            return $this->user()->can('update', $this->route('levelTrackSubject'));
+        }
         return true;
     }
 
