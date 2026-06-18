@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Halaqa\HalaqaRequest;
 use App\Http\Resources\HalaqaResource;
 use App\Models\Halaqa;
+use App\Models\HalaqaStatus;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
@@ -72,7 +73,7 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type', 'students', 'supervisors.user'])->get();
+        $halaqas = $query->with(['reference', 'type', 'students', 'supervisors.user', 'lastStatus'])->get();
 
         return $this->successWithPagination(
             HalaqaResource::collection($halaqas),
@@ -91,8 +92,26 @@ class HalaqaController extends Controller
     public function store(HalaqaRequest $request)
     {
         // $halaqa = Halaqa::create($request->validated());
+        $halaqaData = $request->validated();
+        $halaqaStatusData = [
+            'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
+            'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
+            'sponsor_entity' => $request->input('sponsor_entity'),
+            'from_date' => $request->input('from_date', now()->toDateString()),
+            'to_date' => $request->input('to_date'),
+            'notes' => $request->input('notes'),
+        ];
+        // unset from_date and to_date from $halaqaData since they are not part of Halaqa model
+        unset(
+            // $halaqaData['from_date'],
+            // $halaqaData['to_date'],
+            $halaqaData['status_type_id'],
+            $halaqaData['sponsorship_type_id'],
+            $halaqaData['sponsor_entity'],
+            $halaqaData['notes']
+        );
         $halaqa = Halaqa::create([
-            ...$request->validated(),
+            ...$halaqaData,
             // 'is_approved' => false, // ← دائماً false عند الإنشاء
         ]);
 
@@ -102,6 +121,20 @@ class HalaqaController extends Controller
         // } catch (\Exception $e) {
         //     return $this->error($e->getMessage(), 422);
         // }
+        $message = null;
+        if ($halaqa) {
+            $message = 'تم إنشاء الحلقة';
+            if (
+                $halaqaStatusData['status_type_id'] !== null ||
+                $halaqaStatusData['sponsorship_type_id'] !== null ||
+                $halaqaStatusData['sponsor_entity'] !== null
+            ) {
+                $halaqaStatus = HalaqaStatus::create(['halaqa_id' => $halaqa->id] + $halaqaStatusData);
+                if ($halaqaStatus) {
+                    $message .= ' وتم إضافة حالة الحلقة';
+                }
+            }
+        }
 
         if ($request->boolean('with_type')) {
             $halaqa->load('type');
@@ -113,7 +146,6 @@ class HalaqaController extends Controller
         //     ? 'تم إنشاء الحلقة وتفعيلها مباشرة'    // المدير العام
         //     : 'تم إنشاء الحلقة وإرسالها للاعتماد';
 
-        $message = 'تم إنشاء الحلقة';
 
 
         return $this->success(new HalaqaResource($halaqa), $message, 201);
@@ -150,13 +182,46 @@ class HalaqaController extends Controller
      */
     public function update(HalaqaRequest $request, Halaqa $halaqa)
     {
-        $halaqa->update($request->validated());
+        $halaqaData = $request->validated();
+        $halaqaStatusData = [
+            'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
+            'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
+            'sponsor_entity' => $request->input('sponsor_entity'),
+            'from_date' => $request->input('from_date', now()->toDateString()),
+            'to_date' => $request->input('to_date'),
+            'notes' => $request->input('notes'),
+        ];
+
+        // unset from_date and to_date from $halaqaData since they are not part of Halaqa model
+        unset(
+            // $halaqaData['from_date'],
+            // $halaqaData['to_date'],
+            $halaqaData['status_type_id'],
+            $halaqaData['sponsorship_type_id'],
+            $halaqaData['sponsor_entity'],
+            $halaqaData['notes']
+        );
+
+        $halaqa->update($halaqaData);
+
+
+        $message = 'تم تحديث بيانات الحلقة بنجاح';
+        if (
+            $halaqaStatusData['status_type_id'] !== null ||
+            $halaqaStatusData['sponsorship_type_id'] !== null ||
+            $halaqaStatusData['sponsor_entity'] !== null
+        ) {
+            $halaqaStatus = HalaqaStatus::updateOrCreate(['halaqa_id' => $halaqa->id], $halaqaStatusData);
+            if ($halaqaStatus) {
+                $message .= ' وتم تحديث حالة الحلقة بنجاح';
+            }
+        }
 
         $halaqa->load(['type', 'reference']);
 
         return $this->success(
             new HalaqaResource($halaqa),
-            'تم تحديث بيانات الحلقة بنجاح'
+            $message
         );
     }
 

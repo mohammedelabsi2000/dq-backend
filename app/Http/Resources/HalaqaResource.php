@@ -17,9 +17,21 @@ class HalaqaResource extends JsonResource
 
     public function toArray($request)
     {
+        $halaqa_status = [];
+        $this->whenLoaded('lastStatus', function () use (&$halaqa_status) {
+            $halaqa_status = [
+                'status_type' => $this->lastStatus->statusType ? new ConstantResource($this->lastStatus->statusType) : null,
+                'sponsorship_type' => $this->lastStatus->sponsorshipType ? new ConstantResource($this->lastStatus->sponsorshipType) : null,
+                'sponsor_entity' => $this->lastStatus->sponsor_entity,
+                'from_date' => $this->lastStatus->from_date,
+                'to_date' => $this->lastStatus->to_date,
+                'status_notes' => $this->lastStatus->notes,
+            ];
+        });
+        
         return [
             'id' => $this->id,
-
+ 
             'name' => $this->name,
             'location' => $this->location,
             'description' => $this->description,
@@ -45,12 +57,14 @@ class HalaqaResource extends JsonResource
             'students' => StudentResource::collection(
                 $this->whenLoaded('students')
             ),
-            'from_date' => $this->from_date,
-            'to_date' => $this->to_date,
+            // 'from_date' => $this->from_date,
+            // 'to_date' => $this->to_date,
 
-            'last_status' => $this->whenLoaded('lastStatus', function () {
-                return new HalaqaStatusResource($this->lastStatus);
-            }),
+            // 'last_status' => $this->whenLoaded('lastStatus', function () {
+            //     return new HalaqaStatusResource($this->lastStatus);
+            // }),
+
+            ...$halaqa_status,
 
             /*
             |--------------------------------------------------------------------------
@@ -69,24 +83,24 @@ class HalaqaResource extends JsonResource
             'approval' => $this->when(
                 $this->relationLoaded('approvalRequest'),
                 fn() => $this->approvalRequest ? [
-                    'is_approved'      => $this->is_approved,
-                    'status'           => $this->approvalRequest->status->label(),
-                    'current_level'    => $this->approvalRequest->current_level->label(),
+                    'is_approved' => $this->is_approved,
+                    'status' => $this->approvalRequest->status->label(),
+                    'current_level' => $this->approvalRequest->current_level->label(),
                     'rejection_reason' => $this->approvalRequest->rejection_reason,
-                    'requested_at'     => $this->approvalRequest->created_at?->format('Y-m-d H:i'),
+                    'requested_at' => $this->approvalRequest->created_at?->format('Y-m-d H:i'),
                     'logs' => $this->when(
                         $this->approvalRequest->relationLoaded('logs'),
                         fn() => $this->approvalRequest->logs->map(fn($log) => [
-                            'level'      => ApprovalLevel::from($log->level)->label(),
-                            'action'     => $log->action === 'approved' ? 'موافقة' : 'رفض',
-                            'acted_by'   => $log->actor?->full_name ?? $log->actor?->name,
-                            'notes'      => $log->notes,
+                            'level' => ApprovalLevel::from($log->level)->label(),
+                            'action' => $log->action === 'approved' ? 'موافقة' : 'رفض',
+                            'acted_by' => $log->actor?->full_name ?? $log->actor?->name,
+                            'notes' => $log->notes,
                             'created_at' => $log->created_at?->format('Y-m-d H:i'),
                         ])
                     ),
                 ] : [
-                    'is_approved'   => $this->is_approved,
-                    'status'        => null,
+                    'is_approved' => $this->is_approved,
+                    'status' => null,
                     'current_level' => null,
                 ]
             ),
