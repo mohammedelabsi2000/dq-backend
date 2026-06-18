@@ -22,7 +22,7 @@ class LevelTrackSubjectController extends Controller
      */
     public function index(Request $request, LevelTrack $levelTrack)
     {
-        // $this->authorize('viewAny', LevelTrackSubject::class);
+        $this->authorize('viewAny', LevelTrackSubject::class);
 
         $query = $levelTrack->levelTrackSubjects();
 
@@ -78,7 +78,7 @@ class LevelTrackSubjectController extends Controller
      */
     public function show(Request $request, LevelTrackSubject $levelTrackSubject)
     {
-        // $this->authorize('view', $levelTrackSubject);
+        $this->authorize('view', $levelTrackSubject);
 
         $levelTrackSubject->load('subject', 'levelTrack.level', 'levelTrack.track');
 
@@ -117,7 +117,7 @@ class LevelTrackSubjectController extends Controller
      */
     public function destroy(LevelTrackSubject $levelTrackSubject)
     {
-        // $this->authorize('delete', $levelTrackSubject);
+        $this->authorize('delete', $levelTrackSubject);
 
         $levelTrackSubject->delete();
 

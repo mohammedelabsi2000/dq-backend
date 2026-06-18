@@ -61,7 +61,7 @@ class Handler extends ExceptionHandler
 
         // Authorization exception
         if ($e instanceof AuthorizationException) {
-            return $this->error($e->getMessage(), 403);
+            return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء.', 403);
         }
 
         // Route not found

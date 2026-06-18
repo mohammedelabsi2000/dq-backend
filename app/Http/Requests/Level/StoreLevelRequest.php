@@ -15,8 +15,8 @@ class StoreLevelRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return true;
-        // return $this->user()->can('create', Level::class);
+        // return $this->user()->hasPermissionTo('levels.create');
+        return $this->user()->can('create', Level::class);
     }
 
     /**

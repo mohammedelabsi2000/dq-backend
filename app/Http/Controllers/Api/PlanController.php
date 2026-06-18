@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Plan\PlanRequest;
+use App\Http\Requests\Plan\StorePlanRequest;
+use App\Http\Requests\Plan\UpdatePlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Models\Plan;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class PlanController extends Controller
      */
     public function index(Request $request)
     {
-        // $this->authorize('viewAny', Plan::class);
+        $this->authorize('viewAny', Plan::class);
 
         $query = Plan::query();
 
@@ -56,10 +57,10 @@ class PlanController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param PlanRequest $request
+     * @param StorePlanRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(PlanRequest $request)
+    public function store(StorePlanRequest $request)
     {
         $plan = Plan::create($request->validated());
 
@@ -95,7 +96,7 @@ class PlanController extends Controller
     // }
     public function show(Request $request, Plan $plan)
     {
-        // $this->authorize('view', $plan);
+        $this->authorize('view', $plan);
 
         // تحميل الخطة مع مستوياتها، ومسارات كل مستوى ومواده، مع أعداد العلاقات
         $plan->load([
@@ -117,11 +118,11 @@ class PlanController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param PlanRequest $request
+     * @param UpdatePlanRequest $request
      * @param Plan $plan
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(PlanRequest $request, Plan $plan)
+    public function update(UpdatePlanRequest $request, Plan $plan)
     {
         $plan->update($request->validated());
 
@@ -144,7 +145,7 @@ class PlanController extends Controller
      */
     public function destroy(Plan $plan)
     {
-        // $this->authorize('delete', $plan);
+        $this->authorize('delete', $plan);
 
         // تحقق من وجود مستويات تابعة قبل الحذف
         if ($plan->levels()->exists()) {
@@ -170,6 +171,8 @@ class PlanController extends Controller
      */
     public function toggleActive(Plan $plan)
     {
+        $this->authorize('toggle_active', $plan);
+
         $plan->update(['is_active' => !$plan->is_active]);
 
         return $this->success(
@@ -186,8 +189,8 @@ class PlanController extends Controller
      */
     public function reorder(Request $request)
     {
-        // $this->authorize('update', Plan::class);
-
+        $this->authorize('reorder', Plan::class);
+        
         $items = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*.id' => ['required', 'integer', 'distinct', 'exists:plans,id'],
