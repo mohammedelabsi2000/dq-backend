@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Constant;
 use App\Models\ConstantType;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ConstantFactory extends Factory
@@ -16,10 +17,10 @@ class ConstantFactory extends Factory
             'name' => $this->faker->word(),
             'constant_type_id' => ConstantType::factory(),
             'parent_id' => null,
-            'is_active' => $this->faker->boolean(90),
+            'is_active' => true,
             'notes' => $this->faker->optional()->text(),
-            'created_by' => 1,
-            'updated_by' => 1,
+            'created_by' => User::factory(),
+            'updated_by' => User::factory(),
         ];
     }
 

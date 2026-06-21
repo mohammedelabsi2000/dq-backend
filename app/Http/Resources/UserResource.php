@@ -21,7 +21,7 @@ class UserResource extends JsonResource
             'thName' => $this->thName,
             'family' => $this->family,
             'full_name' => trim(preg_replace('/\s+/', ' ', $this->full_name)),
-            'dob' => $this->dob,
+            'dob' => $this->dob?->format('Y-m-d'),
             'gender' => $this->gender?->label(),
             'genderText' => $this->gender_text,
             'numChildren' => $this->numChildren,

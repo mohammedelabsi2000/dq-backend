@@ -130,8 +130,8 @@ class HalaqaStatusTest extends TestCase
             'to_date' => $toDate,
         ]);
 
-        $this->assertEquals($fromDate, $halaqaStatus->from_date);
-        $this->assertEquals($toDate, $halaqaStatus->to_date);
+        $this->assertEquals($fromDate, $halaqaStatus->from_date->format('Y-m-d'));
+        $this->assertEquals($toDate, $halaqaStatus->to_date->format('Y-m-d'));
     }
 
     /** @test */

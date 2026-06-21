@@ -12,6 +12,11 @@ class HalaqaStatus extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'from_date' => 'date:Y-m-d',
+        'to_date' => 'date:Y-m-d',
+    ];
+
     public function halaqa()
     {
         return $this->belongsTo(Halaqa::class);

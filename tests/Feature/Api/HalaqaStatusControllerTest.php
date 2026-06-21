@@ -308,10 +308,10 @@ class HalaqaStatusControllerTest extends TestCase
                 'success' => true,
                 'data' => [
                     'id' => $halaqaStatus->id,
-                    'from_date' => $halaqaStatus->from_date,
-                    'to_date' => $halaqaStatus->to_date,
-                    'notes' => $halaqaStatus->notes
-                ]
+                    'from_date' => $halaqaStatus->from_date?->format('Y-m-d'),
+                    'to_date' => $halaqaStatus->to_date?->format('Y-m-d'),
+                    'notes' => $halaqaStatus->notes,
+                ],
             ]);
     }
 

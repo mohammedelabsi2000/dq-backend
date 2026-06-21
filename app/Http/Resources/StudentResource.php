@@ -31,7 +31,7 @@ class StudentResource extends JsonResource
             'prefix_name' => new ConstantResource($this->whenLoaded('prefixName')),
 
             // تاريخ الميلاد
-            'dob' => $this->dob,
+            'dob' => $this->dob?->format('Y-m-d'),
 
             // الجنس
             'gender' => $this->gender?->label(),

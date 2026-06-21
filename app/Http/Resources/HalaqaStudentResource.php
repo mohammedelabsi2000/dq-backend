@@ -24,8 +24,8 @@ class HalaqaStudentResource extends JsonResource
 
             'enrollment_status' => new ConstantResource($this->whenLoaded('enrollment_status')),
 
-            'from_date' => $this->from_date,
-            'to_date' => $this->to_date,
+            'from_date' => $this->from_date?->format('Y-m-d'),
+            'to_date' => $this->to_date?->format('Y-m-d'),
             'created_at' => optional($this->created_at)->toDateTimeString(),
             'updated_at' => optional($this->updated_at)->toDateTimeString(),
         ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\IdQueryServices;
+use Carbon\Carbon;
 
 class IdQueryController extends Controller
 {
@@ -34,7 +35,8 @@ class IdQueryController extends Controller
             'sName' => $personData['CI_FATHER_ARB'],
             'thName' => $personData['CI_GRAND_FATHER_ARB'],
             'family' => $personData['CI_FAMILY_ARB'],
-            'dob' => $personData['CI_BIRTH_DT'],
+            'dob' => Carbon::createFromFormat('d/m/Y', $personData['CI_BIRTH_DT'])->format('Y-m-d'),
+            // 'dob' => date('Y-m-d', strtotime($personData['CI_BIRTH_DT'])),
             'gender' => $personData['SEX'],
         ], 'success', 200);
     }
