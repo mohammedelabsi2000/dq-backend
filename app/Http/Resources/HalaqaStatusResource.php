@@ -18,8 +18,8 @@ class HalaqaStatusResource extends JsonResource
             'id' => $this->id,
             'status_type' => $this->statusType ? new ConstantResource($this->statusType) : null,
             'sponsorship_type' => $this->sponsorshipType ? new ConstantResource($this->sponsorshipType) : null,
-            'from_date' => $this->from_date,
-            'to_date' => $this->to_date,
+            'from_date' => $this->from_date?->format('Y-m-d'),
+            'to_date' => $this->to_date?->format('Y-m-d'),
             'notes' => $this->notes,
         ];
     }
