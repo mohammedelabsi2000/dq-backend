@@ -97,7 +97,7 @@ class HalaqaStatusFilterTest extends TestCase
         $results = $filter->apply()->get();
 
         $this->assertCount(2, $results);
-        $this->assertEquals('2024-02-01', $results->first()->from_date);
+        $this->assertEquals('2024-02-01', $results->first()->from_date->format('Y-m-d'));
     }
 
     /** @test */
@@ -112,7 +112,7 @@ class HalaqaStatusFilterTest extends TestCase
         $results = $filter->apply()->get();
 
         $this->assertCount(2, $results);
-        $this->assertEquals('2024-01-31', $results->first()->to_date);
+        $this->assertEquals('2024-01-31', $results->first()->to_date->format('Y-m-d'));
     }
 
     /** @test */
@@ -188,7 +188,7 @@ class HalaqaStatusFilterTest extends TestCase
         $this->assertCount(1, $results);
         $this->assertEquals($halaqa->id, $results->first()->halaqa_id);
         $this->assertEquals($statusType->id, $results->first()->status_type_id);
-        $this->assertEquals('2024-02-01', $results->first()->from_date);
+        $this->assertEquals('2024-02-01', $results->first()->from_date->format('Y-m-d'));
         $this->assertNull($results->first()->to_date);
     }
 
@@ -267,8 +267,8 @@ class HalaqaStatusFilterTest extends TestCase
         $results = $filter->apply()->get();
 
         $this->assertCount(1, $results);
-        $this->assertEquals('2024-02-01', $results->first()->from_date);
-        $this->assertEquals('2024-02-29', $results->first()->to_date);
+        $this->assertEquals('2024-02-01', $results->first()->from_date->format('Y-m-d'));
+        $this->assertEquals('2024-02-29', $results->first()->to_date->format('Y-m-d'));
     }
 
     /** @test */

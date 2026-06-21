@@ -381,25 +381,26 @@ class HalaqaControllerTest extends TestCase
             'reference_type' => 'center',
         ]);
 
-        // 2. إنشاء طالب (بدون halaqa_id لأنه غير موجود في جدوله)
+        // 2. إنشاء طالب
         $student = Student::factory()->create();
 
-        // 3. ربط الطالب بالحلقة في الجدول الوسيط
-        // افترضت هنا أن اسم الموديل الوسيط هو HalaqaStudent
+        // 3. إنشاء حالة تسجيل صالحة (enrollment_status)
+        $enrollmentStatus = \App\Models\Constant::factory()->create();
+
+        // 4. ربط الطالب بالحلقة في الجدول الوسيط
         DB::table('halaqa_students')->insert([
             'halaqa_id'            => $halaqa->id,
             'student_id'           => $student->id,
             'from_date'            => now(),
-            'enrollment_status_id' => 1, // تأكد من وجود ID صالح من الـ constants
+            'enrollment_status_id' => $enrollmentStatus->id, // ✅
             'created_at'           => now(),
             'updated_at'           => now(),
         ]);
 
-        // 4. محاولة الحذف
+        // 5. محاولة الحذف
         $response = $this->actingAs($this->adminUser, 'sanctum')
             ->deleteJson("/api/halaqas/{$halaqa->id}");
 
-        // يجب أن يعود بـ 400 لأن الحلقة مرتبطة بطلاب
         $response->assertStatus(400)
             ->assertJson(['success' => false]);
 

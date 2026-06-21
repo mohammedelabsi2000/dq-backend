@@ -93,7 +93,7 @@ class StudentTest extends TestCase
     public function test_marital_status_relationship()
     {
         $student = Student::factory()->create();
-        $maritalStatus = Constant::factory()->create(['constant_type_id' => 1]);
+        $maritalStatus = Constant::factory()->create(); // بدون تحديد constant_type_id — يُنشأ تلقائيًا
 
         $student->marital_status_id = $maritalStatus->id;
         $student->save();
@@ -105,7 +105,7 @@ class StudentTest extends TestCase
     public function test_money_status_relationship()
     {
         $student = Student::factory()->create();
-        $moneyStatus = Constant::factory()->create(['constant_type_id' => 4]);
+        $moneyStatus = Constant::factory()->create();
 
         $student->money_status_id = $moneyStatus->id;
         $student->save();
@@ -117,7 +117,7 @@ class StudentTest extends TestCase
     public function test_prefix_name_relationship()
     {
         $student = Student::factory()->create();
-        $prefixName = Constant::factory()->create(['constant_type_id' => 2]);
+        $prefixName = Constant::factory()->create();
 
         $student->prefix_name_id = $prefixName->id;
         $student->save();
@@ -144,7 +144,7 @@ class StudentTest extends TestCase
     public function test_guardian_type_relationship()
     {
         $student = Student::factory()->create();
-        $guardianType = Constant::factory()->create(['constant_type_id' => 6]);
+        $guardianType = Constant::factory()->create();
 
         $student->guardian_type_id = $guardianType->id;
         $student->save();

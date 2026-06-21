@@ -410,8 +410,8 @@ class UserControllerTest extends TestCase
     public function test_user_resource_includes_relationships()
     {
         $mosque = Mosque::factory()->create();
-        $maritalStatus = Constant::factory()->create(['constant_type_id' => 1]);
-        $prefix = Constant::factory()->create(['constant_type_id' => 2]);
+        $maritalStatus = Constant::factory()->create();
+        $prefix = Constant::factory()->create();
 
         $user = User::factory()->create([
             'mosque_id' => $mosque->id,
