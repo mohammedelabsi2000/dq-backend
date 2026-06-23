@@ -98,7 +98,7 @@ class StudentFilter extends BaseFilter
     {
         $halaqaId = $this->request->integer('exclude_halaqa_students');
         return $query->whereDoesntHave('halaqas', function ($q) use ($halaqaId) {
-            $q->where('halaqa_id', $halaqaId);
+            $q->where('halaqa_id', $halaqaId)->whereNull('halaqa_students.deleted_at');
         });
     }
 

@@ -44,7 +44,7 @@ class StudentController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-
+        logger($query->toSql());
         $students = $query->withStandardRelations()->get();
 
         return $this->successWithPagination(
@@ -197,7 +197,7 @@ class StudentController extends Controller
 
 
         try {
-            $userId =  auth()->id();
+            $userId = auth()->id();
             $filePath = $request->file('file')->storeAs('imports', 'students-with-relations-' . now()->timestamp . '.xlsx', 'public');
             $filePath = public_path('storage/' . $filePath);
             (new StudentWithRelationsImport($userId))->queue($filePath);
