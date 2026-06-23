@@ -29,7 +29,7 @@ class Halaqa extends Model
 
     protected $casts = [
         'reference_type' => HalaqaReferenceType::class,
-        'is_approved'    => 'boolean',
+        'is_approved' => 'boolean',
     ];
 
     protected $with = ['lastStatus'];
@@ -70,7 +70,8 @@ class Halaqa extends Model
     public function students()
     {
         return $this->belongsToMany(Student::class, 'halaqa_students')
-            ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
+            ->withPivot(['id', 'from_date', 'to_date', 'enrollment_status_id'])
+            ->wherePivotNull('deleted_at')
             ->withTimestamps();
         // ->using(HalaqaStudent::class);
     }

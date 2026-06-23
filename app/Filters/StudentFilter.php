@@ -35,12 +35,13 @@ class StudentFilter extends BaseFilter
             'guardian_type_id' => 'filterByGuardianType',
             'age_min' => 'filterByAgeMin',
             'age_max' => 'filterByAgeMax',
-            'guardian_id' => 'filterByGuardianId'
+            'guardian_id' => 'filterByGuardianId',
+            'exclude_halaqa_students' => 'filterByExcludeHalaqaStudents',
         ]);
 
         // Apply boolean filters
         $query = $this->applyBooleanFilters([
-            'has_halaqa' => 'filterByHasHalaqa'
+            'has_halaqa' => 'filterByHasHalaqa',
         ]);
 
         return $query;
@@ -91,6 +92,14 @@ class StudentFilter extends BaseFilter
     protected function filterByHasHalaqa(Builder|QueryBuilder $query): Builder|QueryBuilder
     {
         return $query->whereHas('halaqas');
+    }
+
+    protected function filterByExcludeHalaqaStudents(Builder|QueryBuilder $query): Builder|QueryBuilder
+    {
+        $halaqaId = $this->request->integer('exclude_halaqa_students');
+        return $query->whereDoesntHave('halaqas', function ($q) use ($halaqaId) {
+            $q->where('halaqa_id', $halaqaId);
+        });
     }
 
     protected function filterByGuardianId(Builder|QueryBuilder $query): Builder|QueryBuilder

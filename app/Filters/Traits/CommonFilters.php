@@ -106,6 +106,10 @@ trait CommonFilters
 
         // Direct region relationship
         if (method_exists($query->getModel(), 'region')) {
+            /* if ($this->request->filled('exclude_halaqa_students')) {
+                $branchId = $this->request->integer('branch_id');
+                return $query->where('id', $regionId)->where('branch_id', $branchId);
+            } */
             return $query->where('region_id', $regionId);
         }
 
