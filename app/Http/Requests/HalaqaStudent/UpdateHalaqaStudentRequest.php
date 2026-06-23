@@ -5,6 +5,7 @@ namespace App\Http\Requests\HalaqaStudent;
 use App\Helpers\ConstantHelper;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\DQFormRequest;
+use App\Models\HalaqaStudent;
 
 class UpdateHalaqaStudentRequest extends DQFormRequest
 {
@@ -15,7 +16,8 @@ class UpdateHalaqaStudentRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('halaqa_student'));
+        return $this->user()->can('create', HalaqaStudent::class);
+        // return $this->user()->can('update', $this->route('halaqa_student'));
     }
 
     /**
@@ -27,7 +29,8 @@ class UpdateHalaqaStudentRequest extends DQFormRequest
     {
         return [
             'halaqa_id' => 'sometimes|required|exists:halaqas,id',
-            'student_id' => 'sometimes|required|exists:students,id',
+            'students' => 'required|array|min:1',
+            'students.*' => 'exists:students,id',
             'from_date' => 'sometimes|required|date',
             'to_date' => 'nullable|date|after_or_equal:from_date',
             'enrollment_status_id' => [
@@ -41,7 +44,7 @@ class UpdateHalaqaStudentRequest extends DQFormRequest
     {
         return [
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
-            'student_id.exists' => 'الطالب المحدد غير موجود',
+            'students.*.exists' => 'الطالب المحدد غير موجود',
             'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
             'enrollment_status_id.in' => 'الحالة المحددة غير موجودة',
         ];

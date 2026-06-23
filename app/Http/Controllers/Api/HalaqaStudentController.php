@@ -166,28 +166,20 @@ class HalaqaStudentController extends Controller
      * تعديل تسجيل موجود
      */
     public function update(
-        UpdateHalaqaStudentRequest $request,
-        HalaqaStudent $halaqaStudent
+        UpdateHalaqaStudentRequest $request
     ) {
         $validated = $request->validated();
 
-        // معالجة التحديث من خلال الخدمة
-        $updatedStudent = $this->halaqaStudentService->updateHalaqaStudentEnrollment(
-            $halaqaStudent,
-            $validated
-        );
-
-        // تحديد رسالة النجاح بناءً على نوع التحديث
-        $message = $this->halaqaStudentService->hasHalaqaOrFromDateChanged($halaqaStudent, $validated)
-            ? 'تم نقل الطالب إلى الحلقة الجديدة بنجاح'
-            : 'تم تحديث بيانات التسجيل بنجاح';
-
-        $statusCode = $this->halaqaStudentService->hasHalaqaOrFromDateChanged($halaqaStudent, $validated) ? 201 : 200;
+        HalaqaStudent::whereIn('student_id', $validated['students'])
+            ->whereNull('to_date')
+            ->update([
+                'from_date' => $validated['from_date'],
+                'enrollment_status_id' => $validated['enrollment_status_id'],
+            ]);
 
         return $this->success(
-            new HalaqaStudentResource($updatedStudent->load(['halaqa', 'student', 'enrollment_status'])),
-            $message,
-            $statusCode
+            null,
+            'تم تحديث بيانات التسجيل بنجاح',
         );
     }
 

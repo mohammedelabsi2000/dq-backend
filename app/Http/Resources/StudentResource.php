@@ -82,6 +82,13 @@ class StudentResource extends JsonResource
                     ];
                 });
             }),
+            'halaqa_student_id' => $this->pivot?->id,
+            'from_date' => $this->pivot?->from_date,
+            'to_date' => $this->pivot?->to_date,
+            'enrollment_status' => new ConstantResource(
+                Constant::find($this->pivot?->enrollment_status_id)
+            ),
+
             'current_halaqa' => $this->whenLoaded('halaqas', function () {
                 $current = $this->halaqas->firstWhere('pivot.to_date', null);
                 if ($current) {

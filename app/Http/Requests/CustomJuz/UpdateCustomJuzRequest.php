@@ -14,7 +14,7 @@ class UpdateCustomJuzRequest extends BaseCustomJuzRequest
      */
     public function authorize()
     {
-        return $this->user()->can('update', $this->route('custom_juz'));
+        return $this->user()->can('update', $this->route('juz'));
     }
 
     /**
@@ -24,7 +24,7 @@ class UpdateCustomJuzRequest extends BaseCustomJuzRequest
      */
     public function rules()
     {
-        $customJuzId = $this->route('custom_juz')?->id;
+        $customJuzId = $this->route('juz')?->id;
 
         return [
             'sort_order' => 'sometimes|integer',

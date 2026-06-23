@@ -66,7 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Halaqa students assignment
-    Route::apiResource('halaqa-students', HalaqaStudentController::class);
+    Route::apiResource('halaqa-students', HalaqaStudentController::class)->except(['update']);
+    Route::put('halaqa-students', [HalaqaStudentController::class, 'update']);
 
     // Halaqa statuses management
     Route::apiResource('halaqa-statuses', HalaqaStatusController::class);
