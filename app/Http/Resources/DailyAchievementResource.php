@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class DailyAchievementResource extends JsonResource
@@ -20,15 +21,15 @@ class DailyAchievementResource extends JsonResource
             'teacher' => new UserResource($this->whenLoaded('teacher')),
 
             'subject_id' => $this->subject_id,
-'subject'    => new SubjectResource($this->whenLoaded('subject')),
+    'subject'    => new SubjectResource($this->whenLoaded('subject')),
             
             // التاريخ
             'date' => $this->date?->format('Y-m-d'),
             
             // السور والآيات
-            'from_surah' => $this->from_surah,
+            'from_surah' => Surah::find($this->from_surah),
             'from_ayah' => $this->from_ayah,
-            'to_surah' => $this->to_surah,
+            'to_surah' => Surah::find($this->to_surah),
             'to_ayah' => $this->to_ayah,
             // 'ayah_count' => $this->ayah_count,
             

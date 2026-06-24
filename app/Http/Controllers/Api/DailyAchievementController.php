@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\DailyAchievement\StoreDailyAchievementRequest;
 use App\Http\Requests\DailyAchievement\UpdateDailyAchievementRequest;
 use App\Http\Resources\DailyAchievementResource;
+use App\Http\Resources\StudentResource;
 use App\Models\DailyAchievement;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class DailyAchievementController extends Controller
@@ -128,6 +130,8 @@ class DailyAchievementController extends Controller
     {
         // $this->authorize('viewAny', DailyAchievement::class);
 
+        $student = Student::findOrFail($studentId);
+
         $query = DailyAchievement::query()
             ->byStudent($studentId)
             ->with(['teacher']);
@@ -137,13 +141,29 @@ class DailyAchievementController extends Controller
             $query->byDateRange($request->from_date, $request->to_date);
         }
 
+        // Total achievements
+        $totalAchievements = $query->count();
+
         $achievements = $query->orderBy('date', 'desc')->get();
 
-        return $this->success(
-            DailyAchievementResource::collection($achievements),
+        $data = [
+            'achievements' => DailyAchievementResource::collection($achievements),
+            'student' => new StudentResource($student)
+        ];
+        $total = $query->count();
+
+        return $this->successWithPagination(
+            $data,
+            ['total' => $total],
             'success',
             200
         );
+
+        // return $this->success(
+        //     $data,
+        //     'success',
+        //     200
+        // );
     }
 
     // public function statistics(Request $request)

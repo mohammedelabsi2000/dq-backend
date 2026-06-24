@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\AchievementStatus;
 use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
+use App\Models\Quran\Surah;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -57,6 +58,16 @@ class DailyAchievement extends Model
     public function subject()
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function fromSurah()
+    {
+        return $this->belongsTo(Surah::class, 'from_surah', 'id');
+    }
+
+    public function toSurah()
+    {
+        return $this->belongsTo(Surah::class, 'to_surah', 'id');
     }
 
     // public function createdBy()

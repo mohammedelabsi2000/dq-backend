@@ -94,10 +94,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/statistics', [StatisticsController::class, 'index']);
 
     // Daily achievements management
-    Route::prefix('daily-achievements')->group(function () {
+    Route::prefix('daily-memorization')->group(function () {
         Route::get('students/{studentId}', [DailyAchievementController::class, 'studentAchievements']);
         Route::get('statistics', [DailyAchievementController::class, 'statistics']);
     });
-    Route::apiResource('daily-achievements', DailyAchievementController::class);
+    Route::apiResource('daily-memorization', DailyAchievementController::class);
     
 });
