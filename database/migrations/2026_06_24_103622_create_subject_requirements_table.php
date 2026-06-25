@@ -17,9 +17,9 @@ return new class extends Migration
         Schema::create('subject_requirements', function (Blueprint $table) {
             $table->id();
             $table->foreignId('subject_id')->constrained('subjects');
-            $table->enum('success_value_type', SuccessValueType::cases())->default('main_mark')->comment('نوع النجاح');
+            $table->enum('success_value_type', array_column(SuccessValueType::cases(), 'value'))->default('main_mark')->comment('نوع النجاح');
             $table->unsignedInteger('success_value')->default(0)->comment('قيمة النجاح من 0-100');
-            $table->decimal('weight', 5, 2)->default(0)->comment('وزن / نسبة المتطلب داخل المادة');
+            $table->decimal('weight', 5, 2)->nullable()->comment('وزن / نسبة المتطلب داخل المادة');
 
             $table->auditColumns();
         });

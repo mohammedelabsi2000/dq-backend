@@ -31,6 +31,7 @@ class SubjectResource extends JsonResource
 
             // 'track'       => new TrackResource($this->whenLoaded('track')),
             'subject_type' => new ConstantResource($this->whenLoaded('subjectType')),
+            'subject_requirements' => SubjectRequirementResource::collection($this->whenLoaded('subjectRequirements')),
         ];
     }
 }
