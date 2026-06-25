@@ -15,7 +15,7 @@ class ConstantTypeFactory extends Factory
         return [
             'name' => $this->faker->unique()->word(),
             'description' => $this->faker->sentence(),
-            'notes' => $this->faker->optional()->text(200),
+            'notes' => $this->faker->optional()->text(100),
             'created_by' => User::factory(),
             'updated_by' => User::factory(),
         ];
