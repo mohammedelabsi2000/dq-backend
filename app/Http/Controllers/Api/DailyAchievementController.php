@@ -9,14 +9,19 @@ use App\Http\Resources\DailyAchievementResource;
 use App\Http\Resources\StudentResource;
 use App\Models\DailyAchievement;
 use App\Models\Student;
+use App\Services\QuranCalculatorService;
 use Illuminate\Http\Request;
 
 class DailyAchievementController extends Controller
 {
+
+    public function __construct(
+        protected QuranCalculatorService $calculator
+    ) {}
     public function index(Request $request)
     {
         // $this->authorize('viewAny', DailyAchievement::class);
-        
+
         $query = DailyAchievement::query()
             ->with(['student', 'teacher']);
 
@@ -73,8 +78,24 @@ class DailyAchievementController extends Controller
         // $this->authorize('create', DailyAchievement::class);
 
         $data = $request->validated();
+        $data['teacher_id'] = auth()->id();
         // $data['created_by'] = auth()->id();
         // $data['recorded_at'] = now();
+
+        // حساب عدد الآيات والصفحات تلقائياً
+        $data['ayahs_count'] = $this->calculator->calculateAyahsCount(
+            $data['from_surah'],
+            $data['from_ayah'],
+            $data['to_surah'],
+            $data['to_ayah']
+        );
+
+        $data['pages_count'] = $this->calculator->calculatePagesCount(
+            $data['from_surah'],
+            $data['from_ayah'],
+            $data['to_surah'],
+            $data['to_ayah']
+        );
 
         $achievement = DailyAchievement::create($data);
         $achievement->load(['student', 'teacher']);
@@ -89,7 +110,7 @@ class DailyAchievementController extends Controller
     public function show(DailyAchievement $dailyAchievement)
     {
         // $this->authorize('view', $dailyAchievement);
-        
+
         $dailyAchievement->load(['student', 'teacher']);
 
         return $this->success(
@@ -99,26 +120,46 @@ class DailyAchievementController extends Controller
         );
     }
 
-    public function update(UpdateDailyAchievementRequest $request, DailyAchievement $dailyAchievement)
+    public function update(UpdateDailyAchievementRequest $request, DailyAchievement $daily_memorization)
     {
         // $this->authorize('update', $dailyAchievement);
 
         $data = $request->validated();
 
-        $dailyAchievement->update($data);
-        $dailyAchievement->load(['student', 'teacher']);
+          // إعادة حساب عدد الآيات والصفحات لو تغيّر نطاق السور/الآيات
+        $rangeChanged = $request->filled('from_surah') || $request->filled('from_ayah')
+                     || $request->filled('to_surah') || $request->filled('to_ayah');
+ 
+        if ($rangeChanged) {
+            $fromSurah = $data['from_surah'] ?? $daily_memorization->from_surah;
+            $fromAyah  = $data['from_ayah']  ?? $daily_memorization->from_ayah;
+            $toSurah   = $data['to_surah']   ?? $daily_memorization->to_surah;
+            $toAyah    = $data['to_ayah']    ?? $daily_memorization->to_ayah;
+ 
+            $data['ayahs_count'] = $this->calculator->calculateAyahsCount(
+                $fromSurah, $fromAyah, $toSurah, $toAyah
+            );
+ 
+            $data['pages_count'] = $this->calculator->calculatePagesCount(
+                $fromSurah, $fromAyah, $toSurah, $toAyah
+            );
+        }
+
+        
+        $daily_memorization->update($data);
+        $daily_memorization->load(['student', 'teacher']);
 
         return $this->success(
-            new DailyAchievementResource($dailyAchievement),
+            new DailyAchievementResource($daily_memorization),
             'تم تحديث إنجاز الحفظ بنجاح'
         );
     }
 
-    public function destroy(DailyAchievement $dailyAchievement)
+    public function destroy(DailyAchievement $daily_memorization)
     {
         // $this->authorize('delete', $dailyAchievement);
-        
-        $dailyAchievement->delete();
+
+        $daily_memorization->delete();
 
         return $this->success(
             null,
@@ -158,12 +199,6 @@ class DailyAchievementController extends Controller
             'success',
             200
         );
-
-        // return $this->success(
-        //     $data,
-        //     'success',
-        //     200
-        // );
     }
 
     // public function statistics(Request $request)

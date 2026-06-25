@@ -24,9 +24,11 @@ return new class extends Migration
             $table->foreign('to_surah')->references('id')->on('quran_surahs');
             $table->unsignedSmallInteger('to_ayah')->comment('رقم الآية النهاية');
             // $table->integer('ayah_count')->comment('عدد الآيات المحفوظة');
-            $table->string('achievement_type')->comment('نوع الحفظ: new_memorization, revision, recitation, exam');
-            $table->string('evaluation_grade')->comment('درجة التقييم: excellent, very_good, good, acceptable, weak');
-            $table->string('achievement_status')->comment('حالة الإنجاز: completed, partial, retry');
+            $table->unsignedInteger('ayahs_count')->nullable()->comment('عدد الآيات المحفوظة - محسوب تلقائياً');
+            $table->decimal('pages_count', 6, 2)->nullable()->comment('عدد الصفحات المحفوظة - محسوب تلقائياً، قد يكون كسرياً');
+            $table->string('achievement_type')->default('new_memorization')->comment('نوع الحفظ: new_memorization, revision, recitation, exam');
+            $table->string('evaluation_grade')->default('excellent')->comment('درجة التقييم: excellent, very_good, good, acceptable, weak');
+            $table->string('achievement_status')->default('completed')->comment('حالة الإنجاز: completed, partial, retry');
             $table->integer('mistakes_count')->default(0)->comment('عدد الأخطاء');
             $table->text('notes')->nullable()->comment('ملاحظات');
             $table->timestamp('recorded_at')->useCurrent()->comment('وقت التسجيل');
@@ -35,6 +37,7 @@ return new class extends Migration
             $table->index(['student_id', 'date']);
             $table->index(['teacher_id', 'date']);
             $table->index('date');
+            $table->index('subject_id');
         });
     }
 

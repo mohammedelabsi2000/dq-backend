@@ -5,65 +5,86 @@ namespace App\Http\Requests\DailyAchievement;
 use App\Enums\AchievementStatus;
 use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
-use App\Models\Quran\Surah;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Http\Requests\DQFormRequest;
+use App\Services\QuranCalculatorService;
 
-class UpdateDailyAchievementRequest extends FormRequest
+class UpdateDailyAchievementRequest extends DQFormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
     public function rules(): array
     {
         return [
-            'student_id' => 'sometimes|required|exists:students,id',
-            'teacher_id' => 'nullable|exists:users,id',
-            'subject_id' => 'nullable|exists:subjects,id',
-            'date' => 'sometimes|required|date',
-            'from_surah' => 'sometimes|required|integer|min:1|max:114|exists:quran_surahs,id',
-            'from_ayah' => [
-                'sometimes',
-                'required',
-                'integer',
-                'min:1',
-                function ($attribute, $value, $fail) {
-                    if ($this->from_surah) {
-                        $surah = Surah::find($this->from_surah);
-                        if ($surah && $value > $surah->verses_count) {
-                            $fail('رقم الآية البداية يجب أن لا يتجاوز ' . $surah->verses_count . ' في سورة ' . $surah->name_ar);
-                        }
-                    }
-                },
-            ],
-            'to_surah' => 'sometimes|required|integer|min:1|max:114|exists:quran_surahs,id',
-            'to_ayah' => [
-                'sometimes',
-                'required',
-                'integer',
-                'min:1',
-                function ($attribute, $value, $fail) {
-                    if ($this->to_surah) {
-                        $surah = Surah::find($this->to_surah);
-                        if ($surah && $value > $surah->verses_count) {
-                            $fail('رقم الآية النهاية يجب أن لا يتجاوز ' . $surah->verses_count . ' في سورة ' . $surah->name_ar);
-                        }
-                    }
-                },
-            ],
-            'achievement_type' => ['sometimes', 'required', Rule::in(AchievementType::getValues())],
-            'evaluation_grade' => ['sometimes', 'required', Rule::in(EvaluationGrade::getValues())],
-            'achievement_status' => ['sometimes', 'required', Rule::in(AchievementStatus::getValues())],
-            'mistakes_count' => 'sometimes|required|integer|min:0',
-            'notes' => 'nullable|string|max:1000',
+            'student_id'   => ['sometimes', 'required', 'integer', 'exists:students,id'],
+            'teacher_id'   => ['nullable', 'integer', 'exists:users,id'],
+            'subject_id'   => ['nullable', 'integer', 'exists:subjects,id'],
+
+            'date'         => ['sometimes', 'required', 'date'],
+
+            'from_surah'   => ['sometimes', 'required', 'integer', 'exists:quran_surahs,id'],
+            'from_ayah'    => ['sometimes', 'required', 'integer', 'min:1'],
+            'to_surah'     => ['sometimes', 'required', 'integer', 'exists:quran_surahs,id'],
+            'to_ayah'      => ['sometimes', 'required', 'integer', 'min:1'],
+
+            'achievement_type'   => ['sometimes', 'nullable', 'string', 'in:' . implode(',', AchievementType::getValues())],
+            'evaluation_grade'   => ['sometimes', 'nullable', 'string', 'in:' . implode(',', EvaluationGrade::getValues())],
+            'achievement_status' => ['sometimes', 'nullable', 'string', 'in:' . implode(',', AchievementStatus::getValues())],
+
+            'mistakes_count' => ['nullable', 'integer', 'min:0'],
+            'notes'          => ['nullable', 'string'],
+            'recorded_at'    => ['nullable', 'date'],
+        ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            // التحقق من النطاق فقط لو الحقول الأربعة موجودة في الـ request
+            $hasAllRangeFields = $this->filled('from_surah') && $this->filled('from_ayah')
+                              && $this->filled('to_surah') && $this->filled('to_ayah');
+
+            if (!$hasAllRangeFields) {
+                return;
+            }
+
+            if ($validator->errors()->has('from_surah') || $validator->errors()->has('to_surah')
+                || $validator->errors()->has('from_ayah') || $validator->errors()->has('to_ayah')) {
+                return;
+            }
+
+            $errors = app(QuranCalculatorService::class)->validateRange(
+                $this->from_surah,
+                $this->from_ayah,
+                $this->to_surah,
+                $this->to_ayah
+            );
+
+            foreach ($errors as $field => $message) {
+                $validator->errors()->add($field, $message);
+            }
+        });
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'student_id'         => 'الطالب',
+            'teacher_id'         => 'المعلم',
+            'subject_id'         => 'المساق',
+            'date'               => 'التاريخ',
+            'from_surah'         => 'سورة البداية',
+            'from_ayah'          => 'آية البداية',
+            'to_surah'           => 'سورة النهاية',
+            'to_ayah'            => 'آية النهاية',
+            'achievement_type'   => 'نوع الحفظ',
+            'evaluation_grade'   => 'درجة التقييم',
+            'achievement_status' => 'حالة الإنجاز',
+            'mistakes_count'     => 'عدد الأخطاء',
+            'notes'              => 'الملاحظات',
+            'recorded_at'        => 'وقت التسجيل',
         ];
     }
 
@@ -71,29 +92,22 @@ class UpdateDailyAchievementRequest extends FormRequest
     {
         return [
             'student_id.required' => 'حقل الطالب مطلوب',
-            'student_id.exists' => 'الطالب المحدد غير موجود',
-            'teacher_id.exists' => 'المعلم المحدد غير موجود',
-            'subject_id.exists' => 'المادة المحددة غير موجودة',
+            'student_id.exists'   => 'الطالب المحدد غير موجود',
+            'teacher_id.exists'   => 'المعلم المحدد غير موجود',
+            'subject_id.exists'   => 'المساق المحدد غير موجود',
+
             'date.required' => 'حقل التاريخ مطلوب',
-            'date.date' => 'التاريخ يجب أن يكون صحيحاً',
-            'from_surah.required' => 'حقل من سورة مطلوب',
-            'from_surah.min' => 'رقم السورة يجب أن يكون بين 1 و 114',
-            'from_surah.max' => 'رقم السورة يجب أن يكون بين 1 و 114',
-            'from_ayah.required' => 'حقل من آية مطلوب',
-            'from_ayah.min' => 'رقم الآية يجب أن يكون أكبر من 0',
-            'to_surah.required' => 'حقل إلى سورة مطلوب',
-            'to_surah.min' => 'رقم السورة يجب أن يكون بين 1 و 114',
-            'to_surah.max' => 'رقم السورة يجب أن يكون بين 1 و 114',
-            'to_ayah.required' => 'حقل إلى آية مطلوب',
-            'to_ayah.min' => 'رقم الآية يجب أن يكون أكبر من 0',
-            'ayah_count.required' => 'حقل عدد الآيات مطلوب',
-            'ayah_count.min' => 'عدد الآيات يجب أن يكون أكبر من 0',
-            'achievement_type.required' => 'حقل نوع الحفظ مطلوب',
-            'evaluation_grade.required' => 'حقل درجة التقييم مطلوب',
-            'achievement_status.required' => 'حقل حالة الإنجاز مطلوب',
-            'mistakes_count.required' => 'حقل عدد الأخطاء مطلوب',
-            'mistakes_count.min' => 'عدد الأخطاء يجب أن يكون 0 أو أكبر',
-            'notes.max' => 'الملاحظات يجب أن لا تتجاوز 1000 حرف',
+            'date.date'     => 'صيغة التاريخ غير صحيحة',
+
+            'from_surah.exists' => 'سورة البداية غير موجودة',
+            'to_surah.exists'   => 'سورة النهاية غير موجودة',
+
+            'achievement_type.in'   => 'نوع الحفظ غير صحيح',
+            'evaluation_grade.in'   => 'درجة التقييم غير صحيحة',
+            'achievement_status.in' => 'حالة الإنجاز غير صحيحة',
+
+            'mistakes_count.integer' => 'عدد الأخطاء يجب أن يكون رقماً',
+            'mistakes_count.min'     => 'عدد الأخطاء يجب أن يكون أكبر من أو يساوي صفر',
         ];
     }
 }

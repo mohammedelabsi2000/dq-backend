@@ -17,13 +17,14 @@ class DailyAchievement extends Model
     protected $fillable = [
         'student_id',
         'teacher_id',
+        'subject_id',
         'date',
         'from_surah',
         'from_ayah',
         'to_surah',
         'to_ayah',
-        'subject_id',
-        // 'ayah_count',
+        'ayahs_count',
+        'pages_count',
         'achievement_type',
         'evaluation_grade',
         'achievement_status',
@@ -38,12 +39,18 @@ class DailyAchievement extends Model
         'from_ayah' => 'integer',
         'to_surah' => 'integer',
         'to_ayah' => 'integer',
+        'ayahs_count' => 'integer',
+        'pages_count' => 'decimal:2',
         'mistakes_count' => 'integer',
         'recorded_at' => 'datetime',
         'achievement_type' => AchievementType::class,
         'evaluation_grade' => EvaluationGrade::class,
         'achievement_status' => AchievementStatus::class,
     ];
+
+    // ========================
+    // Relations
+    // ========================
 
     public function student()
     {
@@ -62,23 +69,17 @@ class DailyAchievement extends Model
 
     public function fromSurah()
     {
-        return $this->belongsTo(Surah::class, 'from_surah', 'id');
+        return $this->belongsTo(Surah::class, 'from_surah');
     }
 
     public function toSurah()
     {
-        return $this->belongsTo(Surah::class, 'to_surah', 'id');
+        return $this->belongsTo(Surah::class, 'to_surah');
     }
 
-    // public function createdBy()
-    // {
-    //     return $this->belongsTo(User::class, 'created_by');
-    // }
-
-    // public function updatedBy()
-    // {
-    //     return $this->belongsTo(User::class, 'updated_by');
-    // }
+    // ========================
+    // Scopes
+    // ========================
 
     public function scopeByStudent($query, $studentId)
     {
@@ -88,6 +89,11 @@ class DailyAchievement extends Model
     public function scopeByTeacher($query, $teacherId)
     {
         return $query->where('teacher_id', $teacherId);
+    }
+
+    public function scopeBySubject($query, $subjectId)
+    {
+        return $query->where('subject_id', $subjectId);
     }
 
     public function scopeByDate($query, $date)
