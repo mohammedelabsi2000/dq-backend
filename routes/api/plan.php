@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
     Route::apiResource('plans', PlanController::class);
     Route::apiResource('tracks', TrackController::class);
     Route::apiResource('subjects', SubjectController::class);
+    Route::get('subject-requirement-types', [SubjectController::class, 'subject_requirement_types']);
     
     // 2. مسارات الـ Levels (تأكد من وضع reorder قبل الـ resource)
     Route::post('levels/reorder', [LevelController::class, 'reorder']);

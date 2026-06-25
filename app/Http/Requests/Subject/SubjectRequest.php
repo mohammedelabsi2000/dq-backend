@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Subject;
 
 use App\Enums\SubjectType;
+use App\Enums\SuccessValueType;
 use App\Helpers\ConstantHelper;
 use App\Models\Constant;
 use App\Models\Subject;
@@ -80,6 +81,11 @@ class SubjectRequest extends FormRequest
 
             'description' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
+
+            'subject_requirements' => ['nullable', 'array'],
+            'subject_requirements.*.success_value' => ['required', 'numeric', 'between:0,100'],
+            'subject_requirements.*.success_value_type' => ['required', 'string', Rule::in(array_column(SuccessValueType::cases(), 'value'))],
+
         ];
     }
 
@@ -107,6 +113,14 @@ class SubjectRequest extends FormRequest
 
             'description.string' => 'الوصف يجب أن يكون نصًا.',
             'notes.string' => 'الملاحظات يجب أن تكون نصًا.',
+
+            'subject_requirements.array' => 'متطلبات المساق يجب أن تكون مصفوفة.',
+            'subject_requirements.*.success_value.required' => 'قيمة النجاح مطلوبة.',
+            'subject_requirements.*.success_value.numeric' => 'قيمة النجاح يجب أن تكون رقمًا.',
+            'subject_requirements.*.success_value.between' => 'قيمة النجاح يجب أن تكون بين 0 و 100.',
+            'subject_requirements.*.success_value_type.required' => 'نوع قيمة النجاح مطلوب.',
+            'subject_requirements.*.success_value_type.string' => 'نوع قيمة النجاح يجب أن يكون نصًا.',
+            'subject_requirements.*.success_value_type.in' => 'نوع قيمة النجاح المحدد غير موجود.',
         ];
     }
 
@@ -123,6 +137,9 @@ class SubjectRequest extends FormRequest
             'pages' => 'صفحات',
             'description' => 'الوصف',
             'notes' => 'الملاحظات',
+            'subject_requirements' => 'متطلبات المساق',
+            'subject_requirements.*.success_value' => 'قيمة النجاح',
+            'subject_requirements.*.success_value_type' => 'نوع قيمة النجاح',
         ];
     }
 

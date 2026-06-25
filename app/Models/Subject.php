@@ -40,4 +40,9 @@ class Subject extends Model
             ->withPivot('is_required')
             ->withTimestamps();
     }
+
+    public function subjectRequirements(): HasMany
+    {
+        return $this->hasMany(SubjectRequirement::class);
+    }
 }
