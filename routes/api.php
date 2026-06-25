@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\{
     ConstantController,
     ConstantTypeController,
     CourseController,
+    DailyAchievementController,
     GradeController,
     HalaqaController,
     HalaqaStatusController,
@@ -91,4 +92,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // ID Query endpoint
     Route::post('/id-query', [IdQueryController::class, 'sendRequest']);
     Route::get('/statistics', [StatisticsController::class, 'index']);
+
+    // Daily achievements management
+    Route::prefix('daily-memorization')->group(function () {
+        Route::get('students/{studentId}', [DailyAchievementController::class, 'studentAchievements']);
+        Route::get('statistics', [DailyAchievementController::class, 'statistics']);
+    });
+    Route::apiResource('daily-memorization', DailyAchievementController::class);
+    
 });

@@ -11,6 +11,7 @@ use App\Models\Halaqa;
 use App\Models\HalaqaStudent;
 use App\Models\Mosque;
 use App\Models\PersonalCourse;
+use App\Models\Quran\CustomJuz;
 use App\Models\Region;
 use App\Models\Student;
 use App\Models\User;
@@ -20,6 +21,7 @@ use App\Policies\ApprovalPolicy;
 use App\Policies\BranchPolicy;
 use App\Policies\CenterPolicy;
 use App\Policies\ConstantPolicy;
+use App\Policies\CustomJuzPolicy;
 use App\Policies\HalaqaPolicy;
 use App\Policies\HalaqaStudentPolicy;
 use App\Policies\MosquePolicy;
@@ -51,6 +53,7 @@ class AuthServiceProvider extends ServiceProvider
         Constant::class => ConstantPolicy::class,
         HalaqaStudent::class => HalaqaStudentPolicy::class,
         ApprovalRequest::class => ApprovalPolicy::class,
+        CustomJuz::class => CustomJuzPolicy::class,
     ];
 
     /**

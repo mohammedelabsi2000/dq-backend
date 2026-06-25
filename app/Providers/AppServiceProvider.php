@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\{
     Branch,
     Center,
+    DailyAchievement,
     Halaqa,
     Mosque,
     Region,
@@ -15,6 +16,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
 use App\Observers\AuditObserver;
+use App\Observers\DailyAchievementObserver;
 
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
@@ -135,6 +137,7 @@ class AppServiceProvider extends ServiceProvider
             }
         }
     }
+
 
     /*
     |--------------------------------------------------------------------------

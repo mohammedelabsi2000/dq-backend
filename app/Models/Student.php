@@ -150,6 +150,11 @@ class Student extends Model
             ->withTimestamps();
     }
 
+    public function dailyAchievements()
+    {
+        return $this->hasMany(DailyAchievement::class);
+    }
+
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
