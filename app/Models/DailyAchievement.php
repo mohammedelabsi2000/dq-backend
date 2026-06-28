@@ -6,6 +6,7 @@ use App\Enums\AchievementStatus;
 use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
 use App\Models\Quran\Surah;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -114,5 +115,82 @@ class DailyAchievement extends Model
     public function scopeByStatus($query, AchievementStatus $status)
     {
         return $query->where('achievement_status', $status);
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->isGlobalAdmin()) {
+            return $query;
+        }
+
+        $branchIds = $user->getScopeIds('branch');
+        $regionIds = $user->getScopeIds('region');
+        $centerIds = $user->getScopeIds('center');
+        $halaqaIds = $user->getScopeIds('halaqa');
+
+        // محفظ حلقة ← إنجازات طلاب حلقته فقط
+        if ($halaqaIds->isNotEmpty()) {
+            return $query->whereHas('student', function ($q) use ($halaqaIds) {
+                $q->whereHas('halaqaEnrollments', function ($q) use ($halaqaIds) {
+                    $q->whereIn('halaqa_id', $halaqaIds);
+                });
+            });
+        }
+
+        // مدير مركز ← إنجازات طلاب حلقات مركزه
+        if ($centerIds->isNotEmpty()) {
+            $halaqaIds = Halaqa::where('reference_type', 'center')
+                ->whereIn('reference_id', $centerIds)
+                ->pluck('id');
+
+            return $query->whereHas('student', function ($q) use ($halaqaIds) {
+                $q->whereHas('halaqaEnrollments', function ($q) use ($halaqaIds) {
+                    $q->whereIn('halaqa_id', $halaqaIds);
+                });
+            });
+        }
+
+        // مدير منطقة ← إنجازات طلاب حلقات منطقته (مباشرة + عبر مراكزها)
+        if ($regionIds->isNotEmpty()) {
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            $halaqaIds = Halaqa::where(function ($q) use ($regionIds, $centerIds) {
+                $q->where(fn($q) => $q->where('reference_type', 'region')
+                    ->whereIn('reference_id', $regionIds));
+                if ($centerIds->isNotEmpty()) {
+                    $q->orWhere(fn($q) => $q->where('reference_type', 'center')
+                        ->whereIn('reference_id', $centerIds));
+                }
+            })->pluck('id');
+
+            return $query->whereHas('student', function ($q) use ($halaqaIds) {
+                $q->whereHas('halaqaEnrollments', function ($q) use ($halaqaIds) {
+                    $q->whereIn('halaqa_id', $halaqaIds);
+                });
+            });
+        }
+
+        // مدير فرع ← إنجازات طلاب حلقات كل مناطق فرعه (مباشرة + عبر مراكزها)
+        if ($branchIds->isNotEmpty()) {
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+            $halaqaIds = Halaqa::where(function ($q) use ($regionIds, $centerIds) {
+                $q->where(fn($q) => $q->where('reference_type', 'region')
+                    ->whereIn('reference_id', $regionIds));
+                if ($centerIds->isNotEmpty()) {
+                    $q->orWhere(fn($q) => $q->where('reference_type', 'center')
+                        ->whereIn('reference_id', $centerIds));
+                }
+            })->pluck('id');
+
+            return $query->whereHas('student', function ($q) use ($halaqaIds) {
+                $q->whereHas('halaqaEnrollments', function ($q) use ($halaqaIds) {
+                    $q->whereIn('halaqa_id', $halaqaIds);
+                });
+            });
+        }
+
+        return $query->whereRaw('1 = 0');
     }
 }

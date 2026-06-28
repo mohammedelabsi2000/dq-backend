@@ -94,6 +94,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'level_track_subjects.create', 'title' => 'إضافة مادة للمسار'],
             ['name' => 'level_track_subjects.update', 'title' => 'تعديل مادة المسار'],
             ['name' => 'level_track_subjects.delete', 'title' => 'حذف مادة المسار'],
+            ['name' => 'daily_achievements.show', 'title' => 'عرض الإنجاز اليومي'],
+            ['name' => 'daily_achievements.create', 'title' => 'إضافة إنجاز يومي'],
+            ['name' => 'daily_achievements.update', 'title' => 'تعديل إنجاز يومي'],
+            ['name' => 'daily_achievements.delete', 'title' => 'حذف إنجاز يومي'],
         ];
 
         // creating all permissions for both sanctum and web guards

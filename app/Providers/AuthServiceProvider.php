@@ -7,6 +7,7 @@ use App\Models\ApprovalRequest;
 use App\Models\Branch;
 use App\Models\Center;
 use App\Models\Constant;
+use App\Models\DailyAchievement;
 use App\Models\Halaqa;
 use App\Models\HalaqaStudent;
 use App\Models\Mosque;
@@ -22,6 +23,7 @@ use App\Policies\BranchPolicy;
 use App\Policies\CenterPolicy;
 use App\Policies\ConstantPolicy;
 use App\Policies\CustomJuzPolicy;
+use App\Policies\DailyAchievementPolicy;
 use App\Policies\HalaqaPolicy;
 use App\Policies\HalaqaStudentPolicy;
 use App\Policies\MosquePolicy;
@@ -54,6 +56,7 @@ class AuthServiceProvider extends ServiceProvider
         HalaqaStudent::class => HalaqaStudentPolicy::class,
         ApprovalRequest::class => ApprovalPolicy::class,
         CustomJuz::class => CustomJuzPolicy::class,
+        DailyAchievement::class => DailyAchievementPolicy::class,
     ];
 
     /**

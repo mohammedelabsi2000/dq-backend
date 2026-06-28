@@ -20,9 +20,10 @@ class DailyAchievementController extends Controller
     ) {}
     public function index(Request $request)
     {
-        // $this->authorize('viewAny', DailyAchievement::class);
+        $this->authorize('viewAny', DailyAchievement::class);
 
         $query = DailyAchievement::query()
+            ->visibleTo(auth()->user())
             ->with(['student', 'teacher']);
 
         // Filter by student
@@ -75,7 +76,7 @@ class DailyAchievementController extends Controller
 
     public function store(StoreDailyAchievementRequest $request)
     {
-        // $this->authorize('create', DailyAchievement::class);
+        $this->authorize('create', DailyAchievement::class);
 
         $data = $request->validated();
         $data['teacher_id'] = auth()->id();
@@ -109,7 +110,7 @@ class DailyAchievementController extends Controller
 
     public function show(DailyAchievement $dailyAchievement)
     {
-        // $this->authorize('view', $dailyAchievement);
+        $this->authorize('view', $dailyAchievement);
 
         $dailyAchievement->load(['student', 'teacher']);
 
@@ -122,7 +123,7 @@ class DailyAchievementController extends Controller
 
     public function update(UpdateDailyAchievementRequest $request, DailyAchievement $daily_memorization)
     {
-        // $this->authorize('update', $dailyAchievement);
+        $this->authorize('update', $daily_memorization);
 
         $data = $request->validated();
 
@@ -157,7 +158,7 @@ class DailyAchievementController extends Controller
 
     public function destroy(DailyAchievement $daily_memorization)
     {
-        // $this->authorize('delete', $dailyAchievement);
+        $this->authorize('delete', $daily_memorization);
 
         $daily_memorization->delete();
 
@@ -169,12 +170,13 @@ class DailyAchievementController extends Controller
 
     public function studentAchievements(Request $request, $studentId)
     {
-        // $this->authorize('viewAny', DailyAchievement::class);
+        $this->authorize('viewAny', DailyAchievement::class);
 
         $student = Student::findOrFail($studentId);
 
         $query = DailyAchievement::query()
             ->byStudent($studentId)
+            ->visibleTo(auth()->user())
             ->with(['teacher']);
 
         // Filter by date range
