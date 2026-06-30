@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Subject;
 
+use App\Enums\MemorizationDirection;
 use App\Enums\SubjectType;
 use App\Enums\SuccessValueType;
 use App\Helpers\ConstantHelper;
@@ -67,6 +68,11 @@ class SubjectRequest extends FormRequest
                 'max:255',
             ],
 
+            'custom_juz_id' => ['nullable', 'array', 'exists:custom_juz,id'],
+            'custom_juz_id.*' => ['integer'],
+
+            'memorization_direction' => ['nullable', 'string', Rule::in(array_column(MemorizationDirection::cases(), 'value'))],
+
             'juzs' => ['nullable', 'array'],
             'juzs.*' => ['integer'],
 
@@ -76,15 +82,13 @@ class SubjectRequest extends FormRequest
             'verses' => ['nullable', 'array'],
             'verses.*' => ['integer'],
 
-            // 'pages' => ['nullable', 'array'],
-            // 'pages.*' => ['integer'],
-
             'description' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
 
             'subject_requirements' => ['nullable', 'array'],
             'subject_requirements.*.success_value' => ['required', 'numeric', 'between:0,100'],
             'subject_requirements.*.success_value_type' => ['required', 'string', Rule::in(array_column(SuccessValueType::cases(), 'value'))],
+            'subject_requirements.*.weight' => ['nullable', 'numeric', 'between:0,100'],
 
         ];
     }
@@ -101,6 +105,8 @@ class SubjectRequest extends FormRequest
             'sub_title.required' => 'العنوان الفرعي مطلوب لهذا النوع من المساق.',
             'sub_title.string' => 'العنوان الفرعي يجب أن يكون نصًا.',
             'sub_title.max' => 'العنوان الفرعي لا يمكن أن يتجاوز 255 حرفًا.',
+            'custom_juz_id.array' => 'الأجزاء المخصصة يجب أن تكون مصفوفة.',
+            'custom_juz_id.*.integer' => 'الأجزاء المخصصة يجب أن تكون أعدادًا صحيحة.',
 
             'juzs.array' => 'الأجزاء يجب أن تكون مصفوفة.',
             'juzs.*.integer' => 'الأجزاء يجب أن تكون أعدادًا صحيحة.',
@@ -131,6 +137,8 @@ class SubjectRequest extends FormRequest
             'subject_type_id' => 'نوع المساق',
             'title' => 'عنوان المساق',
             'sub_title' => 'عنوان فرعي',
+            'custom_juz_id' => 'الجزء المخصص',
+            'memorization_direction' => 'اتجاه الحفظ',
             'juzs' => 'أجزاء',
             'surahs' => 'سور',
             'verses' => 'آيات',
@@ -162,17 +170,21 @@ class SubjectRequest extends FormRequest
                 return;
             }
 
-            if (
-                empty($this->juzs) &&
-                empty($this->surahs) &&
-                empty($this->verses) &&
-                empty($this->pages)
-            ) {
+            // For memorization subject types, custom_juz_id is required
+            if (empty($this->custom_juz_id)) {
                 $validator->errors()->add(
-                    'subject_details',
-                    'يجب إدخال قيمة في أحد الحقول: الأجزاء أو السور أو الآيات أو الصفحات.'
+                    'custom_juz_id',
+                    'يجب اختيار الجزء المخصص لهذا النوع من المساق.'
                 );
             }
+
+            // At least surahs or verses must be provided
+            // if (empty($this->surahs) && empty($this->verses)) {
+            //     $validator->errors()->add(
+            //         'subject_details',
+            //         'يجب اختيار السور أو الآيات.'
+            //     );
+            // }
         });
     }
 
