@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Quran\CustomJuz;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +24,12 @@ class Subject extends Model
     {
         return $this->belongsTo(Track::class)->withDefault();
     }
-    
+
+    public function customJuz(): BelongsTo
+    {
+        return $this->belongsTo(CustomJuz::class);
+    }
+
     public function subjectType(): BelongsTo
     {
         return $this->belongsTo(Constant::class);

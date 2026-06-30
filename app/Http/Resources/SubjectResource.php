@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Quran\CustomJuz;
 use App\Models\Quran\Juz;
 use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,12 +15,17 @@ class SubjectResource extends JsonResource
             'id' => $this->id,
             // 'track_id'    => $this->track_id,
             'subject_type_id' => $this->subject_type_id,
+            'custom_juz_id' => json_decode($this->custom_juz_id),
+            // 'custom_juz_labels' => CustomJuz::find(json_decode($this->custom_juz_id))->pluck('name')->toArray(),
+            'memorization_direction' => $this->memorization_direction,
+            // 'memorization_direction_label' => $this->memorization_direction?->label,
 
             'title' => $this->title,
             'sub_title' => $this->sub_title,
+            
             // Numeric arrays stored as JSON in the database, so we decode them before returning
-            'juzs' => json_decode($this->juzs),
-            'juz_labels' => Juz::find(json_decode($this->juzs))->pluck('name')->toArray(),
+            // 'juzs' => json_decode($this->juzs),
+            // 'juz_labels' => Juz::find(json_decode($this->juzs))->pluck('name')->toArray(),
             'surahs' => json_decode($this->surahs),
             'surah_labels' => Surah::find(json_decode($this->surahs))->pluck('name_ar')->toArray(),
             'verses' => json_decode($this->verses),
@@ -30,6 +36,7 @@ class SubjectResource extends JsonResource
             'created_at' => $this->created_at?->toDateTimeString(),
 
             // 'track'       => new TrackResource($this->whenLoaded('track')),
+            // 'custom_juz' => new CustomJuzResource($this->whenLoaded('customJuz')),
             'subject_type' => new ConstantResource($this->whenLoaded('subjectType')),
             'subject_requirements' => SubjectRequirementResource::collection($this->whenLoaded('subjectRequirements')),
         ];

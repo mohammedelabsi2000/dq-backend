@@ -42,6 +42,18 @@ class StoreDailyAchievementRequest extends DQFormRequest
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
+            // التحقق من عدم تكرار الإنجاز لنفس الطالب في نفس اليوم
+            $existingAchievement = \App\Models\DailyAchievement::where('student_id', $this->student_id)
+                ->where('date', $this->date)
+                ->when($this->route('daily_achievement'), function ($query) {
+                    $query->where('id', '!=', $this->route('daily_achievement')->id);
+                })
+                ->exists();
+
+            if ($existingAchievement) {
+                $validator->errors()->add('student_id', 'يوجد إنجاز مسجل لهذا الطالب في هذا التاريخ بالفعل');
+            }
+
             if ($validator->errors()->has('from_surah') || $validator->errors()->has('to_surah')
                 || $validator->errors()->has('from_ayah') || $validator->errors()->has('to_ayah')) {
                 return; // لا تتحقق من النطاق لو فيه أخطاء أساسية بالفعل

@@ -7,6 +7,7 @@ use App\Http\Resources\CustomJuzResource;
 use App\Http\Requests\CustomJuz\StoreCustomJuzRequest;
 use App\Http\Requests\CustomJuz\UpdateCustomJuzRequest;
 use App\Models\Quran\CustomJuz;
+use App\Models\Quran\Surah;
 
 class CustomJuzController extends Controller
 {
@@ -53,5 +54,39 @@ class CustomJuzController extends Controller
         $juz = $juz->delete();
 
         return $this->success($juz, 'تم حذف الجزء بنجاح');
+    }
+
+    public function surahs(CustomJuz $juz)
+    {
+        $this->authorize('view', $juz);
+
+        $juz->load(['start_surah', 'end_surah']);
+
+        // Get all surahs in range
+        $surahIds = range($juz->start_surah_id, $juz->end_surah_id);
+        $surahs = Surah::whereIn('id', $surahIds)->get();
+
+        $surahData = [];
+        foreach ($surahs as $surah) {
+            $surahData[] = [
+                'id' => $surah->id,
+                'name_ar' => $surah->name_ar,
+                'name_en' => $surah->name_en,
+                'verse_range' => [
+                    'start_aya' => $surah->id == $juz->start_surah_id ? $juz->start_aya : 1,
+                    'end_aya' => $surah->id == $juz->end_surah_id ? $juz->end_aya : null,
+                ],
+            ];
+        }
+
+        return $this->success([
+            'custom_juz' => [
+                'id' => $juz->id,
+                'name' => $juz->name,
+                'start_surah_id' => $juz->start_surah_id,
+                'end_surah_id' => $juz->end_surah_id,
+            ],
+            'surahs' => $surahData,
+        ], 'success', 200);
     }
 }
