@@ -142,22 +142,22 @@ class StudentPlanController extends Controller
     /**
      * تعديل بيانات التحاق طالب بخطة
      */
-    public function update(UpdateStudentPlanRequest $request, StudentPlan $studentPlan)
+    public function update(UpdateStudentPlanRequest $request, StudentPlan $plan_student)
     {
         $validated = $request->validated();
 
         // لو تم تعديل is_main إلى true، ألغِ الرئيسية عن باقي الخطط النشطة
         if (isset($validated['is_main']) && $validated['is_main']) {
-            $studentPlan->setAsMain();
+            $plan_student->setAsMain();
         }
 
         // تحديث البيانات
-        $studentPlan->update($validated);
+        $plan_student->update($validated);
 
-        $studentPlan->load(['student', 'plan', 'currentLevel', 'startingLevel', 'levelHistory.level']);
+        $plan_student->load(['student', 'plan', 'currentLevel', 'startingLevel', 'levelHistory.level']);
 
         return $this->success(
-            new StudentPlanResource($studentPlan),
+            new StudentPlanResource($plan_student),
             'تم تعديل بيانات التحاق بنجاح'
         );
     }
@@ -259,5 +259,12 @@ class StudentPlanController extends Controller
             $q,
             'طلاب الخطة'
         );
+    }
+
+    public function destroy(StudentPlan $plan_student)
+    {
+        $plan_student->delete();
+
+        return $this->success(null, 'تم حذف خطة الطالب بنجاح');
     }
 }

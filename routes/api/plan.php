@@ -55,11 +55,11 @@ Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
     });
 
     Route::apiResource('plan-students', StudentPlanController::class)
-        ->only(['index', 'store', 'show', 'update']);
+        /* ->only(['index', 'store', 'show', 'update']) */;
 
-    Route::put('plan-students/{studentPlan}/move-level', [StudentPlanController::class, 'moveLevel']);
-    Route::put('plan-students/{studentPlan}/close', [StudentPlanController::class, 'close']);
-    Route::put('plan-students/{studentPlan}/set-main', [StudentPlanController::class, 'setMain']);
+    // Route::put('plan-students/{studentPlan}/move-level', [StudentPlanController::class, 'moveLevel']);
+    // Route::put('plan-students/{studentPlan}/close', [StudentPlanController::class, 'close']);
+    // Route::put('plan-students/{studentPlan}/set-main', [StudentPlanController::class, 'setMain']);
 
     //  Route::prefix('level-tracks/{levelTrack}/subjects')->group(function () {
     //     Route::get('/',  [LevelTrackSubjectController::class, 'index']);  // جلب الكل
