@@ -155,6 +155,19 @@ class Student extends Model
         return $this->hasMany(DailyAchievement::class);
     }
 
+    public function studentPlans()
+    {
+        return $this->hasMany(StudentPlan::class);
+    }
+
+    /**
+     * الخطة النشطة الحالية للطالب (إن وجدت)
+     */
+    public function activePlan()
+    {
+        return $this->hasOne(StudentPlan::class)->whereNull('to_date');
+    }
+
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
