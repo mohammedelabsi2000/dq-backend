@@ -5,8 +5,13 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Plan\StorePlanRequest;
 use App\Http\Requests\Plan\UpdatePlanRequest;
+use App\Http\Requests\StudentPlan\EnrollStudentPlanRequest;
 use App\Http\Resources\PlanResource;
+use App\Http\Resources\StudentPlanResource;
+use App\Http\Resources\StudentResource;
+use App\Models\Level;
 use App\Models\Plan;
+use App\Models\StudentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -190,7 +195,7 @@ class PlanController extends Controller
     public function reorder(Request $request)
     {
         $this->authorize('reorder', Plan::class);
-        
+
         $items = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*.id' => ['required', 'integer', 'distinct', 'exists:plans,id'],
@@ -207,5 +212,77 @@ class PlanController extends Controller
             null,
             'تم تحديث الترتيب بنجاح'
         );
+    }
+
+    public function getStudentsByPlan(Plan $plan)
+    {
+        $query = $plan->students();
+
+        $q = $this->applyFilters($query, [
+            'searchColumns' => ['name'],
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc',
+            'limit' => '*',
+        ]);
+
+        $query = $q['query'];
+        $planStudents = $query->get();
+        return $this->successWithPagination(
+            StudentPlanResource::collection($planStudents),
+            ['total' => $planStudents->count(), 'skip' => 0, 'limit' => 10],
+            'success',
+            200
+        );
+    }
+
+    public function storeStudentsByPlan(EnrollStudentPlanRequest $request, Plan $plan)
+    {
+        $validated = $request->validated();
+
+        $startingLevelId = $validated['starting_level_id']
+            ?? Level::where('plan_id', $plan->id)->orderBy('order')->value('id');
+
+        $isMain = $validated['is_main'] ?? false;
+        $studentPlans = collect();
+
+        foreach ($validated['student_ids'] as $studentId) {
+            // هل هذه أول خطة نشطة للطالب؟ تصبح رئيسية تلقائياً إذا لم يُطلب خلاف ذلك
+            $hasOtherActivePlans = StudentPlan::where('student_id', $studentId)
+                ->active()
+                ->exists();
+
+            $shouldBeMain = $isMain ?? !$hasOtherActivePlans;
+
+            $studentPlan = StudentPlan::create([
+                'student_id' => $studentId,
+                'plan_id' => $plan->id,
+                'starting_level_id' => $startingLevelId,
+                'current_level_id' => $startingLevelId,
+                'from_date' => $validated['from_date'],
+                'is_main' => $shouldBeMain,
+                'status' => 'active',
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            // لو طُلبت كرئيسية صراحة، ألغِ الرئيسية عن باقي الخطط النشطة
+            if ($shouldBeMain) {
+                $studentPlan->setAsMain();
+            }
+
+            // فتح أول سجل في history
+            $studentPlan->levelHistory()->create([
+                'level_id' => $startingLevelId,
+                'from_date' => $validated['from_date'],
+                'to_date' => null,
+            ]);
+
+            $studentPlans->push($studentPlan);
+
+            return $this->success(
+                StudentPlanResource::collection($studentPlans),
+                'تم تسجيل التحاق الطلاب بالخطة بنجاح',
+                201
+            );
+        }
     }
 }

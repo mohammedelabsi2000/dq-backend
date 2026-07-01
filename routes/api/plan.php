@@ -69,4 +69,7 @@ Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
 
     // Route::get('level-track-subjects/{levelTrackSubject}',    [LevelTrackSubjectController::class, 'show']);
     // Route::delete('level-track-subjects/{levelTrackSubject}', [LevelTrackSubjectController::class, 'destroy']);
+
+    Route::get('{plan}/students', [PlanController::class, 'getStudentsByPlan'])->name('plans.students');
+    Route::post('{plan}/students', [PlanController::class, 'storeStudentsByPlan'])->name('plans.students.post');
 });
