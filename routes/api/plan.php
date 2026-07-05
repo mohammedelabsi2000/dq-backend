@@ -72,4 +72,5 @@ Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
 
     Route::get('{plan}/students', [PlanController::class, 'getStudentsByPlan'])->name('plans.students');
     Route::post('{plan}/students', [PlanController::class, 'storeStudentsByPlan'])->name('plans.students.post');
+    Route::put('{plan}/students/{student}', [PlanController::class, 'updateStudentByPlan'])->name('plans.students.update');
 });

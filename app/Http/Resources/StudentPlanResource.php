@@ -9,33 +9,12 @@ class StudentPlanResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
+            'plan' => new PlanResource($this),
 
-            'student_id' => $this->student_id,
-            'student' => new StudentResource($this->whenLoaded('student')),
+            'students' => StudentResource::collection($this->whenLoaded('students')),
 
-            'plan_id' => $this->plan_id,
-            'plan' => new PlanResource($this->whenLoaded('plan')),
+            // 'student_ids' => $this->students->pluck('id'),
 
-            'starting_level_id' => $this->starting_level_id,
-            'starting_level' => new LevelResource($this->whenLoaded('startingLevel')),
-
-            'current_level_id' => $this->current_level_id,
-            'current_level' => new LevelResource($this->whenLoaded('currentLevel')),
-
-            'from_date' => $this->from_date?->format('Y-m-d'),
-            'to_date' => $this->to_date?->format('Y-m-d'),
-
-            'is_main' => $this->is_main,
-
-            'status' => $this->status,
-            'status_label' => $this->status?->getLabel(),
-
-            'is_active' => is_null($this->to_date),
-
-            'notes' => $this->notes,
-
-            'level_history' => StudentLevelHistoryResource::collection($this->whenLoaded('levelHistory')),
         ];
     }
 }

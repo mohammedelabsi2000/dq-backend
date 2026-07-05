@@ -11,6 +11,7 @@ use App\Http\Resources\StudentPlanResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Level;
 use App\Models\Plan;
+use App\Models\Student;
 use App\Models\StudentPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -216,7 +217,8 @@ class PlanController extends Controller
 
     public function getStudentsByPlan(Plan $plan)
     {
-        $query = $plan->students();
+        $query = $plan->with('students');
+        // $plan = Plan::with('students')->findOrFail($plan);
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
@@ -226,10 +228,10 @@ class PlanController extends Controller
         ]);
 
         $query = $q['query'];
-        $planStudents = $query->get();
+        $planWithStudents = $query->first();
         return $this->successWithPagination(
-            StudentPlanResource::collection($planStudents),
-            ['total' => $planStudents->count(), 'skip' => 0, 'limit' => 10],
+            new StudentPlanResource($planWithStudents),
+            ['total' => $planWithStudents->students->count(), 'skip' => 0, 'limit' => 10],
             'success',
             200
         );
@@ -240,49 +242,129 @@ class PlanController extends Controller
         $validated = $request->validated();
 
         $startingLevelId = $validated['starting_level_id']
-            ?? Level::where('plan_id', $plan->id)->orderBy('order')->value('id');
+            ?? Level::where('plan_id', $plan->id)->orderBy('order')->first()?->id;
 
-        $isMain = $validated['is_main'] ?? false;
-        $studentPlans = collect();
+        $isMain = boolval($validated['is_main']);
+        // $studentPlans = collect();
 
-        foreach ($validated['student_ids'] as $studentId) {
-            // هل هذه أول خطة نشطة للطالب؟ تصبح رئيسية تلقائياً إذا لم يُطلب خلاف ذلك
-            $hasOtherActivePlans = StudentPlan::where('student_id', $studentId)
-                ->active()
-                ->exists();
+        $studentsIds = $validated['student_ids'];
 
-            $shouldBeMain = $isMain ?? !$hasOtherActivePlans;
+        $students = Student::whereIn('id', $studentsIds)->with('plans')->get();
 
-            $studentPlan = StudentPlan::create([
-                'student_id' => $studentId,
+        foreach ($students as $student) {
+
+            $data = [
+                'student_id' => $student->id,
                 'plan_id' => $plan->id,
                 'starting_level_id' => $startingLevelId,
                 'current_level_id' => $startingLevelId,
                 'from_date' => $validated['from_date'],
-                'is_main' => $shouldBeMain,
+                'is_main' => $isMain,
                 'status' => 'active',
                 'notes' => $validated['notes'] ?? null,
-            ]);
+            ];
 
-            // لو طُلبت كرئيسية صراحة، ألغِ الرئيسية عن باقي الخطط النشطة
-            if ($shouldBeMain) {
-                $studentPlan->setAsMain();
+            if (!$student->plans()->exists()) {
+                $data['is_main'] = true;
             }
 
-            // فتح أول سجل في history
-            $studentPlan->levelHistory()->create([
-                'level_id' => $startingLevelId,
-                'from_date' => $validated['from_date'],
-                'to_date' => null,
-            ]);
+            if ($isMain) {
+                $student->plans()->where('is_main', true)->update(['is_main' => false]);
+            }
 
-            $studentPlans->push($studentPlan);
-
-            return $this->success(
-                StudentPlanResource::collection($studentPlans),
-                'تم تسجيل التحاق الطلاب بالخطة بنجاح',
-                201
+            $student->plans()->syncWithPivotValues(
+                [$validated['plan_id']],
+                $data,
+                false
             );
         }
+
+        return $this->success(
+            null,
+            'تم تسجيل التحاق الطلاب بالخطة بنجاح',
+            201
+        );
+
+        // $studentPlan = ['plan_id' => $plan->id,
+        //     'starting_level_id' => $startingLevelId,
+        //     'current_level_id' => $startingLevelId,
+        //     'from_date' => $validated['from_date'],
+        //     'is_main' => $isMain,
+        //     'status' => 'active',
+        //     'notes' => $validated['notes'] ?? null];
+
+        // $plan->students()->syncWithPivotValues($validated['student_ids'], $studentPlan);
+
+        // foreach ($validated['student_ids'] as $studentId) {
+        //     // هل هذه أول خطة نشطة للطالب؟ تصبح رئيسية تلقائياً إذا لم يُطلب خلاف ذلك
+        //     $hasOtherActivePlans = StudentPlan::where('student_id', $studentId)
+        //         ->active()
+        //         ->exists();
+
+        //     $shouldBeMain = $isMain ?? !$hasOtherActivePlans;
+
+        //     $studentPlan = StudentPlan::create([
+        //         'student_id' => $studentId,
+        //         'plan_id' => $plan->id,
+        //         'starting_level_id' => $startingLevelId,
+        //         'current_level_id' => $startingLevelId,
+        //         'from_date' => $validated['from_date'],
+        //         'is_main' => $shouldBeMain,
+        //         'status' => 'active',
+        //         'notes' => $validated['notes'] ?? null,
+        //     ]);
+
+        //     // لو طُلبت كرئيسية صراحة، ألغِ الرئيسية عن باقي الخطط النشطة
+        //     if ($shouldBeMain) {
+        //         $studentPlan->setAsMain();
+        //     }
+
+        //     // فتح أول سجل في history
+        //     $studentPlan->levelHistory()->create([
+        //         'level_id' => $startingLevelId,
+        //         'from_date' => $validated['from_date'],
+        //         'to_date' => null,
+        //     ]);
+
+        //     $studentPlans->push($studentPlan);
+
+        //     return $this->success(
+        //         StudentPlanResource::collection($studentPlans),
+        //         'تم تسجيل التحاق الطلاب بالخطة بنجاح',
+        //         201
+        //     );
+        // }
+    }
+
+    public function updateStudentByPlan(Request $request, $planId, $studentId)
+    {
+        $validated = $request->validate([
+            'starting_level_id' => 'nullable|exists:levels,id',
+            'current_level_id' => 'nullable|exists:levels,id',
+            'from_date' => 'required|date',
+            'to_date' => 'nullable|date|after_or_equal:from_date',
+            'is_main' => 'nullable|boolean',
+            'status' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $plan = Plan::findOrFail($planId);
+        $plan->students()->updateExistingPivot($studentId, [
+            'starting_level_id' => $validated['starting_level_id'],
+            'current_level_id' => $validated['current_level_id'],
+            'from_date' => $validated['from_date'],
+            'to_date' => $validated['to_date'],
+            'is_main' => $validated['is_main'],
+            'status' => $validated['status'],
+            'notes' => $validated['notes'],
+        ]);
+
+        $plan->load('students');
+
+        return $this->success(
+            new StudentPlanResource($plan),
+            'تم تحديث الخطة بنجاح',
+            200
+        );
     }
 }

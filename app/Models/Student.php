@@ -155,9 +155,10 @@ class Student extends Model
         return $this->hasMany(DailyAchievement::class);
     }
 
-    public function studentPlans()
+    public function plans()
     {
-        return $this->hasMany(StudentPlan::class);
+        return $this->belongsToMany(Plan::class, 'student_plans')
+            ->withPivot('is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes');
     }
 
     /**
