@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Constant;
+use App\Models\Level;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
@@ -111,14 +112,36 @@ class StudentResource extends JsonResource
             'enrollments_count' => $this->when(isset($this->enrollments_count), $this->enrollments_count),
             'attendances_count' => $this->when(isset($this->attendances_count), $this->attendances_count),
 
+            'plan_pivots' => $this->whenPivotLoaded('student_plans', function () {
+                return [
+                    'starting_level_id' => $this->pivot->starting_level_id,
+                    // 'starting_level' => $this->when($this->pivot->starting_level_id, fn() => new LevelResource(Level::find($this->pivot->starting_level_id))),
+
+                    'current_level_id' => $this->pivot->current_level_id,
+                    // 'current_level' => $this->when($this->pivot->current_level_id, fn() => new LevelResource(Level::find($this->pivot->current_level_id))),
+
+                    'from_date' => $this->pivot->from_date,
+                    'to_date' => $this->pivot->to_date,
+
+                    'is_main' => $this->pivot->is_main,
+
+                    'status' => $this->pivot->status,
+                    'status_label' => $this->pivot->status,
+
+                    'is_active' => is_null($this->pivot->to_date),
+
+                    'notes' => $this->pivot->notes,
+                ];
+            }),
+
             // روابط
-            'links' => [
-                'self' => url("/api/students/{$this->id}"),
-                'mosque' => url("/api/mosques/{$this->mosque_id}"),
-                'guardian' => url("/api/users/identity/{$this->guardian_id}"),
-                'enrollments' => url("/api/enrollments?student_id={$this->id}"),
-                'attendances' => url("/api/attendances?attendable_id={$this->id}&attendable_type=student"),
-            ],
+            // 'links' => [
+            //     'self' => url("/api/students/{$this->id}"),
+            //     'mosque' => url("/api/mosques/{$this->mosque_id}"),
+            //     'guardian' => url("/api/users/identity/{$this->guardian_id}"),
+            //     'enrollments' => url("/api/enrollments?student_id={$this->id}"),
+            //     'attendances' => url("/api/attendances?attendable_id={$this->id}&attendable_type=student"),
+            // ],
         ];
     }
 }

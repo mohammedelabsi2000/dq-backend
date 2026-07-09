@@ -77,6 +77,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'plans.update', 'title' => 'تعديل خطة'],
             ['name' => 'plans.delete', 'title' => 'حذف خطة'],
             ['name' => 'plans.toggle_active', 'title' => 'تفعيل/إيقاف خطة'],
+            ['name' => 'plans.show_plan_students', 'title' => 'عرض طلاب الخطة'],
+            ['name' => 'plans.enroll_student', 'title' => 'تسجيل طالب في خطة'],
+            ['name' => 'plans.update_student', 'title' => 'تعديل طالب في خطة'],
+            ['name' => 'plans.delete_student', 'title' => 'حذف طالب من خطة'],
             ['name' => 'tracks.show', 'title' => 'عرض المسارات'],
             ['name' => 'tracks.create', 'title' => 'إضافة مسار'],
             ['name' => 'tracks.update', 'title' => 'تعديل مسار'],
@@ -98,6 +102,10 @@ class PermissionSeeder extends Seeder
             ['name' => 'daily_achievements.create', 'title' => 'إضافة إنجاز يومي'],
             ['name' => 'daily_achievements.update', 'title' => 'تعديل إنجاز يومي'],
             ['name' => 'daily_achievements.delete', 'title' => 'حذف إنجاز يومي'],
+            // ['name' => 'student_plans.show', 'title' => 'عرض خطط الطلاب'],
+            // ['name' => 'student_plans.create', 'title' => 'تسجيل طالب في خطة'],
+            // ['name' => 'student_plans.update', 'title' => 'تعديل خطة طالب'],
+            // ['name' => 'student_plans.delete', 'title' => 'حذف خطة طالب'],
         ];
 
         // creating all permissions for both sanctum and web guards

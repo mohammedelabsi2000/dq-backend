@@ -55,4 +55,22 @@ class Plan extends Model
     {
         return $query->where('is_active', true);
     }
+
+    public function students()
+    {
+        return $this->belongsToMany(Student::class, 'student_plans')
+        ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
+    }
+
+    // current students
+    public function currentStudents()
+    {
+        return $this->hasManyThrough(Student::class, StudentPlan::class, 'plan_id', 'id', 'id', 'student_id')
+            ->where('status', 'active')
+            ->whereDate('from_date', '<=', now())
+            ->where(function ($query) {
+                $query->whereDate('to_date', '>=', now())
+                    ->orWhereNull('to_date');
+            });
+    }
 }

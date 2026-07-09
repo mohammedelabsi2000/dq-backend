@@ -57,4 +57,24 @@ class PlanPolicy
     {
         return $user->hasPermissionTo('plans.toggle_active');
     }
+
+    public function showPlanStudents(User $user, Plan $plan): bool
+    {
+        return $user->hasPermissionTo('plans.show_plan_students');
+    }
+
+    public function enrollStudent(User $user, Plan $plan): bool
+    {
+        return $user->hasPermissionTo('plans.enroll_student');
+    }
+
+    public function updateStudent(User $user, Plan $plan): bool
+    {
+        return $user->hasPermissionTo('plans.update_student');
+    }
+
+    public function deleteStudent(User $user, Plan $plan): bool
+    {
+        return $user->hasPermissionTo('plans.delete_student');
+    }
 }
