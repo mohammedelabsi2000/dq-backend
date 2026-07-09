@@ -11,7 +11,7 @@ class StudentPlanResource extends JsonResource
         return [
             'plan' => new PlanResource($this),
 
-            'students' => StudentResource::collection($this->whenLoaded('students')),
+            'students' => StudentResource::collection($this->students),
 
             // 'student_ids' => $this->students->pluck('id'),
 

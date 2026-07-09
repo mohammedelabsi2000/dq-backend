@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\SuccessValueType;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class SubjectRequirementResource extends JsonResource
@@ -20,6 +21,7 @@ class SubjectRequirementResource extends JsonResource
             'success_value_type' => $this->success_value_type,
             'success_value' => $this->success_value,
             'weight' => $this->weight,
+            'success_value_type_label' => SuccessValueType::tryFrom($this->success_value_type)?->label(),
         ];
     }
 }

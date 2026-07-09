@@ -59,9 +59,7 @@ class Plan extends Model
     public function students()
     {
         return $this->belongsToMany(Student::class, 'student_plans')
-        ->withPivot('is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes');
-        // return $this->hasMany(StudentPlan::class, 'plan_id', 'id');
-        // return $this->hasManyThrough(Student::class, StudentPlan::class, 'plan_id', 'id', 'id', 'student_id');
+        ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
     }
 
     // current students

@@ -3,13 +3,14 @@
 namespace App\Http\Requests\StudentPlan;
 
 use App\Http\Requests\DQFormRequest;
+use App\Models\Plan;
 use App\Models\StudentPlan;
 
 class EnrollStudentPlanRequest extends DQFormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('enrollStudent', $this->route('plan'));
     }
 
     public function rules(): array
