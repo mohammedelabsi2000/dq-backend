@@ -52,11 +52,6 @@ class StudentPlan extends Model
         return $this->belongsTo(Level::class, 'current_level_id');
     }
 
-    public function levelHistory(): HasMany
-    {
-        return $this->hasMany(StudentLevelHistory::class)->orderBy('from_date');
-    }
-
     // ========================
     // Scopes
     // ========================
