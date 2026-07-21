@@ -13,7 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        //
+        Schema::dropIfExists('audits');
+        Schema::dropIfExists('grades');
+        Schema::dropIfExists('attendances');
+        Schema::dropIfExists('replacement_limits');
+        Schema::dropIfExists('student_level_histories');
     }
 
     /**
