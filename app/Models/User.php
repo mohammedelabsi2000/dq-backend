@@ -163,15 +163,8 @@ class User extends Authenticatable
         return $this->gender?->label() ?? 'غير محدد';
     }
 
-
-    public function academicQualifications()
-    {
-        return $this->morphMany(AcademicQualification::class, 'person');
-    }
-
-    public function personalCourses()
-    {
-        return $this->morphMany(PersonalCourse::class, 'person');
+    public function certificates(){
+        return $this->morphMany(Certificate::class, 'person');
     }
 
     public function activeScopes()

@@ -97,7 +97,7 @@ class HalaqaController extends Controller
             'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
             'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
             'sponsor_entity' => $request->input('sponsor_entity'),
-            'from_date' => $request->input('from_date', now()->toDateString()),
+            'from_date' => $request->input('from_date'),
             'to_date' => $request->input('to_date'),
             'notes' => $request->input('notes'),
         ];
@@ -187,7 +187,7 @@ class HalaqaController extends Controller
             'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
             'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
             'sponsor_entity' => $request->input('sponsor_entity'),
-            'from_date' => $request->input('from_date', now()->toDateString()),
+            'from_date' => $request->input('from_date'),
             'to_date' => $request->input('to_date'),
             'notes' => $request->input('notes'),
         ];

@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Mosque;
-use App\Models\AcademicQualification;
-use App\Models\PersonalCourse;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
