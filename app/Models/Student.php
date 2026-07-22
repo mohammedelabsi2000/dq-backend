@@ -5,9 +5,6 @@
 namespace App\Models;
 
 
-
-use App\Concerns\Auditable;
-
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +25,7 @@ class Student extends Model
 
 {
 
-    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope;
 
 
 
@@ -116,11 +113,6 @@ class Student extends Model
         'gender' => Gender::class
 
     ];
-
-
-
-    public static $usesAudit = true;
-
 
 
     protected $appends = ['full_name'];
@@ -251,17 +243,6 @@ class Student extends Model
 
         return $this->belongsTo(User::class, 'guardian_id', 'identity');
     }
-
-
-
-    public function attendances()
-
-    {
-
-        return $this->morphMany(Attendance::class, 'attendable');
-    }
-
-
 
     public function halaqaEnrollments()
 

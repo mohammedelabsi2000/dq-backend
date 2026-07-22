@@ -90,13 +90,6 @@ class User extends Authenticatable
     // =======================
 
     // علاقة المستخدم بالمسجد
-
-
-    public function attendances()
-    {
-        return $this->morphMany(Attendance::class, 'attendable');
-    }
-
     public function mosque()
     {
         return $this->belongsTo(Mosque::class);
