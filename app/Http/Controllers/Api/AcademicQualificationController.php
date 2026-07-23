@@ -13,6 +13,8 @@ use Illuminate\Http\UploadedFile;
 class AcademicQualificationController extends Controller
 {
 
+//test
+
     public function getPersonQualifications($person_type, $person_id)
     {
         $this->authorize('viewAny', AcademicQualification::class);
