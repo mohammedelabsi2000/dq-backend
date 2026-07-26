@@ -12,14 +12,21 @@ class Certificate extends Model
 
     protected $guarded = [];
 
-    public function academicDegree()
+    
+
+    public function academicQualification()
     {
-        return $this->belongsTo(Constant::class, 'academic_degree_id');
+        return $this->belongsTo(Constant::class, 'academic_qualification_id');
     }
 
     public function major()
     {
         return $this->belongsTo(Constant::class, 'major_id');
+    }
+
+    public function courseType()
+    {
+        return $this->belongsTo(Constant::class, 'course_type_id');
     }
 
     public function person()
@@ -30,5 +37,14 @@ class Certificate extends Model
     public function images()
     {
         return $this->morphMany(Image::class, 'imageable');
+    }
+
+    public function getCertificateTypeLabelAttribute()
+    {
+        return match ($this->certificate_type) {
+            'academy' => 'مؤهل علمي',
+            'course' => 'دورة علمية',
+            default => null,
+        };
     }
 }

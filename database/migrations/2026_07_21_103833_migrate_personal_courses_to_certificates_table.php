@@ -71,7 +71,7 @@ return new class extends Migration {
                 WHERE i.imageable_type = ?
             ", [
                     Certificate::class,
-                    PersonalCourse::class,
+                    'PersonalCourse',
                 ]);
             });
         });

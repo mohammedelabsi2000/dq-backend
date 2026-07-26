@@ -28,20 +28,24 @@ class CertificateRequest extends FormRequest
         return [
             'person_type' => 'required|string',
             'person_id' => 'required|integer',
+            'certificate_link' => 'nullable|string',
             'date_graduate' => 'nullable|date',
+            'provider' => 'nullable|string',
             'certificate_type' => 'required|in:academy,course',
-            'academic_degree_id' => [
+            'academic_qualification_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('academic_degree')),
             ],
-            'qualification_id' => [
+            'major_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('major')),
             ],
+            'course_name' => 'nullable|string',
             'course_type_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('course_type')),
             ],
+            'notes' => 'nullable|string',
             'certificate_file' => 'nullable|file|mimes:pdf|max:5120',
         ];
     }
@@ -54,17 +58,11 @@ class CertificateRequest extends FormRequest
     public function messages()
     {
         return [
-            'person_type.required' => 'حقل نوع الشخص مطلوب.',
-            'person_id.required' => 'حقل معرف الشخص مطلوب.',
-            'date_graduate.date' => 'حقل تاريخ الحصول على الشهادة يجب أن يكون تاريخًا صالحًا.',
-            'certificate_type.required' => 'حقل نوع الشهادة مطلوب.',
-            'certificate_type.in' => 'نوع الشهادة المحدد غير صالح. يجب أن يكون إما "academy" أو "course".',
-            'academic_degree_id.in' => 'الدرجة العلمية المحددة غير موجودة.',
-            'qualification_id.in' => 'التخصص المحدد غير موجود.',
-            'course_type_id.in' => 'نوع الدورة المحدد غير موجود.',
-            'certificate_file.file' => 'حقل ملف الشهادة يجب أن يكون ملفًا.',
-            'certificate_file.mimes' => 'حقل ملف الشهادة يجب أن يكون من نوع PDF.',
-            'certificate_file.max' => 'حجم ملف الشهادة يجب ألا يتجاوز 5 ميغابايت.',
+            'academic_qualification_id.in' => 'الدرجة العلمية غير صالحة',
+            'major_id.in' => 'التخصص غير صالح',
+            'course_type_id.in' => 'نوع الدورة غير صالح',
+            'certificate_file.max' => 'حجم الملف يجب أن لا يتجاوز 5 ميغابايت',
+            'certificate_file.mimes' => 'صيغة الملف يجب أن تكون PDF',
         ];
     }
 }

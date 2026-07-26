@@ -33,8 +33,8 @@ return new class extends Migration {
                         'date_graduate',
                         'provider',
                         'certificate_type',
-                        'academic_degree_id',
-                        'qualification_id',
+                        'academic_qualification_id',
+                        'major_id',
                         'notes',
                         'created_at',
                         'updated_at',
@@ -73,7 +73,7 @@ return new class extends Migration {
                 WHERE i.imageable_type = ?
             ", [
                     Certificate::class,
-                    AcademicQualification::class,
+                    'AcademicQualification',
                 ]);
             });
         });

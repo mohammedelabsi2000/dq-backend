@@ -26,7 +26,7 @@ class CertificateController extends Controller
         $total = $q['count'];
 
         $data = $query->with([
-            'academicDegree',
+            'academicQualification',
             'major',
             'person',
             'images',
@@ -42,7 +42,9 @@ class CertificateController extends Controller
 
     public function store(CertificateRequest $request)
     {
-        $certificate = Certificate::create($request->validated());
+        $validatedData = $request->validated();
+        unset($validatedData['certificate_file']);
+        $certificate = Certificate::create($validatedData);
 
         if ($request->hasFile('certificate_file')) {
             // delegate file processing to the helper
@@ -50,7 +52,7 @@ class CertificateController extends Controller
         }
 
         return $this->success(
-            new CertificateResource($certificate->load(['academicDegree', 'major', 'person', 'images'])),
+            new CertificateResource($certificate->load(['academicQualification', 'major', 'person', 'images'])),
             'تم إضافة الشهادة بنجاح',
             201
         );
@@ -60,7 +62,7 @@ class CertificateController extends Controller
     {
         $this->authorize('view', $certificate);
         $certificate = $certificate->load([
-            'academicDegree',
+            'academicQualification',
             'major',
             'person',
             'images',
@@ -76,15 +78,16 @@ class CertificateController extends Controller
 
     public function update(CertificateRequest $request, Certificate $certificate)
     {
-
-        $certificate->update($request->validated());
+        $validatedData = $request->validated();
+        unset($validatedData['certificate_file']);
+        $certificate->update($validatedData);
 
         if ($request->hasFile('certificate_file')) {
             $this->storeCertificate($certificate, $request->file('certificate_file'));
         }
 
         return $this->success(
-            new CertificateResource($certificate->load(['academicDegree', 'major', 'person', 'images'])),
+            new CertificateResource($certificate->load(['academicQualification', 'major', 'person', 'images'])),
             'تم تحديث بيانات الشهادة',
             200
         );
@@ -125,8 +128,10 @@ class CertificateController extends Controller
     {
         $this->authorize('viewAny', Certificate::class);
         $data = Certificate::with([
-            'academicDegree',
+            'academicQualification',
             'major',
+            'courseType',
+            'person',
             'images'
         ])->where('person_type', $person_type)
             ->where('person_id', $person_id)
