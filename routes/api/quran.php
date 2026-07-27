@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\CustomJuzController;
 use App\Http\Controllers\Api\QuranController;
+use App\Http\Middleware\SetCurrentUserContext;
 
 // Custom Juz CRUD
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     Route::apiResource('custom-juz', CustomJuzController::class)->parameters([
         'custom-juz' => 'juz'
     ]);

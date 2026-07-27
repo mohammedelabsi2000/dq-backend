@@ -4,6 +4,7 @@ namespace App\Http\Requests\Student;
 
 use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
+use App\Rules\GenderVisibilityRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
@@ -27,7 +28,7 @@ class UpdateStudentRequest extends BaseStudentRequest
             'dob' => 'nullable|date',
             'mosque_id' => 'sometimes|exists:mosques,id',
             'location' => 'nullable|string',
-            'gender' => ['sometimes', new Enum(Gender::class)],
+            'gender' => ['sometimes', new Enum(Gender::class), new GenderVisibilityRule()],
             'marital_status_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),

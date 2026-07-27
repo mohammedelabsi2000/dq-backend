@@ -5,6 +5,7 @@ namespace App\Http\Requests\Center;
 use App\Http\Requests\DQFormRequest;
 use App\Models\Center;
 use App\Models\Region;
+use App\Rules\GenderVisibilityRule;
 
 class StoreCenterRequest extends DQFormRequest
 {
@@ -26,20 +27,22 @@ class StoreCenterRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'name'      => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'region_id' => 'required|exists:regions,id',
             'mosque_id' => 'nullable|exists:mosques,id',
-            'notes'     => 'nullable|string',
+            'notes' => 'nullable|string',
+            'gender' => ['required', new GenderVisibilityRule()],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required'      => 'اسم المركز مطلوب',
+            'name.required' => 'اسم المركز مطلوب',
             'region_id.required' => 'يجب اختيار المنطقة',
-            'region_id.exists'   => 'المنطقة المحددة غير موجودة',
-            'mosque_id.exists'   => 'المسجد المحدد غير موجود',
+            'region_id.exists' => 'المنطقة المحددة غير موجودة',
+            'mosque_id.exists' => 'المسجد المحدد غير موجود',
+            'gender.required' => 'يجب اختيار الجنس'
         ];
     }
 }
