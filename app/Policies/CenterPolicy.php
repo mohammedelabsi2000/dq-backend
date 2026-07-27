@@ -17,7 +17,8 @@ class CenterPolicy
 
     public function view(User $user, Center $center): bool
     {
-        return $user->hasPermissionTo('centers.show');
+        return $user->hasPermissionTo('centers.show')
+            && $this->isVisible($user, $center);
     }
 
     public function create(User $user): bool
@@ -27,11 +28,18 @@ class CenterPolicy
 
     public function update(User $user, Center $center): bool
     {
-        return $user->hasPermissionTo('centers.update');
+        return $user->hasPermissionTo('centers.update')
+            && $this->isVisible($user, $center);
     }
 
     public function delete(User $user, Center $center): bool
     {
-        return $user->hasPermissionTo('centers.delete');
+        return $user->hasPermissionTo('centers.delete')
+            && $this->isVisible($user, $center);
+    }
+
+    private function isVisible(User $user, Center $center): bool
+    {
+        return Center::visibleTo($user)->where('id', $center->id)->exists();
     }
 }

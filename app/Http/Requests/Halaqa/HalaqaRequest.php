@@ -19,10 +19,13 @@ class HalaqaRequest extends DQFormRequest
      */
     public function authorize()
     {
+        $referenceType = $this->input('reference_type');
+        $referenceId = $this->input('reference_id') ? (int) $this->input('reference_id') : null;
+
         if ($this->isStore()) {
-            return $this->user()->can('create', Halaqa::class);
+            return $this->user()->can('create', [Halaqa::class, $referenceType, $referenceId]);
         } elseif ($this->isUpdate()) {
-            return $this->user()->can('update', $this->route('halaqa'));
+            return $this->user()->can('update', [$this->route('halaqa'), $referenceType, $referenceId]);
         }
         return false;
     }

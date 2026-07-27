@@ -8,6 +8,8 @@ namespace App\Models;
 
 use App\Concerns\Auditable;
 
+use App\Concerns\HasApproval;
+
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +30,7 @@ class Student extends Model
 
 {
 
-    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
+    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope, HasApproval;
 
 
 
@@ -78,6 +80,8 @@ class Student extends Model
 
         'end_aya',
 
+        'is_approved',
+
     ];
 
 
@@ -102,6 +106,8 @@ class Student extends Model
 
             'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
 
+            'approvalRequest',
+
         ];
     }
 
@@ -113,7 +119,9 @@ class Student extends Model
 
         'dob' => 'date',
 
-        'gender' => Gender::class
+        'gender' => Gender::class,
+
+        'is_approved' => 'boolean',
 
     ];
 

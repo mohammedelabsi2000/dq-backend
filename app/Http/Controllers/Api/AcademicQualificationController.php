@@ -8,6 +8,8 @@ use App\Http\Requests\AcademicQualification\UpdateAcademicQualificationRequest;
 use App\Http\Resources\AcademicQualificationResource;
 use App\Models\AcademicQualification;
 use App\Models\Image;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
 
 class AcademicQualificationController extends Controller
@@ -17,7 +19,8 @@ class AcademicQualificationController extends Controller
 
     public function getPersonQualifications($person_type, $person_id)
     {
-        $this->authorize('viewAny', AcademicQualification::class);
+        $this->authorize('viewForPerson', [AcademicQualification::class, $person_type, (int) $person_id]);
+
         $data = AcademicQualification::with([
             'academicDegree',
             'major',
@@ -42,6 +45,18 @@ class AcademicQualificationController extends Controller
     {
         $this->authorize('viewAny', AcademicQualification::class);
         $query = AcademicQualification::query();
+
+        if (!auth()->user()->isGlobalAdmin()) {
+            $query->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('person_type', 'student')
+                        ->whereIn('person_id', Student::visibleTo(auth()->user())->select('id'));
+                })->orWhere(function ($q) {
+                    $q->where('person_type', 'user')
+                        ->whereIn('person_id', User::visibleTo(auth()->user())->select('id'));
+                });
+            });
+        }
 
         $q = $this->applyFilters($query, [
             'orderColumn' => 'created_at',

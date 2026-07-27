@@ -69,10 +69,6 @@ class UserResource extends JsonResource
                     $this->relationLoaded('approvalRequest'),
                     fn() => $this->approvalRequest?->status?->label()
                 ),
-                'current_level'    => $this->when(
-                    $this->relationLoaded('approvalRequest'),
-                    fn() => $this->approvalRequest?->current_level?->label()
-                ),
                 'rejection_reason' => $this->when(
                     $this->relationLoaded('approvalRequest'),
                     fn() => $this->approvalRequest?->rejection_reason

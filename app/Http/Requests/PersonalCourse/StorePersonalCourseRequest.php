@@ -16,7 +16,11 @@ class StorePersonalCourseRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('create', PersonalCourse::class);
+        return $this->user()->can('create', [
+            PersonalCourse::class,
+            $this->input('person_type'),
+            $this->input('person_id') ? (int) $this->input('person_id') : null,
+        ]);
     }
 
     /**

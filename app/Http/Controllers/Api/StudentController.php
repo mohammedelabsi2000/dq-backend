@@ -44,7 +44,6 @@ class StudentController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        logger($query->toSql());
         $students = $query->withStandardRelations()->get();
 
         return $this->successWithPagination(
@@ -160,6 +159,7 @@ class StudentController extends Controller
 
     public function importWithRelations(Request $request)
     {
+        $this->authorize('create', Student::class);
 
         // Validate the request to ensure a file is provided and is of the correct type
         $validator = Validator::make(

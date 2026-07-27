@@ -3,7 +3,6 @@
 
 namespace App\Concerns;
 
-use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use App\Models\ApprovalRequest;
 use App\Models\User;
@@ -16,51 +15,31 @@ trait HasApproval
         return $this->morphOne(ApprovalRequest::class, 'approvable');
     }
 
-    // public function submitForApproval(User $requester): ?ApprovalRequest
-    // {
-    //     if ($this->approvalRequest()->exists()) {
-    //         throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
-    //     }
-
-    //     $startingLevel = ApprovalLevel::startingLevelForUser($requester);
-
-    //     // المدير العام → اعتماد فوري بدون مراحل
-    //     if ($startingLevel === null) {
-    //         $this->update(['is_approved' => true]);
-    //         return null;
-    //     }
-
-    //     return $this->approvalRequest()->create([
-    //         'current_level' => $startingLevel,
-    //         'status'        => ApprovalStatus::Pending,
-    //         'requested_by'  => $requester->id,
-    //     ]);
-    // }
-
-    public function submitForApproval(User $requester, ?string $notes = null): ?ApprovalRequest
+    public function submitForApproval(User $requester): ?ApprovalRequest
     {
-        // نتحقق فقط من الطلبات غير الملغاة
-        $exists = $this->approvalRequest()
-            ->whereNotIn('status', [ApprovalStatus::Cancelled])
-            ->exists();
-
-        if ($exists) {
+        if ($this->approvalRequest()->exists()) {
             throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
         }
 
-        $startingLevel = ApprovalLevel::startingLevelForUser($requester);
-
-        if ($startingLevel === null) {
-            $this->update(['is_approved' => true, 'is_active' => true]);
+        // المدير العام → اعتماد فوري بدون طلب
+        if ($requester->isGlobalAdmin()) {
+            $this->update($this->approvedAttributes());
             return null;
         }
 
         return $this->approvalRequest()->create([
-            'current_level' => $startingLevel,
-            'status'        => ApprovalStatus::Pending,
-            'requested_by'  => $requester->id,
-            'notes'         => $notes,
+            'status'       => ApprovalStatus::Pending,
+            'requested_by' => $requester->id,
         ]);
+    }
+
+    /**
+     * القيم التي تُحدَّث على النموذج عند اعتماده. النماذج التي لها سلوك إضافي
+     * (مثل تفعيل تسجيل الدخول للمستخدم) يمكنها تجاوز هذه الدالة.
+     */
+    public function approvedAttributes(): array
+    {
+        return ['is_approved' => true];
     }
 
     public function isPending(): bool

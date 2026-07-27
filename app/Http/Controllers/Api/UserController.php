@@ -108,7 +108,7 @@ class UserController extends Controller
         // رفع طلب الاعتماد تلقائياً
         // $user->submitForApproval(auth()->user());
         try {
-            $approvalRequest = $user->submitForApproval(auth()->user(), $request->input('notes'));
+            $approvalRequest = $user->submitForApproval(auth()->user());
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 422);
         }
@@ -139,7 +139,7 @@ class UserController extends Controller
             'maritalStatus',
             'prefix',
             'roles.permissions',
-            'approvalRequest.logs.actor',
+            'approvalRequest',
             'activeScopes'
         ]);
         return $this->success(

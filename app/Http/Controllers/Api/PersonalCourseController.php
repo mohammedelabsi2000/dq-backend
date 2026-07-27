@@ -8,13 +8,15 @@ use App\Http\Requests\PersonalCourse\UpdatePersonalCourseRequest;
 use App\Http\Resources\PersonalCourseResource;
 use App\Models\Image;
 use App\Models\PersonalCourse;
+use App\Models\Student;
+use App\Models\User;
 
 class PersonalCourseController extends Controller
 {
 
     public function getPersonCourses($person_type, $person_id)
     {
-        $this->authorize('viewAny', PersonalCourse::class);
+        $this->authorize('viewForPerson', [PersonalCourse::class, $person_type, (int) $person_id]);
 
         $data = PersonalCourse::with(['person', 'type', 'images'])
             ->where('person_type', $person_type)
@@ -31,6 +33,18 @@ class PersonalCourseController extends Controller
     {
         $this->authorize('viewAny', PersonalCourse::class);
         $query = PersonalCourse::query();
+
+        if (!auth()->user()->isGlobalAdmin()) {
+            $query->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('person_type', 'student')
+                        ->whereIn('person_id', Student::visibleTo(auth()->user())->select('id'));
+                })->orWhere(function ($q) {
+                    $q->where('person_type', 'user')
+                        ->whereIn('person_id', User::visibleTo(auth()->user())->select('id'));
+                });
+            });
+        }
 
         $q = $this->applyFilters($query, [
             'searchColumns' => [],

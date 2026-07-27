@@ -64,6 +64,10 @@ class UserRoleController extends Controller
             return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 422);
         }
 
+        if (!$this->canAssignRoles(auth()->user(), $request->role_ids)) {
+            return $this->error('لا يمكنك إسناد دور يحتوي صلاحيات لا تملكها أنت نفسك', 403);
+        }
+
         $this->userRoleService->assignRolesWithScopes(
             $user,
             $request->role_ids,
@@ -75,6 +79,29 @@ class UserRoleController extends Controller
             'تم تنسيب الأدوار بنجاح',
             201
         );
+    }
+
+    /**
+     * المدير العام يمكنه إسناد أي دور؛ غيره لا يمكنه إسناد دور يمنح صلاحيات لا يملكها هو نفسه،
+     * منعاً لتصعيد الصلاحيات عبر إسناد دور أعلى من صلاحياته لحساب آخر.
+     */
+    private function canAssignRoles(User $actor, array $roleIds): bool
+    {
+        if ($actor->isGlobalAdmin()) {
+            return true;
+        }
+
+        $rolePermissionIds = Role::whereIn('id', $roleIds)
+            ->with('permissions')
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->pluck('id')
+            ->unique();
+
+        $actorPermissionIds = $actor->getAllPermissions()->pluck('id');
+
+        return $rolePermissionIds->diff($actorPermissionIds)->isEmpty();
     }
 
     /*

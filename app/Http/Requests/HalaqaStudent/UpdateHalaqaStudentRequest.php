@@ -16,8 +16,9 @@ class UpdateHalaqaStudentRequest extends DQFormRequest
      */
     public function authorize()
     {
-        return $this->user()->can('create', HalaqaStudent::class);
-        // return $this->user()->can('update', $this->route('halaqa_student'));
+        $halaqaId = $this->input('halaqa_id') ? (int) $this->input('halaqa_id') : null;
+
+        return $this->user()->can('create', [HalaqaStudent::class, $halaqaId]);
     }
 
     /**

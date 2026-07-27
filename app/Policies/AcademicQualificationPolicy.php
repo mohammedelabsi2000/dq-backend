@@ -6,6 +6,7 @@ use App\Models\AcademicQualification;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class AcademicQualificationPolicy
 {
@@ -23,6 +24,15 @@ class AcademicQualificationPolicy
     }
 
     /**
+     * Determine whether the user can view all qualifications belonging to a specific person.
+     */
+    public function viewForPerson($user, string $personType, int $personId): bool
+    {
+        return ($user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show'))
+            && $this->isPersonVisible($user, $personType, $personId);
+    }
+
+    /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
@@ -31,19 +41,25 @@ class AcademicQualificationPolicy
      */
     public function view($user, AcademicQualification $qualification)
     {
-        return $user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show');
+        return ($user->hasPermissionTo('users.certificates.show') || $user->hasPermissionTo('students.certificates.show'))
+            && $this->isPersonVisible($user, $qualification->person_type, $qualification->person_id);
     }
 
     /**
      * Determine whether user can create models.
      *
      * @param  \App\Models\User  $user
-     * @param  mixed  $person
+     * @param  string|null  $personType
+     * @param  int|null  $personId
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user, $person = null)
+    public function create($user, ?string $personType = null, ?int $personId = null)
     {
-        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
+        if (!$user->hasPermissionTo('users.certificates.update') && !$user->hasPermissionTo('students.certificates.update')) {
+            return false;
+        }
+
+        return $this->isPersonVisible($user, $personType, $personId);
     }
 
     /**
@@ -55,7 +71,8 @@ class AcademicQualificationPolicy
      */
     public function update($user, AcademicQualification $qualification)
     {
-        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
+        return ($user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update'))
+            && $this->isPersonVisible($user, $qualification->person_type, $qualification->person_id);
     }
 
     /**
@@ -67,7 +84,27 @@ class AcademicQualificationPolicy
      */
     public function delete($user, AcademicQualification $qualification)
     {
-        return $user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update');
+        return ($user->hasPermissionTo('users.certificates.update') || $user->hasPermissionTo('students.certificates.update'))
+            && $this->isPersonVisible($user, $qualification->person_type, $qualification->person_id);
+    }
+
+    /**
+     * يتحقق أن الشخص (مستخدم أو طالب) المرتبط بالمؤهل ضمن نطاق المستخدم الحالي،
+     * لأن صلاحية الشهادات لا ترتبط بنطاق جغرافي بحد ذاتها.
+     */
+    private function isPersonVisible(User $user, ?string $personType, ?int $personId): bool
+    {
+        if ($user->isGlobalAdmin() || !$personType || !$personId) {
+            return $user->isGlobalAdmin();
+        }
+
+        $modelClass = Relation::getMorphedModel($personType) ?? $personType;
+
+        if (!$modelClass || !class_exists($modelClass) || !method_exists($modelClass, 'scopeVisibleTo')) {
+            return false;
+        }
+
+        return $modelClass::visibleTo($user)->where('id', $personId)->exists();
     }
 
     /**

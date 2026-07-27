@@ -46,7 +46,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
         Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
         Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);
-        Route::post('{approvalRequest}/cancel',        [ApprovalController::class, 'cancel']);
     });
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)

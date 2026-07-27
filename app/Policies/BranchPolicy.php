@@ -2,6 +2,8 @@
 
 namespace App\Policies;
 
+use App\Models\Branch;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class BranchPolicy
@@ -10,57 +12,50 @@ class BranchPolicy
 
     /**
      * Determine whether the user can view any models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function viewAny($user)
+    public function viewAny(User $user): bool
     {
         return $user->hasPermissionTo('branches.show');
     }
 
     /**
      * Determine whether the user can view the model.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view($user)
+    public function view(User $user, Branch $branch): bool
     {
-        return $user->hasPermissionTo('branches.show');
+        return $user->hasPermissionTo('branches.show')
+            && $this->isVisible($user, $branch);
     }
 
     /**
      * Determine whether the user can create models.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function create($user)
+    public function create(User $user): bool
     {
         return $user->hasPermissionTo('branches.create');
     }
 
     /**
      * Determine whether the user can update the model.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update($user)
+    public function update(User $user, Branch $branch): bool
     {
-        return $user->hasPermissionTo('branches.update');
+        return $user->hasPermissionTo('branches.update')
+            && $this->isVisible($user, $branch);
     }
 
     /**
      * Determine whether the user can delete the model.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete($user)
+    public function delete(User $user, Branch $branch): bool
     {
-        return $user->hasPermissionTo('branches.delete');
+        return $user->hasPermissionTo('branches.delete')
+            && $this->isVisible($user, $branch);
+    }
+
+    private function isVisible(User $user, Branch $branch): bool
+    {
+        return Branch::visibleTo($user)->where('id', $branch->id)->exists();
     }
 
     /**

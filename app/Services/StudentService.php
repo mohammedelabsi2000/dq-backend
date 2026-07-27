@@ -29,6 +29,10 @@ class StudentService
                 $this->assignStudentToHalaqa($student, $halaqaId);
             }
 
+            if ($requester) {
+                $student->submitForApproval($requester);
+            }
+
             return $student;
         });
     }
@@ -99,7 +103,7 @@ class StudentService
 
             // Submit guardian for approval if requester is provided
             if ($requester) {
-                $guardian->submitForApproval($requester, 'طلب إنشاء ولي أمر للطالب: ' . $studentName);
+                $guardian->submitForApproval($requester);
             }
         } else {
             if ($guardian->trashed()) {
@@ -108,7 +112,7 @@ class StudentService
 
             // If guardian exists but is not approved, submit for approval
             if (!$guardian->is_approved && $requester && !$guardian->approvalRequest) {
-                $guardian->submitForApproval($requester, 'طلب تفعيل ولي أمر للطالب: ' . $studentName);
+                $guardian->submitForApproval($requester);
             }
         }
 
