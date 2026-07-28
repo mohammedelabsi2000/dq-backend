@@ -2,6 +2,8 @@
 
 namespace App\Concerns;
 
+use App\Models\Center;
+use App\Models\Halaqa;
 use App\Models\UserScope;
 use Illuminate\Support\Collection;
 
@@ -11,7 +13,7 @@ trait HasVisibilityScope
     {
         return $this->hasMany(UserScope::class);
     }
-
+    
     public function isGlobalAdmin(): bool
     {
         return $this->scopes()->active()->doesntExist();
@@ -23,11 +25,40 @@ trait HasVisibilityScope
      */
     public function getScopeIds(string $type): Collection
     {
-        return $this->scopes()
+        $user = auth()->user();
+
+        /*if ($user->isGlobalAdmin()) {
+            switch ($type) {
+                case 'branch':
+                    # code...
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+
+        if (!$user->can('gender_visibility')) {
+            switch ($type) {
+                case 'center':
+                    $scopeIds = Center::where('gender', $user->gender)->pluck('id');
+                    break;
+                case 'halaqa':
+                    $scopeIds = Halaqa::where('gender', $user->gender)->pluck('id');
+                    break;
+                default:
+                    $scopeIds = [];
+            }
+        }*/
+
+        $scopeIds = $this->scopes()
             ->where('scope_type', $type)
             ->active()
             ->pluck('scope_id')
             ->unique();    // ← مهم لأن نفس الـ scope قد يتكرر عبر أدوار مختلفة
+
+        return $scopeIds;
     }
 
     /**
@@ -47,9 +78,9 @@ trait HasVisibilityScope
     public function assignScope(string $scopeType, int $scopeId): void
     {
         UserScope::firstOrCreate([
-            'user_id'    => $this->id,
+            'user_id' => $this->id,
             'scope_type' => $scopeType,
-            'scope_id'   => $scopeId,
+            'scope_id' => $scopeId,
         ]);
     }
 

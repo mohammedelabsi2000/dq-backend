@@ -4,13 +4,14 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Api\AccessTokensController;
+use App\Http\Middleware\SetCurrentUserContext;
 
 // Public routes
 Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
     ->middleware('guest:sanctum');
 
 // Authenticated routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     Route::get('/user', function (Request $request) {
         return Auth::guard('sanctum')->user();
     });

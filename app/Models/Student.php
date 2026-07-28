@@ -4,8 +4,6 @@
 
 namespace App\Models;
 
-
-
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -19,11 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 use App\Concerns\HasVisibilityScope;
-
-
+use App\Models\Scopes\GenderVisibilityScope;
 
 class Student extends Model
-
 {
 
     use HasFactory, SoftDeletes, HasVisibilityScope;
@@ -95,6 +91,8 @@ class Student extends Model
 
     protected static function booted()
     {
+        static::addGlobalScope(new GenderVisibilityScope);
+
         static::deleting(function ($student) {
             foreach ($student->images as $image) {
                 Storage::disk($image->disk)->delete($image->file_path);
@@ -197,7 +195,7 @@ class Student extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isGlobalAdmin()) {
+        if ($user->isGlobalAdmin() && $user->can('gender_visibility')) {
             return $query;
         }
 
@@ -275,9 +273,9 @@ class Student extends Model
 
         if ($regionIds->isNotEmpty()) {
 
-            $centerIds  = Center::whereIn('region_id', $regionIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
 
-            $mosqueIds  = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
 
 
 
@@ -331,11 +329,11 @@ class Student extends Model
 
         if ($branchIds->isNotEmpty()) {
 
-            $regionIds  = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
 
-            $centerIds  = Center::whereIn('region_id', $regionIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
 
-            $mosqueIds  = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
 
 
 
@@ -391,7 +389,6 @@ class Student extends Model
 
 
     public function scopeWithStandardRelations($query)
-
     {
 
         return $query->with(self::standardRelations());
@@ -400,7 +397,6 @@ class Student extends Model
 
 
     public function scopeByGuardian($query, $guardianId)
-
     {
 
         return $query->where('guardian_id', $guardianId);
@@ -409,7 +405,6 @@ class Student extends Model
 
 
     public function scopeByMosque($query, $mosqueId)
-
     {
 
         return $query->where('mosque_id', $mosqueId);
@@ -418,7 +413,6 @@ class Student extends Model
 
 
     public function getAgeAttribute()
-
     {
 
         $today = now();
@@ -431,7 +425,6 @@ class Student extends Model
 
 
     public function isActiveInHalaqa($halaqaId)
-
     {
 
         return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('halaqa_students.to_date')->exists();

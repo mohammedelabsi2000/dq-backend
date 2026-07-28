@@ -29,7 +29,12 @@ class Region extends Model
 
     public function centers()
     {
-        return $this->hasMany(Center::class);
+        $user = auth()->user();
+        $centers = $this->hasMany(Center::class);
+        if (!$user->can('gender_visibility')) {
+            $centers = $centers->where('gender', $user->gender);
+        }
+        return $centers;
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder

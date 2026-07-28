@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use App\Http\Requests\DQFormRequest;
+use App\Rules\GenderVisibilityRule;
 
 class StoreUserRequest extends DQFormRequest
 {
@@ -57,7 +58,7 @@ class StoreUserRequest extends DQFormRequest
 
             // Other fields
             'location' => 'nullable|string|max:255',
-            'gender' => ['nullable', new Enum(Gender::class)],
+            'gender' => ['nullable', new Enum(Gender::class), new GenderVisibilityRule()],
             'numChildren' => 'nullable|integer|min:0',
 
             'identity' => ['nullable', 'digits:9'],
@@ -68,7 +69,7 @@ class StoreUserRequest extends DQFormRequest
             'job_place' => 'nullable|string|max:255',
             'job_salary' => 'nullable|numeric|min:0',
             'is_approved' => 'nullable|boolean',
-            'notes' => 'nullable|string|max:1000'
+            'notes' => 'nullable|string|max:1000',
         ];
     }
 
@@ -141,6 +142,7 @@ class StoreUserRequest extends DQFormRequest
             'location.max' => 'الموقع يجب ألا يتجاوز 255 حرفاً.',
 
             'gender.enum' => 'قيمة الجنس يجب أن تكون ذكر أو أنثى.',
+            'gender.required' => 'يجب اختيار الجنس',
 
             'numChildren.integer' => 'عدد الأبناء يجب أن يكون رقم صحيح.',
             'numChildren.min' => 'عدد الأبناء لا يمكن أن يكون سالباً.',
