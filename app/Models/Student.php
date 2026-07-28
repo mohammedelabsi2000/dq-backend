@@ -5,9 +5,6 @@
 namespace App\Models;
 
 
-
-use App\Concerns\Auditable;
-
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -26,7 +23,7 @@ use App\Models\Scopes\GenderVisibilityScope;
 class Student extends Model
 {
 
-    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope;
 
 
 
@@ -113,11 +110,6 @@ class Student extends Model
         'gender' => Gender::class
 
     ];
-
-
-
-    public static $usesAudit = true;
-
 
 
     protected $appends = ['full_name'];
