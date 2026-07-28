@@ -4,15 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StudentLevelHistory extends Model
 {
+    use SoftDeletes;
+
+    public static $usesAudit = true;
+
     protected $fillable = [
         'student_plan_id',
         'level_id',
         'from_date',
         'to_date',
         'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $casts = [

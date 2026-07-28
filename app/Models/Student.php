@@ -6,8 +6,6 @@ namespace App\Models;
 
 
 
-use App\Concerns\Auditable;
-
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -28,350 +26,190 @@ class Student extends Model
 
 {
 
-    use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope;
 
 
 
     protected $fillable = [
 
         'identity',
-
         'fName',
-
         'sName',
-
         'thName',
-
         'family',
-
         'dob',
-
         'mosque_id',
-
         'location',
-
         'gender',
-
         'marital_status_id',
-
         'money_status_id',
-
         'prefix_name_id',
-
         'guardian_id',
-
         'guardian_type_id',
-
         'phone',
-
         'whatsapp',
-
         'created_by',
-
         'updated_by',
-
+        'deleted_by',
         'memorized_juz',
-
         'completed_juz',
-
         'surah_id',
-
         'end_aya',
-
     ];
 
 
 
     public static function standardRelations()
-
     {
-
         return [
-
             'mosque',
-
             'maritalStatus',
-
             'moneyStatus',
-
             'guardian',
-
             'guardianType',
-
             'prefixName',
-
             'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
-
         ];
     }
 
 
-
-
-
     protected $casts = [
-
         'dob' => 'date',
-
         'gender' => Gender::class
-
     ];
-
-
 
     public static $usesAudit = true;
 
-
-
     protected $appends = ['full_name'];
 
-
-
-
-
     public function images()
-
     {
-
         return $this->morphMany(\App\Models\Image::class, 'imageable');
     }
 
-
-
     public function mainImage()
-
     {
-
         return $this->morphOne(\App\Models\Image::class, 'imageable')
-
             ->where('is_main', true);
     }
 
-
-
-
-
     protected static function booted()
-
     {
-
         static::deleting(function ($student) {
-
-
-
             foreach ($student->images as $image) {
-
-
-
                 Storage::disk($image->disk)->delete($image->file_path);
-
-
-
                 $image->delete();
             }
         });
     }
 
     // full_name عمود ظاهري في DB لكن نضيفه هنا كاحتياط
-
     public function getFullNameAttribute()
-
     {
-
         return implode(' ', array_filter([
-
             $this->fName,
-
             $this->sName,
-
             $this->thName,
-
             $this->family,
-
         ]));
     }
 
     public function getGenderTextAttribute()
-
     {
-
         return $this->gender?->label() ?? 'غير محدد';
     }
 
-
-
     public function mosque()
-
     {
-
         return $this->belongsTo(Mosque::class);
     }
 
-
-
     public function maritalStatus()
-
     {
-
         return $this->belongsTo(Constant::class, 'marital_status_id');
     }
 
-
-
     public function moneyStatus()
-
     {
-
         return $this->belongsTo(Constant::class, 'money_status_id');
     }
 
-
-
     public function guardianType()
-
     {
-
         return $this->belongsTo(Constant::class, 'guardian_type_id');
     }
 
-
-
     public function prefixName()
-
     {
-
         return $this->belongsTo(Constant::class, 'prefix_name_id');
     }
 
-
-
     public function guardian()
-
     {
-
         return $this->belongsTo(User::class, 'guardian_id', 'identity');
     }
 
-
-
     public function attendances()
-
     {
-
         return $this->morphMany(Attendance::class, 'attendable');
     }
 
-
-
     public function halaqaEnrollments()
-
     {
-
         return $this->hasMany(HalaqaStudent::class);
     }
 
-
-
     public function halaqas()
-
     {
-
         return $this->belongsToMany(Halaqa::class, 'halaqa_students')
-
             ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
-
             ->withTimestamps();
     }
 
-
-
     public function dailyAchievements()
-
     {
-
         return $this->hasMany(DailyAchievement::class);
     }
 
-
-
     public function plans()
-
     {
-
         return $this->belongsToMany(Plan::class, 'student_plans')
-
             ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
     }
 
-
-
-
     public function startingLevel()
-
     {
-
         return $this->belongsTo(Level::class, 'starting_level_id');
     }
 
-
-
     public function currentLevel()
-
     {
-
         return $this->belongsTo(Level::class, 'current_level_id');
     }
 
-
-
     /**
-
      * الخطة النشطة الحالية للطالب (إن وجدت)
-
      */
-
     public function activePlan()
-
     {
-
         return $this->hasOne(StudentPlan::class)->whereNull('to_date');
     }
 
-
-
-
-
     public function scopeVisibleTo(Builder $query, User $user): Builder
-
     {
-
         if ($user->isGlobalAdmin()) {
-
             return $query;
         }
 
-
-
         $branchIds = $user->getScopeIds('branch');
-
         $regionIds = $user->getScopeIds('region');
-
         $centerIds = $user->getScopeIds('center');
-
         $halaqaIds = $user->getScopeIds('halaqa');
-
-
-
         // محفظ حلقة ← طلاب حلقته المسجلين فقط
-
         if ($halaqaIds->isNotEmpty()) {
-
             return $query->whereHas(
-
                 'halaqaEnrollments',
-
                 fn($q) => $q->whereIn('halaqa_id', $halaqaIds)
-
             );
         }
 

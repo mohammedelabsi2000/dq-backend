@@ -5,15 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Concerns\HasVisibilityScope;
 
 class Branch extends Model
 {
-    use HasFactory, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope;
+
+    public static $usesAudit = true;
 
     protected $fillable = [
         'name',
         'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     public function regions()

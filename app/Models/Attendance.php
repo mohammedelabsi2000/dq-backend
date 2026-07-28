@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    public static $usesAudit = true;
 
     protected $fillable = [
         'attendable_id',
@@ -15,7 +18,10 @@ class Attendance extends Model
         'halaqa_id',
         'date',
         'status_id',
-        'notes'
+        'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
 

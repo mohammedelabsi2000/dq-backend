@@ -6,9 +6,14 @@ use App\Enums\StudentPlanStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StudentPlan extends Model
 {
+    use SoftDeletes;
+
+    public static $usesAudit = true;
+
     protected $fillable = [
         'student_id',
         'plan_id',
@@ -19,6 +24,9 @@ class StudentPlan extends Model
         'is_main',
         'status',
         'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $casts = [

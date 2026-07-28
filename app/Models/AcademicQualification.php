@@ -23,7 +23,12 @@ class AcademicQualification extends Model
         'certificate_link',
         'educational_institution',
         'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
+
+    public static $usesAudit = true;
 
     public function getFullNameAttribute()
     {

@@ -11,6 +11,7 @@ class PersonalCourse extends Model
     use HasFactory;
     use SoftDeletes;
 
+    public static $usesAudit = true;
 
     protected $fillable = [
         'course_name',
@@ -22,6 +23,9 @@ class PersonalCourse extends Model
         'person_type',
         'person_id',
         'type_id',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     // polymorphic relation

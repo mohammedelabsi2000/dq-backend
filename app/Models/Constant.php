@@ -11,6 +11,7 @@ class Constant extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public static $usesAudit = true;
 
     protected $fillable = [
         'name',
@@ -18,6 +19,9 @@ class Constant extends Model
         'parent_id',
         'is_active',
         'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     // العلاقة مع نوع الثابت

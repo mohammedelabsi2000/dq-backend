@@ -5,13 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class Mosque extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'notes', 'region_id'];
+    public static $usesAudit = true;
+
+    protected $fillable = ['name', 'notes', 'region_id', 'created_by', 'updated_by', 'deleted_by'];
 
     public function region()
     {

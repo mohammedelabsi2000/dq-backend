@@ -4,9 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class LevelTrackSubject extends Model
 {
+    use SoftDeletes;
+
+    public static $usesAudit = true;
+
     protected $guarded = ['id'];
     /* protected $fillable = [
         'level_track_id',

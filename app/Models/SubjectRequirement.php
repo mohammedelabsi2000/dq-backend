@@ -10,6 +10,8 @@ class SubjectRequirement extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public static $usesAudit = true;
+
     protected $guarded = [];
 
     public function subject()
