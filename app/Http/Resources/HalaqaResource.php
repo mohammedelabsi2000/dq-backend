@@ -27,13 +27,14 @@ class HalaqaResource extends JsonResource
                 'status_notes' => $this->lastStatus->notes,
             ];
         });
-        
+
         return [
             'id' => $this->id,
- 
+
             'name' => $this->name,
             'location' => $this->location,
             'description' => $this->description,
+            'gender' => $this->gender,
 
             /*
             |--------------------------------------------------------------------------

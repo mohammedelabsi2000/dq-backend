@@ -1,0 +1,160 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Certificate\CertificateRequest;
+use App\Http\Resources\Certificate\CertificateResource;
+use App\Models\Certificate;
+use App\Models\Image;
+use App\Models\Student;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+
+class CertificateController extends Controller
+{
+    public function index()
+    {
+        $this->authorize('viewAny', Certificate::class);
+        $query = Certificate::query();
+
+        if (!auth()->user()->isGlobalAdmin()) {
+            $query->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('person_type', 'student')
+                        ->whereIn('person_id', Student::visibleTo(auth()->user())->select('id'));
+                })->orWhere(function ($q) {
+                    $q->where('person_type', 'user')
+                        ->whereIn('person_id', User::visibleTo(auth()->user())->select('id'));
+                });
+            });
+        }
+
+        $q = $this->applyFilters($query, [
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc'
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $data = $query->with([
+            'academicQualification',
+            'major',
+            'person',
+            'images',
+        ])->get();
+
+        return $this->successWithPagination(
+            CertificateResource::collection($data),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
+            'success',
+            200
+        );
+    }
+
+    public function store(CertificateRequest $request)
+    {
+        $validatedData = $request->validated();
+        unset($validatedData['certificate_file']);
+        $certificate = Certificate::create($validatedData);
+
+        if ($request->hasFile('certificate_file')) {
+            // delegate file processing to the helper
+            $this->storeCertificate($certificate, $request->file('certificate_file'));
+        }
+
+        return $this->success(
+            new CertificateResource($certificate->load(['academicQualification', 'major', 'person', 'images'])),
+            'تم إضافة الشهادة بنجاح',
+            201
+        );
+    }
+
+    public function show(Certificate $certificate)
+    {
+        $this->authorize('view', $certificate);
+        $certificate = $certificate->load([
+            'academicQualification',
+            'major',
+            'person',
+            'images',
+
+        ]);
+
+        return $this->success(
+            new CertificateResource($certificate),
+            'success',
+            200
+        );
+    }
+
+    public function update(CertificateRequest $request, Certificate $certificate)
+    {
+        $validatedData = $request->validated();
+        unset($validatedData['certificate_file']);
+        $certificate->update($validatedData);
+
+        if ($request->hasFile('certificate_file')) {
+            $this->storeCertificate($certificate, $request->file('certificate_file'));
+        }
+
+        return $this->success(
+            new CertificateResource($certificate->load(['academicQualification', 'major', 'person', 'images'])),
+            'تم تحديث بيانات الشهادة',
+            200
+        );
+    }
+
+    public function destroy(Certificate $certificate)
+    {
+        $this->authorize('delete', $certificate);
+        $certificate->delete();
+
+        return $this->success(
+            null,
+            'تم حذف الشهادة',
+            202
+        );
+    }
+
+    protected function storeCertificate(Certificate $certificate, UploadedFile $file)
+    {
+        $path = $file->store('uploads/certificates', 'public');
+
+        return Image::updateOrCreate(
+            [
+                'imageable_id' => $certificate->id,
+                'imageable_type' => Certificate::class,
+            ],
+            [
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $path,
+                'disk' => 'public',
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+            ]
+        );
+    }
+
+    public function getPersonCertificates($person_type, $person_id)
+    {
+        $this->authorize('viewForPerson', [Certificate::class, $person_type, (int) $person_id]);
+        $data = Certificate::with([
+            'academicQualification',
+            'major',
+            'courseType',
+            'person',
+            'images'
+        ])->where('person_type', $person_type)
+            ->where('person_id', $person_id)
+            ->get();
+
+        return $this->success(
+            CertificateResource::collection($data),
+            'success',
+            200
+        );
+    }
+}

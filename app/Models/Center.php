@@ -5,13 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Concerns\HasVisibilityScope;
+use App\Models\Scopes\GenderVisibilityScope;
 
 class Center extends Model
 {
-    use HasFactory, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope;
 
-    protected $fillable = ['name', 'notes', 'region_id', 'mosque_id'];
+    public static $usesAudit = true;
+
+    protected $fillable = ['name', 'notes', 'region_id', 'mosque_id', 'gender', 'created_by', 'updated_by', 'deleted_by'];
+
+    protected static function booted()
+    {
+        static::addGlobalScope(new GenderVisibilityScope);
+    }
 
     public function region()
     {
@@ -25,7 +34,12 @@ class Center extends Model
 
     public function halaqat()
     {
-        return $this->hasMany(Halaqa::class);
+        $user = auth()->user();
+        $halaqas = $this->hasMany(Halaqa::class);
+        if (!$user->can('gender_visibility')) {
+            $halaqas = $halaqas->where('gender', $user->gender);
+        }
+        return $halaqas;
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder

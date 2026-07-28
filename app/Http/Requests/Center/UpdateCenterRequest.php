@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Center;
 
 use App\Http\Requests\DQFormRequest;
+use App\Rules\GenderVisibilityRule;
 
 class UpdateCenterRequest extends DQFormRequest
 {
@@ -29,6 +30,7 @@ class UpdateCenterRequest extends DQFormRequest
             'region_id' => 'sometimes|required|exists:regions,id',
             'mosque_id' => 'nullable|exists:mosques,id',
             'notes'     => 'nullable|string',
+            'gender' => ['required', new GenderVisibilityRule()],
         ];
     }
 
@@ -39,6 +41,7 @@ class UpdateCenterRequest extends DQFormRequest
             'region_id.required' => 'يجب اختيار المنطقة',
             'region_id.exists'   => 'المنطقة المحددة غير موجودة',
             'mosque_id.exists'   => 'المسجد المحدد غير موجود',
+            'gender.required' => 'يجب اختيار الجنس'
         ];
     }
 }

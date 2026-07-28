@@ -5,9 +5,14 @@ namespace App\Models;
 use App\Models\Quran\CustomJuz;
 use App\Models\Quran\Surah;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PreviousAchievement extends Model
 {
+    use SoftDeletes;
+
+    public static $usesAudit = true;
+
     protected $guarded = [];
 
     public function student()

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Concerns\HasApproval;
 use App\Concerns\HasVisibilityScope;
 use App\Enums\HalaqaReferenceType;
+use App\Models\Scopes\GenderVisibilityScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Halaqa extends Model
 {
     use HasFactory, SoftDeletes, HasVisibilityScope, HasApproval;
+
+    public static $usesAudit = true;
 
     protected $table = 'halaqas';
 
@@ -33,7 +36,10 @@ class Halaqa extends Model
     ];
 
     protected $with = ['lastStatus'];
-
+    protected static function booted()
+    {
+        static::addGlobalScope(new GenderVisibilityScope);
+    }
     /*
     |--------------------------------------------------------------------------
     | Relationships
@@ -93,7 +99,8 @@ class Halaqa extends Model
 
     public function lastStatus()
     {
-        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('from_date')->with(['statusType', 'sponsorshipType']);
+        logger('Last status relation');
+        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('id')->with(['statusType', 'sponsorshipType']);
     }
 
     /**

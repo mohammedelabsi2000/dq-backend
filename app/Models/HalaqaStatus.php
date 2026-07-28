@@ -10,6 +10,8 @@ class HalaqaStatus extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public static $usesAudit = true;
+
     protected $guarded = [];
 
     protected $casts = [

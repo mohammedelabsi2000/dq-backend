@@ -7,6 +7,7 @@ use App\Helpers\ConstantHelper;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use App\Http\Requests\DQFormRequest;
+use App\Rules\GenderVisibilityRule;
 
 class UpdateUserRequest extends DQFormRequest
 {
@@ -61,7 +62,7 @@ class UpdateUserRequest extends DQFormRequest
             ],
 
             'location' => 'nullable|string|max:255',
-            'gender' => ['nullable', new Enum(Gender::class)],
+            'gender' => ['nullable', new Enum(Gender::class), new GenderVisibilityRule()],
             'numChildren' => 'nullable|integer|min:0',
 
             'identity' => [
@@ -129,6 +130,7 @@ class UpdateUserRequest extends DQFormRequest
 
             // gender
             'gender.enum' => 'الجنس يجب أن يكون ذكر أو أنثى.',
+            'gender.required' => 'يجب اختيار الجنس',
 
             // numChildren
             'numChildren.integer' => 'عدد الأبناء يجب أن يكون رقماً صحيحاً.',

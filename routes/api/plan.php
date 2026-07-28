@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentPlanController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\SubjectController;
+use App\Http\Middleware\SetCurrentUserContext;
 use Illuminate\Support\Facades\Route;
 
 // Custom Juz CRUD
@@ -24,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
-Route::middleware('auth:sanctum')->prefix('plan')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('plan')->group(function () {
     // 1. مسارات الـ Resources الأساسية (توضع دائماً في الأعلى)
     Route::apiResource('plans', PlanController::class);
     Route::apiResource('tracks', TrackController::class);

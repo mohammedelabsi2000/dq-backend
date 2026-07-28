@@ -1,25 +1,23 @@
 <?php
 
+use App\Http\Middleware\SetCurrentUserContext;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
-    AcademicQualificationController,
     ApprovalController,
     ApprovalController as ApiApprovalController,
-    AttendanceController,
     BranchController,
     CenterController,
+    CertificateController,
     ConstantController,
     ConstantTypeController,
     CourseController,
     DailyAchievementController,
-    GradeController,
     HalaqaController,
     HalaqaStatusController,
     HalaqaStudentController,
     IdQueryController,
     ImageController,
     MosqueController,
-    PersonalCourseController,
     PlanAssignmentController,
     PlanController,
     PlanStudentController,
@@ -35,7 +33,7 @@ foreach (glob(__DIR__ . '/api/*.php') as $file) {
     require $file;
 }
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     // Constants management
     Route::apiResource('constant_types', ConstantTypeController::class);
     Route::apiResource('constants', ConstantController::class);
@@ -72,16 +70,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Halaqa statuses management
     Route::apiResource('halaqa-statuses', HalaqaStatusController::class);
 
-    // Academic qualifications management
-    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
-    Route::prefix('academic-qualifications')->group(function () {
-        Route::get('{person_type}/{person_id}', [AcademicQualificationController::class, 'getPersonQualifications']);
-    });
-
-    // Personal courses management
-    Route::apiResource('personal-courses', PersonalCourseController::class);
-    Route::prefix('personal-courses')->group(function () {
-        Route::get('{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+    Route::apiResource('certificates', CertificateController::class);
+    Route::prefix('certificates')->group(function () {
+        Route::get('{person_type}/{person_id}', [CertificateController::class, 'getPersonCertificates']);
     });
 
     // Images management (for students, users, qualifications, etc.)
@@ -98,5 +89,5 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('statistics', [DailyAchievementController::class, 'statistics']);
     });
     Route::apiResource('daily-memorization', DailyAchievementController::class);
-    
+
 });

@@ -124,7 +124,6 @@ class StudentResource extends JsonResource
 
             // إحصائيات
             'enrollments_count' => $this->when(isset($this->enrollments_count), $this->enrollments_count),
-            'attendances_count' => $this->when(isset($this->attendances_count), $this->attendances_count),
 
             'plan_pivots' => $this->whenPivotLoaded('student_plans', function () {
                 return [
@@ -147,15 +146,6 @@ class StudentResource extends JsonResource
                     'notes' => $this->pivot->notes,
                 ];
             }),
-
-            // روابط
-            // 'links' => [
-            //     'self' => url("/api/students/{$this->id}"),
-            //     'mosque' => url("/api/mosques/{$this->mosque_id}"),
-            //     'guardian' => url("/api/users/identity/{$this->guardian_id}"),
-            //     'enrollments' => url("/api/enrollments?student_id={$this->id}"),
-            //     'attendances' => url("/api/attendances?attendable_id={$this->id}&attendable_type=student"),
-            // ],
         ];
     }
 }

@@ -24,6 +24,8 @@ class CenterResource extends JsonResource
             'mosque' => $this->mosque
                 ? new MosqueResource($this->mosque)
                 : null,
+
+            'gender' => $this->gender,
         ];
     }
 }

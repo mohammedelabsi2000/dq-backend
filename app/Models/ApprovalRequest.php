@@ -13,11 +13,14 @@ class ApprovalRequest extends Model
 {
     use HasFactory;
 
+    public static $usesAudit = true;
+
     protected $fillable = [
         'approvable_type',
         'approvable_id',
         'status',
         'requested_by',
+        'updated_by',
         'rejection_reason',
     ];
 
