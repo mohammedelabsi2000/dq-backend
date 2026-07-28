@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -42,10 +41,13 @@ class PermissionSeeder extends Seeder
             ['name' => 'users.update', 'title' => 'تعديل مستخدم'],
             ['name' => 'users.delete', 'title' => 'حذف مستخدم'],
             ['name' => 'users.toggle_active', 'title' => 'تفعيل/إيقاف المستخدم'],
+            ['name' => 'users.approve', 'title' => 'اعتماد مستخدم'],
+            ['name' => 'users.reject', 'title' => 'رفض اعتماد مستخدم'],
+            ['name' => 'halaqas.approve', 'title' => 'اعتماد حلقة'],
+            ['name' => 'halaqas.reject', 'title' => 'رفض اعتماد حلقة'],
+            ['name' => 'students.approve', 'title' => 'اعتماد طالب'],
+            ['name' => 'students.reject', 'title' => 'رفض اعتماد طالب'],
             ['name' => 'approvals.show', 'title' => 'عرض الطلبات'],
-            ['name' => 'approvals.approve', 'title' => 'الموافقة على الطلب'],
-            ['name' => 'approvals.reject', 'title' => 'رفض الطلب'],
-            ['name' => 'approvals.cancel', 'title' => 'إلغاء الطلب'],
             ['name' => 'approvals.resubmit', 'title' => 'إعادة تقديم الطلب'],
             ['name' => 'users.roles.update', 'title' => 'تعديل صلاحيات المستخدم'],
             ['name' => 'users.certificates.show', 'title' => 'عرض شهادات المستخدمين'],

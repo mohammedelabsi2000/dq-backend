@@ -8,6 +8,7 @@ use App\Http\Resources\ApprovalRequestResource;
 use App\Models\ApprovalRequest;
 use Illuminate\Http\Request;
 use App\Models\Halaqa;
+use App\Models\Student;
 use App\Models\User;
 use App\Http\Traits\ApiResponser;
 
@@ -26,31 +27,65 @@ class ApprovalController extends Controller
         $this->authorize('viewAny', ApprovalRequest::class);
         $user = $request->user();
 
+        // approvable_type مخزّن في قاعدة البيانات وفق morph map كـ alias (user/halaqa/student)
+        // وليس اسم الكلاس الكامل، لذلك يجب الفلترة بنفس الـ alias
         $type = match ($request->input('type')) {
-            'users'   => User::class,
-            'halaqas' => Halaqa::class,
-            default   => null,
+            'users', 'user'       => 'user',
+            'halaqas', 'halaqa'   => 'halaqa',
+            'students', 'student' => 'student',
+            default               => null,
         };
 
-        // $request = ApprovalRequest::visibleTo($user)->
+        // أنواع الطلبات التي يملك المستخدم صلاحية الاعتماد أو الرفض عليها
+        // مدير الدائرة (Global Admin) يرى كل الأنواع دون قيد
+        $allowedTypes = $user->isGlobalAdmin()
+            ? ['user', 'halaqa', 'student']
+            : collect(['users' => 'user', 'halaqas' => 'halaqa', 'students' => 'student'])
+                ->filter(fn($alias, $prefix) => $user->hasPermissionTo("$prefix.approve") || $user->hasPermissionTo("$prefix.reject"))
+                ->values()
+                ->all();
 
-        $requests = ApprovalRequest::visibleTo($user, $type)
+        $query = ApprovalRequest::visibleTo($user, $type)
+            ->where(
+                fn($q) =>
+                $q->whereIn('approvable_type', $allowedTypes)
+                    ->orWhere('requested_by', $user->id)
+            )
             ->when(
                 $request->filled('status'),
                 fn($q) =>
                 $q->where('status', $request->input('status'))
             )
-            ->with(['approvable.roles', 'requester.roles', 'logs.actor'])
-            ->latest()
-            ->paginate(20);
+            ->when(
+                $request->filled('from_date'),
+                fn($q) =>
+                $q->whereDate('created_at', '>=', $request->input('from_date'))
+            )
+            ->when(
+                $request->filled('to_date'),
+                fn($q) =>
+                $q->whereDate('created_at', '<=', $request->input('to_date'))
+            )
+            ->with([
+                'approvable' => fn($morphTo) => $morphTo->morphWith([User::class => ['roles']]),
+                'requester.roles',
+            ]);
+
+        $q = $this->applyFilters($query, [
+            'orderColumn' => 'created_at',
+            'orderBy' => 'desc',
+        ]);
+
+        $requests = $q['query']->get();
 
         return $this->successWithPagination(
-            ApprovalRequestResource::collection($requests->items()),
-            $this->paginate($requests),
+            ApprovalRequestResource::collection($requests),
+            ['total' => $q['count'], 'skip' => $q['skip'], 'limit' => $q['limit']],
             'قائمة طلبات الموافقة'
         );
     }
 
+    
     public function approve(Request $request, ApprovalRequest $approvalRequest)
     {
         $this->authorize('approve', $approvalRequest);
@@ -71,7 +106,7 @@ class ApprovalController extends Controller
         }
 
         try {
-            $approvalRequest->approve($user, $request->input('notes'));
+            $approvalRequest->approve($user);
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 422);
         }
@@ -117,12 +152,6 @@ class ApprovalController extends Controller
     public function resubmit(Request $request, ApprovalRequest $approvalRequest)
     {
         $this->authorize('resubmit', $approvalRequest);
-        $request->validate([
-            'notes' => 'nullable|string|max:1000',
-        ], [
-            'notes.string' => 'الملاحظات يجب أن تكون نصاً.',
-            'notes.max'    => 'الملاحظات يجب ألا تتجاوز 1000 حرف.',
-        ]);
         $user = $request->user();
 
         // فقط مقدم الطلب يمكنه إعادة الإرسال
@@ -134,7 +163,7 @@ class ApprovalController extends Controller
         }
 
         try {
-            $approvalRequest->resubmit($request->input('notes'));
+            $approvalRequest->resubmit();
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 422);
         }
@@ -143,18 +172,5 @@ class ApprovalController extends Controller
             null,
             'تمت إعادة إرسال الطلب بنجاح'
         );
-    }
-
-    public function cancel(Request $request, ApprovalRequest $approvalRequest)
-    {
-        $this->authorize('cancel', $approvalRequest);
-
-        try {
-            $approvalRequest->cancel($request->user());
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 422);
-        }
-
-        return $this->success(null, 'تم إلغاء الطلب بنجاح.');
     }
 }

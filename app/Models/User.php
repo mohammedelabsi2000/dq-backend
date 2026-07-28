@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Concerns\HasApproval;
 use App\Concerns\HasVisibilityScope;
-use App\Enums\ApprovalLevel;
 use App\Enums\Gender;
 use App\Models\Scopes\GenderVisibilityScope;
 use Illuminate\Database\Eloquent\Builder;
@@ -381,13 +380,8 @@ class User extends Authenticatable
         return $query->whereRaw('1 = 0');
     }
 
-
-    public function approvalLevel(): ?ApprovalLevel
+    public function approvedAttributes(): array
     {
-        if ($this->isGlobalAdmin())                      return ApprovalLevel::Admin;
-        if ($this->getScopeIds('branch')->isNotEmpty())  return ApprovalLevel::Branch;
-        if ($this->getScopeIds('region')->isNotEmpty())  return ApprovalLevel::Region;
-        if ($this->getScopeIds('center')->isNotEmpty())  return null; // مدير المركز — يبدأ من Region
-        return null;
+        return ['is_approved' => true, 'is_active' => true];
     }
 }

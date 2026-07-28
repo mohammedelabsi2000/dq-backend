@@ -61,6 +61,20 @@ class StudentResource extends JsonResource
             // الموقع
             'location' => $this->location,
 
+            // الاعتماد
+            'is_approved' => $this->is_approved,
+            'approval' => [
+                'is_approved'      => $this->is_approved,
+                'status'           => $this->when(
+                    $this->relationLoaded('approvalRequest'),
+                    fn() => $this->approvalRequest?->status?->label()
+                ),
+                'rejection_reason' => $this->when(
+                    $this->relationLoaded('approvalRequest'),
+                    fn() => $this->approvalRequest?->rejection_reason
+                ),
+            ],
+
             // Previous achievement
             'memorized_juz' => $this->memorized_juz ?? null,
             'memorized_juz_array' => $this->memorized_juz ? array_map('intval', explode(',', $this->memorized_juz)) : null,

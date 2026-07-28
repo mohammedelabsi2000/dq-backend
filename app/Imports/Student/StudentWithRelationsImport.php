@@ -103,7 +103,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue
         $currentUser = User::find($this->userId);
         if ($currentUser && $user->wasRecentlyCreated) {
             try {
-                $user->submitForApproval($currentUser, "طلب إنشاء حساب معلم للحلقة: {$halaqa->name} من خلال استيراد البيانات");
+                $user->submitForApproval($currentUser);
             } catch (\Throwable $th) {
                 //
             }
@@ -165,9 +165,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue
             $currentUser = User::find($this->userId);
             if ($currentUser && $user->wasRecentlyCreated) {
                 try {
-                    $studentName = $newData['name'] ?? 'الطالب';
-                    $studentName = trim($studentName) ?: 'الطالب';
-                    $user->submitForApproval($currentUser, "طلب إنشاء حساب ولي أمر للطالب: {$studentName} من خلال استيراد البيانات");
+                    $user->submitForApproval($currentUser);
                 } catch (\Throwable $th) {
                     //
                 }

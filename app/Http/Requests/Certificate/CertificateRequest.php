@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Certificate;
 
 use App\Helpers\ConstantHelper;
+use App\Models\Certificate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,7 +16,15 @@ class CertificateRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        if ($this->route('certificate')) {
+            return $this->user()->can('update', $this->route('certificate'));
+        }
+
+        return $this->user()->can('create', [
+            Certificate::class,
+            $this->input('person_type'),
+            $this->input('person_id') ? (int) $this->input('person_id') : null,
+        ]);
     }
 
     /**

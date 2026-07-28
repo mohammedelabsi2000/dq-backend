@@ -7,6 +7,8 @@ use App\Http\Requests\Certificate\CertificateRequest;
 use App\Http\Resources\Certificate\CertificateResource;
 use App\Models\Certificate;
 use App\Models\Image;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
@@ -16,6 +18,18 @@ class CertificateController extends Controller
     {
         $this->authorize('viewAny', Certificate::class);
         $query = Certificate::query();
+
+        if (!auth()->user()->isGlobalAdmin()) {
+            $query->where(function ($q) {
+                $q->where(function ($q) {
+                    $q->where('person_type', 'student')
+                        ->whereIn('person_id', Student::visibleTo(auth()->user())->select('id'));
+                })->orWhere(function ($q) {
+                    $q->where('person_type', 'user')
+                        ->whereIn('person_id', User::visibleTo(auth()->user())->select('id'));
+                });
+            });
+        }
 
         $q = $this->applyFilters($query, [
             'orderColumn' => 'created_at',
@@ -126,7 +140,7 @@ class CertificateController extends Controller
 
     public function getPersonCertificates($person_type, $person_id)
     {
-        $this->authorize('viewAny', Certificate::class);
+        $this->authorize('viewForPerson', [Certificate::class, $person_type, (int) $person_id]);
         $data = Certificate::with([
             'academicQualification',
             'major',

@@ -30,7 +30,8 @@ class MosquePolicy
      */
     public function view($user, Mosque $mosque)
     {
-        return $user->hasPermissionTo('mosques.show');
+        return $user->hasPermissionTo('mosques.show')
+            && $this->isVisible($user, $mosque);
     }
 
     /**
@@ -52,7 +53,8 @@ class MosquePolicy
      */
     public function update($user, Mosque $mosque)
     {
-        return $user->hasPermissionTo('mosques.update');
+        return $user->hasPermissionTo('mosques.update')
+            && $this->isVisible($user, $mosque);
     }
 
     /**
@@ -63,7 +65,13 @@ class MosquePolicy
      */
     public function delete($user, Mosque $mosque)
     {
-        return $user->hasPermissionTo('mosques.delete');
+        return $user->hasPermissionTo('mosques.delete')
+            && $this->isVisible($user, $mosque);
+    }
+
+    private function isVisible($user, Mosque $mosque): bool
+    {
+        return Mosque::visibleTo($user)->where('id', $mosque->id)->exists();
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Requests\Role\StoreRoleRequest;
 use App\Http\Requests\Role\UpdateRoleRequest;
 use App\Http\Resources\PermissionResource;
 use App\Http\Resources\RoleResource;
+use App\Models\User;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -51,17 +52,20 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
 
+        $permissions = ($validated['give_all'] ?? false)
+            ? Permission::all()
+            : Permission::whereIn('id', $validated['abilities'] ?? [])->get();
+
+        if (!$this->canGrantPermissions(auth()->user(), $permissions)) {
+            return $this->error('لا يمكنك منح صلاحيات لا تملكها أنت نفسك', 403);
+        }
+
         $role = Role::create([
             'name' => $validated['name'],
             'guard_name' => 'sanctum',
         ]);
 
-        if ($validated['give_all'] ?? false) {
-            $role->syncPermissions(Permission::all());
-        } elseif (!empty($validated['abilities'])) {
-            $permissions = Permission::whereIn('id', $validated['abilities'])->get();
-            $role->syncPermissions($permissions);
-        }
+        $role->syncPermissions($permissions);
 
         return $this->success(new RoleResource($role->load('permissions')), 'تم إنشاء الدور بنجاح', 201);
     }
@@ -92,20 +96,39 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
 
-        $role->update(['name' => $validated['name']]);
+        $permissions = ($validated['give_all'] ?? false)
+            ? Permission::all()
+            : Permission::whereIn('id', $validated['abilities'] ?? [])->get();
 
-        // Update permissions
-        if ($validated['give_all'] ?? false) {
-            $permissions = Permission::all();
-            $role->syncPermissions($permissions);
-        } elseif (!empty($validated['abilities'])) {
-            $permissions = Permission::whereIn('id', $validated['abilities'])->get();
-            $role->syncPermissions($permissions);
-        } else {
-            $role->syncPermissions([]);
+        // الصلاحيات التي سيفقدها الدور والتي سيكتسبها، كلاهما يجب أن يملكهما الفاعل نفسه
+        $changedPermissions = $role->permissions
+            ->pluck('id')
+            ->merge($permissions->pluck('id'))
+            ->unique();
+
+        if (!$this->canGrantPermissions(auth()->user(), Permission::whereIn('id', $changedPermissions)->get())) {
+            return $this->error('لا يمكنك تعديل صلاحيات لا تملكها أنت نفسك', 403);
         }
 
+        $role->update(['name' => $validated['name']]);
+        $role->syncPermissions($permissions);
+
         return $this->success(new RoleResource($role->load('permissions')), 'تم تحديث الدور بنجاح');
+    }
+
+    /**
+     * المدير العام يستطيع منح أي صلاحية؛ غيره لا يمكنه منح/تعديل صلاحية لا يملكها هو نفسه،
+     * وإلا أمكنه تصعيد صلاحياته عبر تعديل دور موجود أو إنشاء دور جديد بكل الصلاحيات.
+     */
+    private function canGrantPermissions(User $actor, \Illuminate\Support\Collection $permissions): bool
+    {
+        if ($actor->isGlobalAdmin()) {
+            return true;
+        }
+
+        $actorPermissionIds = $actor->getAllPermissions()->pluck('id');
+
+        return $permissions->pluck('id')->diff($actorPermissionIds)->isEmpty();
     }
 
     /**

@@ -45,11 +45,6 @@ class UserRoleService
             $newScopes = $this->removeRedundantParentScopes($newScopes);
         }
 
-        // dd([
-        //     'newScopes' => $newScopes,
-        //     'activeScopes' => $user->scopes()->whereNull('to_date')->get(['role_id', 'scope_type', 'scope_id'])->toArray(),
-        // ]);
-
         // ✅ أغلق كل القديمة دائماً
         $user->scopes()
             ->whereNull('to_date')
@@ -61,17 +56,9 @@ class UserRoleService
                         $s['scope_type']     === $existing->scope_type &&
                         (int) $s['scope_id'] === (int) $existing->scope_id
                 );
-                // dd($stillExists);
-
 
                 if (!$stillExists) {
-                    // dd(111);
                     $existing->update(['to_date' => now()->endOfDay()]);
-                    dump([
-                        'closing' => $existing->scope_type . '|' . $existing->scope_id,
-                        'result'  => 'closed',
-                        'to_date' => $existing->fresh()->to_date,
-                    ]);
                 }
             });
 

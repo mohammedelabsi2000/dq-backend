@@ -170,7 +170,8 @@ class HalaqaStudentController extends Controller
     ) {
         $validated = $request->validated();
 
-        HalaqaStudent::whereIn('student_id', $validated['students'])
+        HalaqaStudent::visibleTo(auth()->user())
+            ->whereIn('student_id', $validated['students'])
             ->whereNull('to_date')
             ->update([
                 'from_date' => $validated['from_date'],

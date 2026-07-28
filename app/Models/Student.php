@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Concerns\HasApproval;
 use App\Enums\Gender;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +23,7 @@ use App\Models\Scopes\GenderVisibilityScope;
 class Student extends Model
 {
 
-    use HasFactory, SoftDeletes, HasVisibilityScope;
+    use HasFactory, SoftDeletes, HasVisibilityScope, HasApproval;
 
 
 
@@ -51,6 +52,7 @@ class Student extends Model
         'completed_juz',
         'surah_id',
         'end_aya',
+        'is_approved',
     ];
 
 
@@ -65,13 +67,15 @@ class Student extends Model
             'guardianType',
             'prefixName',
             'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
+            'approvalRequest',
         ];
     }
 
 
     protected $casts = [
         'dob' => 'date',
-        'gender' => Gender::class
+        'gender' => Gender::class,
+        'is_approved' => 'boolean',
     ];
 
     public static $usesAudit = true;
