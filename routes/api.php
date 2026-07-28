@@ -3,11 +3,11 @@
 use App\Http\Middleware\SetCurrentUserContext;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
-    AcademicQualificationController,
     ApprovalController,
     ApprovalController as ApiApprovalController,
     BranchController,
     CenterController,
+    CertificateController,
     ConstantController,
     ConstantTypeController,
     CourseController,
@@ -18,7 +18,6 @@ use App\Http\Controllers\Api\{
     IdQueryController,
     ImageController,
     MosqueController,
-    PersonalCourseController,
     PlanAssignmentController,
     PlanController,
     PlanStudentController,
@@ -41,11 +40,11 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // ── الاعتمادات ──────────────────────────────────────
     Route::prefix('approvals')->group(function () {
-        Route::get('/',                         [ApprovalController::class, 'index']);
-        Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
-        Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
-        Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);
-        Route::post('{approvalRequest}/cancel',        [ApprovalController::class, 'cancel']);
+        Route::get('/', [ApprovalController::class, 'index']);
+        Route::post('{approvalRequest}/approve', [ApprovalController::class, 'approve']);
+        Route::post('{approvalRequest}/reject', [ApprovalController::class, 'reject']);
+        Route::post('{approvalRequest}/resubmit', [ApprovalController::class, 'resubmit']);
+        Route::post('{approvalRequest}/cancel', [ApprovalController::class, 'cancel']);
     });
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
@@ -72,16 +71,9 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     // Halaqa statuses management
     Route::apiResource('halaqa-statuses', HalaqaStatusController::class);
 
-    // Academic qualifications management
-    Route::apiResource('academic-qualifications', AcademicQualificationController::class);
-    Route::prefix('academic-qualifications')->group(function () {
-        Route::get('{person_type}/{person_id}', [AcademicQualificationController::class, 'getPersonQualifications']);
-    });
-
-    // Personal courses management
-    Route::apiResource('personal-courses', PersonalCourseController::class);
-    Route::prefix('personal-courses')->group(function () {
-        Route::get('{person_type}/{person_id}', [PersonalCourseController::class, 'getPersonCourses']);
+    Route::apiResource('certificates', CertificateController::class);
+    Route::prefix('certificates')->group(function () {
+        Route::get('{person_type}/{person_id}', [CertificateController::class, 'getPersonCertificates']);
     });
 
     // Images management (for students, users, qualifications, etc.)
@@ -98,5 +90,5 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::get('statistics', [DailyAchievementController::class, 'statistics']);
     });
     Route::apiResource('daily-memorization', DailyAchievementController::class);
-    
+
 });

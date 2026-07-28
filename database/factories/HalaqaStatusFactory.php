@@ -19,7 +19,7 @@ class HalaqaStatusFactory extends Factory
     public function definition()
     {
 
-        $fromDate = $this->faker->date();
+        $fromDate = $this->faker->optional()->date();
 
         return [
             'halaqa_id' => Halaqa::factory(),
