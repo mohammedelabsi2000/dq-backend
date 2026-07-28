@@ -2,7 +2,6 @@
 
 namespace App\Observers;
 
-use App\Support\CurrentUserContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,10 +22,10 @@ class AuditObserver
     {
         if (Auth::check()) {
             if ($model->isFillable('created_by')) {
-                $model->created_by = app(CurrentUserContext::class)->user()?->id;
+                $model->created_by = Auth::id();
             }
             if ($model->isFillable('updated_by')) {
-                $model->updated_by = app(CurrentUserContext::class)->user()?->id;
+                $model->updated_by = Auth::id();
             }
         }
     }
@@ -39,7 +38,7 @@ class AuditObserver
     public function updating(Model $model)
     {
         if (Auth::check() && $model->isFillable('updated_by')) {
-            $model->updated_by = app(CurrentUserContext::class)->user()?->id;
+            $model->updated_by = Auth::id();
         }
     }
 
@@ -51,7 +50,7 @@ class AuditObserver
     public function deleting(Model $model)
     {
         if (Auth::check() && $model->isFillable('deleted_by')) {
-            $model->deleted_by = app(CurrentUserContext::class)->user()?->id;
+            $model->deleted_by = Auth::id();
             $model->save();
         }
     }
