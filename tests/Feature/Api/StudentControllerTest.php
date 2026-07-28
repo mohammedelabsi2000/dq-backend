@@ -546,8 +546,11 @@ class StudentControllerTest extends TestCase
             'reference_id'   => $center->id,
         ]);
 
-        // إنشاء طلاب وتسجيلهم في الحلقة
-        $branchStudents = Student::factory(5)->create(['mosque_id' => $this->mosque->id]);
+        // إنشاء طلاب وتسجيلهم في الحلقة (بنفس جنس مدير الفرع لتفادي فلترة الجنس)
+        $branchStudents = Student::factory(5)->create([
+            'mosque_id' => $this->mosque->id,
+            'gender'    => $this->branchManagerUser->gender,
+        ]);
         foreach ($branchStudents as $student) {
             HalaqaStudent::factory()->create([
                 'halaqa_id'   => $halaqa->id,
