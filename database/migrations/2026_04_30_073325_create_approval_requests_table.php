@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\ApprovalLevel;
 use App\Enums\ApprovalStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -18,7 +17,7 @@ return new class extends Migration
         Schema::create('approval_requests', function (Blueprint $table) {
             $table->id();
             $table->morphs('approvable');
-            $table->string('current_level')->default(ApprovalLevel::Region->value);
+            $table->string('current_level')->default('region');
             $table->string('status')->default(ApprovalStatus::Pending->value);
             $table->foreignId('requested_by')->constrained('users');
             $table->text('rejection_reason')->nullable();
