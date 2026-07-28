@@ -15,6 +15,8 @@ class DailyAchievement extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public static $usesAudit = true;
+
     protected $fillable = [
         'student_id',
         'teacher_id',
@@ -32,6 +34,9 @@ class DailyAchievement extends Model
         'mistakes_count',
         'notes',
         'recorded_at',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $casts = [

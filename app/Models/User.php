@@ -57,6 +57,9 @@ class User extends Authenticatable
         'image',
         'is_approved',
         'is_active',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

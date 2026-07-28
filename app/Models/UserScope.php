@@ -12,6 +12,8 @@ class UserScope extends Model
 
     public $timestamps = false;
 
+    public static $usesAudit = true;
+
     protected $fillable = [
         'user_id',
         'role_id',
@@ -19,6 +21,7 @@ class UserScope extends Model
         'scope_id',
         'from_date',
         'to_date',
+        'created_by',
     ];
 
     protected $casts = [

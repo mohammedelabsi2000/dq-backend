@@ -15,6 +15,8 @@ class HalaqaStudent extends Model
 
     use HasFactory, SoftDeletes, Searchable, HasVisibilityScope;
 
+    public static $usesAudit = true;
+
     protected $casts = [
         'from_date' => 'date',
         'to_date' => 'date',
@@ -31,6 +33,9 @@ class HalaqaStudent extends Model
         'from_date',
         'to_date',
         'enrollment_status_id',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     /**

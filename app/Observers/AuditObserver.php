@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Support\CurrentUserContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,11 +22,11 @@ class AuditObserver
     public function creating(Model $model)
     {
         if (Auth::check()) {
-            if (in_array('created_by', $model->getFillable())) {
-                $model->created_by = Auth::id();
+            if ($model->isFillable('created_by')) {
+                $model->created_by = app(CurrentUserContext::class)->user()->identity;
             }
-            if (in_array('updated_by', $model->getFillable())) {
-                $model->updated_by = Auth::id();
+            if ($model->isFillable('updated_by')) {
+                $model->updated_by = app(CurrentUserContext::class)->user()->identity;
             }
         }
     }
@@ -37,8 +38,8 @@ class AuditObserver
      */
     public function updating(Model $model)
     {
-        if (Auth::check() && in_array('updated_by', $model->getFillable())) {
-            $model->updated_by = Auth::id();
+        if (Auth::check() && $model->isFillable('updated_by')) {
+            $model->updated_by = app(CurrentUserContext::class)->user()->identity;
         }
     }
 
@@ -49,8 +50,8 @@ class AuditObserver
      */
     public function deleting(Model $model)
     {
-        if (Auth::check() && in_array('deleted_by', $model->getFillable())) {
-            $model->deleted_by = Auth::id();
+        if (Auth::check() && $model->isFillable('deleted_by')) {
+            $model->deleted_by = app(CurrentUserContext::class)->user()->identity;
             $model->save();
         }
     }
@@ -63,7 +64,7 @@ class AuditObserver
      */
     public function restoring(Model $model)
     {
-        if (Auth::check() && in_array('deleted_by', $model->getFillable())) {
+        if (Auth::check() && $model->isFillable('deleted_by')) {
             $model->deleted_by = null;
             $model->save();
         }

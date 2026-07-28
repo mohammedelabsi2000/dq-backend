@@ -15,6 +15,8 @@ class Halaqa extends Model
 {
     use HasFactory, SoftDeletes, HasVisibilityScope, HasApproval;
 
+    public static $usesAudit = true;
+
     protected $table = 'halaqas';
 
     /* protected $fillable = [

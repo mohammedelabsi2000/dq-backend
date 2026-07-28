@@ -6,10 +6,13 @@ use App\Enums\ImageType;
 use App\Enums\StorageDisk;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Image extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    public static $usesAudit = true;
 
     protected $fillable = [
         'imageable_id',
@@ -22,7 +25,10 @@ class Image extends Model
         'image_type',
         'sort_order',
         'is_main',
-        'notes'
+        'notes',
+        'created_by',
+        'updated_by',
+        'deleted_by',
     ];
 
     protected $casts = [

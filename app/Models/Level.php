@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Level extends Model
 {
     use SoftDeletes, HasFactory;
+
+    public static $usesAudit = true;
+
     protected $guarded = ['id'];
 
     /* protected $fillable = [

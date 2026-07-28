@@ -13,6 +13,8 @@ class Plan extends Model
 {
     use SoftDeletes, HasFactory;
 
+    public static $usesAudit = true;
+
     protected $guarded = ['id'];
 
     /* protected $fillable = [

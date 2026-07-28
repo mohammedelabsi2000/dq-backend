@@ -43,6 +43,7 @@ class StudentTest extends TestCase
             'whatsapp',
             'created_by',
             'updated_by',
+            'deleted_by',
             'memorized_juz',
             'completed_juz',
             'surah_id',
