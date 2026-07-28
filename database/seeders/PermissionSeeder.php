@@ -102,6 +102,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'daily_achievements.create', 'title' => 'إضافة إنجاز يومي'],
             ['name' => 'daily_achievements.update', 'title' => 'تعديل إنجاز يومي'],
             ['name' => 'daily_achievements.delete', 'title' => 'حذف إنجاز يومي'],
+            ['name' => 'gender_visibility', 'title' => 'عرض الجنسين'],
             // ['name' => 'student_plans.show', 'title' => 'عرض خطط الطلاب'],
             // ['name' => 'student_plans.create', 'title' => 'تسجيل طالب في خطة'],
             // ['name' => 'student_plans.update', 'title' => 'تعديل خطة طالب'],

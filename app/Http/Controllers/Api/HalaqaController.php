@@ -10,6 +10,7 @@ use App\Http\Resources\HalaqaResource;
 use App\Models\Halaqa;
 use App\Models\HalaqaStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HalaqaController extends Controller
 {
@@ -110,42 +111,44 @@ class HalaqaController extends Controller
             $halaqaData['sponsor_entity'],
             $halaqaData['notes']
         );
-        $halaqa = Halaqa::create([
-            ...$halaqaData,
-            // 'is_approved' => false, // ← دائماً false عند الإنشاء
-        ]);
+        $halaqa = null;
+        $message = DB::transaction(function () use ($halaqaData, $halaqaStatusData, $request) {
 
-        // إرسال طلب الاعتماد
-        // try {
-        //     $approvalRequest = $halaqa->submitForApproval(auth()->user());
-        // } catch (\Exception $e) {
-        //     return $this->error($e->getMessage(), 422);
-        // }
-        $message = null;
-        if ($halaqa) {
+            $halaqa = Halaqa::create([
+                ...$halaqaData,
+                // 'is_approved' => false,
+            ]);
+
+            // إرسال طلب الاعتماد
+            // $approvalRequest = $halaqa->submitForApproval(auth()->user());
+
             $message = 'تم إنشاء الحلقة';
+
             if (
                 $halaqaStatusData['status_type_id'] !== null ||
                 $halaqaStatusData['sponsorship_type_id'] !== null ||
                 $halaqaStatusData['sponsor_entity'] !== null
             ) {
-                $halaqaStatus = HalaqaStatus::create(['halaqa_id' => $halaqa->id] + $halaqaStatusData);
-                if ($halaqaStatus) {
-                    $message .= ' وتم إضافة حالة الحلقة';
-                }
+                HalaqaStatus::create([
+                    'halaqa_id' => $halaqa->id,
+                    ...$halaqaStatusData,
+                ]);
+
+                $message .= ' وتم إضافة حالة الحلقة';
             }
-        }
+            if ($request->boolean('with_type')) {
+                $halaqa->load('type');
+            }
 
-        if ($request->boolean('with_type')) {
-            $halaqa->load('type');
-        }
+            $halaqa->load(['type', 'reference', 'approvalRequest']);
 
-        $halaqa->load(['type', 'reference', 'approvalRequest']);
+            return $message;
+        });
+
 
         // $message = $approvalRequest === null
         //     ? 'تم إنشاء الحلقة وتفعيلها مباشرة'    // المدير العام
         //     : 'تم إنشاء الحلقة وإرسالها للاعتماد';
-
 
 
         return $this->success(new HalaqaResource($halaqa), $message, 201);

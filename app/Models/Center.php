@@ -6,13 +6,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Concerns\HasVisibilityScope;
+use App\Models\Scopes\GenderVisibilityScope;
 
 class Center extends Model
 {
     use HasFactory, HasVisibilityScope;
 
-    protected $fillable = ['name', 'notes', 'region_id', 'mosque_id'];
-
+    protected $fillable = ['name', 'notes', 'region_id', 'mosque_id', 'gender'];
+    protected static function booted()
+    {
+        static::addGlobalScope(new GenderVisibilityScope);
+    }
     public function region()
     {
         return $this->belongsTo(Region::class);
@@ -25,7 +29,12 @@ class Center extends Model
 
     public function halaqat()
     {
-        return $this->hasMany(Halaqa::class);
+        $user = auth()->user();
+        $halaqas = $this->hasMany(Halaqa::class);
+        if (!$user->can('gender_visibility')) {
+            $halaqas = $halaqas->where('gender', $user->gender);
+        }
+        return $halaqas;
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder

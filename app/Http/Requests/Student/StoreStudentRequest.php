@@ -5,6 +5,7 @@ namespace App\Http\Requests\Student;
 use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
 use App\Models\Student;
+use App\Rules\GenderVisibilityRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
@@ -26,7 +27,7 @@ class StoreStudentRequest extends BaseStudentRequest
             'dob' => 'nullable|date',
             'mosque_id' => 'required|exists:mosques,id',
             'location' => 'nullable|string',
-            'gender' => ['required', new Enum(Gender::class)],
+            'gender' => ['required', new Enum(Gender::class), new GenderVisibilityRule()],
             'marital_status_id' => [
                 'nullable',
                 Rule::in(ConstantHelper::getConstantIdsByType('marital_status')),

@@ -21,11 +21,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 use App\Concerns\HasVisibilityScope;
-
-
+use App\Models\Scopes\GenderVisibilityScope;
 
 class Student extends Model
-
 {
 
     use HasFactory, SoftDeletes, Auditable, HasVisibilityScope;
@@ -83,7 +81,6 @@ class Student extends Model
 
 
     public static function standardRelations()
-
     {
 
         return [
@@ -130,7 +127,6 @@ class Student extends Model
 
 
     public function images()
-
     {
 
         return $this->morphMany(\App\Models\Image::class, 'imageable');
@@ -139,7 +135,6 @@ class Student extends Model
 
 
     public function mainImage()
-
     {
 
         return $this->morphOne(\App\Models\Image::class, 'imageable')
@@ -152,21 +147,12 @@ class Student extends Model
 
 
     protected static function booted()
-
     {
+        static::addGlobalScope(new GenderVisibilityScope);
 
         static::deleting(function ($student) {
-
-
-
             foreach ($student->images as $image) {
-
-
-
                 Storage::disk($image->disk)->delete($image->file_path);
-
-
-
                 $image->delete();
             }
         });
@@ -175,7 +161,6 @@ class Student extends Model
     // full_name عمود ظاهري في DB لكن نضيفه هنا كاحتياط
 
     public function getFullNameAttribute()
-
     {
 
         return implode(' ', array_filter([
@@ -192,7 +177,6 @@ class Student extends Model
     }
 
     public function getGenderTextAttribute()
-
     {
 
         return $this->gender?->label() ?? 'غير محدد';
@@ -201,7 +185,6 @@ class Student extends Model
 
 
     public function mosque()
-
     {
 
         return $this->belongsTo(Mosque::class);
@@ -210,7 +193,6 @@ class Student extends Model
 
 
     public function maritalStatus()
-
     {
 
         return $this->belongsTo(Constant::class, 'marital_status_id');
@@ -219,7 +201,6 @@ class Student extends Model
 
 
     public function moneyStatus()
-
     {
 
         return $this->belongsTo(Constant::class, 'money_status_id');
@@ -228,7 +209,6 @@ class Student extends Model
 
 
     public function guardianType()
-
     {
 
         return $this->belongsTo(Constant::class, 'guardian_type_id');
@@ -237,7 +217,6 @@ class Student extends Model
 
 
     public function prefixName()
-
     {
 
         return $this->belongsTo(Constant::class, 'prefix_name_id');
@@ -246,7 +225,6 @@ class Student extends Model
 
 
     public function guardian()
-
     {
 
         return $this->belongsTo(User::class, 'guardian_id', 'identity');
@@ -255,7 +233,6 @@ class Student extends Model
 
 
     public function attendances()
-
     {
 
         return $this->morphMany(Attendance::class, 'attendable');
@@ -264,7 +241,6 @@ class Student extends Model
 
 
     public function halaqaEnrollments()
-
     {
 
         return $this->hasMany(HalaqaStudent::class);
@@ -273,7 +249,6 @@ class Student extends Model
 
 
     public function halaqas()
-
     {
 
         return $this->belongsToMany(Halaqa::class, 'halaqa_students')
@@ -286,7 +261,6 @@ class Student extends Model
 
 
     public function dailyAchievements()
-
     {
 
         return $this->hasMany(DailyAchievement::class);
@@ -295,7 +269,6 @@ class Student extends Model
 
 
     public function plans()
-
     {
 
         return $this->belongsToMany(Plan::class, 'student_plans')
@@ -307,7 +280,6 @@ class Student extends Model
 
 
     public function startingLevel()
-
     {
 
         return $this->belongsTo(Level::class, 'starting_level_id');
@@ -316,7 +288,6 @@ class Student extends Model
 
 
     public function currentLevel()
-
     {
 
         return $this->belongsTo(Level::class, 'current_level_id');
@@ -331,7 +302,6 @@ class Student extends Model
      */
 
     public function activePlan()
-
     {
 
         return $this->hasOne(StudentPlan::class)->whereNull('to_date');
@@ -342,11 +312,9 @@ class Student extends Model
 
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
-
     {
 
-        if ($user->isGlobalAdmin()) {
-
+        if ($user->isGlobalAdmin() && $user->can('gender_visibility')) {
             return $query;
         }
 
@@ -437,9 +405,9 @@ class Student extends Model
 
         if ($regionIds->isNotEmpty()) {
 
-            $centerIds  = Center::whereIn('region_id', $regionIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
 
-            $mosqueIds  = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
 
 
 
@@ -493,11 +461,11 @@ class Student extends Model
 
         if ($branchIds->isNotEmpty()) {
 
-            $regionIds  = Region::whereIn('branch_id', $branchIds)->pluck('id');
+            $regionIds = Region::whereIn('branch_id', $branchIds)->pluck('id');
 
-            $centerIds  = Center::whereIn('region_id', $regionIds)->pluck('id');
+            $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
 
-            $mosqueIds  = Mosque::whereIn('region_id', $regionIds)->pluck('id');
+            $mosqueIds = Mosque::whereIn('region_id', $regionIds)->pluck('id');
 
 
 
@@ -553,7 +521,6 @@ class Student extends Model
 
 
     public function scopeWithStandardRelations($query)
-
     {
 
         return $query->with(self::standardRelations());
@@ -562,7 +529,6 @@ class Student extends Model
 
 
     public function scopeByGuardian($query, $guardianId)
-
     {
 
         return $query->where('guardian_id', $guardianId);
@@ -571,7 +537,6 @@ class Student extends Model
 
 
     public function scopeByMosque($query, $mosqueId)
-
     {
 
         return $query->where('mosque_id', $mosqueId);
@@ -580,7 +545,6 @@ class Student extends Model
 
 
     public function getAgeAttribute()
-
     {
 
         $today = now();
@@ -593,7 +557,6 @@ class Student extends Model
 
 
     public function isActiveInHalaqa($halaqaId)
-
     {
 
         return $this->halaqas()->where('halaqa_id', $halaqaId)->whereNull('halaqa_students.to_date')->exists();

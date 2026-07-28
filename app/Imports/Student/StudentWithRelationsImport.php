@@ -319,7 +319,7 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue
 
     public function addHalaqa(string $halaqa_name, Center $center)
     {
-        $halaqa_type_id = $this->firstOrCreateConstant('halaqa_type', 'حفظ', $this->notes)->id;
+        $halaqa_type_id = $this->firstOrCreateConstant('halaqa_types', 'حفظ', $this->notes)->id;
 
         $halaqa = Halaqa::firstOrCreate([
             'name' => $halaqa_name,

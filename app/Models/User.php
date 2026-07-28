@@ -6,6 +6,7 @@ use App\Concerns\HasApproval;
 use App\Concerns\HasVisibilityScope;
 use App\Enums\ApprovalLevel;
 use App\Enums\Gender;
+use App\Models\Scopes\GenderVisibilityScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -136,6 +137,7 @@ class User extends Authenticatable
 
     protected static function booted()
     {
+        static::addGlobalScope(new GenderVisibilityScope);
         static::deleting(function ($user) {
 
             foreach ($user->images as $image) {
