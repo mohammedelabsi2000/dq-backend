@@ -6,6 +6,7 @@ use App\Http\Requests\DQFormRequest;
 use App\Enums\HalaqaReferenceType;
 use App\Helpers\ConstantHelper;
 use App\Models\Halaqa;
+use App\Rules\GenderVisibilityRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Validation\Rules\Enum;
@@ -161,6 +162,7 @@ class HalaqaRequest extends DQFormRequest
 
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date',],
+            'gender' => ['required', new GenderVisibilityRule()],
         ];
     }
 
@@ -197,6 +199,7 @@ class HalaqaRequest extends DQFormRequest
             // to_date
             'to_date.date' => 'تاريخ النهاية يجب أن يكون تاريخ صحيح.',
             'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو يساوي تاريخ البداية.',
+            'gender.required' => 'يجب اختيار الجنس'
         ];
     }
 }

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Observers\AuditObserver;
 use App\Observers\DailyAchievementObserver;
-
+use App\Support\CurrentUserContext;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Pagination\Paginator;
 
@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->singleton(CurrentUserContext::class);
     }
 
     /**
