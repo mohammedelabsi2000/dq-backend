@@ -54,6 +54,7 @@ class StudentPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('students.show');
+        $user->givePermissionTo('gender_visibility');
         $student = $this->createStudent();
 
         $this->assertTrue($this->policy->view($user, $student));
@@ -90,6 +91,7 @@ class StudentPolicyTest extends TestCase
     {
         $user    = User::factory()->create();
         $user->givePermissionTo('students.update');
+        $user->givePermissionTo('gender_visibility');
         $student = $this->createStudent();
 
         $this->assertTrue($this->policy->update($user, $student));
@@ -109,6 +111,7 @@ class StudentPolicyTest extends TestCase
     {
         $user    = User::factory()->create();
         $user->givePermissionTo('students.delete');
+        $user->givePermissionTo('gender_visibility');
         $student = $this->createStudent();
 
         $this->assertTrue($this->policy->delete($user, $student));

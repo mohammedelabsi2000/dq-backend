@@ -196,6 +196,7 @@ class CenterControllerTest extends TestCase
                 'name'      => 'مركز جديد',
                 'region_id' => $this->region->id,
                 'mosque_id' => $this->mosque->id,
+                'gender'    => \App\Enums\Gender::Male->value,
             ]);
 
         $response->assertStatus(201)
@@ -285,6 +286,7 @@ class CenterControllerTest extends TestCase
                 'name'      => 'الاسم الجديد',
                 'region_id' => $this->region->id,
                 'mosque_id' => $this->mosque->id,
+                'gender'    => \App\Enums\Gender::Male->value,
             ]);
 
         $response->assertStatus(200)

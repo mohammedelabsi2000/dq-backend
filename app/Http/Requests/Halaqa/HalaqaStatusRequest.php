@@ -46,6 +46,7 @@ class HalaqaStatusRequest extends DQFormRequest
             'sponsorship_type_id' => ['nullable', Rule::in(ConstantHelper::getConstantIdsByType('sponsorship_type'))],
             'from_date' => [
                 $isUpdate ? 'sometimes' : null,
+                'required',
                 'date'
             ],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date'],
@@ -63,6 +64,7 @@ class HalaqaStatusRequest extends DQFormRequest
 
             'sponsorship_type_id.in' => 'نوع الكفالة غير صالح.',
 
+            'from_date.required' => 'تاريخ البداية مطلوب.',
             'from_date.date' => 'تاريخ البداية يجب أن يكون تاريخاً صحيحاً.',
 
             'to_date.date' => 'تاريخ النهاية يجب أن يكون تاريخ صحيح.',

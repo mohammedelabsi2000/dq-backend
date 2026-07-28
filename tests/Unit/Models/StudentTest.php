@@ -44,6 +44,7 @@ class StudentTest extends TestCase
             'created_by',
             'updated_by',
             'deleted_by',
+            'is_approved',
             'memorized_juz',
             'completed_juz',
             'surah_id',
@@ -219,6 +220,7 @@ class StudentTest extends TestCase
     public function test_visible_to_scope()
     {
         $user = User::factory()->create();
+        $user->givePermissionTo('gender_visibility');
         $student = Student::factory()->create();
 
         $visibleStudents = Student::visibleTo($user)->get();

@@ -213,6 +213,7 @@ class HalaqaControllerTest extends TestCase
                 'reference_type' => HalaqaReferenceType::Center->value,
                 'type_id'        => $this->typeId,
                 'status_type_id' => $this->statusTypeId,
+                'gender'         => \App\Enums\Gender::Male->value,
             ]);
 
         $response->assertStatus(201)
@@ -234,6 +235,7 @@ class HalaqaControllerTest extends TestCase
                 'reference_type' => HalaqaReferenceType::Region->value,
                 'type_id'        => $this->typeId,
                 'status_type_id' => $this->statusTypeId,
+                'gender'         => \App\Enums\Gender::Male->value,
             ]);
 
         $response->assertStatus(201);
@@ -323,6 +325,7 @@ class HalaqaControllerTest extends TestCase
                 'center_id'      => $this->center->id, // استخدم center_id ليتم معالجته في prepareForValidation
                 'type_id'        => $halaqa->type_id,
                 'status_type_id' => $this->statusTypeId,
+                'gender'         => \App\Enums\Gender::Male->value,
             ]);
 
         $response->assertStatus(200)

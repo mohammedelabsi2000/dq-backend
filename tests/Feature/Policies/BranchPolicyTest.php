@@ -43,16 +43,17 @@ class BranchPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('branches.show');
+        $branch = Branch::factory()->create();
 
-        // BranchPolicy::view لا تأخذ $branch كـ parameter
-        $this->assertTrue($this->policy->view($user));
+        $this->assertTrue($this->policy->view($user, $branch));
     }
 
     public function test_user_without_permission_cannot_view_branch()
     {
         $user = User::factory()->create();
+        $branch = Branch::factory()->create();
 
-        $this->assertFalse($this->policy->view($user));
+        $this->assertFalse($this->policy->view($user, $branch));
     }
 
     // ─── create ─────────────────────────────────────────────
@@ -78,15 +79,17 @@ class BranchPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('branches.update');
+        $branch = Branch::factory()->create();
 
-        $this->assertTrue($this->policy->update($user));
+        $this->assertTrue($this->policy->update($user, $branch));
     }
 
     public function test_user_without_permission_cannot_update()
     {
         $user = User::factory()->create();
+        $branch = Branch::factory()->create();
 
-        $this->assertFalse($this->policy->update($user));
+        $this->assertFalse($this->policy->update($user, $branch));
     }
 
     // ─── delete ─────────────────────────────────────────────
@@ -95,14 +98,16 @@ class BranchPolicyTest extends TestCase
     {
         $user = User::factory()->create();
         $user->givePermissionTo('branches.delete');
+        $branch = Branch::factory()->create();
 
-        $this->assertTrue($this->policy->delete($user));
+        $this->assertTrue($this->policy->delete($user, $branch));
     }
 
     public function test_user_without_permission_cannot_delete()
     {
         $user = User::factory()->create();
+        $branch = Branch::factory()->create();
 
-        $this->assertFalse($this->policy->delete($user));
+        $this->assertFalse($this->policy->delete($user, $branch));
     }
 }
