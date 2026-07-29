@@ -94,7 +94,7 @@ class IdQueryServices
      * @param array $data
      * @return array
      */
-    private function mapping(array $data)
+    public function mapping(array $data)
     {
         return [
             'fName' => $data['CI_FIRST_ARB'] ?? null,

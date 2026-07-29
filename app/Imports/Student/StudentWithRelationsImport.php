@@ -21,7 +21,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 
@@ -214,8 +213,10 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue
             return $student;
         }
 
+        $idQueryServices = new IdQueryServices();
+
         try {
-            $personData = (new IdQueryServices())->get($identity);
+            $personData = $idQueryServices->get($identity);
         } catch (\Throwable $th) {
             $this->addToFailedRows($row, 'خطأ في جلب بيانات الشخص: ' . $th->getMessage());
             return null;
@@ -223,48 +224,11 @@ class StudentWithRelationsImport implements ToModel, WithHeadingRow, ShouldQueue
 
         $student = Student::create([
             'identity' => $identity,
-            'fName' => $personData['CI_FIRST_ARB'] ?? null,
-            'sName' => $personData['CI_FATHER_ARB'] ?? null,
-            'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
-            'family' => $personData['CI_FAMILY_ARB'] ?? null,
-            'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
-            'gender' => $personData['SEX'] ?? null,
+            ...$idQueryServices->mapping($personData),
             ...$data,
         ]);
 
         return $student;
-    }
-
-    public function firstOrCreateUser(array $row, int $identity, int $mosque_id): User
-    {
-        $user = User::where('identity', $identity)->first();
-
-        if ($user) {
-            $user->update([
-                'mosque_id' => $mosque_id,
-            ]);
-            return $user;
-        }
-
-        $personData = (new IdQueryServices())->get($identity);
-
-        $user = User::create([
-            'identity' => $identity,
-            'fName' => $personData['CI_FIRST_ARB'] ?? null,
-            'sName' => $personData['CI_FATHER_ARB'] ?? null,
-            'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
-            'family' => $personData['CI_FAMILY_ARB'] ?? null,
-            'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
-            'gender' => $personData['SEX'] ?? null,
-            'mosque_id' => $mosque_id,
-            'email' => $identity . '@tahfiz.com',
-            'password' => Hash::make('12345678'),
-            'is_approved' => false,
-            'is_active' => false,
-        ]);
-
-
-        return $user;
     }
 
     public function addBranch(string $branch_name)
