@@ -24,9 +24,10 @@ class UpdateRegionRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'name'      => 'sometimes|required|string|max:255',
-            'branch_id' => 'sometimes|required|exists:branches,id',
-            'notes'     => 'nullable|string',
+            'name'                => 'sometimes|required|string|max:255',
+            'branch_id'           => 'sometimes|required|exists:branches,id',
+            'standard_region_id'  => 'nullable|integer|unique:regions,standard_region_id,' . $this->route('region')?->id,
+            'notes'               => 'nullable|string',
         ];
     }
 

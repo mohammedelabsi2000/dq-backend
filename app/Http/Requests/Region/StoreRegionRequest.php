@@ -26,9 +26,10 @@ class StoreRegionRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'name'      => 'required|string|max:255',
-            'branch_id' => 'required|exists:branches,id',
-            'notes'     => 'nullable|string',
+            'name'                => 'required|string|max:255',
+            'branch_id'           => 'required|exists:branches,id',
+            'standard_region_id'  => 'nullable|integer|unique:regions,standard_region_id',
+            'notes'               => 'nullable|string',
         ];
     }
 

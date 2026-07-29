@@ -16,6 +16,7 @@ class BranchResource extends JsonResource
     {
         return [
             'id'                    => $this->id,
+            'standard_branch_id'    => $this->standard_branch_id,
             'name'                  => $this->name,
             'notes'                 => $this->notes,
             'regions_count'         => $this->whenCounted('regions'),

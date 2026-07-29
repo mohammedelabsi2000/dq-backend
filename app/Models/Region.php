@@ -14,7 +14,7 @@ class Region extends Model
 
     public static $usesAudit = true;
 
-    protected $fillable = ['name', 'branch_id', 'notes', 'created_by', 'updated_by', 'deleted_by'];
+    protected $fillable = ['name', 'standard_region_id', 'branch_id', 'notes', 'created_by', 'updated_by', 'deleted_by'];
 
     public function branch()
     {

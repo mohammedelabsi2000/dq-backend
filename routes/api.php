@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     ApprovalController,
     ApprovalController as ApiApprovalController,
+    AreaController,
     BranchController,
     CenterController,
     CertificateController,
@@ -44,6 +45,12 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
         Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
         Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);
+    });
+
+    // External areas (branches/regions) fetched from the AFP API
+    Route::prefix('standard-branches')->group(function () {
+        Route::get('/', [AreaController::class, 'index']);
+        Route::get('{id}/standard-regions', [AreaController::class, 'subAreas']);
     });
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
