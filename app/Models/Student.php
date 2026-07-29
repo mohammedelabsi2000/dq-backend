@@ -151,11 +151,6 @@ class Student extends Model
         return $this->belongsTo(User::class, 'guardian_id', 'identity');
     }
 
-    public function attendances()
-    {
-        return $this->morphMany(Attendance::class, 'attendable');
-    }
-
     public function halaqaEnrollments()
     {
         return $this->hasMany(HalaqaStudent::class);
