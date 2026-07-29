@@ -78,19 +78,8 @@ class StudentService
 
         if (!$guardian) {
             $idQueryServices = new IdQueryServices();
-            $personData = null;
-            $guardianData = [];
-
             $personData = $idQueryServices->get($identity);
-
-            $guardianData = [
-                'fName' => $personData['CI_FIRST_ARB'] ?? null,
-                'sName' => $personData['CI_FATHER_ARB'] ?? null,
-                'thName' => $personData['CI_GRAND_FATHER_ARB'] ?? null,
-                'family' => $personData['CI_FAMILY_ARB'] ?? null,
-                'dob' => str_replace('/', '-', $personData['CI_BIRTH_DT']) ?? null,
-                'gender' => $personData['SEX'] ?? null,
-            ];
+            $guardianData = $idQueryServices->mapping($personData);
 
             $guardian = User::create(array_merge([
                 'name' => 'ولي أمر ' . $studentName,
