@@ -15,12 +15,13 @@ class RegionResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id'            => $this->id,
-            'name'          => $this->name,
-            'notes'         => $this->notes,
-            'branch'        => new BranchResource($this->branch),
-            'mosques_count' => $this->whenCounted('mosques'),
-            'mosques'       => MosqueResource::collection($this->whenLoaded('mosques')),
+            'id'                  => $this->id,
+            'standard_region_id'  => $this->standard_region_id,
+            'name'                => $this->name,
+            'notes'               => $this->notes,
+            'branch'              => new BranchResource($this->branch),
+            'mosques_count'       => $this->whenCounted('mosques'),
+            'mosques'             => MosqueResource::collection($this->whenLoaded('mosques')),
         ];
     }
 }

@@ -25,6 +25,7 @@ class UpdateBranchRequest extends DQFormRequest
     {
         return [
             'name'                  => 'sometimes|required|string|max:255',
+            'standard_branch_id'    => 'nullable|integer|unique:branches,standard_branch_id,' . $this->route('branch')?->id,
             'notes'                 => 'nullable|string',
         ];
     }

@@ -16,6 +16,7 @@ class Branch extends Model
 
     protected $fillable = [
         'name',
+        'standard_branch_id',
         'notes',
         'created_by',
         'updated_by',

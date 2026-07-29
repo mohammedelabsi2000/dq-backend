@@ -9,4 +9,9 @@ return [
         "token" => env('ID_QUERY_TOKEN'),
         "master_column" => "CI_ID_NUM",
     ],
+
+    "areas_api" => [
+        "base_url" => env('AREAS_API_URL', 'https://afp.daralquran.ps/api/v2/external'),
+        "api_key" => env('AREAS_API_KEY'),
+    ],
 ];

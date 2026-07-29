@@ -26,6 +26,7 @@ class StoreBranchRequest extends DQFormRequest
     {
         return [
             'name'                  => 'required|string|max:255',
+            'standard_branch_id'    => 'nullable|integer|unique:branches,standard_branch_id',
             'notes'                 => 'nullable|string',
         ];
     }
