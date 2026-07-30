@@ -46,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        
         $this->configurePagination();
         $this->configureSchema();
         $this->configureExcel();
