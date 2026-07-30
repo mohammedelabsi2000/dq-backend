@@ -99,3 +99,4 @@ jobs:
             php artisan view:cache
             sudo chmod -R 775 storage bootstrap/cache
             php artisan queue:restart
+            
