@@ -89,7 +89,8 @@ jobs:
             cd ${{ secrets.APP_PATH }}
             sudo chmod -R 775 storage bootstrap/cache
             sudo chmod -R 775 storage storage
-            git pull origin ${{ github.ref_name }}
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
             php artisan db:seed --force
