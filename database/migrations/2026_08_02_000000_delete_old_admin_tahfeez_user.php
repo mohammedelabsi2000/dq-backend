@@ -18,18 +18,19 @@ return new class extends Migration {
                 return;
             }
 
+            // model_type/tokenable_type مخزّنة وفق morph map كـ alias 'user' وليس اسم الكلاس الكامل
             DB::table('model_has_roles')
-                ->where('model_type', \App\Models\User::class)
+                ->where('model_type', 'user')
                 ->where('model_id', $userId)
                 ->delete();
 
             DB::table('model_has_permissions')
-                ->where('model_type', \App\Models\User::class)
+                ->where('model_type', 'user')
                 ->where('model_id', $userId)
                 ->delete();
 
             DB::table('personal_access_tokens')
-                ->where('tokenable_type', \App\Models\User::class)
+                ->where('tokenable_type', 'user')
                 ->where('tokenable_id', $userId)
                 ->delete();
 

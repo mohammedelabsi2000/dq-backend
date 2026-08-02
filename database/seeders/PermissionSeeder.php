@@ -128,10 +128,19 @@ class PermissionSeeder extends Seeder
 
         $adminRole->syncPermissions(Permission::all());
 
-        // Assign admin role to first user
         $firstUser = User::where('email', 'admin@tahfiz.dq')->first();
+
+        // دور المسؤول التقني الأعلى: خاص بالمبرمجين فقط، لديه كافة الصلاحيات، ومخفي عن قوائم
+        // الأدوار العادية (انظر RoleController وUserRoleController للمنطق الذي يخفيه/يحميه)
+        $superAdminRole = Role::firstOrCreate([
+            'name' => 'المسؤول التقني الأعلى',
+            'guard_name' => 'sanctum',
+        ]);
+
+        $superAdminRole->syncPermissions(Permission::all());
+
         if ($firstUser) {
-            $firstUser->assignRole($adminRole);
+            $firstUser->assignRole($superAdminRole);
         }
     }
 }

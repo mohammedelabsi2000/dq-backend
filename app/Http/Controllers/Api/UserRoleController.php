@@ -11,6 +11,7 @@ use Spatie\Permission\Models\Role;
 
 class UserRoleController extends Controller
 {
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
 
     public function __construct(protected UserRoleService $userRoleService) {}
 
@@ -26,9 +27,16 @@ class UserRoleController extends Controller
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
+        $roleNames = $user->getRoleNames();
+        $permissionNames = $user->getAllPermissions()->pluck('name');
+
+        if (!auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            $roleNames = $roleNames->reject(fn($name) => $name === self::SUPER_ADMIN_ROLE)->values();
+        }
+
         return $this->success([
-            'roles'       => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->pluck('name'),
+            'roles'       => $roleNames,
+            'permissions' => $permissionNames,
             'scopes'      => $user->scopes()->whereNull('to_date')->get(),
         ], 'الأدوار المخصصة للمستخدم');
     }
@@ -62,6 +70,17 @@ class UserRoleController extends Controller
     {
         if (auth()->id() === $user->id) {
             return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 422);
+        }
+
+        if (!auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            if ($user->hasRole(self::SUPER_ADMIN_ROLE)) {
+                return $this->error('لا يمكنك تعديل أدوار هذا المستخدم', 403);
+            }
+
+            $superAdminRoleId = Role::where('name', self::SUPER_ADMIN_ROLE)->where('guard_name', 'sanctum')->value('id');
+            if ($superAdminRoleId && in_array($superAdminRoleId, $request->role_ids)) {
+                return $this->error('لا يمكنك إسناد دور ' . self::SUPER_ADMIN_ROLE, 403);
+            }
         }
 
         if (!$this->canAssignRoles(auth()->user(), $request->role_ids)) {
@@ -116,6 +135,10 @@ class UserRoleController extends Controller
             return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 403);
         }
 
+        if ($user->hasRole(self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك تعديل نطاقات هذا المستخدم', 403);
+        }
+
         $scopes = $request->scopes; // [['type' => 'branch', 'id' => 5], ...]
 
         $user->syncScopes($scopes);
@@ -137,6 +160,10 @@ class UserRoleController extends Controller
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
+        if ($user->hasRole(self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك تعديل نطاقات هذا المستخدم', 403);
+        }
+
         $user->clearScopes();
 
         return $this->success(null, 'تم حذف جميع نطاقات المستخدم بنجاح');
@@ -156,6 +183,10 @@ class UserRoleController extends Controller
 
         if (!auth()->user()->hasPermissionTo('users.roles.update', 'sanctum')) {
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+        }
+
+        if ($user->hasRole(self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك تعديل أدوار هذا المستخدم', 403);
         }
 
         $user->syncRoles([]);
