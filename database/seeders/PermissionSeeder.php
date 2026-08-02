@@ -129,7 +129,7 @@ class PermissionSeeder extends Seeder
         $adminRole->syncPermissions(Permission::all());
 
         // Assign admin role to first user
-        $firstUser = User::where('email', 'admin@tahfeez.dq')->first();
+        $firstUser = User::where('email', 'admin@tahfiz.dq')->first();
         if ($firstUser) {
             $firstUser->assignRole($adminRole);
         }
