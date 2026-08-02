@@ -11,6 +11,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // User::where('email', '')->delete();
         // إنشاء مستخدم مسؤول
         User::updateOrCreate([
             'email' => 'admin@tahfiz.dq',
