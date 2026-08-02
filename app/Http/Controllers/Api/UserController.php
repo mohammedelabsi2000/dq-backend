@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     use HasVisibilityScope;
 
-    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني';
 
     /**
      * Display a listing of the resource.

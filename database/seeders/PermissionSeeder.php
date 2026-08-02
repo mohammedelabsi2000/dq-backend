@@ -133,7 +133,7 @@ class PermissionSeeder extends Seeder
         // دور المسؤول التقني الأعلى: خاص بالمبرمجين فقط، لديه كافة الصلاحيات، ومخفي عن قوائم
         // الأدوار العادية (انظر RoleController وUserRoleController للمنطق الذي يخفيه/يحميه)
         $superAdminRole = Role::firstOrCreate([
-            'name' => 'المسؤول التقني الأعلى',
+            'name' => 'المسؤول التقني',
             'guard_name' => 'sanctum',
         ]);
 

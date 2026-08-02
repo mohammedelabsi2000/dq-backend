@@ -11,7 +11,7 @@ use Spatie\Permission\Models\Role;
 
 class UserRoleController extends Controller
 {
-    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني';
 
     public function __construct(protected UserRoleService $userRoleService) {}
 
