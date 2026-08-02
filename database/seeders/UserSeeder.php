@@ -13,18 +13,18 @@ class UserSeeder extends Seeder
     {
         // إنشاء مستخدم مسؤول
         User::updateOrCreate([
-            'email' => 'admin@tahfeez.dq',
-            'identity' => '100000000',
+            'email' => 'admin@tahfiz.dq',
+            'identity' => '999999999',
         ], [
-            'fName' => 'رائد',
-            'sName' => 'علي',
-            'thName' => 'حسن',
-            'family' => 'المدهون',
-            'name' => 'admin',
-            'password' => Hash::make('password'),
+            'fName' => 'مسؤول',
+            'sName' => '',
+            'thName' => '',
+            'family' => 'النظام',
+            'name' => 'مسؤول النظام ',
+            'password' => Hash::make('AdminAdmin'),
             'email_verified_at' => now(),
             'gender' => 'ذكر',
-            'phone' => '0555555555',
+            'phone' => '',
             'mosque_id' => Mosque::first()->id ?? null,
             'is_approved' => '1',
             'is_active' => '1',
