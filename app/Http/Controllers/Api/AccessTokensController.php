@@ -59,23 +59,13 @@ class AccessTokensController extends Controller
             'password'    => 'required|string|min:6',
             'device_name' => 'string|max:255'
         ], [
-            'login.required'    => 'حقل البريد الإلكتروني أو الهوية مطلوب',
+            'login.required'    => 'حقل رقم الهوية مطلوب',
             'password.required' => 'حقل كلمة المرور مطلوب',
             'password.min'      => 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
         ]);
 
-        $login = $request->login;
-
-        // $user = filter_var($login, FILTER_VALIDATE_EMAIL)
-        //     ? User::where('email', $login)->first()
-        //     : User::where('identity', $login)->first();
-
         $user = User::with('approvalRequest')
-            ->where(function ($q) use ($login) {
-                filter_var($login, FILTER_VALIDATE_EMAIL)
-                    ? $q->where('email', $login)
-                    : $q->where('identity', $login);
-            })
+            ->where('identity', $request->login)
             ->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
