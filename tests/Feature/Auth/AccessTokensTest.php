@@ -10,7 +10,7 @@ class AccessTokensTest extends TestCase
 {
 
     /** @test */
-    public function test_login_with_email()
+    public function test_login_with_email_is_rejected()
     {
         $user = User::factory()->create([
             'email' => 'test@test.com',
@@ -22,16 +22,7 @@ class AccessTokensTest extends TestCase
             'password' => '123456',
         ]);
 
-        $response->assertStatus(201)
-            ->assertJsonStructure([
-                'data' => [
-                    'token',
-                    'user',
-                    'roles',
-                    'permissions',
-                    'scopes',
-                ]
-            ]);
+        $response->assertStatus(401);
     }
 
     /** @test */
@@ -58,7 +49,7 @@ class AccessTokensTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/auth/access-tokens', [
-            'login' => $user->email,
+            'login' => $user->identity,
             'password' => 'wrong123',
         ]);
 
@@ -188,7 +179,7 @@ class AccessTokensTest extends TestCase
         ]);
 
         $response = $this->postJson('/api/auth/access-tokens', [
-            'login' => $user->email,
+            'login' => $user->identity,
             'password' => '123456',
         ]);
 
