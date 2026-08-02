@@ -13,6 +13,8 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
+
     /**
      * Display a listing of the resource.
      * 
@@ -25,6 +27,11 @@ class RoleController extends Controller
         }
 
         $query = Role::query();
+
+        if (!auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            $query->where('name', '!=', self::SUPER_ADMIN_ROLE);
+        }
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn'   => 'created_at',
@@ -51,6 +58,10 @@ class RoleController extends Controller
     public function store(StoreRoleRequest $request)
     {
         $validated = $request->validated();
+
+        if ($validated['name'] === self::SUPER_ADMIN_ROLE && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك إنشاء هذا الدور', 403);
+        }
 
         $permissions = ($validated['give_all'] ?? false)
             ? Permission::all()
@@ -82,6 +93,10 @@ class RoleController extends Controller
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
+        if ($role->name === self::SUPER_ADMIN_ROLE && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('غير موجود', 404);
+        }
+
         return $this->success(new RoleResource($role->load('permissions')), 'بيانات الدور');
     }
 
@@ -95,6 +110,10 @@ class RoleController extends Controller
     public function update(UpdateRoleRequest $request, Role $role)
     {
         $validated = $request->validated();
+
+        if (($role->name === self::SUPER_ADMIN_ROLE || $validated['name'] === self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك تعديل هذا الدور', 403);
+        }
 
         $permissions = ($validated['give_all'] ?? false)
             ? Permission::all()
@@ -141,6 +160,10 @@ class RoleController extends Controller
     {
         if (!auth()->user()->hasPermissionTo('roles.delete', 'sanctum')) {
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
+        }
+
+        if ($role->name === self::SUPER_ADMIN_ROLE && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('لا يمكنك حذف هذا الدور', 403);
         }
 
         $role->delete();

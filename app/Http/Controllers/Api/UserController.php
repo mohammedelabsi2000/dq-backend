@@ -16,6 +16,8 @@ class UserController extends Controller
 {
     use HasVisibilityScope;
 
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
+
     /**
      * Display a listing of the resource.
      *
@@ -27,6 +29,10 @@ class UserController extends Controller
         $authUser = auth()->user();
 
         $query = User::query()->where('is_approved', true)->visibleTo(auth()->user());
+
+        if (!$authUser->hasRole(self::SUPER_ADMIN_ROLE)) {
+            $query->whereDoesntHave('roles', fn($q) => $q->where('name', self::SUPER_ADMIN_ROLE));
+        }
 
         // if ($authUser->isGlobalAdmin() && $request->filled('active')) {
         //     match ($request->input('active')) {
@@ -134,6 +140,11 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
+
+        if ($user->hasRole(self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+            return $this->error('غير موجود', 404);
+        }
+
         $user = $user->load([
             'mosque',
             'maritalStatus',
