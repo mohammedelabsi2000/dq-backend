@@ -16,10 +16,10 @@ return new class extends Migration {
             DB::table('roles')
                 ->where('name', 'super_admin')
                 ->where('guard_name', 'sanctum')
-                ->update(['name' => 'المسؤول التقني الأعلى']);
+                ->update(['name' => 'المسؤول التقني']);
 
             $roleId = DB::table('roles')
-                ->where('name', 'المسؤول التقني الأعلى')
+                ->where('name', 'المسؤول التقني')
                 ->where('guard_name', 'sanctum')
                 ->value('id');
 

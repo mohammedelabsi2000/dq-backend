@@ -13,7 +13,7 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
-    private const SUPER_ADMIN_ROLE = 'المسؤول التقني الأعلى';
+    private const SUPER_ADMIN_ROLE = 'المسؤول التقني';
 
     /**
      * Display a listing of the resource.
@@ -59,7 +59,7 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
 
-        if ($validated['name'] === self::SUPER_ADMIN_ROLE && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+        if ($validated['name'] === self::SUPER_ADMIN_ROLE) {
             return $this->error('لا يمكنك إنشاء هذا الدور', 403);
         }
 
@@ -111,8 +111,12 @@ class RoleController extends Controller
     {
         $validated = $request->validated();
 
-        if (($role->name === self::SUPER_ADMIN_ROLE || $validated['name'] === self::SUPER_ADMIN_ROLE) && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+        if ($role->name === self::SUPER_ADMIN_ROLE || $validated['name'] === self::SUPER_ADMIN_ROLE) {
             return $this->error('لا يمكنك تعديل هذا الدور', 403);
+        }
+
+        if (auth()->user()->hasRole($role->name)) {
+            return $this->error('لا يمكنك تعديل صلاحياتك الخاصة', 403);
         }
 
         $permissions = ($validated['give_all'] ?? false)
@@ -162,8 +166,12 @@ class RoleController extends Controller
             return $this->error('ليس لديك صلاحية للقيام بهذا الإجراء', 403);
         }
 
-        if ($role->name === self::SUPER_ADMIN_ROLE && !auth()->user()->hasRole(self::SUPER_ADMIN_ROLE)) {
+        if ($role->name === self::SUPER_ADMIN_ROLE) {
             return $this->error('لا يمكنك حذف هذا الدور', 403);
+        }
+
+        if (auth()->user()->hasRole($role->name)) {
+            return $this->error('لا يمكنك حذف صلاحياتك الخاصة', 403);
         }
 
         $role->delete();
