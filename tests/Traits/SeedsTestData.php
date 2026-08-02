@@ -24,7 +24,7 @@ trait SeedsTestData
         // $this->seed(QuranSeeder::class);
         
         // $this->adminUser = User::find(1);
-        $this->adminUser = User::where('email', 'admin@tahfeez.dq')->first();
+        $this->adminUser = User::where('email', 'admin@tahfiz.dq')->first();
         $this->adminUser->assignRole('مدير الدائرة');
 
         Halaqa::factory()->count(5)->withStatuses(random_int(1, 5))->create();
