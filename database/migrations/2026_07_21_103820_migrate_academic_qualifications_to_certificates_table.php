@@ -46,7 +46,10 @@ return new class extends Migration {
                     person_type,
                     person_id,
                     certificate_link,
-                    date_graduate,
+                    CASE
+                        WHEN date_graduate IS NULL THEN NULL
+                        ELSE STR_TO_DATE(CONCAT(date_graduate, '-01-01'), '%Y-%m-%d')
+                    END,
                     educational_institution,
                     'academy',
                     academic_degree_id,
