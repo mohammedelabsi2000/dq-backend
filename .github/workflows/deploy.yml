@@ -80,7 +80,7 @@ jobs:
           script: |
             cd ${{ secrets.APP_PATH }}
             sudo chmod -R 775 storage bootstrap/cache
-            git fetch origin main
+            git fetch origin
             git reset --hard origin/main
             composer install --no-dev --optimize-autoloader --no-interaction
             php artisan migrate --force
