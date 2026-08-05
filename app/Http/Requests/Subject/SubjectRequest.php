@@ -171,7 +171,7 @@ class SubjectRequest extends FormRequest
             }
 
             // For memorization subject types, custom_juz_id is required
-            if (empty($this->custom_juz_id)) {
+            if (empty($this->custom_juz_id) && $this->subject_type_id !== Constant::where('const_key', SubjectType::LimitedMemorization)->first()?->id) {
                 $validator->errors()->add(
                     'custom_juz_id',
                     'يجب اختيار الجزء المخصص لهذا النوع من المساق.'
