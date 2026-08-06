@@ -99,14 +99,14 @@ class SubjectController extends Controller
 
         $subject = Subject::create($data);
 
-        $subjectRequirements = $data['subject_requirements'] ?? [];
+        /* $subjectRequirements = $data['subject_requirements'] ?? [];
         foreach ($subjectRequirements as $requirement) {
             $subject->subjectRequirements()->create([
                 'success_value' => $requirement['success_value'],
                 'success_value_type' => $requirement['success_value_type'],
                 'weight' => $requirement['weight'] ?? null,
             ]);
-        }
+        } */
 
         return $this->success(new SubjectResource($subject->load('track')), 'تم إنشاء المساق بنجاح', 201);
     }
