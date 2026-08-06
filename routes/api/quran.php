@@ -7,7 +7,7 @@ use App\Http\Middleware\SetCurrentUserContext;
 
 // Custom Juz CRUD
 
-Route::middleware(['auth:sanctum', SetCurrentUserContext::class, 'idle.timeout'])->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     Route::apiResource('custom-juz', CustomJuzController::class)->parameters([
         'custom-juz' => 'juz'
     ]);

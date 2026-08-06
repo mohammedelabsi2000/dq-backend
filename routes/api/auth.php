@@ -11,7 +11,7 @@ Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
     ->middleware('guest:sanctum');
 
 // Authenticated routes
-Route::middleware(['auth:sanctum', SetCurrentUserContext::class, 'idle.timeout'])->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     Route::get('/user', function (Request $request) {
         return Auth::guard('sanctum')->user();
     });
