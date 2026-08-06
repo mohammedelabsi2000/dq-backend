@@ -48,7 +48,8 @@ class StudentTest extends TestCase
             'memorized_juz',
             'completed_juz',
             'surah_id',
-            'end_aya'
+            'end_aya',
+            'memorization_direction',
         ];
 
         // Assert that the model's fillable attributes match the expected array with canonical ordering
