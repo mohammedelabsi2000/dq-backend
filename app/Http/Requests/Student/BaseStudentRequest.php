@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Student;
 
+use App\Enums\MemorizationDirection;
 use App\Http\Requests\DQFormRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BaseStudentRequest extends DQFormRequest
 {
@@ -14,6 +16,7 @@ class BaseStudentRequest extends DQFormRequest
             'memorized_juz' => 'nullable|string',
             'completed_juz' => 'nullable|string',
             'surah_id' => 'nullable|integer|exists:quran_surahs,id',
+            'memorization_direction' => ['nullable', 'string', Rule::in(array_column(MemorizationDirection::cases(), 'value'))],
             'end_aya' => [
                 'required_with:surah_id',
                 'integer',
@@ -40,6 +43,7 @@ class BaseStudentRequest extends DQFormRequest
             'surah_id.exists' => 'السورة غير صحيحة',
             'end_aya.integer' => 'رقم الآية يجب أن يكون رقمًا صحيحًا',
             'end_aya.required_with' => 'يجب اختيار رقم الآية عند اختيار سورة',
+            'memorization_direction.in' => 'اتجاه الحفظ يجب أن يكون تصاعدي أو تنازلي',
         ];
     }
 }
