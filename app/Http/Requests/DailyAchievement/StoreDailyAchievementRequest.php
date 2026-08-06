@@ -5,6 +5,7 @@ namespace App\Http\Requests\DailyAchievement;
 use App\Enums\AchievementStatus;
 use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
+use App\Enums\MemorizationDirection;
 use App\Http\Requests\DQFormRequest;
 use App\Services\QuranCalculatorService;
 
@@ -28,6 +29,8 @@ class StoreDailyAchievementRequest extends DQFormRequest
             'from_ayah'    => ['required', 'integer', 'min:1'],
             'to_surah'     => ['required', 'integer', 'exists:quran_surahs,id'],
             'to_ayah'      => ['required', 'integer', 'min:1'],
+
+            'memorization_direction' => ['nullable', 'string', 'in:' . implode(',', array_column(MemorizationDirection::cases(), 'value'))],
 
             'achievement_type'   => ['nullable', 'string', 'in:' . implode(',', AchievementType::getValues())],
             'evaluation_grade'   => ['nullable', 'string', 'in:' . implode(',', EvaluationGrade::getValues())],
@@ -83,6 +86,7 @@ class StoreDailyAchievementRequest extends DQFormRequest
             'from_ayah'          => 'آية البداية',
             'to_surah'           => 'سورة النهاية',
             'to_ayah'            => 'آية النهاية',
+            'memorization_direction' => 'اتجاه الحفظ',
             'achievement_type'   => 'نوع الحفظ',
             'evaluation_grade'   => 'درجة التقييم',
             'achievement_status' => 'حالة الإنجاز',
@@ -110,6 +114,8 @@ class StoreDailyAchievementRequest extends DQFormRequest
             'to_surah.required' => 'حقل سورة النهاية مطلوب',
             'to_surah.exists'   => 'سورة النهاية غير موجودة',
             'to_ayah.required'  => 'حقل آية النهاية مطلوب',
+
+            'memorization_direction.in' => 'اتجاه الحفظ يجب أن يكون تصاعدي أو تنازلي',
 
             'achievement_type.required'   => 'حقل نوع الحفظ مطلوب',
             'achievement_type.in'         => 'نوع الحفظ غير صحيح',

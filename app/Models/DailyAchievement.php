@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\AchievementStatus;
 use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
+use App\Enums\MemorizationDirection;
 use App\Models\Quran\Surah;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +27,7 @@ class DailyAchievement extends Model
         'from_ayah',
         'to_surah',
         'to_ayah',
+        'memorization_direction',
         'ayahs_count',
         'pages_count',
         'achievement_type',
@@ -52,6 +54,7 @@ class DailyAchievement extends Model
         'achievement_type' => AchievementType::class,
         'evaluation_grade' => EvaluationGrade::class,
         'achievement_status' => AchievementStatus::class,
+        'memorization_direction' => MemorizationDirection::class,
     ];
 
     // ========================

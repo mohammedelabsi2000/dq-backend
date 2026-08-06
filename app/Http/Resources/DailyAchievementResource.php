@@ -33,6 +33,10 @@ class DailyAchievementResource extends JsonResource
             'to_ayah' => $this->to_ayah,
             // 'ayah_count' => $this->ayah_count,
 
+            // اتجاه الحفظ
+            'memorization_direction' => $this->memorization_direction?->value,
+            'memorization_direction_label' => $this->memorization_direction?->label(),
+
             // محسوبة تلقائياً
             'ayahs_count' => $this->ayahs_count,
             'pages_count' => (float) $this->pages_count,
