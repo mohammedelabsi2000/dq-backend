@@ -52,7 +52,7 @@ class SubjectRequest extends FormRequest
             // 'track_id' => ['nullable', 'exists:tracks,id'],
             'subject_type_id' => ['required', Rule::in(ConstantHelper::getConstantIdsByType('subject_type'))],
             'title' => ['required', 'string', 'max:255'],
-            'sub_title' => [
+            /* 'sub_title' => [
                 'nullable',
                 Rule::requiredIf(function () {
                     return in_array(
@@ -66,7 +66,7 @@ class SubjectRequest extends FormRequest
                 }),
                 'string',
                 'max:255',
-            ],
+            ], */
 
             'custom_juz_id' => ['nullable', 'array', 'exists:custom_juz,id'],
             'custom_juz_id.*' => ['integer'],
@@ -89,6 +89,10 @@ class SubjectRequest extends FormRequest
             'subject_requirements.*.success_value' => ['required', 'numeric', 'between:0,100'],
             'subject_requirements.*.success_value_type' => ['required', 'string', Rule::in(array_column(SuccessValueType::cases(), 'value'))],
             'subject_requirements.*.weight' => ['nullable', 'numeric', 'between:0,100'],
+            'gender' => ['nullable', 'string', Rule::in(['ذكر', 'أنثى'])],
+            'success_mark' => ['nullable', 'numeric', 'between:0,100'],
+            'alerts_count' => ['nullable', 'integer', 'min:0'],
+            'errors_count' => ['nullable', 'integer', 'min:0'],
 
         ];
     }
@@ -127,6 +131,7 @@ class SubjectRequest extends FormRequest
             'subject_requirements.*.success_value_type.required' => 'نوع قيمة النجاح مطلوب.',
             'subject_requirements.*.success_value_type.string' => 'نوع قيمة النجاح يجب أن يكون نصًا.',
             'subject_requirements.*.success_value_type.in' => 'نوع قيمة النجاح المحدد غير موجود.',
+            'gender.in' => 'الجنس المحدد غير موجود.',
         ];
     }
 
@@ -148,6 +153,7 @@ class SubjectRequest extends FormRequest
             'subject_requirements' => 'متطلبات المساق',
             'subject_requirements.*.success_value' => 'قيمة النجاح',
             'subject_requirements.*.success_value_type' => 'نوع قيمة النجاح',
+            'gender' => 'الجنس',
         ];
     }
 
