@@ -76,3 +76,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('plan'
     Route::put('{plan}/students/{student}', [PlanController::class, 'updateStudentByPlan'])->name('plans.students.update');
     Route::delete('{plan}/students/{student}', [PlanController::class, 'deleteStudentByPlan'])->name('plans.students.delete');
 });
+
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
+    Route::get('standard-circles', [SubjectController::class, 'standardCircles']);
+});

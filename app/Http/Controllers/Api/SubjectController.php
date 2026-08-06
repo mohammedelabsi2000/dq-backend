@@ -236,4 +236,12 @@ class SubjectController extends Controller
 
         return $this->success($types, 'success', 200);
     }
+
+    public function standardCircles()
+    {
+        $this->authorize('viewAny', Subject::class);
+
+        $circles = app(\App\Services\AreaService::class)->getCircles();
+        return $this->success($circles, 'success', 200);
+    }
 }
