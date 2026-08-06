@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Constant;
 use App\Models\Level;
+use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentResource extends JsonResource
@@ -81,6 +82,7 @@ class StudentResource extends JsonResource
             'completed_juz' => $this->memorized_juz ?? null,
             'completed_juz_array' => $this->completed_juz ? array_map('intval', explode(',', $this->completed_juz)) : null,
             'surah_id' => $this->surah_id ?? null,
+            'last_surah_label' => Surah::find($this->surah_id)?->name_ar,
             'end_aya' => $this->end_aya ?? null,
             'memorization_direction' => $this->memorization_direction?->value,
             'memorization_direction_label' => $this->memorization_direction?->label(),
