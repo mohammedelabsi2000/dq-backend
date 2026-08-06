@@ -34,7 +34,7 @@ foreach (glob(__DIR__ . '/api/*.php') as $file) {
     require $file;
 }
 
-Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class, 'idle.timeout'])->group(function () {
     // Constants management
     Route::apiResource('constant_types', ConstantTypeController::class);
     Route::apiResource('constants', ConstantController::class);

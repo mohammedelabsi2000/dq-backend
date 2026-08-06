@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 // });
 
-Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('plan')->group(function () {
+Route::middleware(['auth:sanctum', SetCurrentUserContext::class, 'idle.timeout'])->prefix('plan')->group(function () {
     // 1. مسارات الـ Resources الأساسية (توضع دائماً في الأعلى)
     Route::apiResource('plans', PlanController::class);
     Route::apiResource('tracks', TrackController::class);
