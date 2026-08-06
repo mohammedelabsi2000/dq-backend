@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Concerns\HasApproval;
 use App\Enums\Gender;
+use App\Enums\MemorizationDirection;
 
 use Illuminate\Database\Eloquent\Builder;
 
@@ -53,6 +54,7 @@ class Student extends Model
         'surah_id',
         'end_aya',
         'is_approved',
+        'memorization_direction',
     ];
 
 
@@ -76,6 +78,7 @@ class Student extends Model
         'dob' => 'date',
         'gender' => Gender::class,
         'is_approved' => 'boolean',
+        'memorization_direction' => MemorizationDirection::class,
     ];
 
     public static $usesAudit = true;

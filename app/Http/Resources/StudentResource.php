@@ -82,6 +82,8 @@ class StudentResource extends JsonResource
             'completed_juz_array' => $this->completed_juz ? array_map('intval', explode(',', $this->completed_juz)) : null,
             'surah_id' => $this->surah_id ?? null,
             'end_aya' => $this->end_aya ?? null,
+            'memorization_direction' => $this->memorization_direction?->value,
+            'memorization_direction_label' => $this->memorization_direction?->label(),
 
             // الحلقات
             'halaqas' => $this->whenLoaded('halaqas', function () {
