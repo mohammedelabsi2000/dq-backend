@@ -22,7 +22,7 @@ class SubjectResource extends JsonResource
 
             'title' => $this->title,
             'sub_title' => $this->sub_title,
-            
+
             // Numeric arrays stored as JSON in the database, so we decode them before returning
             // 'juzs' => json_decode($this->juzs),
             // 'juz_labels' => Juz::find(json_decode($this->juzs))->pluck('name')->toArray(),
@@ -39,6 +39,14 @@ class SubjectResource extends JsonResource
             // 'custom_juz' => new CustomJuzResource($this->whenLoaded('customJuz')),
             'subject_type' => new ConstantResource($this->whenLoaded('subjectType')),
             'subject_requirements' => SubjectRequirementResource::collection($this->whenLoaded('subjectRequirements')),
+            'standard_department_id' => $this->standard_department_id,
+            'standard_department_name' => $this->standard_department_name,
+            'gender' => $this->gender === 'ذكر' ? 'male' : ($this->gender === 'أنثى' ? 'female' : null),
+            'success_mark' => $this->success_mark,
+            'alerts_count' => $this->alerts_count,
+            'errors_count' => $this->errors_count,
+            'standard_pass_mark' => $this->standard_pass_mark,
+            'standard_subject_id' => $this->standard_subject_id,
         ];
     }
 }

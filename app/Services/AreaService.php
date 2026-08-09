@@ -10,7 +10,8 @@ class AreaService
 {
     public function __construct(
         private readonly Client $httpClient
-    ) {}
+    ) {
+    }
 
     /**
      * @throws \RuntimeException
@@ -49,5 +50,27 @@ class AreaService
     public function getBranchRegions(int $id): array
     {
         return $this->fetch("/areas/{$id}/sub-areas");
+    }
+
+    public function getCircles()
+    {
+        return $this->fetch("/circles");
+    }
+    public function getCourses($circleId = null, $gender = null)
+    {
+        $queryParams = [];
+
+        if ($circleId !== null) {
+            $queryParams['circle_id'] = $circleId;
+        }
+
+        if ($gender !== null) {
+            $queryParams['gender'] = $gender;
+        }
+
+        $queryString = http_build_query($queryParams);
+        $subURL = "/courses" . ($queryString ? "?" . $queryString : "");
+
+        return $this->fetch($subURL);
     }
 }

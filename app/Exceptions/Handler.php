@@ -6,6 +6,7 @@ use App\Http\Traits\ApiResponser;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -88,6 +89,12 @@ class Handler extends ExceptionHandler
         // Debug mode: show full exception
         if (config('app.debug')) {
             return parent::render($request, $e);
+        }
+
+        if ($e instanceof QueryException) {
+            return $this->error('حدث خطأ في استعلام قاعدة البيانات', 500);
+        } else if ($e instanceof \PDOException) {
+            return $this->error('حدث خطأ في قاعدة البيانات', 500);
         }
 
         // Default fallback
