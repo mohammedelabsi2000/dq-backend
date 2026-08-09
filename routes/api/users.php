@@ -7,6 +7,7 @@ use App\Http\Middleware\SetCurrentUserContext;
 // All user-related routes are protected by Sanctum authentication
 Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     // basic CRUD for users
+    Route::get('users/candidate-teachers', [UserController::class, 'candidateTeachers']);
     Route::apiResource('users', UserController::class);
     Route::put('users/{user}/toggle-active', [UserController::class, 'toggleActive']);
 

@@ -22,10 +22,14 @@ class ApprovalRequest extends Model
         'requested_by',
         'updated_by',
         'rejection_reason',
+        'submitted_at',
+        'decided_at',
     ];
 
     protected $casts = [
-        'status' => ApprovalStatus::class,
+        'status'       => ApprovalStatus::class,
+        'submitted_at' => 'datetime',
+        'decided_at'   => 'datetime',
     ];
 
     /*
@@ -57,7 +61,10 @@ class ApprovalRequest extends Model
         }
 
         DB::transaction(function () {
-            $this->update(['status' => ApprovalStatus::Approved]);
+            $this->update([
+                'status'     => ApprovalStatus::Approved,
+                'decided_at' => now(),
+            ]);
             $this->approvable->update($this->approvable->approvedAttributes());
         });
     }
@@ -72,6 +79,7 @@ class ApprovalRequest extends Model
             $this->update([
                 'status'           => ApprovalStatus::Rejected,
                 'rejection_reason' => $reason,
+                'decided_at'       => now(),
             ]);
         });
     }
@@ -85,6 +93,8 @@ class ApprovalRequest extends Model
         $this->update([
             'status'           => ApprovalStatus::Pending,
             'rejection_reason' => null,
+            'submitted_at'     => now(),
+            'decided_at'       => null,
         ]);
     }
 
