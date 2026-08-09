@@ -9,6 +9,7 @@ use App\Http\Requests\Halaqa\HalaqaRequest;
 use App\Http\Resources\HalaqaResource;
 use App\Models\Halaqa;
 use App\Models\HalaqaStatus;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
@@ -101,6 +102,8 @@ class HalaqaController extends Controller
             'to_date' => $request->input('to_date'),
             'notes' => $request->input('notes'),
         ];
+        $teacherId = $halaqaData['teacher_id'] ?? null;
+
         // unset from_date and to_date from $halaqaData since they are not part of Halaqa model
         unset(
             // $halaqaData['from_date'],
@@ -108,11 +111,17 @@ class HalaqaController extends Controller
             $halaqaData['status_type_id'],
             $halaqaData['sponsorship_type_id'],
             $halaqaData['sponsor_entity'],
-            $halaqaData['notes']
+            $halaqaData['notes'],
+            $halaqaData['teacher_id'],
         );
         $halaqa = Halaqa::create([
             ...$halaqaData,
         ]);
+
+        if ($teacherId) {
+            $teacher = User::findOrFail($teacherId);
+            $teacher->assignScope('halaqa', $halaqa->id);
+        }
 
         // إرسال طلب الاعتماد
         try {

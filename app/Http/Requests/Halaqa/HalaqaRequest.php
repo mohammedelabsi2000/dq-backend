@@ -166,6 +166,13 @@ class HalaqaRequest extends DQFormRequest
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date',],
             'gender' => ['required', new GenderVisibilityRule()],
+
+            // تنسيب معلم للحلقة عند إنشائها
+            'teacher_id' => [
+                'nullable',
+                'integer',
+                'exists:users,id',
+            ],
         ];
     }
 
@@ -202,7 +209,11 @@ class HalaqaRequest extends DQFormRequest
             // to_date
             'to_date.date' => 'تاريخ النهاية يجب أن يكون تاريخ صحيح.',
             'to_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو يساوي تاريخ البداية.',
-            'gender.required' => 'يجب اختيار الجنس'
+            'gender.required' => 'يجب اختيار الجنس',
+
+            // teacher_id
+            'teacher_id.integer' => 'معرف المعلم يجب أن يكون رقماً.',
+            'teacher_id.exists' => 'المعلم المحدد غير موجود.',
         ];
     }
 }
