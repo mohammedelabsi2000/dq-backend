@@ -29,6 +29,19 @@ class SubjectRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        // replace value of the gender field with the corresponding value from the enum
+        if ($this->has('gender')) {
+            $genderValue = $this->input('gender');
+            $newGenderValue = null;
+            if ($genderValue === 'male') {
+                $newGenderValue = 'ذكر';
+            } elseif ($genderValue === 'female') {
+                $newGenderValue = 'أنثى';
+            }
+            $this->merge([
+                'gender' => $newGenderValue,
+            ]);
+        }
         $this->merge([
             // 'title' => $this->name,
             // 'subject_type_id' => $this->subject_type,
@@ -89,11 +102,14 @@ class SubjectRequest extends FormRequest
             'subject_requirements.*.success_value' => ['required', 'numeric', 'between:0,100'],
             'subject_requirements.*.success_value_type' => ['required', 'string', Rule::in(array_column(SuccessValueType::cases(), 'value'))],
             'subject_requirements.*.weight' => ['nullable', 'numeric', 'between:0,100'],
+            'standard_department_id' => ['nullable', 'integer'],
+            'standard_department_name' => ['nullable', 'string', 'max:255'],
             'gender' => ['nullable', 'string', Rule::in(['ذكر', 'أنثى'])],
             'success_mark' => ['nullable', 'numeric', 'between:0,100'],
             'alerts_count' => ['nullable', 'integer', 'min:0'],
             'errors_count' => ['nullable', 'integer', 'min:0'],
-
+            'standard_pass_mark' => ['nullable', 'numeric', 'between:0,100'],
+            'standard_subject_id' => ['nullable', 'integer'],
         ];
     }
 
