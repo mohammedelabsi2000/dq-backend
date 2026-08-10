@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\FailedRowsExport;
+use App\Exports\StudentExport;
 use App\Filters\StudentFilter;
 use App\Imports\Student\ValidateStudentsImport;
 use App\Models\Student;
@@ -209,5 +210,10 @@ class StudentController extends Controller
             null,
             'تم استيراد البيانات بنجاح'
         );
+    }
+
+    public function export()
+    {
+        return Excel::download(new StudentExport, 'students.xlsx');
     }
 }

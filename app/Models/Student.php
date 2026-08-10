@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
 use App\Concerns\HasVisibilityScope;
+use App\Models\Quran\Surah;
 use App\Models\Scopes\GenderVisibilityScope;
 
 class Student extends Model
@@ -164,6 +165,16 @@ class Student extends Model
         return $this->belongsToMany(Halaqa::class, 'halaqa_students')
             ->withPivot(['from_date', 'to_date', 'enrollment_status_id'])
             ->withTimestamps();
+    }
+
+    public function lastHalaqa()
+    {
+        //
+    }
+
+    public function surah()
+    {
+        return $this->hasOne(Surah::class, 'id', 'surah_id');
     }
 
     public function dailyAchievements()
