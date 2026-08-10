@@ -268,15 +268,20 @@ class StudentServiceTest extends TestCase
 
         $this->service->update($student, ['halaqa_id' => $newHalaqa->id]);
 
-        //  نتحقق أن الصف القديم محذوف soft
-        $this->assertSoftDeleted('halaqa_students', [
-            'student_id' => $student->id,
-            'halaqa_id'  => $oldHalaqa->id,
-        ]);
+        // نتحقق أن الصف القديم أُغلق (to_date) وليس محذوفاً، للحفاظ على السجل التاريخي
+        $oldRecord = HalaqaStudent::withTrashed()
+            ->where('student_id', $student->id)
+            ->where('halaqa_id', $oldHalaqa->id)
+            ->first();
+
+        $this->assertNotNull($oldRecord);
+        $this->assertFalse($oldRecord->trashed());
+        $this->assertNotNull($oldRecord->to_date);
 
         $this->assertDatabaseHas('halaqa_students', [
             'student_id' => $student->id,
             'halaqa_id'  => $newHalaqa->id,
+            'to_date'    => null,
         ]);
     }
 
@@ -293,11 +298,15 @@ class StudentServiceTest extends TestCase
 
         $this->service->update($student, ['halaqa_id' => null]);
 
-        //  نتحقق أن الصف محذوف soft بدل assertDatabaseMissing
-        $this->assertSoftDeleted('halaqa_students', [
-            'student_id' => $student->id,
-            'halaqa_id'  => $halaqa->id,
-        ]);
+        // نتحقق أن الصف أُغلق (to_date) وليس محذوفاً، للحفاظ على السجل التاريخي
+        $record = HalaqaStudent::withTrashed()
+            ->where('student_id', $student->id)
+            ->where('halaqa_id', $halaqa->id)
+            ->first();
+
+        $this->assertNotNull($record);
+        $this->assertFalse($record->trashed());
+        $this->assertNotNull($record->to_date);
     }
 
     // ─────────────────────────────────────────────
