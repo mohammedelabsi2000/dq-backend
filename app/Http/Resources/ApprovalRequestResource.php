@@ -16,14 +16,15 @@ class ApprovalRequestResource extends JsonResource
             'status'           => $this->status->value,
             'status_label'     => $this->status->label(),
             'rejection_reason' => $this->rejection_reason,
-            'requested_at'     => $this->created_at?->format('Y-m-d H:i'),
+            'requested_at'     => ($this->submitted_at ?? $this->created_at)?->format('Y-m-d H:i'),
+            'decided_at'       => $this->decided_at?->format('Y-m-d H:i'),
 
-            // نوع الطلب
+            // نوع الطلب (approvable_type مخزّن كـ alias عبر morph map: user/halaqa/student)
             'type' => match ($this->approvable_type) {
-                User::class    => 'user',
-                Halaqa::class  => 'halaqa',
-                Student::class => 'student',
-                default        => $this->approvable_type,
+                'user'    => 'user',
+                'halaqa'  => 'halaqa',
+                'student' => 'student',
+                default   => $this->approvable_type,
             },
 
             // الكيان المطلوب اعتماده

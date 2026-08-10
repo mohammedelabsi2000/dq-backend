@@ -49,6 +49,8 @@ class PermissionSeeder extends Seeder
             ['name' => 'students.reject', 'title' => 'رفض اعتماد طالب'],
             ['name' => 'approvals.show', 'title' => 'عرض الطلبات'],
             ['name' => 'approvals.resubmit', 'title' => 'إعادة تقديم الطلب'],
+            ['name' => 'settings.show', 'title' => 'عرض إعدادات النظام'],
+            ['name' => 'settings.update', 'title' => 'تعديل إعدادات النظام'],
             ['name' => 'users.roles.update', 'title' => 'تعديل صلاحيات المستخدم'],
             ['name' => 'users.certificates.show', 'title' => 'عرض شهادات المستخدمين'],
             ['name' => 'users.certificates.update', 'title' => 'تعديل شهادة المستخدم'],

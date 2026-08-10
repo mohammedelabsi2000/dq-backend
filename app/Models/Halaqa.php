@@ -124,6 +124,11 @@ class Halaqa extends Model
             ->count();
     }
 
+    public function autoApprovalEnabled(): bool
+    {
+        return Setting::isEnabled(Setting::AUTO_APPROVE_HALAQAS);
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->isGlobalAdmin()) {

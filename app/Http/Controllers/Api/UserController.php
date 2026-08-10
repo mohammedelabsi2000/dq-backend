@@ -61,6 +61,41 @@ class UserController extends Controller
     }
 
     /**
+     * قائمة المستخدمين المرشحين لتنسيبهم كمعلم لحلقة:
+     * من ليس لديه أي دور/سكوب على الإطلاق، أو لديه سكوب فعّال على مركز أو حلقة فقط.
+     */
+    public function candidateTeachers(Request $request)
+    {
+        $this->authorize('viewAny', User::class);
+
+        $query = User::query()
+            ->where('is_approved', true)
+            ->visibleTo(auth()->user())
+            ->where(function ($q) {
+                $q->where(function ($noAssignment) {
+                    $noAssignment->whereDoesntHave('roles')
+                        ->whereDoesntHave('scopes', fn($s) => $s->active());
+                })->orWhereHas('scopes', function ($s) {
+                    $s->active()->whereIn('scope_type', ['center', 'halaqa']);
+                });
+            });
+
+        [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
+            'searchColumns' => ['full_name', 'identity'],
+            'orderColumn' => 'created_at',
+        ]);
+
+        $users = $query->with(['mosque', 'roles'])->get();
+
+        return $this->successWithPagination(
+            UserResource::collection($users),
+            ['total' => $total, 'skip' => $skip, 'limit' => $limit],
+            'المستخدمون المرشحون للتنسيب كمعلم',
+            200
+        );
+    }
+
+    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request

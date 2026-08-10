@@ -21,8 +21,8 @@ trait HasApproval
             throw new \Exception('يوجد طلب اعتماد مسبق لهذا العنصر.');
         }
 
-        // المدير العام → اعتماد فوري بدون طلب
-        if ($requester->isGlobalAdmin()) {
+        // المدير العام أو تفعيل الاعتماد التلقائي لهذا النوع → اعتماد فوري بدون طلب
+        if ($requester->isGlobalAdmin() || $this->autoApprovalEnabled()) {
             $this->update($this->approvedAttributes());
             return null;
         }
@@ -30,7 +30,17 @@ trait HasApproval
         return $this->approvalRequest()->create([
             'status'       => ApprovalStatus::Pending,
             'requested_by' => $requester->id,
+            'submitted_at' => now(),
         ]);
+    }
+
+    /**
+     * هل الاعتماد التلقائي مفعّل لهذا النوع؟ افتراضياً معطّل.
+     * النماذج التي تدعم الاعتماد التلقائي (الحلقات والطلاب) تُجاوز هذه الدالة.
+     */
+    public function autoApprovalEnabled(): bool
+    {
+        return false;
     }
 
     /**

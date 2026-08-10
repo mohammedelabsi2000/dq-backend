@@ -195,6 +195,11 @@ class Student extends Model
         return $this->hasOne(StudentPlan::class)->whereNull('to_date');
     }
 
+    public function autoApprovalEnabled(): bool
+    {
+        return Setting::isEnabled(Setting::AUTO_APPROVE_STUDENTS);
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->isGlobalAdmin() && $user->can('gender_visibility')) {
