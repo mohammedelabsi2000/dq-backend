@@ -81,6 +81,8 @@ trait HasVisibilityScope
             'user_id' => $this->id,
             'scope_type' => $scopeType,
             'scope_id' => $scopeId,
+        ], [
+            'from_date' => now(),
         ]);
     }
 
