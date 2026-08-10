@@ -89,6 +89,7 @@ class Halaqa extends Model
     {
         return $this->hasMany(UserScope::class, 'scope_id')
             ->where('scope_type', 'halaqa')
+            ->active()
             ->with('user');
     }
 

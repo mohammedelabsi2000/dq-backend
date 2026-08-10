@@ -142,10 +142,21 @@ class StudentService
 
     public function updateStudentHalaqaAssignment(Student $student, ?int $halaqaId): void
     {
-        // Remove existing halaqa assignments
-        HalaqaStudent::where('student_id', $student->id)->delete();
+        $activeEnrollment = HalaqaStudent::where('student_id', $student->id)
+            ->whereNull('to_date')
+            ->first();
 
-        // Assign to new halaqa if provided
+        // لا يوجد تغيير فعلي
+        if ($activeEnrollment && $activeEnrollment->halaqa_id === $halaqaId) {
+            return;
+        }
+
+        // إغلاق التسجيل النشط الحالي (إن وجد) بدل حذفه، للحفاظ على السجل التاريخي
+        if ($activeEnrollment) {
+            $activeEnrollment->update(['to_date' => now()->toDateString()]);
+        }
+
+        // تنسيب للحلقة الجديدة إن تم تحديدها
         if ($halaqaId) {
             $this->assignStudentToHalaqa($student, $halaqaId);
         }

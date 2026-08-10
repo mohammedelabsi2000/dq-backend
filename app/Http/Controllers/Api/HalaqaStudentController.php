@@ -164,22 +164,35 @@ class HalaqaStudentController extends Controller
 
     /**
      * تعديل تسجيل موجود
+     * إذا تغيرت الحلقة (أو تاريخ البداية) → يتم إغلاق تسجيل الطالب النشط الحالي
+     * وإنشاء تسجيل جديد في الحلقة الجديدة، بحيث لا يبقى الطالب منسّباً لأكثر من حلقة بنفس الوقت
      */
     public function update(
         UpdateHalaqaStudentRequest $request
     ) {
         $validated = $request->validated();
 
-        HalaqaStudent::visibleTo(auth()->user())
-            ->whereIn('student_id', $validated['students'])
-            ->whereNull('to_date')
-            ->update([
-                'from_date' => $validated['from_date'],
-                'enrollment_status_id' => $validated['enrollment_status_id'],
-            ]);
+        $updatedRecords = [];
+
+        foreach ($validated['students'] as $studentId) {
+            $halaqaStudent = HalaqaStudent::visibleTo(auth()->user())
+                ->where('student_id', $studentId)
+                ->whereNull('to_date')
+                ->first();
+
+            if (!$halaqaStudent) {
+                continue;
+            }
+
+            $updatedRecords[] = $this->halaqaStudentService->updateHalaqaStudentEnrollment($halaqaStudent, $validated);
+        }
 
         return $this->success(
-            null,
+            HalaqaStudentResource::collection(
+                HalaqaStudent::with(['halaqa', 'student', 'enrollment_status'])
+                    ->whereIn('id', collect($updatedRecords)->pluck('id'))
+                    ->get()
+            ),
             'تم تحديث بيانات التسجيل بنجاح',
         );
     }

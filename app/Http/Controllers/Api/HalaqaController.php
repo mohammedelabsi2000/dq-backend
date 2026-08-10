@@ -10,6 +10,7 @@ use App\Http\Resources\HalaqaResource;
 use App\Models\Halaqa;
 use App\Models\HalaqaStatus;
 use App\Models\User;
+use App\Models\UserScope;
 use Illuminate\Http\Request;
 
 class HalaqaController extends Controller
@@ -119,8 +120,7 @@ class HalaqaController extends Controller
         ]);
 
         if ($teacherId) {
-            $teacher = User::findOrFail($teacherId);
-            $teacher->assignScope('halaqa', $halaqa->id);
+            $this->assignTeacherToHalaqa(User::findOrFail($teacherId), $halaqa);
         }
 
         // إرسال طلب الاعتماد
@@ -198,11 +198,25 @@ class HalaqaController extends Controller
             $halaqaData['status_type_id'],
             $halaqaData['sponsorship_type_id'],
             $halaqaData['sponsor_entity'],
-            $halaqaData['notes']
+            $halaqaData['notes'],
+            $halaqaData['teacher_id'],
         );
 
         $halaqa->update($halaqaData);
 
+        // تعديل المعلم المنسّب للحلقة
+        if ($request->has('teacher_id')) {
+            $newTeacherId = $request->input('teacher_id');
+
+            UserScope::where('scope_type', 'halaqa')
+                ->where('scope_id', $halaqa->id)
+                ->whereNull('to_date')
+                ->update(['to_date' => now()]);
+
+            if ($newTeacherId) {
+                $this->assignTeacherToHalaqa(User::findOrFail($newTeacherId), $halaqa);
+            }
+        }
 
         $message = 'تم تحديث بيانات الحلقة بنجاح';
         if (
@@ -216,12 +230,27 @@ class HalaqaController extends Controller
             }
         }
 
-        $halaqa->load(['type', 'reference']);
+        $halaqa->load(['type', 'reference', 'supervisors.user']);
 
         return $this->success(
             new HalaqaResource($halaqa),
             $message
         );
+    }
+
+    /**
+     * تنسيب معلم لحلقة، مع ضمان أن المعلم لا يبقى منسّباً لأي حلقة أخرى
+     * (معلم واحد = حلقة واحدة).
+     */
+    private function assignTeacherToHalaqa(User $teacher, Halaqa $halaqa): void
+    {
+        UserScope::where('scope_type', 'halaqa')
+            ->where('user_id', $teacher->id)
+            ->where('scope_id', '!=', $halaqa->id)
+            ->whereNull('to_date')
+            ->update(['to_date' => now()]);
+
+        $teacher->assignScope('halaqa', $halaqa->id);
     }
 
     /**
