@@ -93,6 +93,14 @@ class Halaqa extends Model
             ->with('user');
     }
 
+    public function lastSupervisor()
+    {
+        return $this->hasOne(UserScope::class, 'scope_id')
+            ->where('scope_type', 'halaqa')
+            ->latestOfMany('id')
+            ->with('user');
+    }
+
     public function statuses()
     {
         return $this->hasMany(HalaqaStatus::class, 'halaqa_id');

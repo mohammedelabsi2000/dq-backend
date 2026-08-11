@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\HalaqaReferenceType;
+use App\Exports\HalaqaExport;
 use App\Filters\HalaqaFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Halaqa\HalaqaRequest;
@@ -12,6 +13,7 @@ use App\Models\HalaqaStatus;
 use App\Models\User;
 use App\Models\UserScope;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class HalaqaController extends Controller
 {
@@ -275,5 +277,10 @@ class HalaqaController extends Controller
             null,
             'تم حذف الحلقة بنجاح'
         );
+    }
+
+    public function export()
+    {
+        return Excel::download(new HalaqaExport, 'halaqas.xlsx');
     }
 }
