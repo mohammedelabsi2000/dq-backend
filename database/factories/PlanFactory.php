@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\PeriodUnit;
+use App\Enums\PlanType;
 use App\Models\Plan;
 use App\Models\Constant;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,6 +24,9 @@ class PlanFactory extends Factory
             'max_period' => $this->faker->optional()->numberBetween($period, 24),
             'tolerance' => $this->faker->numberBetween(0, 7),
             'is_active' => $this->faker->boolean(),
+            'type' => $this->faker->randomElement(PlanType::cases())->value,
+            'age_from' => $this->faker->optional()->numberBetween(4, 10),
+            'age_to' => $this->faker->optional()->numberBetween(11, 18),
         ];
     }
 }

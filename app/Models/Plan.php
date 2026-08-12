@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PeriodUnit;
+use App\Enums\PlanType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,9 +27,13 @@ class Plan extends Model
         'max_period',
         'tolerance',
         'is_active',
+        'type',
+        'age_from',
+        'age_to',
     ]; */
     protected $casts = [
         'period_unit' => PeriodUnit::class,
+        'type' => PlanType::class,
     ];
 
     /* protected $casts = [

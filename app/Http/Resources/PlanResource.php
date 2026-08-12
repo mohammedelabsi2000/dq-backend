@@ -21,6 +21,10 @@ class PlanResource extends JsonResource
             'max_period' => $this->max_period,
             'tolerance' => $this->tolerance,
             'is_active' => $this->is_active,
+            'type' => $this->type,
+            'type_label' => $this->type?->label(),
+            'age_from' => $this->age_from,
+            'age_to' => $this->age_to,
 
             // يُحمَّل فقط إذا كان موجوداً في الـ eager load
             'levels' => LevelResource::collection($this->whenLoaded('levels')),
