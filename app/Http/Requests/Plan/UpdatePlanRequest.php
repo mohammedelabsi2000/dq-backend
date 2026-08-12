@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Plan;
 
 use App\Enums\PeriodUnit;
+use App\Enums\PlanType;
 use App\Http\Requests\DQFormRequest;
 use App\Models\Plan;
 use Illuminate\Validation\Rules\Enum;
@@ -26,6 +27,9 @@ class UpdatePlanRequest extends DQFormRequest
             'max_period' => ['nullable', 'integer', 'min:1'],
             'tolerance' => ['nullable', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
+            'type' => ['sometimes', 'string', new Enum(PlanType::class)],
+            'age_from' => ['nullable', 'integer', 'min:0'],
+            'age_to' => ['nullable', 'integer', 'min:0', 'gte:age_from'],
         ];
     }
 
@@ -56,6 +60,16 @@ class UpdatePlanRequest extends DQFormRequest
             'tolerance.min' => 'السماحية لا يمكن أن تكون سالبة.',
 
             'is_active.boolean' => 'الحالة يجب أن تكون صحيحة أو خاطئة.',
+
+            'type.string' => 'نوع الخطة يجب أن يكون نصاً.',
+            'type.enum' => 'نوع الخطة غير صالح.',
+
+            'age_from.integer' => 'عمر الطالب (من) يجب أن يكون عدداً صحيحاً.',
+            'age_from.min' => 'عمر الطالب (من) لا يمكن أن يكون سالباً.',
+
+            'age_to.integer' => 'عمر الطالب (إلى) يجب أن يكون عدداً صحيحاً.',
+            'age_to.min' => 'عمر الطالب (إلى) لا يمكن أن يكون سالباً.',
+            'age_to.gte' => 'عمر الطالب (إلى) يجب أن يكون أكبر من أو يساوي عمر الطالب (من).',
         ];
     }
 
@@ -68,6 +82,9 @@ class UpdatePlanRequest extends DQFormRequest
             'period_unit' => 'وحدة المدة',
             'is_active' => 'الحالة',
             'tolerance' => 'السماحية',
+            'type' => 'نوع الخطة',
+            'age_from' => 'عمر الطالب (من)',
+            'age_to' => 'عمر الطالب (إلى)',
         ];
     }
 }
