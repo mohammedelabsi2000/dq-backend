@@ -64,10 +64,13 @@ class StudentController extends Controller
                 ->first();
 
             if ($student) {
-                // إذا كان محذوف نرجعه
-                if ($student->trashed()) {
-                    $student->restore();
+                // إذا كان الطالب موجوداً وغير محذوف نمنع الإضافة المكررة
+                if (!$student->trashed()) {
+                    return $this->error('الطالب موجود مسبقاً', 422);
                 }
+
+                // إذا كان محذوف نرجعه
+                $student->restore();
 
                 // نحدث البيانات
                 $student->update($data);
