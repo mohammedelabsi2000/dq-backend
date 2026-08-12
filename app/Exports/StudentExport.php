@@ -2,7 +2,9 @@
 
 namespace App\Exports;
 
+use App\Filters\StudentFilter;
 use App\Models\Student;
+use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -11,9 +13,13 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping
 {
     public function query()
     {
-        return Student::query()
+        $request = request();
+        $query = Student::query();
+        $query = (new StudentFilter($query, $request))->apply();
+
+        return $query
             ->with([
-                'mosque.region',
+                'mosque.region.branch',
                 'mosque',
             ]);
     }
@@ -27,6 +33,7 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping
             'الجنس',
             'رقم التواصل',
             'رقم الواتساب',
+            'الفرع',
             'المحلية',
             'المسجد',
             'الحلقة',
@@ -39,6 +46,7 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping
             'الحالة المادية',
             'ولي الأمر',
             'رقم هوية ولي الأمر',
+            'اسم ولي الأمر',
         ];
     }
 
@@ -51,6 +59,7 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping
             $student->gender->label(),
             $student->phone,
             $student->whatsapp,
+            $student->mosque?->region?->branch?->name,
             $student->mosque?->region?->name,
             $student->mosque?->name,
             $student->halaqas->last()?->name ?? null,
@@ -63,6 +72,7 @@ class StudentExport implements FromQuery, WithHeadings, WithMapping
             $student->moneyStatus?->name,
             $student->guardianType?->name,
             $student->guardian_id,
+            User::where('identity', $student->guardian_id)->first()?->full_name,
         ];
     }
 }
