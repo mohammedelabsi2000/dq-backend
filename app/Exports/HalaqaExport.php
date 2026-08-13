@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Filters\HalaqaFilter;
 use App\Models\Halaqa;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -11,7 +12,11 @@ class HalaqaExport implements FromQuery, WithHeadings, WithMapping
 {
     public function query()
     {
-        return Halaqa::query()
+        $request = request();
+        $query = Halaqa::query()->where('is_approved', true);
+        $query = (new HalaqaFilter($query, $request))->apply();
+        
+        return $query
             ->with([
                 'type',
                 'lastStatus.statusType',
