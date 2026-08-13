@@ -45,6 +45,18 @@ class Plan extends Model
         'is_active' => 'boolean',
     ]; */
 
+    protected static function booted()
+    {
+        static::saved(function (Plan $plan) {
+            if ($plan->type === PlanType::Main && $plan->is_active) {
+                static::where('type', PlanType::Main->value)
+                    ->where('id', '!=', $plan->id)
+                    ->where('is_active', true)
+                    ->update(['is_active' => false]);
+            }
+        });
+    }
+
     // ========================
     // Relations
     // ========================
@@ -61,6 +73,14 @@ class Plan extends Model
     public function scopeIsActive(Builder $query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * هل هذه الخطة هي الخطة الرئيسية الفعالة الوحيدة حالياً؟
+     */
+    public function isActiveMain(): bool
+    {
+        return $this->type === PlanType::Main && $this->is_active;
     }
 
     public function students()
