@@ -5,6 +5,7 @@ namespace App\Http\Requests\Student;
 use App\Enums\Gender;
 use App\Helpers\ConstantHelper;
 use App\Models\Student;
+use App\Rules\ActiveHalaqaRule;
 use App\Rules\GenderVisibilityRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
@@ -50,7 +51,7 @@ class StoreStudentRequest extends BaseStudentRequest
             'phone' => 'nullable|string|max:25',
             'whatsapp' => 'nullable|string|max:25',
 
-            'halaqa_id' => 'nullable|exists:halaqas,id',
+            'halaqa_id' => ['nullable', 'exists:halaqas,id', new ActiveHalaqaRule()],
         ]);
     }
 

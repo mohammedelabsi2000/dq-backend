@@ -3,6 +3,7 @@
 namespace App\Http\Requests\HalaqaStudent;
 
 use App\Helpers\ConstantHelper;
+use App\Rules\ActiveHalaqaRule;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\DQFormRequest;
 use App\Models\HalaqaStudent;
@@ -29,7 +30,7 @@ class UpdateHalaqaStudentRequest extends DQFormRequest
     public function rules(): array
     {
         return [
-            'halaqa_id' => 'sometimes|required|exists:halaqas,id',
+            'halaqa_id' => ['sometimes', 'required', 'exists:halaqas,id', new ActiveHalaqaRule()],
             'students' => 'required|array|min:1',
             'students.*' => 'exists:students,id',
             'from_date' => 'sometimes|required|date',

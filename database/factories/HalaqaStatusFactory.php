@@ -23,9 +23,6 @@ class HalaqaStatusFactory extends Factory
 
         return [
             'halaqa_id' => Halaqa::factory(),
-            'status_type_id' => fake()->randomElement(
-                ConstantHelper::getConstantIdsByType('status_type')
-            ),
             'sponsorship_type_id' => fake()->randomElement(
                 ConstantHelper::getConstantIdsByType('sponsorship_type')
             ),

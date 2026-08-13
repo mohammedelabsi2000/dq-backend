@@ -33,6 +33,7 @@ class Halaqa extends Model
     protected $casts = [
         'reference_type' => HalaqaReferenceType::class,
         'is_approved' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     protected $with = ['lastStatus'];
@@ -109,7 +110,7 @@ class Halaqa extends Model
     public function lastStatus()
     {
         logger('Last status relation');
-        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('id')->with(['statusType', 'sponsorshipType']);
+        return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('id')->with(['sponsorshipType']);
     }
 
     /**
@@ -136,6 +137,11 @@ class Halaqa extends Model
     public function autoApprovalEnabled(): bool
     {
         return Setting::isEnabled(Setting::AUTO_APPROVE_HALAQAS);
+    }
+
+    public function scopeIsActive(Builder $query)
+    {
+        return $query->where('is_active', true);
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder

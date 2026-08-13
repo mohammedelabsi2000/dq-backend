@@ -158,14 +158,12 @@ class HalaqaRequest extends DQFormRequest
                 'required',
                 Rule::in(ConstantHelper::getConstantIdsByType('halaqa_types')),
             ],
-            'status_type_id' => [
-                'required',
-                Rule::in(ConstantHelper::getConstantIdsByType('status_type')),
-            ],
 
             'from_date' => ['nullable', 'date'],
             'to_date' => ['nullable', 'date', 'after_or_equal:from_date',],
             'gender' => ['required', new GenderVisibilityRule()],
+
+            'is_active' => ['sometimes', 'boolean'],
 
             // تنسيب معلم للحلقة عند إنشائها
             'teacher_id' => [
@@ -174,6 +172,26 @@ class HalaqaRequest extends DQFormRequest
                 'exists:users,id',
             ],
         ];
+    }
+
+    /**
+     * منع تنسيب معلم لحلقة غير فعالة (سواء كانت غير فعالة أصلاً، أو يجري تعطيلها بنفس الطلب).
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!$this->filled('teacher_id')) {
+                return;
+            }
+
+            $isActive = $this->has('is_active')
+                ? $this->boolean('is_active')
+                : ($this->isUpdate() ? (bool) $this->route('halaqa')?->is_active : true);
+
+            if (!$isActive) {
+                $validator->errors()->add('teacher_id', 'لا يمكن تنسيب معلم لحلقة غير فعالة.');
+            }
+        });
     }
 
     public function messages()

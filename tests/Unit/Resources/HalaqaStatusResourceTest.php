@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 class HalaqaStatusResourceTest extends TestCase
 {
-    private ?int $statusTypeId = null;
     private ?int $sponsorshipTypeId = null;
 
     protected function setUp(): void
@@ -23,9 +22,6 @@ class HalaqaStatusResourceTest extends TestCase
 
     public function assignConstantTypes()
     {
-        $this->statusTypeId = (ConstantType::where('name', 'status_type')->first()
-            ?? ConstantType::factory()->create(['name' => 'status_type']))->id;
-
         $this->sponsorshipTypeId = (ConstantType::where('name', 'sponsorship_type')->first()
             ?? ConstantType::factory()->create(['name' => 'sponsorship_type']))->id;
     }
@@ -33,11 +29,9 @@ class HalaqaStatusResourceTest extends TestCase
     /** @test */
     public function it_transforms_halaqa_status_to_array()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -54,31 +48,9 @@ class HalaqaStatusResourceTest extends TestCase
     }
 
     /** @test */
-    public function it_handles_null_status_type()
-    {
-        $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
-
-        $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => null,
-            'sponsorship_type_id' => $sponsorshipType->id,
-            'from_date' => '2024-01-01',
-            'to_date' => '2024-12-31',
-            'notes' => 'Test notes'
-        ]);
-
-        $resource = new HalaqaStatusResource($halaqaStatus);
-        $array = $resource->toArray(new Request());
-
-        $this->assertNull($array['status_type']);
-    }
-
-    /** @test */
     public function it_handles_null_sponsorship_type()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => null,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -88,35 +60,15 @@ class HalaqaStatusResourceTest extends TestCase
         $resource = new HalaqaStatusResource($halaqaStatus);
         $array = $resource->toArray(new Request());
 
-        $this->assertNull($array['sponsorship_type']);
-    }
-
-    /** @test */
-    public function it_handles_null_both_types()
-    {
-        $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => null,
-            'sponsorship_type_id' => null,
-            'from_date' => '2024-01-01',
-            'to_date' => '2024-12-31',
-            'notes' => 'Test notes'
-        ]);
-
-        $resource = new HalaqaStatusResource($halaqaStatus);
-        $array = $resource->toArray(new Request());
-
-        $this->assertNull($array['status_type']);
         $this->assertNull($array['sponsorship_type']);
     }
 
     /** @test */
     public function it_handles_null_to_date()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => null,
@@ -132,11 +84,9 @@ class HalaqaStatusResourceTest extends TestCase
     /** @test */
     public function it_handles_null_notes()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -150,29 +100,6 @@ class HalaqaStatusResourceTest extends TestCase
     }
 
     /** @test */
-    public function it_transforms_status_type_correctly()
-    {
-        $statusType = Constant::factory()->create([
-            'constant_type_id' => $this->statusTypeId,
-            'name' => 'Active',
-        ]);
-
-        $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
-            'sponsorship_type_id' => null,
-            'from_date' => '2024-01-01',
-            'to_date' => null,
-            'notes' => null
-        ]);
-
-        $resource = new HalaqaStatusResource($halaqaStatus);
-        $array = $resource->toArray(new Request());
-
-        $this->assertEquals($statusType->id, $array['status_type']['id']);
-        $this->assertEquals('Active', $array['status_type']['name']);
-    }
-
-    /** @test */
     public function it_transforms_sponsorship_type_correctly()
     {
         $sponsorshipType = Constant::factory()->create([
@@ -181,7 +108,6 @@ class HalaqaStatusResourceTest extends TestCase
         ]);
 
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => null,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => null,
@@ -191,7 +117,6 @@ class HalaqaStatusResourceTest extends TestCase
         $resource = new HalaqaStatusResource($halaqaStatus);
         $array = $resource->toArray(new Request());
 
-        // $this->assertIsArray($array['sponsorship_type']);
         $this->assertEquals($sponsorshipType->id, $array['sponsorship_type']['id']);
         $this->assertEquals('Full Sponsorship', $array['sponsorship_type']['name']);
     }
@@ -199,11 +124,9 @@ class HalaqaStatusResourceTest extends TestCase
     /** @test */
     public function it_returns_all_required_fields()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -213,7 +136,7 @@ class HalaqaStatusResourceTest extends TestCase
         $resource = new HalaqaStatusResource($halaqaStatus);
         $array = $resource->toArray(new Request());
 
-        $expectedKeys = ['id', 'status_type', 'sponsorship_type', 'from_date', 'to_date', 'notes'];
+        $expectedKeys = ['id', 'sponsorship_type', 'from_date', 'to_date', 'notes'];
 
         foreach ($expectedKeys as $key) {
             $this->assertArrayHasKey($key, $array);
@@ -223,11 +146,9 @@ class HalaqaStatusResourceTest extends TestCase
     /** @test */
     public function it_can_be_used_in_collection()
     {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
 
         $halaqaStatuses = HalaqaStatus::factory()->count(3)->create([
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
         ]);
 
@@ -239,7 +160,6 @@ class HalaqaStatusResourceTest extends TestCase
         foreach ($array as $item) {
             $this->assertIsArray($item);
             $this->assertArrayHasKey('id', $item);
-            $this->assertArrayHasKey('status_type', $item);
             $this->assertArrayHasKey('sponsorship_type', $item);
             $this->assertArrayHasKey('from_date', $item);
             $this->assertArrayHasKey('to_date', $item);
@@ -263,7 +183,6 @@ class HalaqaStatusResourceTest extends TestCase
         $this->assertEquals('2024-01-01', $array['from_date']);
         $this->assertNull($array['to_date']);
         $this->assertNull($array['notes']);
-        $this->assertNull($array['status_type']);
         $this->assertNull($array['sponsorship_type']);
     }
 
@@ -301,7 +220,6 @@ class HalaqaStatusResourceTest extends TestCase
     public function it_works_with_minimal_data()
     {
         $halaqaStatus = HalaqaStatus::factory()->create([
-            'status_type_id' => null,
             'sponsorship_type_id' => null,
             'from_date' => '2024-01-01',
             'to_date' => null,
@@ -315,7 +233,6 @@ class HalaqaStatusResourceTest extends TestCase
         $this->assertEquals('2024-01-01', $array['from_date']);
         $this->assertNull($array['to_date']);
         $this->assertNull($array['notes']);
-        $this->assertNull($array['status_type']);
         $this->assertNull($array['sponsorship_type']);
     }
 }

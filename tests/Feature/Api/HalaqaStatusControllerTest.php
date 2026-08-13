@@ -10,14 +10,10 @@ use Tests\TestCase;
 
 class HalaqaStatusControllerTest extends TestCase
 {
-    private ?int $statusTypeId = null;
     private ?int $sponsorshipTypeId = null;
 
     public function assignConstantTypes()
     {
-        $this->statusTypeId = (ConstantType::where('name', 'status_type')->first()
-            ?? ConstantType::factory()->create(['name' => 'status_type']))->id;
-
         $this->sponsorshipTypeId = (ConstantType::where('name', 'sponsorship_type')->first()
             ?? ConstantType::factory()->create(['name' => 'sponsorship_type']))->id;
     }
@@ -48,7 +44,6 @@ class HalaqaStatusControllerTest extends TestCase
                 'data' => [
                     '*' => [
                         'id',
-                        'status_type',
                         'sponsorship_type',
                         'from_date',
                         'to_date',
@@ -71,22 +66,6 @@ class HalaqaStatusControllerTest extends TestCase
 
         $response->assertStatus(200);
 
-        $this->assertEquals(3, $response->json('total'));
-    }
-
-    /** @test */
-    public function it_filters_halaqa_statuses_by_status_type_id()
-    {
-
-        $statusType1 = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-        $statusType2 = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-
-        HalaqaStatus::factory()->count(3)->create(['status_type_id' => $statusType1->id]);
-        HalaqaStatus::factory()->count(2)->create(['status_type_id' => $statusType2->id]);
-
-        $response = $this->getJson("/api/halaqa-statuses?status_type_id={$statusType1->id}");
-
-        $response->assertStatus(200);
         $this->assertEquals(3, $response->json('total'));
     }
 
@@ -160,12 +139,10 @@ class HalaqaStatusControllerTest extends TestCase
     {
         $halaqa = Halaqa::factory()->create();
 
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId, 'is_active' => true]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId, 'is_active' => true]);
 
         $data = [
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -180,7 +157,6 @@ class HalaqaStatusControllerTest extends TestCase
                 'message',
                 'data' => [
                     'id',
-                    'status_type',
                     'sponsorship_type',
                     'from_date',
                     'to_date',
@@ -190,7 +166,6 @@ class HalaqaStatusControllerTest extends TestCase
 
         $this->assertDatabaseHas('halaqa_statuses', [
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -214,7 +189,6 @@ class HalaqaStatusControllerTest extends TestCase
         $this->assertDatabaseHas('halaqa_statuses', [
             'halaqa_id' => $halaqa->id,
             'from_date' => '2024-01-01',
-            'status_type_id' => null,
             'sponsorship_type_id' => null,
             'to_date' => null,
             'notes' => null
@@ -226,13 +200,10 @@ class HalaqaStatusControllerTest extends TestCase
     {
         $halaqa = Halaqa::factory()->create();
 
-
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId, 'is_active' => true]);
         $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId, 'is_active' => true]);
 
         $data = [
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'sponsorship_type_id' => $sponsorshipType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -297,7 +268,6 @@ class HalaqaStatusControllerTest extends TestCase
                 'code',
                 'data' => [
                     'id',
-                    'status_type',
                     'sponsorship_type',
                     'from_date',
                     'to_date',
@@ -332,12 +302,7 @@ class HalaqaStatusControllerTest extends TestCase
     {
         $halaqaStatus = HalaqaStatus::factory()->create();
 
-        $newStatusType = Constant::factory()->create([
-            'constant_type_id' => $this->statusTypeId,
-            'is_active' => true,
-        ]);
         $data = [
-            'status_type_id' => $newStatusType->id,
             'to_date' => '2024-06-30',
             'notes' => 'Updated notes',
         ];
@@ -350,7 +315,6 @@ class HalaqaStatusControllerTest extends TestCase
                 'message',
                 'data' => [
                     'id',
-                    'status_type',
                     'sponsorship_type',
                     'from_date',
                     'to_date',
@@ -360,7 +324,6 @@ class HalaqaStatusControllerTest extends TestCase
 
         $this->assertDatabaseHas('halaqa_statuses', [
             'id' => $halaqaStatus->id,
-            'status_type_id' => $newStatusType->id,
             'to_date' => '2024-06-30',
             'notes' => 'Updated notes'
         ]);
@@ -436,27 +399,4 @@ class HalaqaStatusControllerTest extends TestCase
 
         $response->assertStatus(404);
     }
-
-    // public function it_can_create_halaqa_status_with_all_optional_fields()
-    // {
-    //     $halaqa = Halaqa::factory()->create();
-
-
-    //     $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-    //     $sponsorshipType = Constant::factory()->create(['constant_type_id' => $this->sponsorshipTypeId]);
-
-    //     $data = [
-    //         'halaqa_id' => $halaqa->id,
-    //         'status_type_id' => $statusType->id,
-    //         'sponsorship_type_id' => $sponsorshipType->id,
-    //         'from_date' => '2024-01-01',
-    //         'to_date' => '2024-12-31',
-    //         'notes' => 'Comprehensive test notes with detailed information'
-    //     ];
-
-    //     $response = $this->postJson('/api/halaqa-statuses', $data);
-
-    //     $response->assertStatus(201);
-    //     $this->assertDatabaseHas('halaqa_statuses', $data);
-    // }
 }

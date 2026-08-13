@@ -19,7 +19,6 @@ class HalaqaExport implements FromQuery, WithHeadings, WithMapping
         return $query
             ->with([
                 'type',
-                'lastStatus.statusType',
                 'lastStatus.sponsorshipType',
                 'lastSupervisor.user',
                 'studentEnrollments',
@@ -78,7 +77,7 @@ class HalaqaExport implements FromQuery, WithHeadings, WithMapping
             $halaqa->lastSupervisor?->user?->full_name ?? '',
             $halaqa->studentEnrollments->count() ?? 0,
 
-            $halaqa->lastStatus?->statusType?->name,
+            $halaqa->is_active ? 'فعالة' : 'غير فعالة',
             $halaqa->lastStatus?->sponsorshipType?->name,
             $halaqa->lastStatus?->sponsor_entity,
             $halaqa->lastStatus?->from_date,

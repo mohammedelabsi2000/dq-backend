@@ -16,7 +16,6 @@ class HalaqaStatusResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'status_type' => $this->statusType ? new ConstantResource($this->statusType) : null,
             'sponsorship_type' => $this->sponsorshipType ? new ConstantResource($this->sponsorshipType) : null,
             'from_date' => $this->from_date?->format('Y-m-d'),
             'to_date' => $this->to_date?->format('Y-m-d'),

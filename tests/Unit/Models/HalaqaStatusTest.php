@@ -10,14 +10,10 @@ use Tests\TestCase;
 
 class HalaqaStatusTest extends TestCase
 {
-    private ?int $statusTypeId = null;
     private ?int $sponsorshipTypeId = null;
 
     public function assignConstantTypes()
     {
-        $this->statusTypeId = (ConstantType::where('name', 'status_type')->first()
-            ?? ConstantType::factory()->create(['name' => 'status_type']))->id;
-
         $this->sponsorshipTypeId = (ConstantType::where('name', 'sponsorship_type')->first()
             ?? ConstantType::factory()->create(['name' => 'sponsorship_type']))->id;
     }
@@ -52,19 +48,6 @@ class HalaqaStatusTest extends TestCase
     }
 
     /** @test */
-    public function it_belongs_to_status_type_constant()
-    {
-        $halaqaStatus = HalaqaStatus::factory()->create();
-
-        if ($halaqaStatus->status_type_id) {
-            $this->assertInstanceOf(Constant::class, $halaqaStatus->statusType);
-            $this->assertEquals($halaqaStatus->status_type_id, $halaqaStatus->statusType->id);
-        } else {
-            $this->assertNull($halaqaStatus->statusType);
-        }
-    }
-
-    /** @test */
     public function it_belongs_to_sponsorship_type_constant()
     {
         $halaqaStatus = HalaqaStatus::factory()->create();
@@ -75,15 +58,6 @@ class HalaqaStatusTest extends TestCase
         } else {
             $this->assertNull($halaqaStatus->sponsorshipType);
         }
-    }
-
-    /** @test */
-    public function it_can_have_null_status_type_id()
-    {
-        $halaqaStatus = HalaqaStatus::factory()->create(['status_type_id' => null]);
-
-        $this->assertNull($halaqaStatus->status_type_id);
-        $this->assertNull($halaqaStatus->statusType);
     }
 
     /** @test */
@@ -179,24 +153,6 @@ class HalaqaStatusTest extends TestCase
         $halaqaStatus3 = HalaqaStatus::factory()->create(['halaqa_id' => $otherHalaqa->id]);
 
         $halaqaStatuses = HalaqaStatus::where('halaqa_id', $halaqa->id)->get();
-
-        $this->assertCount(2, $halaqaStatuses);
-        $this->assertTrue($halaqaStatuses->contains($halaqaStatus1));
-        $this->assertTrue($halaqaStatuses->contains($halaqaStatus2));
-        $this->assertFalse($halaqaStatuses->contains($halaqaStatus3));
-    }
-
-    /** @test */
-    public function it_can_scope_by_status_type()
-    {
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-        $otherStatusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-
-        $halaqaStatus1 = HalaqaStatus::factory()->create(['status_type_id' => $statusType->id]);
-        $halaqaStatus2 = HalaqaStatus::factory()->create(['status_type_id' => $statusType->id]);
-        $halaqaStatus3 = HalaqaStatus::factory()->create(['status_type_id' => $otherStatusType->id]);
-
-        $halaqaStatuses = HalaqaStatus::where('status_type_id', $statusType->id)->get();
 
         $this->assertCount(2, $halaqaStatuses);
         $this->assertTrue($halaqaStatuses->contains($halaqaStatus1));

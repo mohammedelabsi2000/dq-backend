@@ -42,7 +42,6 @@ class HalaqaStatusRequest extends DQFormRequest
                 'required',
                 'exists:halaqas,id',
             ],
-            'status_type_id' => ['nullable', Rule::in(ConstantHelper::getConstantIdsByType('status_type'))],
             'sponsorship_type_id' => ['nullable', Rule::in(ConstantHelper::getConstantIdsByType('sponsorship_type'))],
             'from_date' => [
                 $isUpdate ? 'sometimes' : null,
@@ -59,8 +58,6 @@ class HalaqaStatusRequest extends DQFormRequest
         return [
             'halaqa_id.required' => 'يجب اختيار الحلقة.',
             'halaqa_id.exists' => 'الحلقة المحددة غير موجودة.',
-
-            'status_type_id.in' => 'نوع حالة الحلقة غير صالح.',
 
             'sponsorship_type_id.in' => 'نوع الكفالة غير صالح.',
 
