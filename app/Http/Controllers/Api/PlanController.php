@@ -10,6 +10,7 @@ use App\Http\Requests\StudentPlan\UpdateStudentPlanRequest;
 use App\Http\Resources\PlanResource;
 use App\Http\Resources\StudentPlanResource;
 use App\Models\Level;
+use App\Enums\PlanType;
 use App\Models\Plan;
 use App\Models\Student;
 use App\Models\StudentPlan;
@@ -257,13 +258,16 @@ class PlanController extends Controller
         $startingLevelId = $validated['starting_level_id']
             ?? Level::where('plan_id', $plan->id)->orderBy('order')->first()?->id;
 
-        $isMain = intval($validated['is_main']);
+        // is_main تُستنتج تلقائياً: تكون رئيسية فقط إذا كانت هذه هي الخطة الرئيسية الفعالة الوحيدة
+        $isMain = $plan->isActiveMain();
 
         $studentsIds = $validated['student_ids'];
 
         $students = Student::whereIn('id', $studentsIds)->get();
 
         foreach ($students as $student) {
+
+            $hasOtherActivePlans = $student->plans()->wherePivotNull('to_date')->exists();
 
             $data = [
                 'student_id' => $student->id,
@@ -276,19 +280,17 @@ class PlanController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ];
 
-            if (!$student->plans()->exists()) {
-                $data['is_main'] = 1;
-            }
-
-            if (boolval($isMain) && $student->plans()->exists()) {
+            if (!$hasOtherActivePlans) {
+                // كل طالب يجب أن يكون له خطة رئيسية واحدة على الأقل
+                $data['is_main'] = true;
+            } elseif ($isMain) {
                 $plans_ids = $student->plans()->wherePivotNull('to_date')->pluck('plans.id')->toArray();
-                unset($plans_ids[$plan->id]);
                 $updateData = array_fill_keys($plans_ids, ['is_main' => 0]);
                 $student->plans()->syncWithoutDetaching($updateData);
             }
 
             $student->plans()->syncWithPivotValues(
-                [$validated['plan_id']],
+                [$plan->id],
                 $data,
                 false
             );

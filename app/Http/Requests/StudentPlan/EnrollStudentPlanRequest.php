@@ -21,7 +21,6 @@ class EnrollStudentPlanRequest extends DQFormRequest
             'plan_id'            => ['required', 'integer', 'exists:plans,id'],
             'starting_level_id'  => ['nullable', 'integer', 'exists:levels,id'],
             'from_date'          => ['required', 'date'],
-            'is_main'            => ['sometimes', 'boolean'],
             'notes'              => ['nullable', 'string'],
         ];
     }
@@ -69,7 +68,6 @@ class EnrollStudentPlanRequest extends DQFormRequest
             'plan_id'           => 'الخطة',
             'starting_level_id' => 'المستوى المبدئي',
             'from_date'         => 'تاريخ الالتحاق',
-            'is_main'           => 'الخطة الرئيسية',
             'notes'             => 'الملاحظات',
         ];
     }

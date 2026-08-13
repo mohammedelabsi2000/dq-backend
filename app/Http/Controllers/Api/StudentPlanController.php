@@ -9,6 +9,7 @@ use App\Http\Requests\StudentPlan\MoveLevelRequest;
 use App\Http\Requests\StudentPlan\UpdateStudentPlanRequest;
 use App\Http\Resources\StudentPlanResource;
 use App\Models\Level;
+use App\Models\Plan;
 use App\Models\StudentPlan;
 use Illuminate\Http\Request;
 
@@ -56,16 +57,19 @@ class StudentPlanController extends Controller
         $startingLevelId = $validated['starting_level_id']
             ?? Level::where('plan_id', $validated['plan_id'])->orderBy('order')->value('id');
 
-        $isMain = $validated['is_main'] ?? false;
+        $plan = Plan::findOrFail($validated['plan_id']);
+
+        // is_main تُستنتج تلقائياً: تكون رئيسية فقط إذا كانت هذه هي الخطة الرئيسية الفعالة الوحيدة
+        $isMain = $plan->isActiveMain();
         $studentPlans = collect();
 
         foreach ($validated['student_ids'] as $studentId) {
-            // هل هذه أول خطة نشطة للطالب؟ تصبح رئيسية تلقائياً إذا لم يُطلب خلاف ذلك
+            // هل هذه أول خطة نشطة للطالب؟ تصبح رئيسية تلقائياً حتى لو لم تكن الخطة الرئيسية الفعالة
             $hasOtherActivePlans = StudentPlan::where('student_id', $studentId)
                 ->active()
                 ->exists();
 
-            $shouldBeMain = $isMain ?? !$hasOtherActivePlans;
+            $shouldBeMain = $isMain || !$hasOtherActivePlans;
 
             $studentPlan = StudentPlan::create([
                 'student_id'        => $studentId,
