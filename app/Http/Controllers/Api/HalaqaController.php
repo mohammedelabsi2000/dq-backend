@@ -202,7 +202,10 @@ class HalaqaController extends Controller
         $halaqa->update($halaqaData);
 
         // تعديل المعلم المنسّب للحلقة
-        if ($request->has('teacher_id')) {
+        // ملاحظة: نستخدم filled() وليس has() عمداً — إرسال teacher_id فارغاً/null
+        // (كما يحدث مثلاً عند تعطيل الحلقة وإخفاء حقل المعلم في الواجهة) يجب ألا يُفسَّر
+        // كطلب لإلغاء تنسيب المعلم الحالي، بل يُتجاهل ويبقى المعلم كما هو.
+        if ($request->filled('teacher_id')) {
             $newTeacherId = $request->input('teacher_id');
 
             UserScope::where('scope_type', 'halaqa')
@@ -210,9 +213,7 @@ class HalaqaController extends Controller
                 ->whereNull('to_date')
                 ->update(['to_date' => now()]);
 
-            if ($newTeacherId) {
-                $this->assignTeacherToHalaqa(User::findOrFail($newTeacherId), $halaqa);
-            }
+            $this->assignTeacherToHalaqa(User::findOrFail($newTeacherId), $halaqa);
         }
 
         $message = 'تم تحديث بيانات الحلقة بنجاح';
