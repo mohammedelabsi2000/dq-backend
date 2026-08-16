@@ -12,6 +12,25 @@ use Illuminate\Support\Facades\Hash;
 
 class StudentService
 {
+    public function createOrUpdateStudent(array $data, User $requester = null): Student
+    {
+        // Check if student exists by identity
+        $student = Student::withTrashed()->where('identity', $data['identity'])->first();
+
+        if ($student) {
+            // Update existing student
+            $data = array_merge($data, $student->toArray());
+            return $this->update($student, $data, $requester);
+        } else {
+            // Create new student
+            $idQueryServices = new IdQueryServices();
+            $personData = $idQueryServices->get($data['identity']);
+            $studentData = $idQueryServices->mapping($personData);
+            $data = array_merge($data, $studentData);
+            return $this->create($data, $requester);
+        }
+    }
+
     public function create(array $data, User $requester = null): Student
     {
         return DB::transaction(function () use ($data, $requester) {
