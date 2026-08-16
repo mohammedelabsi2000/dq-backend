@@ -30,6 +30,11 @@ class Constant extends Model
         return $this->belongsTo(ConstantType::class, 'constant_type_id');
     }
 
+    public function typeName()
+    {
+        return $this->belongsTo(ConstantType::class, 'constant_type_id')->select('id', 'name as type_name');
+    }
+
     // العلاقة مع نوع الثابت
     public function constantType()
     {
