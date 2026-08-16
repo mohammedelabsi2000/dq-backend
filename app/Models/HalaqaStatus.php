@@ -24,11 +24,6 @@ class HalaqaStatus extends Model
         return $this->belongsTo(Halaqa::class);
     }
     
-    public function statusType()
-    {
-        return $this->belongsTo(Constant::class, 'status_type_id');
-    }
-    
     public function sponsorshipType()
     {
         return $this->belongsTo(Constant::class, 'sponsorship_type_id');

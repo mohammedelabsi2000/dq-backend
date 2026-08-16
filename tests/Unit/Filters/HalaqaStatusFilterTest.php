@@ -12,14 +12,10 @@ use Tests\TestCase;
 
 class HalaqaStatusFilterTest extends TestCase
 {
-    private ?int $statusTypeId = null;
     private ?int $sponsorshipTypeId = null;
 
     public function assignConstantTypes()
     {
-        $this->statusTypeId = (ConstantType::where('name', 'status_type')->first()
-            ?? ConstantType::factory()->create(['name' => 'status_type']))->id;
-
         $this->sponsorshipTypeId = (ConstantType::where('name', 'sponsorship_type')->first()
             ?? ConstantType::factory()->create(['name' => 'sponsorship_type']))->id;
     }
@@ -48,24 +44,6 @@ class HalaqaStatusFilterTest extends TestCase
 
         $this->assertCount(3, $results);
         $this->assertEquals($halaqa1->id, $results->first()->halaqa_id);
-    }
-
-    /** @test */
-    public function it_can_filter_by_status_type_id()
-    {
-
-        $statusType1 = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-        $statusType2 = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
-
-        HalaqaStatus::factory()->count(3)->create(['status_type_id' => $statusType1->id]);
-        HalaqaStatus::factory()->count(2)->create(['status_type_id' => $statusType2->id]);
-
-        $request = new Request(['status_type_id' => $statusType1->id]);
-        $filter = new HalaqaStatusFilter(HalaqaStatus::query(), $request);
-        $results = $filter->apply()->get();
-
-        $this->assertCount(3, $results);
-        $this->assertEquals($statusType1->id, $results->first()->status_type_id);
     }
 
     /** @test */
@@ -152,32 +130,27 @@ class HalaqaStatusFilterTest extends TestCase
     public function it_can_apply_multiple_filters()
     {
         $halaqa = Halaqa::factory()->create();
-        $statusType = Constant::factory()->create(['constant_type_id' => $this->statusTypeId]);
 
         HalaqaStatus::factory()->create([
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'from_date' => '2024-02-01',
             'to_date' => null
         ]);
 
         HalaqaStatus::factory()->create([
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'from_date' => '2024-01-01',
             'to_date' => '2024-01-31'
         ]);
 
         HalaqaStatus::factory()->create([
             'halaqa_id' => Halaqa::factory()->create()->id,
-            'status_type_id' => $statusType->id,
             'from_date' => '2024-02-01',
             'to_date' => null
         ]);
 
         $request = new Request([
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $statusType->id,
             'from_date' => '2024-02-01',
             'active_only' => 'true'
         ]);
@@ -187,7 +160,6 @@ class HalaqaStatusFilterTest extends TestCase
 
         $this->assertCount(1, $results);
         $this->assertEquals($halaqa->id, $results->first()->halaqa_id);
-        $this->assertEquals($statusType->id, $results->first()->status_type_id);
         $this->assertEquals('2024-02-01', $results->first()->from_date->format('Y-m-d'));
         $this->assertNull($results->first()->to_date);
     }
@@ -221,18 +193,6 @@ class HalaqaStatusFilterTest extends TestCase
         HalaqaStatus::factory()->count(3)->create();
 
         $request = new Request(['halaqa_id' => 999]);
-        $filter = new HalaqaStatusFilter(HalaqaStatus::query(), $request);
-        $results = $filter->apply()->get();
-
-        $this->assertCount(0, $results);
-    }
-
-    /** @test */
-    public function it_handles_invalid_status_type_id()
-    {
-        HalaqaStatus::factory()->count(3)->create();
-
-        $request = new Request(['status_type_id' => 999]);
         $filter = new HalaqaStatusFilter(HalaqaStatus::query(), $request);
         $results = $filter->apply()->get();
 

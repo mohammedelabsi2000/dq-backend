@@ -57,7 +57,7 @@ class ApprovalRequest extends Model
     public function approve(User $actor): void
     {
         if ($this->status !== ApprovalStatus::Pending) {
-            throw new \Exception('لا يمكن الموافقة على طلب غير معلق.');
+            throw new \Exception($this->cannotActReason() ?? 'لا يمكن الموافقة على طلب غير معلق.');
         }
 
         DB::transaction(function () {
@@ -72,7 +72,7 @@ class ApprovalRequest extends Model
     public function reject(User $actor, string $reason): void
     {
         if ($this->status !== ApprovalStatus::Pending) {
-            throw new \Exception('لا يمكن رفض طلب غير معلق.');
+            throw new \Exception($this->cannotActReason() ?? 'لا يمكن رفض طلب غير معلق.');
         }
 
         DB::transaction(function () use ($reason) {
@@ -101,6 +101,18 @@ class ApprovalRequest extends Model
     public function canActOn(User $user): bool
     {
         return $this->status === ApprovalStatus::Pending;
+    }
+
+    /**
+     * رسالة عربية واضحة توضّح سبب تعذّر التصرف بالطلب حالياً (null إن كان معلقاً وقابلاً للتصرف).
+     */
+    public function cannotActReason(): ?string
+    {
+        return match ($this->status) {
+            ApprovalStatus::Approved => 'هذا الطلب معتمد بالفعل.',
+            ApprovalStatus::Rejected => 'هذا الطلب مرفوض بالفعل، يمكن إعادة إرساله أولاً قبل اتخاذ إجراء جديد.',
+            default                  => null,
+        };
     }
 
     /*

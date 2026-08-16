@@ -42,6 +42,8 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     // ── الاعتمادات ──────────────────────────────────────
     Route::prefix('approvals')->group(function () {
         Route::get('/',                         [ApprovalController::class, 'index']);
+        Route::post('bulk-approve',              [ApprovalController::class, 'bulkApprove']);
+        Route::post('bulk-reject',               [ApprovalController::class, 'bulkReject']);
         Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
         Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
         Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);

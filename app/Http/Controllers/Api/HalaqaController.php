@@ -98,7 +98,6 @@ class HalaqaController extends Controller
         // $halaqa = Halaqa::create($request->validated());
         $halaqaData = $request->validated();
         $halaqaStatusData = [
-            'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
             'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
             'sponsor_entity' => $request->input('sponsor_entity'),
             'from_date' => $request->input('from_date'),
@@ -111,7 +110,6 @@ class HalaqaController extends Controller
         unset(
             // $halaqaData['from_date'],
             // $halaqaData['to_date'],
-            $halaqaData['status_type_id'],
             $halaqaData['sponsorship_type_id'],
             $halaqaData['sponsor_entity'],
             $halaqaData['notes'],
@@ -137,7 +135,6 @@ class HalaqaController extends Controller
             : 'تم إنشاء الحلقة وإرسالها للاعتماد';
 
         if (
-            $halaqaStatusData['status_type_id'] !== null ||
             $halaqaStatusData['sponsorship_type_id'] !== null ||
             $halaqaStatusData['sponsor_entity'] !== null
         ) {
@@ -185,7 +182,6 @@ class HalaqaController extends Controller
     {
         $halaqaData = $request->validated();
         $halaqaStatusData = [
-            'status_type_id' => $request->input('status_type_id'), // أو أي حالة افتراضية إذا كانت موجودة
             'sponsorship_type_id' => $request->input('sponsorship_type_id'), // أو أي نوع كفالة افتراضي إذا كان موجودًا
             'sponsor_entity' => $request->input('sponsor_entity'),
             'from_date' => $request->input('from_date'),
@@ -197,7 +193,6 @@ class HalaqaController extends Controller
         unset(
             // $halaqaData['from_date'],
             // $halaqaData['to_date'],
-            $halaqaData['status_type_id'],
             $halaqaData['sponsorship_type_id'],
             $halaqaData['sponsor_entity'],
             $halaqaData['notes'],
@@ -222,7 +217,6 @@ class HalaqaController extends Controller
 
         $message = 'تم تحديث بيانات الحلقة بنجاح';
         if (
-            $halaqaStatusData['status_type_id'] !== null ||
             $halaqaStatusData['sponsorship_type_id'] !== null ||
             $halaqaStatusData['sponsor_entity'] !== null
         ) {

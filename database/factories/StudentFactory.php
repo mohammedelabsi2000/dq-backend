@@ -73,6 +73,7 @@ class StudentFactory extends Factory
             'guardian_type_id' => $guardianTypeId,
             'phone' => fake()->optional(0.6)->phoneNumber(),
             'whatsapp' => fake()->optional(0.4)->phoneNumber(),
+            'is_approved' => true,
         ];
     }
 

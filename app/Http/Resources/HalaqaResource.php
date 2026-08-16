@@ -19,7 +19,6 @@ class HalaqaResource extends JsonResource
         $halaqa_status = [];
         $this->whenLoaded('lastStatus', function () use (&$halaqa_status) {
             $halaqa_status = [
-                'status_type' => $this->lastStatus->statusType ? new ConstantResource($this->lastStatus->statusType) : null,
                 'sponsorship_type' => $this->lastStatus->sponsorshipType ? new ConstantResource($this->lastStatus->sponsorshipType) : null,
                 'sponsor_entity' => $this->lastStatus->sponsor_entity,
                 'from_date' => $this->lastStatus->from_date?->format('Y-m-d'),
@@ -35,6 +34,7 @@ class HalaqaResource extends JsonResource
             'location' => $this->location,
             'description' => $this->description,
             'gender' => $this->gender,
+            'is_active' => $this->is_active,
 
             /*
             |--------------------------------------------------------------------------

@@ -19,7 +19,6 @@ class HalaqaStatusFilter extends BaseFilter
         // Apply halaqa-specific filters
         $query = $this->applyFilters([
             'halaqa_id' => 'filterByHalaqaId',
-            'status_type_id' => 'filterByStatusTypeId',
             'sponsorship_type_id' => 'filterBySponsorshipTypeId',
             'from_date' => 'filterByFromDate',
             'to_date' => 'filterByToDate',
@@ -35,11 +34,6 @@ class HalaqaStatusFilter extends BaseFilter
     protected function filterByHalaqaId(Builder|QueryBuilder $query): Builder|QueryBuilder
     {
         return $query->where('halaqa_id', $this->request->integer('halaqa_id'));
-    }
-
-    protected function filterByStatusTypeId(Builder|QueryBuilder $query): Builder|QueryBuilder
-    {
-        return $query->where('status_type_id', $this->request->integer('status_type_id'));
     }
 
     protected function filterBySponsorshipTypeId(Builder|QueryBuilder $query): Builder|QueryBuilder

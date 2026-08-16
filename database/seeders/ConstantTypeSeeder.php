@@ -168,15 +168,6 @@ class ConstantTypeSeeder extends Seeder
                 ]
             ],
             [
-                'name' => 'status_type',
-                'description' => 'حالات الحلقات',
-                'notes' => '',
-                'constants' => [
-                    ['name' => 'فعالة', 'notes' => null, 'is_active' => true],
-                    ['name' => 'غير فعالة', 'notes' => null, 'is_active' => true],
-                ]
-            ],
-            [
                 'name' => 'sponsorship_type',
                 'description' => 'أنواع كفالة الحلقات',
                 'notes' => '',

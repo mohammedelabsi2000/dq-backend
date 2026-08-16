@@ -38,13 +38,11 @@ class HalaqaStatusRequestTest extends TestCase
         $rules = $request->rules();
 
         // Check that optional fields exist and have correct rules
-        $this->assertArrayHasKey('status_type_id', $rules);
         $this->assertArrayHasKey('sponsorship_type_id', $rules);
         $this->assertArrayHasKey('to_date', $rules);
         $this->assertArrayHasKey('notes', $rules);
 
         // Check that they are nullable
-        $this->assertStringContainsString('nullable', $rules['status_type_id'][0]);
         $this->assertStringContainsString('nullable', $rules['sponsorship_type_id'][0]);
         $this->assertStringContainsString('nullable', $rules['to_date'][0]);
         $this->assertStringContainsString('nullable', $rules['notes']);
@@ -76,7 +74,6 @@ class HalaqaStatusRequestTest extends TestCase
 
         $this->assertArrayHasKey('halaqa_id.required', $messages);
         $this->assertArrayHasKey('halaqa_id.exists', $messages);
-        $this->assertArrayHasKey('status_type_id.in', $messages);
         $this->assertArrayHasKey('sponsorship_type_id.in', $messages);
         $this->assertArrayHasKey('from_date.required', $messages);
         $this->assertArrayHasKey('from_date.date', $messages);
@@ -86,7 +83,6 @@ class HalaqaStatusRequestTest extends TestCase
 
         $this->assertEquals('يجب اختيار الحلقة.', $messages['halaqa_id.required']);
         $this->assertEquals('الحلقة المحددة غير موجودة.', $messages['halaqa_id.exists']);
-        $this->assertEquals('نوع حالة الحلقة غير صالح.', $messages['status_type_id.in']);
         $this->assertEquals('نوع الكفالة غير صالح.', $messages['sponsorship_type_id.in']);
         $this->assertEquals('تاريخ البداية مطلوب.', $messages['from_date.required']);
         $this->assertEquals('تاريخ البداية يجب أن يكون تاريخاً صحيحاً.', $messages['from_date.date']);
@@ -102,7 +98,6 @@ class HalaqaStatusRequestTest extends TestCase
 
         $data = [
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => $this->getValidStatusTypeId(),
             'sponsorship_type_id' => $this->getValidSponsorshipTypeId(),
             'from_date' => '2024-01-01',
             'to_date' => '2024-12-31',
@@ -238,25 +233,6 @@ class HalaqaStatusRequestTest extends TestCase
     }
 
     /** @test */
-    public function it_fails_validation_with_invalid_status_type_id()
-    {
-        $halaqa = Halaqa::factory()->create();
-
-        $data = [
-            'halaqa_id' => $halaqa->id,
-            'status_type_id' => 999,
-            'from_date' => '2024-01-01'
-        ];
-
-        $request = new HalaqaStatusRequest();
-        $request->merge($data);
-
-        $validator = validator($data, $request->rules(), $request->messages());
-        $this->assertTrue($validator->fails());
-        $this->assertArrayHasKey('status_type_id', $validator->errors()->toArray());
-    }
-
-    /** @test */
     public function it_fails_validation_with_invalid_sponsorship_type_id()
     {
         $halaqa = Halaqa::factory()->create();
@@ -319,7 +295,6 @@ class HalaqaStatusRequestTest extends TestCase
 
         $data = [
             'halaqa_id' => $halaqa->id,
-            'status_type_id' => null,
             'sponsorship_type_id' => null,
             'from_date' => '2024-01-01',
             'to_date' => null,
@@ -377,15 +352,6 @@ class HalaqaStatusRequestTest extends TestCase
 
         // The authorization depends on HalaqaRequest, so we just test that it returns a boolean
         $this->assertIsBool($request->authorize());
-    }
-
-    /**
-     * Helper method to get a valid status type ID
-     */
-    private function getValidStatusTypeId()
-    {
-        $statusTypes = \App\Helpers\ConstantHelper::getConstantIdsByType('status_type');
-        return $statusTypes[0] ?? null;
     }
 
     /**
