@@ -34,7 +34,7 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Student::class);
-        $query = Student::query()->visibleTo(auth()->user());
+        $query = Student::query()->visibleTo(auth()->user())->where('is_approved', true);
 
         $filteredQuery = (new StudentFilter($query, $request))->apply();
 
