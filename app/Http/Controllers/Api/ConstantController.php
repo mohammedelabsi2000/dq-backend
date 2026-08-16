@@ -30,7 +30,7 @@ class ConstantController extends Controller
 
         // لإرجاع قائمة بالثوابت من نوع مخصص
         if ($request->filled('with_type_name')) {
-            try {
+            /* try {
                 $constType = ConstantType::where(
                     'name',
                     'like',
@@ -39,7 +39,15 @@ class ConstantController extends Controller
             } catch (ModelNotFoundException $th) {
                 return $this->error('نوع الثوابت هذا غير موجود في النظام');
             }
-            $query->where('constant_type_id', '=', intval($constType['id']));
+            $query->where('constant_type_id', '=', intval($constType['id'])); */
+
+            $query->whereIn('constant_type_id', function ($subQuery) use ($request) {
+                $subQuery->select('id')
+                    ->from('constant_types')
+                    ->whereIn('name', explode(',', $request->get('with_type_name')));
+            });
+
+            
 
             $q = $this->applyFilters($query, [
                 'searchColumns' => ['name'],
@@ -50,7 +58,9 @@ class ConstantController extends Controller
             $query = $q['query'];
             $total = $q['count'];
 
-            $constants = $query->get(['id', 'name', 'const_key']);
+            $constants = $query->leftJoin('constant_types', 'constants.constant_type_id', '=', 'constant_types.id')
+            ->get(['constants.id', 'constants.name', 'constants.const_key', 'constant_types.name as type_name'])
+            ->groupBy('type_name');
             return $this->successWithPagination(
                 $constants,
                 ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
