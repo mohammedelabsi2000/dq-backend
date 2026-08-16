@@ -175,7 +175,8 @@ class HalaqaRequest extends DQFormRequest
     }
 
     /**
-     * منع تنسيب معلم لحلقة غير فعالة (سواء كانت غير فعالة أصلاً، أو يجري تعطيلها بنفس الطلب).
+     * منع تنسيب معلم جديد لحلقة غير فعالة (سواء كانت غير فعالة أصلاً، أو يجري تعطيلها بنفس الطلب).
+     * لا يمنع إعادة إرسال نفس المعلم الحالي دون تغيير (مثلاً عند تعطيل الحلقة فقط دون المساس بالمعلم).
      */
     public function withValidator($validator): void
     {
@@ -188,7 +189,17 @@ class HalaqaRequest extends DQFormRequest
                 ? $this->boolean('is_active')
                 : ($this->isUpdate() ? (bool) $this->route('halaqa')?->is_active : true);
 
-            if (!$isActive) {
+            if ($isActive) {
+                return;
+            }
+
+            $currentTeacherId = $this->isUpdate()
+                ? $this->route('halaqa')?->supervisors()->value('user_id')
+                : null;
+
+            $isNewAssignment = (int) $this->input('teacher_id') !== (int) $currentTeacherId;
+
+            if ($isNewAssignment) {
                 $validator->errors()->add('teacher_id', 'لا يمكن تنسيب معلم لحلقة غير فعالة.');
             }
         });
