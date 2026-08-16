@@ -13,8 +13,10 @@ use App\Http\Requests\Student\ImportStudentWithRelationRequest;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Http\Requests\Student\UpdateStudentRequest;
 use App\Http\Resources\StudentResource;
+use App\Imports\Student\HalaqaStudentsImport;
 use App\Imports\StudentsImport;
 use App\Imports\Student\StudentWithRelationsImport;
+use App\Models\Center;
 use App\Services\StudentService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
@@ -170,11 +172,19 @@ class StudentController extends Controller
             $request->all(),
             [
                 'file' => 'required|file|mimes:xlsx,xls',
+                'halaqa_id' => 'required|exists:halaqas,id',
+                'center_id' => 'required|exists:centers,id',
             ],
             [
                 'file.required' => 'الرجاء رفع ملف',
                 'file.file' => 'المدخل يجب أن يكون ملف',
                 'file.mimes' => 'يجب أن يكون الملف من نوع: xlsx أو xls',
+
+                'halaqa_id.required' => 'الرجاء اختيار الحلقة',
+                'halaqa_id.exists' => 'الحلقة المحددة غير موجودة',
+
+                'center_id.required' => 'الرجاء اختيار المركز',
+                'center_id.exists' => 'المركز المحدد غير موجود',
             ]
         );
 
@@ -188,7 +198,29 @@ class StudentController extends Controller
             );
         }
 
-        $import = new ValidateStudentsImport($request);
+        $mosqueId = Center::find($request->input('center_id'))->mosque_id;
+        $import = new HalaqaStudentsImport(
+            $mosqueId,
+            $request->input('halaqa_id')
+        );
+        Excel::import($import, $request->file);
+        $failedRows = $import->getFailedRows();
+        $errorFile = null;
+
+        if (count($failedRows) > 0) {
+            return $this->error(
+                'لم يتم استيراد بعض الصفوف بسبب وجود أخطاء. يرجى مراجعة الملف المرفق لمعرفة التفاصيل.',
+                422,
+                null,
+                ['failed_rows' => $failedRows]
+            );
+            // $fileName = 'failed-students-' . now()->timestamp . '.xlsx';
+            // return Excel::download(new FailedRowsExport($failedRows, []), $fileName);
+        }
+
+        //////////////////////////////////////////
+
+        /*$import = new ValidateStudentsImport($request);
         Excel::import($import, $request->file);
 
         if (!empty($import->errors)) {
@@ -207,7 +239,7 @@ class StudentController extends Controller
             (new StudentWithRelationsImport($userId))->queue($filePath);
         } catch (\Throwable $th) {
             return $this->error($th->getMessage(), 422);
-        }
+        }*/
 
         return $this->success(
             null,

@@ -42,13 +42,14 @@ trait ApiResponser
         return response()->json($pag, $code);
     }
 
-    protected function error($message = 'حدث خطأ', $code = 400, $errors = null)
+    protected function error($message = 'حدث خطأ', $code = 400, $errors = null, $data = null)
     {
         return response()->json([
             'success' => false,
             'message' => $message,
             'errors' => $errors,
             'code' => $code,
+            'data' => $data,
         ], $code);
     }
 
