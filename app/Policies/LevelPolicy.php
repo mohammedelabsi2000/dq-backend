@@ -51,6 +51,14 @@ class LevelPolicy
     }
 
     /**
+     * Determine whether the user can restore the model.
+     */
+    public function restore(User $user, Level $level): bool
+    {
+        return $user->hasPermissionTo('levels.restore');
+    }
+
+    /**
      * Determine whether the user can reorder levels.
      */
     public function reorder(User $user): bool

@@ -37,6 +37,10 @@ class StudentController extends Controller
     {
         $this->authorize('viewAny', Student::class);
         $query = Student::query()->visibleTo(auth()->user())->where('is_approved', true);
+        
+        if (auth()->user()->hasPermissionTo('students.restore')) {
+            $query = $query->withTrashed();
+        }
 
         $filteredQuery = (new StudentFilter($query, $request))->apply();
 
@@ -139,6 +143,17 @@ class StudentController extends Controller
         return $this->success(
             null,
             'تم حذف الطالب بنجاح'
+        );
+    }
+
+    public function restore(Student $student)
+    {
+        $this->authorize('restore', $student);
+        $student->restore();
+
+        return $this->success(
+            new StudentResource($student),
+            'تم استعادة الطالب بنجاح'
         );
     }
 

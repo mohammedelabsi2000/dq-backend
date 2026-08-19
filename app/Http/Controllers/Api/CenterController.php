@@ -24,6 +24,10 @@ class CenterController extends Controller
         $this->authorize('viewAny', Center::class);
         $query = Center::query()->visibleTo(auth()->user());
 
+        if (auth()->user()->hasPermissionTo('centers.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $query = (new CenterFilter($query, $request))->apply();
 
         $q = $this->applyFilters($query, [
@@ -155,5 +159,22 @@ class CenterController extends Controller
         $center->delete();
 
         return $this->success(null, 'تم حذف المركز بنجاح');
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param Center $center
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restore(Center $center)
+    {
+        $this->authorize('restore', $center);
+        $center->restore();
+
+        return $this->success(
+            new CenterResource($center),
+            'تم استعادة المركز بنجاح'
+        );
     }
 }

@@ -64,7 +64,9 @@ class BranchPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore($user) {}
+    public function restore($user) {
+        return $user->hasPermissionTo('branches.restore');
+    }
 
     /**
      * Determine whether the user can permanently delete the model.

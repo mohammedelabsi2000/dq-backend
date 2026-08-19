@@ -38,6 +38,12 @@ class RegionPolicy
             && $this->isVisible($user, $region);
     }
 
+    public function restore(User $user, Region $region): bool
+    {
+        return $user->hasPermissionTo('regions.restore')
+            && $this->isVisible($user, $region);
+    }
+
     private function isVisible(User $user, Region $region): bool
     {
         return Region::visibleTo($user)->where('id', $region->id)->exists();
