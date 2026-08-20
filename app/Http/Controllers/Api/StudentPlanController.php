@@ -59,8 +59,8 @@ class StudentPlanController extends Controller
 
         $plan = Plan::findOrFail($validated['plan_id']);
 
-        // is_main تُستنتج تلقائياً: تكون رئيسية فقط إذا كانت هذه هي الخطة الرئيسية الفعالة الوحيدة
-        $isMain = $plan->isActiveMain();
+        // is_main تُستنتج تلقائياً: تكون رئيسية إذا كانت الخطة من نوع رئيسية ونشطة
+        $isMain = $plan->type === \App\Enums\PlanType::Main && $plan->is_active;
         $studentPlans = collect();
 
         foreach ($validated['student_ids'] as $studentId) {
