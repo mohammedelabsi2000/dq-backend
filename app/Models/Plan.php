@@ -47,14 +47,15 @@ class Plan extends Model
 
     protected static function booted()
     {
-        static::saved(function (Plan $plan) {
-            if ($plan->type === PlanType::Main && $plan->is_active) {
-                static::where('type', PlanType::Main->value)
-                    ->where('id', '!=', $plan->id)
-                    ->where('is_active', true)
-                    ->update(['is_active' => false]);
-            }
-        });
+        // تم إزالة التقييد الذي يمنع وجود أكثر من خطة رئيسية نشطة
+        // static::saved(function (Plan $plan) {
+        //     if ($plan->type === PlanType::Main && $plan->is_active) {
+        //         static::where('type', PlanType::Main->value)
+        //             ->where('id', '!=', $plan->id)
+        //             ->where('is_active', true)
+        //             ->update(['is_active' => false]);
+        //     }
+        // });
     }
 
     // ========================
