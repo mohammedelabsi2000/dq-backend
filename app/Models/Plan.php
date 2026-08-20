@@ -101,4 +101,22 @@ class Plan extends Model
                     ->orWhereNull('to_date');
             });
     }
+
+    /**
+     * البحث عن خطة رئيسية مناسبة بناءً على عمر الطالب
+     */
+    public static function findSuitableMainPlan(int $age): ?Plan
+    {
+        return static::where('type', PlanType::Main->value)
+            ->where('is_active', true)
+            ->where(function ($query) use ($age) {
+                $query->whereNull('age_from')
+                    ->orWhere('age_from', '<=', $age);
+            })
+            ->where(function ($query) use ($age) {
+                $query->whereNull('age_to')
+                    ->orWhere('age_to', '>=', $age);
+            })
+            ->first();
+    }
 }

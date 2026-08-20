@@ -97,24 +97,15 @@ class StudentPlan extends Model
     }
 
     /**
-     * نقل الطالب لمستوى جديد - يغلق سجل المستوى الحالي في history ويفتح سجلاً جديداً
+     * نقل الطالب لمستوى جديد
      */
     public function moveToLevel(int $newLevelId, ?string $date = null, ?string $notes = null): void
     {
         $date = $date ?? now()->toDateString();
 
-        $this->levelHistory()
-             ->whereNull('to_date')
-             ->update(['to_date' => $date]);
-
-        $this->levelHistory()->create([
-            'level_id'   => $newLevelId,
-            'from_date'  => $date,
-            'to_date'    => null,
-            'notes'      => $notes,
+        $this->update([
+            'current_level_id' => $newLevelId,
         ]);
-
-        $this->update(['current_level_id' => $newLevelId]);
     }
 
     /**
@@ -124,10 +115,6 @@ class StudentPlan extends Model
     public function closePlan(StudentPlanStatus $status, ?string $date = null, ?string $notes = null): void
     {
         $date = $date ?? now()->toDateString();
-
-        $this->levelHistory()
-             ->whereNull('to_date')
-             ->update(['to_date' => $date]);
 
         $wasMain = $this->is_main;
 
