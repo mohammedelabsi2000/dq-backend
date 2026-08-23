@@ -16,7 +16,7 @@ class StoreImageRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'image' => 'required|mimes:jpeg,jpg,png,gif,pdf|max:2048',
+            'image' => 'required|mimes:jpeg,jpg,png,gif,pdf,doc,docx|max:10240',
             'imageable_id' => 'required|integer',
             'imageable_type' => 'required|string',
             'image_type' => ['nullable', 'string', new Enum(ImageType::class)],
@@ -29,8 +29,8 @@ class StoreImageRequest extends DQFormRequest
     {
         return [
             'image.required' => 'الصورة مطلوبة',
-            'image.mimes' => 'الصورة يجب أن تكون من نوع jpeg, jpg, png, gif, pdf',
-            'image.max' => 'الصورة يجب أن تكون أقل من 2MB',
+            'image.mimes' => 'الملف يجب أن يكون من نوع jpeg, jpg, png, gif, pdf, doc, docx',
+            'image.max' => 'الملف يجب أن يكون أقل من 10MB',
             'imageable_id.required' => 'معرف الكائن المتعلق مطلوب',
             'imageable_type.required' => 'نوع الكائن المتعلق مطلوب',
             'image_type.string' => 'نوع الصورة يجب أن يكون نص',

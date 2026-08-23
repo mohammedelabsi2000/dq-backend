@@ -9,6 +9,7 @@ use App\Models\{
     Halaqa,
     Mosque,
     Region,
+    Sponsor,
     Student,
     User,
 };
@@ -156,6 +157,7 @@ class AppServiceProvider extends ServiceProvider
             'mosque' => Mosque::class,
             'halaqa' => Halaqa::class,
             'student' => Student::class,
+            'sponsor' => Sponsor::class,
         ]);
     }
 }

@@ -113,6 +113,23 @@ class Halaqa extends Model
         return $this->hasOne(HalaqaStatus::class, 'halaqa_id')->latestOfMany('id')->with(['sponsorshipType']);
     }
 
+    public function sponsorships()
+    {
+        return $this->hasMany(HalaqaSponsorship::class);
+    }
+
+    public function activeSponsorships()
+    {
+        return $this->hasMany(HalaqaSponsorship::class)->whereNull('to_date');
+    }
+
+    public function sponsors()
+    {
+        return $this->belongsToMany(Sponsor::class, 'halaqa_sponsorships')
+            ->withPivot(['id', 'from_date', 'to_date', 'notes'])
+            ->wherePivotNull('to_date');
+    }
+
     /**
      * Get the count of active students in this halaqa.
      */

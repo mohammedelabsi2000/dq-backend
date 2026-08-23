@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\{
     CourseController,
     DailyAchievementController,
     HalaqaController,
+    HalaqaSponsorshipController,
     HalaqaStatusController,
     HalaqaStudentController,
     IdQueryController,
@@ -23,6 +24,7 @@ use App\Http\Controllers\Api\{
     PlanController,
     PlanStudentController,
     RegionController,
+    SponsorController,
     StudentController,
     TrackController,
     StatisticsController
@@ -61,6 +63,17 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     Route::apiResource('mosques', MosqueController::class);
     Route::apiResource('centers', CenterController::class);
     Route::apiResource('halaqas', HalaqaController::class);
+
+    // Sponsors (الكفلاء) management
+    Route::apiResource('sponsors', SponsorController::class);
+
+    // Halaqa <-> Sponsor linking ("إضافة كفالة للحلقة" / "إدارة كفالات الحلقة")
+    Route::prefix('halaqas/{halaqa}/sponsorships')->group(function () {
+        Route::get('/', [HalaqaSponsorshipController::class, 'index']);
+        Route::get('eligible-sponsors', [HalaqaSponsorshipController::class, 'eligibleSponsors']);
+        Route::post('/', [HalaqaSponsorshipController::class, 'store']);
+        Route::post('{halaqaSponsorship}/stop', [HalaqaSponsorshipController::class, 'stop']);
+    });
 
 
 
