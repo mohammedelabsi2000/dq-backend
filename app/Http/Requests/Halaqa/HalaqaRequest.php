@@ -6,6 +6,7 @@ use App\Http\Requests\DQFormRequest;
 use App\Enums\HalaqaReferenceType;
 use App\Helpers\ConstantHelper;
 use App\Models\Halaqa;
+use App\Models\UserScope;
 use App\Rules\GenderVisibilityRule;
 use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -183,6 +184,27 @@ class HalaqaRequest extends DQFormRequest
         $validator->after(function ($validator) {
             if (!$this->filled('teacher_id')) {
                 return;
+            }
+
+            $currentHalaqaId = $this->isUpdate() ? $this->route('halaqa')?->id : null;
+
+            $otherScope = UserScope::where('scope_type', 'halaqa')
+                ->where('user_id', $this->input('teacher_id'))
+                ->when($currentHalaqaId, fn ($q) => $q->where('scope_id', '!=', $currentHalaqaId))
+                ->active()
+                ->first();
+
+            if ($otherScope) {
+                $otherHalaqa = Halaqa::find($otherScope->scope_id);
+
+                if ($otherHalaqa) {
+                    $location = $otherHalaqa->locationLabel();
+                    $message = "هذا المعلم منسّب بالفعل لحلقة \"{$otherHalaqa->name}\"" . ($location ? " التابعة لـ {$location}" : '') . '.';
+
+                    $validator->errors()->add('teacher_id', $message);
+
+                    return;
+                }
             }
 
             $isActive = $this->has('is_active')

@@ -139,6 +139,30 @@ class Halaqa extends Model
         return Setting::isEnabled(Setting::AUTO_APPROVE_HALAQAS);
     }
 
+    /**
+     * وصف موقع الحلقة (المركز التابعة له ومنطقته، أو المنطقة مباشرة) لاستخدامه في رسائل الخطأ/العرض.
+     */
+    public function locationLabel(): ?string
+    {
+        $reference = $this->reference;
+
+        if (!$reference) {
+            return null;
+        }
+
+        if ($this->reference_type?->value === HalaqaReferenceType::Center->value) {
+            $reference->loadMissing('region');
+
+            return 'مركز ' . $reference->name . ($reference->region ? ' - منطقة ' . $reference->region->name : '');
+        }
+
+        if ($this->reference_type?->value === HalaqaReferenceType::Region->value) {
+            return 'منطقة ' . $reference->name;
+        }
+
+        return null;
+    }
+
     public function scopeIsActive(Builder $query)
     {
         return $query->where('is_active', true);

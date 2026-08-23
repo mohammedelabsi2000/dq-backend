@@ -5,6 +5,9 @@ namespace App\Http\Requests\UserRole;
 
 use Illuminate\Validation\Rule;
 use App\Http\Requests\DQFormRequest;
+use App\Models\Halaqa;
+use App\Models\User;
+use App\Models\UserScope;
 
 class AssignRoleRequest extends DQFormRequest
 {
@@ -56,5 +59,43 @@ class AssignRoleRequest extends DQFormRequest
         }
 
         $this->merge(['scopes' => $scopes]);
+    }
+
+    /**
+     * منع تنسيب أكثر من مستخدم كمحفظ فعّال لنفس الحلقة في آن واحد.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $routeUser = $this->route('user');
+            $userId = $routeUser instanceof User ? $routeUser->id : (int) $routeUser;
+
+            foreach ((array) $this->input('scopes', []) as $index => $scope) {
+                if (($scope['type'] ?? null) !== 'halaqa' || empty($scope['id'])) {
+                    continue;
+                }
+
+                $halaqaId = (int) $scope['id'];
+
+                $existingTeacherScope = UserScope::where('scope_type', 'halaqa')
+                    ->where('scope_id', $halaqaId)
+                    ->where('user_id', '!=', $userId)
+                    ->active()
+                    ->first();
+
+                if (!$existingTeacherScope) {
+                    continue;
+                }
+
+                $halaqa = Halaqa::find($halaqaId);
+
+                if ($halaqa) {
+                    $location = $halaqa->locationLabel();
+                    $message = "هذه الحلقة \"{$halaqa->name}\" يوجد لها محفظ بالفعل" . ($location ? " ({$location})" : '') . '.';
+
+                    $validator->errors()->add("scopes.$index.id", $message);
+                }
+            }
+        });
     }
 }
