@@ -240,17 +240,12 @@ class HalaqaController extends Controller
     }
 
     /**
-     * تنسيب معلم لحلقة، مع ضمان أن المعلم لا يبقى منسّباً لأي حلقة أخرى
-     * (معلم واحد = حلقة واحدة).
+     * تنسيب معلم لحلقة (معلم واحد = حلقة واحدة).
+     * التحقق من عدم وجود تنسيب فعّال آخر لنفس المعلم يتم مسبقاً في HalaqaRequest،
+     * فلا يصل الطلب إلى هنا إلا إذا كان المعلم متاحاً للتنسيب.
      */
     private function assignTeacherToHalaqa(User $teacher, Halaqa $halaqa): void
     {
-        UserScope::where('scope_type', 'halaqa')
-            ->where('user_id', $teacher->id)
-            ->where('scope_id', '!=', $halaqa->id)
-            ->whereNull('to_date')
-            ->update(['to_date' => now()]);
-
         $teacher->assignScope('halaqa', $halaqa->id);
     }
 
