@@ -9,6 +9,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     // basic CRUD for users
     Route::get('users/candidate-teachers', [UserController::class, 'candidateTeachers']);
     Route::apiResource('users', UserController::class);
+    Route::post('users/{user}/restore', [UserController::class, 'restore']);
     Route::put('users/{user}/toggle-active', [UserController::class, 'toggleActive']);
 
 

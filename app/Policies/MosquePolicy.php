@@ -82,7 +82,8 @@ class MosquePolicy
      */
     public function restore($user, Mosque $mosque)
     {
-        //
+        return $user->hasPermissionTo('mosques.restore')
+            && $this->isVisible($user, $mosque);
     }
 
     /**

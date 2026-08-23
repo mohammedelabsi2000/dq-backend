@@ -30,6 +30,10 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user())->where('is_approved', true);
 
+        if (auth()->user()->hasPermissionTo('halaqas.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $query = (new HalaqaFilter($query, $request))->apply();
 
         // Filter by specific center
@@ -271,6 +275,23 @@ class HalaqaController extends Controller
         return $this->success(
             null,
             'تم حذف الحلقة بنجاح'
+        );
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  Halaqa  $halaqa
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restore(Halaqa $halaqa)
+    {
+        $this->authorize('restore', $halaqa);
+        $halaqa->restore();
+
+        return $this->success(
+            new HalaqaResource($halaqa),
+            'تم استعادة الحلقة بنجاح'
         );
     }
 

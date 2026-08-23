@@ -56,6 +56,12 @@ class HalaqaPolicy
             && $this->isVisible($user, $halaqa);
     }
 
+    public function restore(User $user, Halaqa $halaqa): bool
+    {
+        return $user->hasPermissionTo('halaqas.restore')
+            && $this->isVisible($user, $halaqa);
+    }
+
     private function isVisible(User $user, Halaqa $halaqa): bool
     {
         return Halaqa::visibleTo($user)->where('id', $halaqa->id)->exists();

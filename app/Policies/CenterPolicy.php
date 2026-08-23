@@ -38,6 +38,12 @@ class CenterPolicy
             && $this->isVisible($user, $center);
     }
 
+    public function restore(User $user, Center $center): bool
+    {
+        return $user->hasPermissionTo('centers.restore')
+            && $this->isVisible($user, $center);
+    }
+
     private function isVisible(User $user, Center $center): bool
     {
         return Center::visibleTo($user)->where('id', $center->id)->exists();
