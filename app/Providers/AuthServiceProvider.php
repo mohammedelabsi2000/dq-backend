@@ -13,6 +13,7 @@ use App\Models\HalaqaStudent;
 use App\Models\Mosque;
 use App\Models\Quran\CustomJuz;
 use App\Models\Region;
+use App\Models\Sponsor;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\UserRole;
@@ -26,6 +27,7 @@ use App\Policies\HalaqaPolicy;
 use App\Policies\HalaqaStudentPolicy;
 use App\Policies\MosquePolicy;
 use App\Policies\RegionPolicy;
+use App\Policies\SponsorPolicy;
 use App\Policies\StudentPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\UserRolePolicy;
@@ -52,7 +54,9 @@ class AuthServiceProvider extends ServiceProvider
         ApprovalRequest::class => ApprovalPolicy::class,
         CustomJuz::class => CustomJuzPolicy::class,
         DailyAchievement::class => DailyAchievementPolicy::class,
-        Certificate::class => \App\Policies\CertificatePlicy::class,];
+        Certificate::class => \App\Policies\CertificatePlicy::class,
+        Sponsor::class => SponsorPolicy::class,
+    ];
 
     /**
      * Register any authentication / authorization services.

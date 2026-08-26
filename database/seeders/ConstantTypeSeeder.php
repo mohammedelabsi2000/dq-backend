@@ -177,6 +177,18 @@ class ConstantTypeSeeder extends Seeder
                 ]
             ],
             [
+                'name' => 'sponsor_student_type',
+                'description' => 'أنواع الطلاب المطلوبين للكفالة',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'عام', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أيتام', 'notes' => null, 'is_active' => true],
+                    ['name' => 'نجباء', 'notes' => null, 'is_active' => true],
+                    ['name' => 'ذوي الهمم', 'notes' => null, 'is_active' => true],
+                    ['name' => 'أخرى', 'notes' => null, 'is_active' => true],
+                ]
+            ],
+            [
                 'name' => 'subject_type',
                 'description' => 'أنواع المساقات',
                 'notes' => '',

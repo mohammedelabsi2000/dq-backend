@@ -9,6 +9,7 @@ enum ImageType: string implements HasLabelAndCode
     case Profile = 'profile';
     case Cover = 'cover';
     case Gallery = 'gallery';
+    case Document = 'document';
 
     public function code(): string
     {
@@ -21,6 +22,7 @@ enum ImageType: string implements HasLabelAndCode
             self::Profile => ['en' => 'Profile', 'ar' => 'صورة شخصية'],
             self::Cover => ['en' => 'Cover', 'ar' => 'غلاف'],
             self::Gallery => ['en' => 'Gallery', 'ar' => 'معرض'],
+            self::Document => ['en' => 'Document', 'ar' => 'مستند'],
         };
     }
 

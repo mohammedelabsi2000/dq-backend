@@ -12,12 +12,14 @@ use App\Http\Controllers\Api\{
     ConstantTypeController,
     DailyAchievementController,
     HalaqaController,
+    HalaqaSponsorshipController,
     HalaqaStatusController,
     HalaqaStudentController,
     IdQueryController,
     ImageController,
     MosqueController,
     RegionController,
+    SponsorController,
     StudentController,
     StatisticsController
 };
@@ -59,6 +61,18 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     Route::post('centers/{center}/restore', [CenterController::class, 'restore']);
     Route::apiResource('halaqas', HalaqaController::class);
     Route::post('halaqas/{halaqa}/restore', [HalaqaController::class, 'restore']);
+
+    // Sponsors (الكفلاء) management
+    Route::apiResource('sponsors', SponsorController::class);
+    Route::get('sponsors/{sponsor}/halaqas', [SponsorController::class, 'halaqas']);
+
+    // Halaqa <-> Sponsor linking ("إضافة كفالة للحلقة" / "إدارة كفالات الحلقة")
+    Route::prefix('halaqas/{halaqa}/sponsorships')->group(function () {
+        Route::get('/', [HalaqaSponsorshipController::class, 'index']);
+        Route::get('eligible-sponsors', [HalaqaSponsorshipController::class, 'eligibleSponsors']);
+        Route::post('/', [HalaqaSponsorshipController::class, 'store']);
+        Route::post('{halaqaSponsorship}/stop', [HalaqaSponsorshipController::class, 'stop']);
+    });
 
 
 
