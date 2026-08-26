@@ -47,14 +47,15 @@ class Plan extends Model
 
     protected static function booted()
     {
-        static::saved(function (Plan $plan) {
-            if ($plan->type === PlanType::Main && $plan->is_active) {
-                static::where('type', PlanType::Main->value)
-                    ->where('id', '!=', $plan->id)
-                    ->where('is_active', true)
-                    ->update(['is_active' => false]);
-            }
-        });
+        // تم إزالة التقييد الذي يمنع وجود أكثر من خطة رئيسية نشطة
+        // static::saved(function (Plan $plan) {
+        //     if ($plan->type === PlanType::Main && $plan->is_active) {
+        //         static::where('type', PlanType::Main->value)
+        //             ->where('id', '!=', $plan->id)
+        //             ->where('is_active', true)
+        //             ->update(['is_active' => false]);
+        //     }
+        // });
     }
 
     // ========================
@@ -99,5 +100,23 @@ class Plan extends Model
                 $query->whereDate('to_date', '>=', now())
                     ->orWhereNull('to_date');
             });
+    }
+
+    /**
+     * البحث عن خطة رئيسية مناسبة بناءً على عمر الطالب
+     */
+    public static function findSuitableMainPlan(int $age): ?Plan
+    {
+        return static::where('type', PlanType::Main->value)
+            ->where('is_active', true)
+            ->where(function ($query) use ($age) {
+                $query->whereNull('age_from')
+                    ->orWhere('age_from', '<=', $age);
+            })
+            ->where(function ($query) use ($age) {
+                $query->whereNull('age_to')
+                    ->orWhere('age_to', '>=', $age);
+            })
+            ->first();
     }
 }

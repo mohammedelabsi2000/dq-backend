@@ -258,8 +258,8 @@ class PlanController extends Controller
         $startingLevelId = $validated['starting_level_id']
             ?? Level::where('plan_id', $plan->id)->orderBy('order')->first()?->id;
 
-        // is_main تُستنتج تلقائياً: تكون رئيسية فقط إذا كانت هذه هي الخطة الرئيسية الفعالة الوحيدة
-        $isMain = $plan->isActiveMain();
+        // is_main تُستنتج تلقائياً: تكون رئيسية إذا كانت الخطة من نوع رئيسية ونشطة
+        $isMain = $plan->type === PlanType::Main && $plan->is_active;
 
         $studentsIds = $validated['student_ids'];
 
@@ -284,6 +284,7 @@ class PlanController extends Controller
                 // كل طالب يجب أن يكون له خطة رئيسية واحدة على الأقل
                 $data['is_main'] = true;
             } elseif ($isMain) {
+                // إذا كانت الخطة رئيسية ونشطة، ألغِ الرئيسية عن الخطط النشطة الأخرى للطالب
                 $plans_ids = $student->plans()->wherePivotNull('to_date')->pluck('plans.id')->toArray();
                 $updateData = array_fill_keys($plans_ids, ['is_main' => 0]);
                 $student->plans()->syncWithoutDetaching($updateData);

@@ -30,6 +30,10 @@ class UserController extends Controller
 
         $query = User::query()->where('is_approved', true)->visibleTo(auth()->user());
 
+        if(auth()->user()->hasPermissionTo('users.restore')) {
+            $query = $query->withTrashed();
+        }
+
         if (!$authUser->hasRole(self::SUPER_ADMIN_ROLE)) {
             $query->whereDoesntHave('roles', fn($q) => $q->where('name', self::SUPER_ADMIN_ROLE));
         }
@@ -238,6 +242,18 @@ class UserController extends Controller
         return $this->success(
             null,
             'تم حذف المسخدم بنجاح'
+        );
+    }
+
+    public function restore(User $user)
+    {
+        $this->authorize('restore', $user);
+
+        $user->restore();
+
+        return $this->success(
+            new UserResource($user),
+            'تم استعادة المستخدم بنجاح'
         );
     }
 

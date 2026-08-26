@@ -24,6 +24,10 @@ class LevelController extends Controller
 
         $query = Level::query();
 
+        if (auth()->user()->hasPermissionTo('levels.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -253,6 +257,17 @@ class LevelController extends Controller
         return $this->success(
             null,
             'تم حذف المستوى بنجاح'
+        );
+    }
+
+    public function restore(Level $level)
+    {
+        $this->authorize('restore', $level);
+        $level->restore();
+
+        return $this->success(
+            new LevelResource($level),
+            'تم استعادة المستوى بنجاح'
         );
     }
 

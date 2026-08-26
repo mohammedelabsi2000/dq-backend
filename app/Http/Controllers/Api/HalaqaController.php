@@ -30,6 +30,10 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user())->where('is_approved', true);
 
+        if (auth()->user()->hasPermissionTo('halaqas.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $query = (new HalaqaFilter($query, $request))->apply();
 
         // Filter by specific center
@@ -236,17 +240,12 @@ class HalaqaController extends Controller
     }
 
     /**
-     * تنسيب معلم لحلقة، مع ضمان أن المعلم لا يبقى منسّباً لأي حلقة أخرى
-     * (معلم واحد = حلقة واحدة).
+     * تنسيب معلم لحلقة (معلم واحد = حلقة واحدة).
+     * التحقق من عدم وجود تنسيب فعّال آخر لنفس المعلم يتم مسبقاً في HalaqaRequest،
+     * فلا يصل الطلب إلى هنا إلا إذا كان المعلم متاحاً للتنسيب.
      */
     private function assignTeacherToHalaqa(User $teacher, Halaqa $halaqa): void
     {
-        UserScope::where('scope_type', 'halaqa')
-            ->where('user_id', $teacher->id)
-            ->where('scope_id', '!=', $halaqa->id)
-            ->whereNull('to_date')
-            ->update(['to_date' => now()]);
-
         $teacher->assignScope('halaqa', $halaqa->id);
     }
 
@@ -271,6 +270,23 @@ class HalaqaController extends Controller
         return $this->success(
             null,
             'تم حذف الحلقة بنجاح'
+        );
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  Halaqa  $halaqa
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function restore(Halaqa $halaqa)
+    {
+        $this->authorize('restore', $halaqa);
+        $halaqa->restore();
+
+        return $this->success(
+            new HalaqaResource($halaqa),
+            'تم استعادة الحلقة بنجاح'
         );
     }
 

@@ -59,8 +59,8 @@ class StudentPlanController extends Controller
 
         $plan = Plan::findOrFail($validated['plan_id']);
 
-        // is_main تُستنتج تلقائياً: تكون رئيسية فقط إذا كانت هذه هي الخطة الرئيسية الفعالة الوحيدة
-        $isMain = $plan->isActiveMain();
+        // is_main تُستنتج تلقائياً: تكون رئيسية إذا كانت الخطة من نوع رئيسية ونشطة
+        $isMain = $plan->type === \App\Enums\PlanType::Main && $plan->is_active;
         $studentPlans = collect();
 
         foreach ($validated['student_ids'] as $studentId) {
@@ -86,13 +86,6 @@ class StudentPlanController extends Controller
             if ($shouldBeMain) {
                 $studentPlan->setAsMain();
             }
-
-            // فتح أول سجل في history
-            $studentPlan->levelHistory()->create([
-                'level_id'  => $startingLevelId,
-                'from_date' => $validated['from_date'],
-                'to_date'   => null,
-            ]);
 
             $studentPlans->push($studentPlan);
         }
@@ -134,7 +127,6 @@ class StudentPlanController extends Controller
             'plan',
             'startingLevel',
             'currentLevel',
-            'levelHistory.level',
         ]);
 
         return $this->success(
@@ -158,7 +150,7 @@ class StudentPlanController extends Controller
         // تحديث البيانات
         $plan_student->update($validated);
 
-        $plan_student->load(['student', 'plan', 'currentLevel', 'startingLevel', 'levelHistory.level']);
+        $plan_student->load(['student', 'plan', 'currentLevel', 'startingLevel']);
 
         return $this->success(
             new StudentPlanResource($plan_student),
@@ -181,7 +173,7 @@ class StudentPlanController extends Controller
             $request->validated('notes')
         );
 
-        $studentPlan->load(['currentLevel', 'levelHistory.level']);
+        $studentPlan->load(['currentLevel']);
 
         return $this->success(
             new StudentPlanResource($studentPlan),
@@ -218,7 +210,7 @@ class StudentPlanController extends Controller
     public function studentHistory(int $studentId)
     {
         $studentPlans = StudentPlan::byStudent($studentId)
-            ->with(['plan', 'startingLevel', 'currentLevel', 'levelHistory.level'])
+            ->with(['plan', 'startingLevel', 'currentLevel'])
             ->orderByDesc('from_date')
             ->get();
 

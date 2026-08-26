@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Helpers\ConstantHelper;
 use App\Models\HalaqaStudent;
+use App\Models\Level;
+use App\Models\Plan;
 use App\Models\PreviousAchievement;
 use App\Models\Student;
+use App\Models\StudentPlan;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -47,6 +50,9 @@ class StudentService
             if ($halaqaId) {
                 $this->assignStudentToHalaqa($student, $halaqaId);
             }
+
+            // Auto-assign student to suitable main plan based on age
+            $this->autoAssignToMainPlan($student);
 
             if ($requester) {
                 $student->submitForApproval($requester);
@@ -168,5 +174,45 @@ class StudentService
         if ($halaqaId) {
             $this->assignStudentToHalaqa($student, $halaqaId);
         }
+    }
+
+    /**
+     * التنسيب التلقائي للطالب إلى خطة رئيسية مناسبة بناءً على العمر
+     */
+    private function autoAssignToMainPlan(Student $student): void
+    {
+        // حساب عمر الطالب
+        if (!$student->dob) {
+            return;
+        }
+
+        $age = $student->dob->age;
+
+        // البحث عن خطة رئيسية مناسبة بناءً على العمر
+        $plan = Plan::findSuitableMainPlan($age);
+
+        if (!$plan) {
+            return;
+        }
+
+        // الحصول على أول مستوى في الخطة
+        $startingLevel = Level::where('plan_id', $plan->id)
+            ->orderBy('order')
+            ->first();
+
+        if (!$startingLevel) {
+            return;
+        }
+
+        // إنشاء سجل التحاق الطالب بالخطة
+        StudentPlan::create([
+            'student_id' => $student->id,
+            'plan_id' => $plan->id,
+            'starting_level_id' => $startingLevel->id,
+            'current_level_id' => $startingLevel->id,
+            'from_date' => now()->toDateString(),
+            'is_main' => true,
+            'status' => 'active',
+        ]);
     }
 }

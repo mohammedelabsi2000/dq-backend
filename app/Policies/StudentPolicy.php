@@ -38,6 +38,12 @@ class StudentPolicy
             && $this->isVisible($user, $student);
     }
 
+    public function restore(User $user, Student $student): bool
+    {
+        return $user->hasPermissionTo('students.restore')
+            && $this->isVisible($user, $student);
+    }
+
     private function isVisible(User $user, Student $student): bool
     {
         return Student::visibleTo($user)->where('id', $student->id)->exists();
