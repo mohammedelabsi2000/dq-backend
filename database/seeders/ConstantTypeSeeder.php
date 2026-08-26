@@ -185,7 +185,6 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'أيتام', 'notes' => null, 'is_active' => true],
                     ['name' => 'نجباء', 'notes' => null, 'is_active' => true],
                     ['name' => 'ذوي الهمم', 'notes' => null, 'is_active' => true],
-                    ['name' => 'أخرى', 'notes' => null, 'is_active' => true],
                 ]
             ],
             [
