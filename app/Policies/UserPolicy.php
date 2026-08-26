@@ -36,6 +36,13 @@ class UserPolicy
         return $user->hasPermissionTo('users.delete')
             && $this->isVisible($user, $target);
     }
+
+    public function restore(User $user, User $target): bool
+    {
+        return $user->hasPermissionTo('users.restore')
+            && $this->isVisible($user, $target);
+    }
+
     public function toggleActive(User $user, User $target): bool
     {
         return $user->hasPermissionTo('users.toggle_active')

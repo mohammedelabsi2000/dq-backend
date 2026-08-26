@@ -4,14 +4,12 @@ use App\Http\Middleware\SetCurrentUserContext;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\{
     ApprovalController,
-    ApprovalController as ApiApprovalController,
     AreaController,
     BranchController,
     CenterController,
     CertificateController,
     ConstantController,
     ConstantTypeController,
-    CourseController,
     DailyAchievementController,
     HalaqaController,
     HalaqaSponsorshipController,
@@ -20,16 +18,11 @@ use App\Http\Controllers\Api\{
     IdQueryController,
     ImageController,
     MosqueController,
-    PlanAssignmentController,
-    PlanController,
-    PlanStudentController,
     RegionController,
     SponsorController,
     StudentController,
-    TrackController,
     StatisticsController
 };
-use App\Models\User;
 
 // Load all API route files from the api directory
 foreach (glob(__DIR__ . '/api/*.php') as $file) {
@@ -43,12 +36,12 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // ── الاعتمادات ──────────────────────────────────────
     Route::prefix('approvals')->group(function () {
-        Route::get('/',                         [ApprovalController::class, 'index']);
-        Route::post('bulk-approve',              [ApprovalController::class, 'bulkApprove']);
-        Route::post('bulk-reject',               [ApprovalController::class, 'bulkReject']);
-        Route::post('{approvalRequest}/approve',       [ApprovalController::class, 'approve']);
-        Route::post('{approvalRequest}/reject',        [ApprovalController::class, 'reject']);
-        Route::post('{approvalRequest}/resubmit',      [ApprovalController::class, 'resubmit']);
+        Route::get('/', [ApprovalController::class, 'index']);
+        Route::post('bulk-approve', [ApprovalController::class, 'bulkApprove']);
+        Route::post('bulk-reject', [ApprovalController::class, 'bulkReject']);
+        Route::post('{approvalRequest}/approve', [ApprovalController::class, 'approve']);
+        Route::post('{approvalRequest}/reject', [ApprovalController::class, 'reject']);
+        Route::post('{approvalRequest}/resubmit', [ApprovalController::class, 'resubmit']);
     });
 
     // External areas (branches/regions) fetched from the AFP API
@@ -59,10 +52,15 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
     Route::apiResource('branches', BranchController::class);
+    Route::post('branches/{branch}/restore', [BranchController::class, 'restore']);
     Route::apiResource('regions', RegionController::class);
+    Route::post('regions/{region}/restore', [RegionController::class, 'restore']);
     Route::apiResource('mosques', MosqueController::class);
+    Route::post('mosques/{mosque}/restore', [MosqueController::class, 'restore']);
     Route::apiResource('centers', CenterController::class);
+    Route::post('centers/{center}/restore', [CenterController::class, 'restore']);
     Route::apiResource('halaqas', HalaqaController::class);
+    Route::post('halaqas/{halaqa}/restore', [HalaqaController::class, 'restore']);
 
     // Sponsors (الكفلاء) management
     Route::apiResource('sponsors', SponsorController::class);
@@ -84,6 +82,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::post('import', [StudentController::class, 'import']);
         Route::post('import-with-relations', [StudentController::class, 'importWithRelations']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
+        Route::post('{student}/restore', [StudentController::class, 'restore']);
     });
 
     // Halaqa students assignment

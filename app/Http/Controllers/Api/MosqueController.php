@@ -24,6 +24,10 @@ class MosqueController extends Controller
 
         $query = Mosque::query()->visibleTo(auth()->user());
 
+        if (auth()->user()->hasPermissionTo('mosques.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -215,6 +219,22 @@ class MosqueController extends Controller
         return $this->success(
             null,
             'تم حذف المسجد بنجاح'
+        );
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  Mosque  $mosque
+     */
+    public function restore(Mosque $mosque)
+    {
+        $this->authorize('restore', $mosque);
+        $mosque->restore();
+
+        return $this->success(
+            new MosqueResource($mosque),
+            'تم استعادة المسجد بنجاح'
         );
     }
 }

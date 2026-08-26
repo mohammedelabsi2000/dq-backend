@@ -22,6 +22,10 @@ class RegionController extends Controller
         $this->authorize('viewAny', Region::class);
         $query = Region::query()->visibleTo(auth()->user());
 
+        if (auth()->user()->hasPermissionTo('regions.restore')) {
+            $query = $query->withTrashed();
+        }
+
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
             'orderColumn' => 'created_at',
@@ -134,6 +138,23 @@ class RegionController extends Controller
         return $this->success(
             null,
             'تم حذف المنطقة بنجاح'
+        );
+    }
+
+    /**
+     * Restore the specified resource from storage.
+     *
+     * @param  Region  $region
+     */
+
+    public function restore(Region $region)
+    {
+        $this->authorize('restore', $region);
+        $region->restore();
+
+        return $this->success(
+            new RegionResource($region),
+            'تم استعادة المنطقة بنجاح'
         );
     }
 }

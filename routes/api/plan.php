@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('plan'
     // 2. مسارات الـ Levels (تأكد من وضع reorder قبل الـ resource)
     Route::post('levels/reorder', [LevelController::class, 'reorder']);
     Route::apiResource('levels', LevelController::class);
+    Route::post('levels/{level}/restore', [LevelController::class, 'restore'])->name('levels.restore');
 
     // 3. المسارات المخصصة والتصحيحية
     Route::post('plans/{plan}/toggle-active', [PlanController::class, 'toggleActive'])->name('plans.toggleActive');

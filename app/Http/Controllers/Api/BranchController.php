@@ -18,6 +18,9 @@ class BranchController extends Controller
 
         $query = Branch::query()->visibleTo(auth()->user());
 
+        if (auth()->user()->hasPermissionTo('branches.restore')) {
+            $query = $query->withTrashed();
+        }
 
         $q = $this->applyFilters($query, [
             'searchColumns' => ['name'],
@@ -121,6 +124,17 @@ class BranchController extends Controller
         return $this->success(
             null,
             'تم حذف الفرع بنجاح'
+        );
+    }
+
+    public function restore(Branch $branch)
+    {
+        $this->authorize('restore', $branch);
+        $branch->restore();
+
+        return $this->success(
+            new BranchResource($branch),
+            'تم استعادة الفرع بنجاح'
         );
     }
 }
