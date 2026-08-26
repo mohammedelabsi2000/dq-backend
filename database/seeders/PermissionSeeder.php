@@ -35,6 +35,7 @@ class PermissionSeeder extends Seeder
             ['name' => 'mosques.create', 'title' => 'إضافة مسجد'],
             ['name' => 'mosques.update', 'title' => 'تعديل مسجد'],
             ['name' => 'mosques.delete', 'title' => 'حذف مسجد'],
+            ['name' => 'mosques.restore', 'title' => 'استعادة مسجد'],
             ['name' => 'sponsors.show', 'title' => 'عرض الكفلاء'],
             ['name' => 'sponsors.create', 'title' => 'إضافة كفيل'],
             ['name' => 'sponsors.update', 'title' => 'تعديل كفيل'],
