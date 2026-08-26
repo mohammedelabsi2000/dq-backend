@@ -19,6 +19,7 @@ class HalaqaSponsorshipResource extends JsonResource
             'halaqa_id' => $this->halaqa_id,
             'sponsor_id' => $this->sponsor_id,
             'sponsor' => new SponsorResource($this->whenLoaded('sponsor')),
+            'halaqa' => new HalaqaResource($this->whenLoaded('halaqa')),
             'from_date' => $this->from_date,
             'to_date' => $this->to_date,
             'is_active' => is_null($this->to_date),

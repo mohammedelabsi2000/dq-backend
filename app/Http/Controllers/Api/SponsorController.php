@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sponsor\StoreSponsorRequest;
 use App\Http\Requests\Sponsor\UpdateSponsorRequest;
+use App\Http\Resources\HalaqaSponsorshipResource;
 use App\Http\Resources\SponsorResource;
 use App\Models\Sponsor;
 use Illuminate\Http\Request;
@@ -73,6 +74,33 @@ class SponsorController extends Controller
         return $this->success(
             new SponsorResource($sponsor),
             'بيانات الكفيل'
+        );
+    }
+
+    /**
+     * الحلقات التي يكفلها هذا الكافل (الفعّالة افتراضياً، أو كل السجل عبر with_history=1).
+     *
+     * @param  Request  $request
+     * @param  Sponsor  $sponsor
+     */
+    public function halaqas(Request $request, Sponsor $sponsor)
+    {
+        $this->authorize('view', $sponsor);
+
+        $query = $sponsor->halaqaSponsorships();
+
+        if (!$request->boolean('with_history')) {
+            $query->whereNull('to_date');
+        }
+
+        $sponsorships = $query
+            ->with(['halaqa.type', 'halaqa.reference'])
+            ->orderByDesc('from_date')
+            ->get();
+
+        return $this->success(
+            HalaqaSponsorshipResource::collection($sponsorships),
+            'الحلقات المكفولة'
         );
     }
 

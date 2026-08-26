@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // Sponsors (الكفلاء) management
     Route::apiResource('sponsors', SponsorController::class);
+    Route::get('sponsors/{sponsor}/halaqas', [SponsorController::class, 'halaqas']);
 
     // Halaqa <-> Sponsor linking ("إضافة كفالة للحلقة" / "إدارة كفالات الحلقة")
     Route::prefix('halaqas/{halaqa}/sponsorships')->group(function () {
