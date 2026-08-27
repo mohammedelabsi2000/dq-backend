@@ -28,8 +28,15 @@ class StopHalaqaSponsorshipRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'to_date' => 'nullable|date',
+            'to_date' => 'nullable|date|before_or_equal:today',
             'stop_reason' => 'nullable|string|max:255',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'to_date.before_or_equal' => 'تاريخ الإيقاف لا يمكن أن يكون في المستقبل.',
         ];
     }
 
