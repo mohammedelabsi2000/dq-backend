@@ -94,7 +94,7 @@ class SponsorController extends Controller
         }
 
         $sponsorships = $query
-            ->with(['halaqa.type', 'halaqa.reference'])
+            ->with(['sponsor.studentType', 'halaqa'])
             ->orderByDesc('from_date')
             ->get();
 

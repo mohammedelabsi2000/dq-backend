@@ -22,13 +22,22 @@ class HalaqaSponsorshipController extends Controller
     {
         $this->authorize('update', $halaqa);
 
-        $sponsorships = $halaqa->sponsorships()
-            ->with('sponsor')
-            ->orderByDesc('from_date')
-            ->get();
+        $query = $halaqa->sponsorships();
 
-        return $this->success(
+        $q = $this->applyFilters($query, [
+            'orderColumn' => 'from_date',
+            'orderBy' => 'desc',
+            'limit' => '*',
+        ]);
+
+        $query = $q['query'];
+        $total = $q['count'];
+
+        $sponsorships = $query->with(['sponsor.studentType', 'halaqa'])->get();
+
+        return $this->successWithPagination(
             HalaqaSponsorshipResource::collection($sponsorships),
+            ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],
             'كفالات الحلقة'
         );
     }
@@ -94,7 +103,7 @@ class HalaqaSponsorshipController extends Controller
         });
 
         return $this->success(
-            new HalaqaSponsorshipResource($sponsorship->load('sponsor')),
+            new HalaqaSponsorshipResource($sponsorship->load(['sponsor.studentType', 'halaqa'])),
             'تمت إضافة الكفالة للحلقة بنجاح',
             201
         );
@@ -126,7 +135,7 @@ class HalaqaSponsorshipController extends Controller
         });
 
         return $this->success(
-            new HalaqaSponsorshipResource($halaqaSponsorship->load('sponsor')),
+            new HalaqaSponsorshipResource($halaqaSponsorship->load(['sponsor.studentType', 'halaqa'])),
             'تم إيقاف الكفالة بنجاح'
         );
     }
