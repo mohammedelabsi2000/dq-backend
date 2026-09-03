@@ -202,6 +202,18 @@ class ConstantTypeSeeder extends Seeder
                     ['name' => 'قيمي / تربوي', 'const_key' => 'evaluation', 'is_active' => true, 'is_system' => true],
                 ]
             ],
+            [
+                'name' => 'result_status',
+                'description' => 'حالات اجتياز الطالب للمساق',
+                'notes' => '',
+                'constants' => [
+                    ['name' => 'ناجح', 'const_key' => 'passed', 'notes' => null, 'is_active' => true],
+                    ['name' => 'راسب', 'const_key' => 'failed', 'notes' => null, 'is_active' => true],
+                    ['name' => 'منسحب', 'const_key' => 'withdraw', 'notes' => null, 'is_active' => true],
+                    ['name' => 'قيد الدراسة', 'const_key' => 'in_progress', 'notes' => null, 'is_active' => true],
+                    ['name' => 'مؤجل', 'const_key' => 'frozen', 'notes' => null, 'is_active' => true],
+                ]
+            ],
         ];
 
         foreach ($constantTypes as $typeData) {
