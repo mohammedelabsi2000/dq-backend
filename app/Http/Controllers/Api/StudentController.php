@@ -38,7 +38,7 @@ class StudentController extends Controller
         $this->authorize('viewAny', Student::class);
         $query = Student::query()->visibleTo(auth()->user())->where('is_approved', true);
         
-        if (auth()->user()->hasPermissionTo('students.restore')) {
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('students.restore')) {
             $query = $query->withTrashed();
         }
 

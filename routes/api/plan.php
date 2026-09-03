@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\LevelController;
 use App\Http\Controllers\Api\LevelTrackSubjectController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\StudentPlanController;
+use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\TrackController;
 use App\Http\Controllers\Api\SubjectController;
 use App\Http\Middleware\SetCurrentUserContext;
@@ -80,4 +81,5 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('plan'
 
 Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
     Route::get('standard-circles', [SubjectController::class, 'standardCircles']);
+    Route::apiResource('student-subject', StudentSubjectController::class);
 });

@@ -69,7 +69,7 @@ class HalaqaStudentsImport implements ToCollection, WithHeadingRow
         $data['halaqa_id'] = $this->halaqaId;
 
         try {
-            $this->studentService->createOrUpdateStudent($data);
+            $this->studentService->createOrUpdateStudent($data, auth()->user());
 
             $this->successCount++;
         } catch (\Throwable $e) {
