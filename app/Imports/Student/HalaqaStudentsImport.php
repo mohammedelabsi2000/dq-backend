@@ -101,7 +101,6 @@ class HalaqaStudentsImport implements ToCollection, WithHeadingRow
 
             'contact_number' => [
                 'nullable',
-                'string',
             ],
 
             'guardian_id' => [
@@ -123,8 +122,6 @@ class HalaqaStudentsImport implements ToCollection, WithHeadingRow
             'identity.required' => 'رقم هوية الطالب مطلوب.',
             'identity.numeric' => 'رقم هوية الطالب يجب أن يكون رقماً.',
             'identity.digits' => 'رقم هوية الطالب يجب أن يكون 9 أرقام.',
-
-            'contact_number.string' => 'رقم التواصل يجب أن يكون نصاً.',
 
             'guardian_id.required' => 'رقم هوية ولي الأمر مطلوب.',
             'guardian_id.numeric' => 'رقم هوية ولي الأمر يجب أن يكون رقماً.',
