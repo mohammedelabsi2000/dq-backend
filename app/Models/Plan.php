@@ -109,14 +109,11 @@ class Plan extends Model
     {
         return static::where('type', PlanType::Main->value)
             ->where('is_active', true)
-            ->where(function ($query) use ($age) {
-                $query->whereNull('age_from')
-                    ->orWhere('age_from', '<=', $age);
-            })
-            ->where(function ($query) use ($age) {
-                $query->whereNull('age_to')
-                    ->orWhere('age_to', '>=', $age);
-            })
+            ->whereNotNull('age_from')
+            ->whereNotNull('age_to')
+            ->where('age_from', '<=', $age)
+            ->where('age_to', '>=', $age)
+            ->orderBy('age_from')
             ->first();
     }
 }
