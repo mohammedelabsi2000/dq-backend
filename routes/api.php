@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\{
     ImageController,
     MosqueController,
     RegionController,
+    SponsorBranchQuotaController,
     SponsorController,
     StudentController,
     StatisticsController
@@ -65,6 +66,14 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
     // Sponsors (الكفلاء) management
     Route::apiResource('sponsors', SponsorController::class);
     Route::get('sponsors/{sponsor}/halaqas', [SponsorController::class, 'halaqas']);
+
+    // Sponsor branch quotas (توزيع حصص الكفيل على الأفرع)
+    Route::prefix('sponsors/{sponsor}/branch-quotas')->group(function () {
+        Route::get('/', [SponsorBranchQuotaController::class, 'index']);
+        Route::post('/', [SponsorBranchQuotaController::class, 'store']);
+        Route::put('{sponsorBranchQuota}', [SponsorBranchQuotaController::class, 'update']);
+        Route::delete('{sponsorBranchQuota}', [SponsorBranchQuotaController::class, 'destroy']);
+    });
 
     // Halaqa <-> Sponsor linking ("إضافة كفالة للحلقة" / "إدارة كفالات الحلقة")
     Route::prefix('halaqas/{halaqa}/sponsorships')->group(function () {
