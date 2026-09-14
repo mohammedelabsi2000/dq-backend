@@ -49,10 +49,12 @@ class HalaqaSponsorshipController extends Controller
     {
         $this->authorize('update', $halaqa);
 
+        $branchId = $halaqa->branchId();
+
         $sponsors = Sponsor::isActive()
             ->with('studentType')
             ->get()
-            ->filter(fn (Sponsor $sponsor) => $sponsor->remainingCapacityFor($halaqa->gender) > 0)
+            ->filter(fn (Sponsor $sponsor) => $sponsor->remainingCapacityForBranch($branchId, $halaqa->gender) > 0)
             ->values();
 
         return $this->success(
@@ -81,8 +83,8 @@ class HalaqaSponsorshipController extends Controller
             return $this->error('هذا الكفيل مرتبط بالفعل بهذه الحلقة', 422);
         }
 
-        if ($sponsor->remainingCapacityFor($halaqa->gender) <= 0) {
-            return $this->error('لا يوجد سعة متبقية لدى هذا الكفيل لهذا الجنس من الحلقات', 422);
+        if ($sponsor->remainingCapacityForBranch($halaqa->branchId(), $halaqa->gender) <= 0) {
+            return $this->error('لا يوجد سعة متبقية لدى هذا الكفيل لهذا الجنس من الحلقات ضمن فرع هذه الحلقة', 422);
         }
 
         $sponsorship = null;

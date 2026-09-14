@@ -34,7 +34,9 @@ class SponsorController extends Controller
         $query = $q['query'];
         $total = $q['count'];
 
-        $sponsors = $query->with('studentType')->withCount('activeHalaqaSponsorships')->get();
+        $sponsors = $query->with(['studentType', 'activeHalaqaSponsorships', 'branchQuotas'])
+            ->withCount('activeHalaqaSponsorships')
+            ->get();
 
         return $this->successWithPagination(
             SponsorResource::collection($sponsors),
@@ -69,7 +71,7 @@ class SponsorController extends Controller
     {
         $this->authorize('view', $sponsor);
 
-        $sponsor->load(['studentType', 'activeHalaqaSponsorships', 'attachments']);
+        $sponsor->load(['studentType', 'activeHalaqaSponsorships', 'branchQuotas', 'attachments']);
 
         return $this->success(
             new SponsorResource($sponsor),

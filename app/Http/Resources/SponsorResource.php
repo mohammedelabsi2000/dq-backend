@@ -39,6 +39,14 @@ class SponsorResource extends JsonResource
                 $this->relationLoaded('activeHalaqaSponsorships'),
                 fn () => $this->remainingCapacityFor('أنثى')
             ),
+            'unallocated_quota_male' => $this->when(
+                $this->relationLoaded('branchQuotas'),
+                fn () => $this->unallocatedQuotaFor('ذكر')
+            ),
+            'unallocated_quota_female' => $this->when(
+                $this->relationLoaded('branchQuotas'),
+                fn () => $this->unallocatedQuotaFor('أنثى')
+            ),
             'attachments' => ImageResource::collection($this->whenLoaded('attachments')),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

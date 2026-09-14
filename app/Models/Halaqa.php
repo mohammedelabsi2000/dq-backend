@@ -180,9 +180,51 @@ class Halaqa extends Model
         return null;
     }
 
+    /**
+     * معرّف الفرع الذي تتبع له هذه الحلقة (عبر المركز أو المنطقة المرجعية لها).
+     */
+    public function branchId(): ?int
+    {
+        $reference = $this->reference;
+
+        if (!$reference) {
+            return null;
+        }
+
+        if ($this->reference_type?->value === HalaqaReferenceType::Center->value) {
+            $reference->loadMissing('region');
+
+            return $reference->region?->branch_id;
+        }
+
+        if ($this->reference_type?->value === HalaqaReferenceType::Region->value) {
+            return $reference->branch_id;
+        }
+
+        return null;
+    }
+
     public function scopeIsActive(Builder $query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * فلترة الحلقات التابعة لفرع معيّن (عبر مناطقه ومراكزها).
+     */
+    public function scopeInBranch(Builder $query, int $branchId): Builder
+    {
+        $regionIds = Region::where('branch_id', $branchId)->pluck('id');
+        $centerIds = Center::whereIn('region_id', $regionIds)->pluck('id');
+
+        return $query->where(function (Builder $q) use ($regionIds, $centerIds) {
+            if ($regionIds->isNotEmpty()) {
+                $q->orWhere(fn ($q) => $q->where('reference_type', 'region')->whereIn('reference_id', $regionIds));
+            }
+            if ($centerIds->isNotEmpty()) {
+                $q->orWhere(fn ($q) => $q->where('reference_type', 'center')->whereIn('reference_id', $centerIds));
+            }
+        });
     }
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
