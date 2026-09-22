@@ -46,9 +46,22 @@ class Mosque extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // محفظ حلقة ← لا يرى أي مسجد
+        // محفظ حلقة ← يرى مسجد مركز حلقته فقط (إن كانت حلقته مرتبطة بمركز له مسجد، وإلا فلا شيء)
         if ($halaqaIds->isNotEmpty()) {
-            return $query->whereRaw('1 = 0');
+            $centerIdsFromHalaqa = Halaqa::whereIn('id', $halaqaIds)
+                ->select('reference_type', 'reference_id')
+                ->get()
+                ->filter(fn ($h) => $h->reference_type?->value === 'center')
+                ->pluck('reference_id')
+                ->unique();
+
+            $mosqueIds = Center::whereIn('id', $centerIdsFromHalaqa)
+                ->whereNotNull('mosque_id')
+                ->pluck('mosque_id');
+
+            return $mosqueIds->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('id', $mosqueIds);
         }
 
         // مدير مركز ← مسجد مركزه فقط
