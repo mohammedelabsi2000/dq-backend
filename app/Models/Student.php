@@ -253,6 +253,11 @@ class Student extends Model
 
 
 
+            // إذا لم توجد حلقات في المركز، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 
                 // مسجل في حلقة المركز
@@ -313,6 +318,11 @@ class Student extends Model
 
 
 
+            // إذا لم توجد حلقات في المنطقة، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 
                 if ($halaqaIds->isNotEmpty()) {
@@ -370,6 +380,11 @@ class Student extends Model
             })->pluck('id');
 
 
+
+            // إذا لم توجد حلقات في الفرع، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
 
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 
