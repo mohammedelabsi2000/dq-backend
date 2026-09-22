@@ -63,10 +63,12 @@ class Branch extends Model
                 ->get();
 
             // حلقات مرتبطة بمنطقة مباشرة
-            $fromRegion = $halaqas->where('reference_type', 'region')->pluck('reference_id');
+            // ملاحظة: reference_type محوَّل (cast) إلى enum على موديل Halaqa، فمقارنته بنص عادي
+            // عبر Collection::where تفشل دائماً (object لا يساوي string) - لذا نقارن ->value تحديداً.
+            $fromRegion = $halaqas->filter(fn ($h) => $h->reference_type?->value === 'region')->pluck('reference_id');
 
             // حلقات مرتبطة بمركز ← نصعد لمنطقته أولاً
-            $fromCenter = $halaqas->where('reference_type', 'center')->pluck('reference_id');
+            $fromCenter = $halaqas->filter(fn ($h) => $h->reference_type?->value === 'center')->pluck('reference_id');
 
             if ($fromRegion->isNotEmpty()) {
                 $branchIds = $branchIds->merge(
