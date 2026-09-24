@@ -12,9 +12,7 @@ Route::post('auth/access-tokens', [AccessTokensController::class, 'store'])
 
 // Authenticated routes
 Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(function () {
-    Route::get('/user', function (Request $request) {
-        return Auth::guard('sanctum')->user();
-    });
+    Route::get('/user', [AccessTokensController::class, 'user']);
 
     Route::post('change-password', [AccessTokensController::class, 'updatePassword']);
     Route::delete('auth/access-tokens/{token?}', [AccessTokensController::class, 'destroy']);

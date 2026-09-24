@@ -161,4 +161,16 @@ class AccessTokensController extends Controller
             return $this->success(null, "تم تغيير كلمة المرور بنجاح!", 200);
         }
     }
+
+    public function user(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        return $this->success([
+            'user'        => new UserResource($user),
+            'roles'       => $user->getRoleNames(),
+            'permissions' => $user->getAllPermissions()->pluck('name')->values(),
+            'scopes'      => $user->activeScopes,
+        ], 'بيانات المستخدم', 200);
+    }
 }
