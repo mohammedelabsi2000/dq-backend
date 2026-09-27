@@ -41,4 +41,9 @@ class StudentSubject extends Model
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
+
+    public function studentLevel()
+    {
+        return $this->belongsTo(StudentLevel::class);
+    }
 }
