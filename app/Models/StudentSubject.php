@@ -12,6 +12,12 @@ class StudentSubject extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'from_date' => 'date',
+        'to_date' => 'date',
+        'grade_date' => 'date',
+    ];
+
     public function student()
     {
         return $this->belongsTo(Student::class);
@@ -29,7 +35,7 @@ class StudentSubject extends Model
 
     public function plan()
     {
-        return null;
+        return $this->hasOneThrough(Plan::class, Level::class, 'id', 'id', 'level_id', 'plan_id');
     }
 
     public function resultStatus()

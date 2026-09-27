@@ -90,8 +90,14 @@ class StudentPlanController extends Controller
                         $query->where('plan_id', $plan->id);
                     });
                     // }
-        
-                    $query->with('level');
+
+                    $query->with([
+                        'level',
+                        'level.subjects',
+                        'studentSubjects' => function ($query) {
+                            $query->with(['subject', 'resultStatus', 'teacher']);
+                        }
+                    ]);
                 },
             ]
         );

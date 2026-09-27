@@ -77,13 +77,21 @@ class Level extends Model
         return $this->hasMany(StudentSubject::class);
     }
 
+    // public function subjects()
+    // {
+    //     return $this->belongsToMany(
+    //         Subject::class,
+    //         'level_track_subjects',
+    //         'level_track_id',
+    //         'subject_id'
+    //     );
+    // }
     public function subjects()
     {
-        return $this->belongsToMany(
-            Subject::class,
-            'level_track_subjects',
-            'level_track_id',
-            'subject_id'
-        );
+        $levelTrackIds = $this->levelTracks()->pluck('id');
+
+        return Subject::whereHas('levelTracks', function ($q) use ($levelTrackIds) {
+            $q->whereIn('level_tracks.id', $levelTrackIds);
+        });
     }
 }
