@@ -47,7 +47,7 @@ class LevelTrack extends Model
     public function subjects(): BelongsToMany
     {
         return $this->belongsToMany(Subject::class, 'level_track_subjects')
-            ->withPivot('is_required')
+            ->withPivot('is_required', 'order', 'weight')
             ->withTimestamps();
     }
 }
