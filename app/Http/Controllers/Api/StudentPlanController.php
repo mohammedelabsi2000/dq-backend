@@ -8,6 +8,7 @@ use App\Http\Resources\PlanResource;
 use App\Http\Resources\StudentPlanDetailsResource;
 use App\Http\Resources\StudentPlanResource;
 use App\Http\Resources\StudentPlansResource;
+use App\Models\Level;
 use App\Models\Plan;
 use App\Models\PlanAssignment;
 use App\Models\Student;
@@ -71,42 +72,64 @@ class StudentPlanController extends Controller
     public function planLevels(Student $student, Plan $plan)
     {
         $this->authorize('view', $student);
-
-        $student = $student->load(
-            [
-                'studentPlans' => function ($query) use ($plan) {
-                    // if ($plan) {
-                    $query->where('plan_id', $plan->id);
-                    // }
-                    $query->with([
-                        // 'plan',
-                        'currentLevel',
-                    ]);
-                },
-
-                'studentLevels' => function ($query) use ($plan) {
-                    // if ($plan) {
-                    $query->whereHas('level', function ($query) use ($plan) {
-                        $query->where('plan_id', $plan->id);
-                    });
-                    // }
-
-                    $query->with([
-                        'level',
-                        'level.subjects',
-                        'studentSubjects' => function ($query) {
-                            $query->with(['subject', 'resultStatus', 'teacher']);
-                        }
-                    ]);
-                },
-            ]
-        );
+        $currentLevel = Level::where('id', StudentPlan::where('student_id', $student->id)
+            ->where('plan_id', $plan->id)
+            ->value('current_level_id'))
+            ->firstOrFail();
+        $levels_ids = $plan->levels()->pluck('id')->toArray();
+        $studentLevelsPivots = $student->levels()
+            ->whereIn('student_levels.id', $levels_ids)->get()->keyBy('id')->map(function ($studentLevel) {
+                return $studentLevel->pivot;
+                // return [
+                //     'id' => $studentLevel->id,
+                //     'from_date' => $studentLevel->from_date,
+                //     'to_date' => $studentLevel->to_date,
+                //     'status' => $studentLevel->status,
+                //     'notes' => $studentLevel->notes,
+                // ];
+            });
 
         return $this->success(
-            new StudentPlanDetailsResource($student),
+            new StudentPlanDetailsResource($plan, $currentLevel, $studentLevelsPivots),
             'تم جلب مستويات الطالب في الخطة بنجاح',
             200
         );
+
+        // $student = $student->load(
+        //     [
+        //         'studentPlans' => function ($query) use ($plan) {
+        //             // if ($plan) {
+        //             $query->where('plan_id', $plan->id);
+        //             // }
+        //             $query->with([
+        //                 // 'plan',
+        //                 'currentLevel',
+        //             ]);
+        //         },
+
+        //         'studentLevels' => function ($query) use ($plan) {
+        //             // if ($plan) {
+        //             $query->whereHas('level', function ($query) use ($plan) {
+        //                 $query->where('plan_id', $plan->id);
+        //             });
+        //             // }
+
+        //             $query->with([
+        //                 'level',
+        //                 'level.subjects',
+        //                 'studentSubjects' => function ($query) {
+        //                     $query->with(['subject', 'resultStatus', 'teacher']);
+        //                 }
+        //             ]);
+        //         },
+        //     ]
+        // );
+
+        // return $this->success(
+        //     new StudentPlanDetailsResource($student),
+        //     'تم جلب مستويات الطالب في الخطة بنجاح',
+        //     200
+        // );
     }
 
     public function unrelatedPlans(Student $student)
