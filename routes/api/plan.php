@@ -4,7 +4,7 @@ use App\Http\Controllers\Api\LevelController;
 use App\Http\Controllers\Api\LevelTrackSubjectController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PlanStudentController;
-use App\Http\Controllers\api\StudentLevelController;
+use App\Http\Controllers\Api\StudentLevelController;
 use App\Http\Controllers\Api\StudentPlanController;
 use App\Http\Controllers\Api\StudentSubjectController;
 use App\Http\Controllers\Api\TrackController;
