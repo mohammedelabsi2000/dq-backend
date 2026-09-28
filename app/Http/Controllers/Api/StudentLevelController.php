@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\api;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LevelResource;
-use App\Http\Resources\PlanResource;
 use App\Models\Level;
 use App\Models\Plan;
 use App\Models\Student;
