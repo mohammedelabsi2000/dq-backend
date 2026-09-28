@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
+use App\Models\Constant;
 
 return new class extends Migration {
     /**
@@ -19,8 +19,7 @@ return new class extends Migration {
             $table->foreignId('subject_id')->constrained('subjects');
             $table->foreignId('level_id')->nullable()->constrained('levels');
             $table->foreignId('result_status_id')->nullable()->constrained('constants')->default(
-                DB::table('constants')
-                    ->where('const_key', 'in_progress')
+                Constant::where('const_key', 'in_progress')
                     ->whereHas('constantType', fn($q) => $q->where('name', 'result_status'))
                     ->value('id')
             );
