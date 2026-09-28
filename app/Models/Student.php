@@ -184,8 +184,50 @@ class Student extends Model
 
     public function plans()
     {
+        // return $this->hasMany(StudentPlan::class);
         return $this->belongsToMany(Plan::class, 'student_plans')
             ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
+    }
+
+    public function studentPlans()
+    {
+        return $this->hasMany(StudentPlan::class);
+    }
+
+    public function levels()
+    {
+        /**
+         * plans
+         */
+        return $this->belongsToMany(Level::class, StudentLevel::class, 'student_id', 'level_id')
+            ->withPivot(['from_date', 'to_date', 'notes']);
+    }
+
+    public function studentLevels()
+    {
+        return $this->hasMany(StudentLevel::class);
+    }
+
+    public function unrelatedPlans()
+    {
+        return Plan::whereDoesntHave('studentPlans', function ($query) {
+            $query->where('student_id', $this->id);
+        });
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(
+            Subject::class,
+            StudentSubject::class,
+            'student_id',
+            'subject_id'
+        )->withPivot(['level_id', 'result_status_id', 'grade', 'from_date', 'to_date','grade_date', 'teacher_id', 'notes']);
+    }
+
+    public function studentSubjects()
+    {
+        return $this->hasMany(StudentSubject::class);
     }
 
     public function startingLevel()

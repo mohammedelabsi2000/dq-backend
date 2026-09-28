@@ -67,6 +67,18 @@ class Plan extends Model
         return $this->hasMany(Level::class, 'plan_id', 'id')->orderBy('order');
     }
 
+    public function studentLevels()
+    {
+        return $this->hasManyThrough(
+            StudentLevel::class,
+            Level::class,
+            'plan_id',
+            'level_id',
+            'id',
+            'id'
+        );
+    }
+
     // ========================
     // Scopes
     // ========================
@@ -87,7 +99,7 @@ class Plan extends Model
     public function students()
     {
         return $this->belongsToMany(Student::class, 'student_plans')
-        ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
+            ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
     }
 
     // current students
@@ -115,5 +127,10 @@ class Plan extends Model
             ->where('age_to', '>=', $age)
             ->orderBy('age_from')
             ->first();
+    }
+
+    public function studentPlans()
+    {
+        return $this->hasMany(StudentPlan::class, 'plan_id', 'id');
     }
 }

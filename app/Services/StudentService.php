@@ -214,5 +214,47 @@ class StudentService
             'is_main' => true,
             'status' => 'active',
         ]);
+
+        // إنشاء سجل التحاق الطالب بالمستوى
+        \App\Models\StudentLevel::create([
+            'student_id' => $student->id,
+            'level_id' => $startingLevel->id,
+            'from_date' => now()->toDateString(),
+        ]);
+
+        // إسناد المواد تلقائياً للطالب في المستوى الأول
+        $this->autoAssignSubjectsToLevel($student, $startingLevel);
+    }
+
+    /**
+     * إسناد المواد تلقائياً للطالب في مستوى معين
+     */
+    private function autoAssignSubjectsToLevel(Student $student, Level $level): void
+    {
+        // الحصول على أول مسار في المستوى
+        $levelTrack = \App\Models\LevelTrack::where('level_id', $level->id)
+            ->orderBy('id')
+            ->first();
+
+        if (!$levelTrack) {
+            return;
+        }
+
+        // الحصول على أول مادة في هذا المسار
+        $levelTrackSubject = \App\Models\LevelTrackSubject::where('level_track_id', $levelTrack->id)
+            ->orderBy('id')
+            ->first();
+
+        if (!$levelTrackSubject) {
+            return;
+        }
+
+        // إسناد أول مادة فقط للطالب
+        \App\Models\StudentSubject::create([
+            'student_id' => $student->id,
+            'subject_id' => $levelTrackSubject->subject_id,
+            'level_id' => $level->id,
+            'from_date' => now()->toDateString(),
+        ]);
     }
 }

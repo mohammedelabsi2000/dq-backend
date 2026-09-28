@@ -12,10 +12,11 @@ class LevelTrackResource extends JsonResource
             'id' => $this->id,
             'level_id' => $this->level_id,
             'track_id' => $this->track_id,
+            'track_name' => $this->track?->name,
             'order' => $this->order,
             'weight' => (int) $this->weight,
             'created_at' => $this->created_at?->toDateTimeString(),
-
+            'subjects'   => SubjectResource::collection($this->whenLoaded('subjects')),
             'level' => new LevelResource($this->whenLoaded('level')),
             'track' => new TrackResource($this->whenLoaded('track')),
             'level_track_subjects' => LevelTrackSubjectResource::collection($this->whenLoaded('levelTrackSubjects')),

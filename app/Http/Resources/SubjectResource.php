@@ -47,6 +47,12 @@ class SubjectResource extends JsonResource
             'errors_count' => $this->errors_count,
             'standard_pass_mark' => $this->standard_pass_mark,
             'standard_subject_id' => $this->standard_subject_id,
+            'order' => $this->when(isset($this->pivot->order), $this->pivot->order),
+            'weight' => $this->when(isset($this->pivot->weight), (float) $this->pivot->weight),
+            'student_subject' => $this->when(
+                $this->relationLoaded('currentStudentSubject') && $this->currentStudentSubject,
+                fn() => new StudentSubjectResource($this->currentStudentSubject)
+            ),
         ];
     }
 }

@@ -53,4 +53,12 @@ class Subject extends Model
     {
         return $this->hasMany(SubjectRequirement::class);
     }
+
+    public function studentSubjects()
+    {
+        return $this->belongsToMany(Student::class, 'student_subjects')
+            ->withPivot('level_id', 'result_status_id','grade', 'from_date', 'to_date','grade_date', 'teacher_id', 'notes');
+        return $this->hasMany(StudentSubject::class)/* 
+            ->withPivot('level_id', 'result_status_id','grade', 'from_date', 'to_date','grade_date', 'teacher_id', 'notes') */;
+    }
 }
