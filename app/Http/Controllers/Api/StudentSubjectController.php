@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentSubjec\StudentSubjectRequest;
 use App\Http\Resources\StudentSubjectResource;
+use App\Models\Constant;
 use App\Models\StudentSubject;
 use Illuminate\Http\Request;
 
@@ -65,17 +66,27 @@ class StudentSubjectController extends Controller
     }
     public function update(StudentSubjectRequest $request, StudentSubject $studentSubject)
     {
-        $studentSubject->update(
-            $request->validated()
-        );
 
-        $studentSubject->load([
+        $validated = $request->validated();
+        if (isset($validated['result_status_key'])) {
+            $resultStatus = Constant::where('const_key', $validated['result_status_key'])->first();
+            if ($resultStatus) {
+                $validated['result_status_id'] = $resultStatus->id;
+            }
+        }
+        unset($validated['result_status_key']);
+
+        $studentSubject->update($validated);
+
+        /* $studentSubject->load([
             'student',
             'subject',
             'level',
             'resultStatus',
             'teacher',
-        ]);
+        ]); */
+
+        
 
         return $this->success(
             new StudentSubjectResource($studentSubject)

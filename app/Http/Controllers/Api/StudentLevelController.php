@@ -9,9 +9,16 @@ use App\Models\Plan;
 use App\Models\Student;
 use App\Models\StudentPlan;
 use App\Models\StudentSubject;
+use App\Services\StudentAcademicProgressService;
+use Illuminate\Http\Request;
 
 class StudentLevelController extends Controller
 {
+    public StudentAcademicProgressService $stdService;
+    public function __construct(StudentAcademicProgressService $studentAcademicProgressService)
+    {
+        $this->stdService = $studentAcademicProgressService;
+    }
     public function levelSubjects(Student $student, Plan $plan, Level $level)
     {
         // 1. التأكد أن المستوى تابع لهذه الخطة
@@ -23,6 +30,7 @@ class StudentLevelController extends Controller
         $studentPlan = StudentPlan::byStudent($student->id)
             ->where('plan_id', $plan->id)
             ->active()
+            // يوجد خطأ في حال عدم وجود مساقات للطالب في هذه الخطة
             ->first();
 
         if (!$studentPlan) {
@@ -55,6 +63,34 @@ class StudentLevelController extends Controller
         return $this->success(
             new LevelResource($level),
             'تم جلب بيانات مستوى الطالب بنجاح',
+            200
+        );
+    }
+
+    public function enrollLevel(Request $request, Student $student)
+    {
+        $request->validate([
+            'level_id' => 'required|exists:levels,id'
+        ]);
+
+        $level = Level::findOrFail($request->level_id);
+
+        // 1. التأكد أن الطالب مسجل حالياً (نشط) في هذه الخطة
+        $studentPlan = StudentPlan::byStudent($student->id)
+            ->where('plan_id', $level->plan_id)
+            ->active()
+            ->first();
+
+        if (!$studentPlan) {
+            return $this->error('الطالب غير مسجل حالياً في هذه الخطة', 404);
+        }
+
+        // 2. تسجيل الطالب في المستوى
+        $this->stdService->enrollLevel($student, $level);
+
+        return $this->success(
+            null,
+            'تم تسجيل الطالب في المستوى بنجاح',
             200
         );
     }
