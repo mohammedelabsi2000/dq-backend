@@ -52,4 +52,9 @@ class StudentSubject extends Model
     {
         return $this->belongsTo(StudentLevel::class);
     }
+
+    public function levelTrack()
+    {
+        return $this->belongsTo(LevelTrack::class);
+    }
 }

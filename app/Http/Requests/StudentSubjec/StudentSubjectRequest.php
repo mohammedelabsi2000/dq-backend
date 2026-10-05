@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\StudentSubjec;
 
+use App\Helpers\ConstantHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StudentSubjectRequest extends FormRequest
 {
@@ -15,13 +17,13 @@ class StudentSubjectRequest extends FormRequest
     {
         return [
             'student_id' => [
-                'required',
+                'sometimes',
                 'integer',
                 'exists:students,id',
             ],
 
             'subject_id' => [
-                'required',
+                'sometimes',
                 'integer',
                 'exists:subjects,id',
             ],
@@ -32,10 +34,10 @@ class StudentSubjectRequest extends FormRequest
                 'exists:levels,id',
             ],
 
-            'result_status_id' => [
+            'result_status_key' => [
                 'nullable',
-                'integer',
-                'exists:constants,id',
+                'string',
+                Rule::in(ConstantHelper::getConstantKeysByType('result_status')),
             ],
 
             'grade' => [
@@ -85,7 +87,7 @@ class StudentSubjectRequest extends FormRequest
 
             'level_id.exists' => 'المستوى المحدد غير موجود.',
 
-            'result_status_id.exists' => 'حالة النتيجة المحددة غير موجودة.',
+            'result_status_key.in' => 'حالة النتيجة المحددة غير موجودة.',
 
             'grade.numeric' => 'يجب أن تكون الدرجة رقمًا.',
             'grade.min' => 'يجب ألا تقل الدرجة عن 0.',
