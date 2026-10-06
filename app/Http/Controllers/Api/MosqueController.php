@@ -79,6 +79,7 @@ class MosqueController extends Controller
                 $centerData = [
                     'name' => $request->input('name'),
                     'region_id' => $request->input('region_id'),
+                    'gender' => $request->user()->gender,
                     'mosque_id' => $mosque->id,
                 ];
                 $center = Center::create($centerData);

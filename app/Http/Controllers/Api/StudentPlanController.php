@@ -78,7 +78,7 @@ class StudentPlanController extends Controller
             ->firstOrFail();
         $levels_ids = $plan->levels()->pluck('id')->toArray();
         $studentLevelsPivots = $student->levels()
-            ->whereIn('student_levels.id', $levels_ids)->get()->keyBy('id')->map(function ($studentLevel) {
+            ->whereIn('student_levels.level_id', $levels_ids)->get()->keyBy('id')->map(function ($studentLevel) {
                 return $studentLevel->pivot;
                 // return [
                 //     'id' => $studentLevel->id,

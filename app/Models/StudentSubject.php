@@ -18,6 +18,20 @@ class StudentSubject extends Model
         'grade_date' => 'date',
     ];
 
+    /**
+     * آخر سجل نجح فيه الطالب في نفس المادة (في أي خطة)، إن وجد
+     */
+    public static function previousPass(int $studentId, int $subjectId, ?int $exceptId = null): ?self
+    {
+        return static::where('student_id', $studentId)
+            ->where('subject_id', $subjectId)
+            ->when($exceptId, fn($q) => $q->where('id', '!=', $exceptId))
+            ->whereHas('resultStatus', fn($q) => $q->where('const_key', 'passed'))
+            ->with(['level.plan', 'resultStatus'])
+            ->latest('id')
+            ->first();
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class);

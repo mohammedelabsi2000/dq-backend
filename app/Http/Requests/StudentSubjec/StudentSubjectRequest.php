@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\StudentSubjec;
 
+use App\Models\LevelTrackSubject;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StudentSubjectRequest extends FormRequest
@@ -71,7 +72,32 @@ class StudentSubjectRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+
+            // القرار عند إسناد مادة سبق أن نجح فيها الطالب: إعادة (retake) أو إعفاء/معادلة (exempt)
+            'on_previous_pass' => [
+                'nullable',
+                'string',
+                'in:retake,exempt',
+            ],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!$this->filled('level_id') || $validator->errors()->hasAny(['subject_id', 'level_id'])) {
+                return;
+            }
+
+            // المساق يجب أن يكون مربوطاً بأحد مسارات المستوى
+            $subjectInLevel = LevelTrackSubject::where('subject_id', $this->subject_id)
+                ->whereHas('levelTrack', fn($q) => $q->where('level_id', $this->level_id))
+                ->exists();
+
+            if (!$subjectInLevel) {
+                $validator->errors()->add('subject_id', 'هذا المساق غير مربوط بأي مسار في المستوى المحدد.');
+            }
+        });
     }
 
     public function messages(): array
@@ -101,6 +127,8 @@ class StudentSubjectRequest extends FormRequest
             'teacher_id.exists' => 'المدرس المحدد غير موجود.',
 
             'notes.string' => 'يجب أن تكون الملاحظات نصًا.',
+
+            'on_previous_pass.in' => 'القرار يجب أن يكون إعادة (retake) أو إعفاء (exempt).',
         ];
     }
 }

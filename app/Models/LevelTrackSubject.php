@@ -25,6 +25,11 @@ class LevelTrackSubject extends Model
         'order' => 'integer',
     ]; */
 
+    protected $casts = [
+        // اتجاه خاص لكل جزء {custom_juz_id: direction}
+        'juz_directions' => 'array',
+    ];
+
     // ========================
     // Relations
     // ========================
