@@ -21,6 +21,7 @@ class DailyAchievementResource extends JsonResource
             'teacher' => new UserResource($this->whenLoaded('teacher')),
 
             'subject_id' => $this->subject_id,
+            'student_subject_id' => $this->student_subject_id,
             'subject'    => new SubjectResource($this->whenLoaded('subject')),
 
             // التاريخ

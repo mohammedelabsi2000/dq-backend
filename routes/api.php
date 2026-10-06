@@ -119,6 +119,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::get('students/{student}', [DailyAchievementController::class, 'studentAchievements']);
         // latestAchievement
         Route::get('students/{student}/latestAchievement', [DailyAchievementController::class, 'latestAchievement'])->name('daily-memorization.latest-achievement');
+        Route::get('students/{studentId}/available-subjects', [DailyAchievementController::class, 'getAvailableSubjects']);
         Route::get('statistics', [DailyAchievementController::class, 'statistics']);
     });
     Route::apiResource('daily-memorization', DailyAchievementController::class);

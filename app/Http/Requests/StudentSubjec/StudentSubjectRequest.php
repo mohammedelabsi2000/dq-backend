@@ -3,6 +3,7 @@
 namespace App\Http\Requests\StudentSubjec;
 
 use App\Helpers\ConstantHelper;
+use App\Models\LevelTrackSubject;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -15,15 +16,18 @@ class StudentSubjectRequest extends FormRequest
 
     public function rules(): array
     {
+        // الطالب والمساق مطلوبان عند الإضافة واختياريان عند التعديل
+        $presence = $this->isMethod('post') ? 'required' : 'sometimes';
+
         return [
             'student_id' => [
-                'sometimes',
+                $presence,
                 'integer',
                 'exists:students,id',
             ],
 
             'subject_id' => [
-                'sometimes',
+                $presence,
                 'integer',
                 'exists:subjects,id',
             ],
@@ -73,7 +77,38 @@ class StudentSubjectRequest extends FormRequest
                 'nullable',
                 'string',
             ],
+
+            // القرار عند إسناد مادة سبق أن نجح فيها الطالب: إعادة (retake) أو إعفاء/معادلة (exempt)
+            'on_previous_pass' => [
+                'nullable',
+                'string',
+                'in:retake,exempt',
+            ],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            if (!$this->filled('level_id') || $validator->errors()->hasAny(['subject_id', 'level_id'])) {
+                return;
+            }
+
+            // المساق يجب أن يكون مربوطاً بأحد مسارات المستوى
+            $subjectId = $this->input('subject_id') ?? $this->route('student_subject')?->subject_id;
+
+            if (!$subjectId) {
+                return;
+            }
+
+            $subjectInLevel = LevelTrackSubject::where('subject_id', $subjectId)
+                ->whereHas('levelTrack', fn($q) => $q->where('level_id', $this->level_id))
+                ->exists();
+
+            if (!$subjectInLevel) {
+                $validator->errors()->add('subject_id', 'هذا المساق غير مربوط بأي مسار في المستوى المحدد.');
+            }
+        });
     }
 
     public function messages(): array
@@ -103,6 +138,8 @@ class StudentSubjectRequest extends FormRequest
             'teacher_id.exists' => 'المدرس المحدد غير موجود.',
 
             'notes.string' => 'يجب أن تكون الملاحظات نصًا.',
+
+            'on_previous_pass.in' => 'القرار يجب أن يكون إعادة (retake) أو إعفاء (exempt).',
         ];
     }
 }

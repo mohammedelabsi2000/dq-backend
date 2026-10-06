@@ -15,6 +15,9 @@ class LevelTrackSubjectResource extends JsonResource
             'is_required'     => $this->is_required,
             'order'           => $this->order,
             'weight'          => (int) $this->weight,
+            // اتجاه حفظ المادة في هذه الخطة (null = اتجاه المادة الافتراضي) واتجاهات الأجزاء المخصَّصة
+            'memorization_direction' => $this->memorization_direction,
+            'juz_directions'  => (object) ($this->juz_directions ?? []),
             'created_at'      => $this->created_at?->toDateTimeString(),
 
             'level_track'     => new LevelTrackResource($this->whenLoaded('levelTrack')),

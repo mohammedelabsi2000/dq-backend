@@ -249,12 +249,19 @@ class StudentService
             return;
         }
 
+        // الإسناد التلقائي لا يوجد فيه مستخدم يقرر، فلو كان الطالب ناجحاً في المادة سابقاً
+        // تُسند عادية مع ملاحظة ليراجعها المشرف (إعادة أو إعفاء)
+        $previousPass = \App\Models\StudentSubject::previousPass($student->id, $levelTrackSubject->subject_id);
+
         // إسناد أول مادة فقط للطالب
         \App\Models\StudentSubject::create([
             'student_id' => $student->id,
             'subject_id' => $levelTrackSubject->subject_id,
             'level_id' => $level->id,
             'from_date' => now()->toDateString(),
+            'notes' => $previousPass
+                ? "تنبيه: الطالب أنجز هذا المساق سابقاً (سجل رقم {$previousPass->id}) - يُراجَع للإعادة أو الإعفاء"
+                : null,
         ]);
     }
 }

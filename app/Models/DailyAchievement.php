@@ -22,6 +22,7 @@ class DailyAchievement extends Model
         'student_id',
         'teacher_id',
         'subject_id',
+        'student_subject_id',
         'date',
         'from_surah',
         'from_ayah',
@@ -76,6 +77,14 @@ class DailyAchievement extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * سجل الطالب في المادة (يحدد الخطة/المستوى الذي سُجّل فيه الإنجاز)
+     */
+    public function studentSubject()
+    {
+        return $this->belongsTo(StudentSubject::class);
+    }
+
     public function fromSurah()
     {
         return $this->belongsTo(Surah::class, 'from_surah');
@@ -84,6 +93,35 @@ class DailyAchievement extends Model
     public function toSurah()
     {
         return $this->belongsTo(Surah::class, 'to_surah');
+    }
+
+    // ========================
+    // Business Logic
+    // ========================
+
+    /**
+     * هل يُحسب هذا الإنجاز ضمن ما أنجزه الطالب من المادة؟ (ما حالته "إعادة" لا يُحسب)
+     */
+    public function countsInProgress(): bool
+    {
+        return $this->student_subject_id && $this->achievement_status !== AchievementStatus::RETRY;
+    }
+
+    /**
+     * هل سُجّلت بعد هذا الإنجاز إنجازات أخرى لنفس الطالب في نفس المادة (في نفس الخطة) ومن نفس النوع؟
+     * الإنجازات تُدخل بالترتيب، فتعديل نطاق إنجاز قديم أو حذفه يترك فجوة في الوسط.
+     */
+    public function hasLaterAchievements(): bool
+    {
+        if (!$this->countsInProgress()) {
+            return false;
+        }
+
+        return static::where('student_subject_id', $this->student_subject_id)
+            ->where('achievement_type', $this->achievement_type)
+            ->where('achievement_status', '!=', AchievementStatus::RETRY)
+            ->where('id', '>', $this->id)
+            ->exists();
     }
 
     // ========================
