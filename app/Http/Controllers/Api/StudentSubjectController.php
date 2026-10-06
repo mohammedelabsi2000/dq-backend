@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentSubjec\StudentSubjectRequest;
 use App\Http\Resources\StudentSubjectResource;
+use App\Models\Constant;
 use App\Models\StudentSubject;
 use Illuminate\Http\Request;
 
@@ -30,11 +31,20 @@ class StudentSubjectController extends Controller
 
     public function store(StudentSubjectRequest $request)
     {
-        $data = $request->safe()->except('on_previous_pass');
+        $data = $request->safe()->except(['on_previous_pass', 'result_status_key']);
         $decision = $request->input('on_previous_pass');
 
+        if ($request->filled('result_status_key')) {
+            $resultStatusId = Constant::where('const_key', $request->input('result_status_key'))->value('id');
+            if ($resultStatusId) {
+                $data['result_status_id'] = $resultStatusId;
+            }
+        }
+
         // الطالب نجح في هذه المادة سابقاً: يُنبَّه المستخدم ليقرر الإعادة أو الإعفاء
-        $previousPass = StudentSubject::previousPass($data['student_id'], $data['subject_id']);
+        $previousPass = isset($data['student_id'], $data['subject_id'])
+            ? StudentSubject::previousPass($data['student_id'], $data['subject_id'])
+            : null;
 
         if ($previousPass && !$decision) {
             return $this->error(
@@ -100,17 +110,27 @@ class StudentSubjectController extends Controller
     }
     public function update(StudentSubjectRequest $request, StudentSubject $studentSubject)
     {
-        $studentSubject->update(
-            $request->safe()->except('on_previous_pass')
-        );
 
-        $studentSubject->load([
+        $validated = $request->validated();
+        if (isset($validated['result_status_key'])) {
+            $resultStatus = Constant::where('const_key', $validated['result_status_key'])->first();
+            if ($resultStatus) {
+                $validated['result_status_id'] = $resultStatus->id;
+            }
+        }
+        unset($validated['result_status_key'], $validated['on_previous_pass']);
+
+        $studentSubject->update($validated);
+
+        /* $studentSubject->load([
             'student',
             'subject',
             'level',
             'resultStatus',
             'teacher',
-        ]);
+        ]); */
+
+        
 
         return $this->success(
             new StudentSubjectResource($studentSubject)

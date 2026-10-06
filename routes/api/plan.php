@@ -93,9 +93,9 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::get('{student}/plans', [StudentPlanController::class, 'plans'])->name('student.plans');
         Route::get('{student}/unrelatedPlans', [StudentPlanController::class, 'unrelatedPlans'])->name('student.unrelatedPlans');
         Route::get('{student}/plans/{plan}', [StudentPlanController::class, 'planLevels'])->name('student.plan.levels');
+        Route::get('{student}/plans/{plan}/unrelatedLevels', [StudentPlanController::class, 'unrelatedLevels'])->name('student.plan.unrelatedLevels');
         Route::get('{student}/plans/{plan}/level/{level}', [StudentLevelController::class, 'levelSubjects'])->name('student.plan.level.subjects');
-
-
+        Route::post('{student}/enrollLevel', [StudentLevelController::class, 'enrollLevel'])->name('student.level.enroll');
     });
     /**
      * End of Student Plan Routes

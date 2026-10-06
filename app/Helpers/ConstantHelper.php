@@ -38,6 +38,12 @@ class ConstantHelper
         return array_column(self::getConstantsByType($typeName), 'id');
     }
 
+    
+    public static function getConstantKeysByType(string $typeName): array
+    {
+        return array_column(self::getConstantsByType($typeName), 'const_key');
+    }
+
     /**
      * Get a constant ID by type name and constant name.
      * 
@@ -51,6 +57,19 @@ class ConstantHelper
 
         foreach ($constants as $constant) {
             if ($constant['name'] === $constantName) {
+                return $constant['id'];
+            }
+        }
+
+        return null;
+    }
+    
+    public static function getConstantIdByKey(string $typeName, string $constantKey): ?int
+    {
+        $constants = self::getConstantsByType($typeName);
+
+        foreach ($constants as $constant) {
+            if ($constant['const_key'] === $constantKey) {
                 return $constant['id'];
             }
         }

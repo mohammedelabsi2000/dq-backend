@@ -116,7 +116,9 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // Daily achievements management
     Route::prefix('daily-memorization')->group(function () {
-        Route::get('students/{studentId}', [DailyAchievementController::class, 'studentAchievements']);
+        Route::get('students/{student}', [DailyAchievementController::class, 'studentAchievements']);
+        // latestAchievement
+        Route::get('students/{student}/latestAchievement', [DailyAchievementController::class, 'latestAchievement'])->name('daily-memorization.latest-achievement');
         Route::get('students/{studentId}/available-subjects', [DailyAchievementController::class, 'getAvailableSubjects']);
         Route::get('statistics', [DailyAchievementController::class, 'statistics']);
     });

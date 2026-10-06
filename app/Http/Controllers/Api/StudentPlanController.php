@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\AssignmentType;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\LevelResource;
 use App\Http\Resources\PlanResource;
 use App\Http\Resources\StudentPlanDetailsResource;
 use App\Http\Resources\StudentPlanResource;
@@ -143,6 +144,22 @@ class StudentPlanController extends Controller
         return $this->success(
             PlanResource::collection($unrelatedPlans),
             'تم جلب الخطط غير المسندة للطالب بنجاح',
+            200
+        );
+    }
+
+    public function unrelatedLevels(Student $student, Plan $plan)
+    {
+        $this->authorize('view', $student);
+
+        $unrelatedLevels = Level::where('plan_id', $plan->id)
+            ->whereDoesntHave('studentLevels', function ($query) use ($student) {
+                $query->where('student_id', $student->id);
+            })->get();
+
+        return $this->success(
+            LevelResource::collection($unrelatedLevels),
+            'تم جلب المستويات غير المسندة للطالب في الخطة بنجاح',
             200
         );
     }

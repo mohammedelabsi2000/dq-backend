@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\AchievementType;
+use App\Enums\SubjectType;
+use App\Enums\TrackEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DailyAchievement\StoreDailyAchievementRequest;
 use App\Http\Requests\DailyAchievement\UpdateDailyAchievementRequest;
@@ -12,6 +14,7 @@ use App\Http\Resources\StudentResource;
 use App\Models\DailyAchievement;
 use App\Models\Student;
 use App\Models\StudentSubject;
+use App\Models\Subject;
 use App\Services\QuranCalculatorService;
 use App\Services\SubjectProgressService;
 use Illuminate\Http\Request;
@@ -23,6 +26,65 @@ class DailyAchievementController extends Controller
         protected QuranCalculatorService $calculator,
         protected SubjectProgressService $subjectProgress
     ) {}
+
+    public function latestAchievement(Request $request, Student $student)
+    {
+        $this->authorize('viewAny', DailyAchievement::class);
+
+
+        $studentSubjects = Subject::whereIn('subject_type_id', [
+            SubjectType::Memorization->id(),
+            SubjectType::LimitedMemorization->id()
+        ])->whereHas('studentSubjects', function ($query) use ($student) {
+            $query->where('student_id', $student->id)
+                ->whereHas('levels', function ($query) {
+                    $query->whereHas('levelTracks', function ($query) {
+                        $query->where('track_id', TrackEnum::Memorization->id());
+                    });
+                });
+        })->get();
+
+        $studentSubjectIds = $studentSubjects->pluck('id')->toArray();
+
+        $latestAchievements = DailyAchievement::where('student_id', $student->id)
+            ->whereIn('subject_id', $studentSubjectIds)
+            ->orderBy('date', 'desc')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(function ($achievements) {
+                return $achievements->first();
+            });
+
+        // subject {data,latestAchievement}
+        $studentSubjectsWithLatestAchievements = $studentSubjects->map(function ($subject) use ($latestAchievements) {
+            return [
+                ...$subject->toArray(),
+                'latest_achievement' => $latestAchievements->get($subject->id),
+            ];
+        });
+
+        return $this->success(
+            $studentSubjectsWithLatestAchievements,
+            'success',
+            200
+        );
+    }
+
+    public function lastAchievement(Request $request, Student $student)
+    {
+        $this->authorize('viewAny', DailyAchievement::class);
+
+        $latestAchievement = DailyAchievement::where('student_id', $student->id)
+            ->orderBy('date', 'desc')
+            ->first();
+
+        return $this->success(
+            new DailyAchievementResource($latestAchievement),
+            'success',
+            200
+        );
+    }
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', DailyAchievement::class);
@@ -144,26 +206,32 @@ class DailyAchievementController extends Controller
 
         $data = $request->validated();
 
-          // إعادة حساب عدد الآيات والصفحات لو تغيّر نطاق السور/الآيات
+        // إعادة حساب عدد الآيات والصفحات لو تغيّر نطاق السور/الآيات
         $rangeChanged = $request->filled('from_surah') || $request->filled('from_ayah')
-                     || $request->filled('to_surah') || $request->filled('to_ayah');
- 
+            || $request->filled('to_surah') || $request->filled('to_ayah');
+
         if ($rangeChanged) {
             $fromSurah = $data['from_surah'] ?? $daily_memorization->from_surah;
-            $fromAyah  = $data['from_ayah']  ?? $daily_memorization->from_ayah;
-            $toSurah   = $data['to_surah']   ?? $daily_memorization->to_surah;
-            $toAyah    = $data['to_ayah']    ?? $daily_memorization->to_ayah;
- 
+            $fromAyah = $data['from_ayah'] ?? $daily_memorization->from_ayah;
+            $toSurah = $data['to_surah'] ?? $daily_memorization->to_surah;
+            $toAyah = $data['to_ayah'] ?? $daily_memorization->to_ayah;
+
             $data['ayahs_count'] = $this->calculator->calculateAyahsCount(
-                $fromSurah, $fromAyah, $toSurah, $toAyah
+                $fromSurah,
+                $fromAyah,
+                $toSurah,
+                $toAyah
             );
- 
+
             $data['pages_count'] = $this->calculator->calculatePagesCount(
-                $fromSurah, $fromAyah, $toSurah, $toAyah
+                $fromSurah,
+                $fromAyah,
+                $toSurah,
+                $toAyah
             );
         }
 
-        
+
         $daily_memorization->update($data);
         $daily_memorization->load(['student', 'teacher', 'subject']);
 
@@ -190,11 +258,12 @@ class DailyAchievementController extends Controller
         );
     }
 
-    public function studentAchievements(Request $request, $studentId)
+    public function studentAchievements(Request $request, Student $student)
     {
         $this->authorize('viewAny', DailyAchievement::class);
 
-        $student = Student::findOrFail($studentId);
+        // $student = Student::findOrFail($studentId);
+        $studentId = $student->id;
 
         $query = DailyAchievement::query()
             ->byStudent($studentId)
