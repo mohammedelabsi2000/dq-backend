@@ -29,6 +29,9 @@ services:
         value: sync
       - key: FILESYSTEM_DISK
         value: public
+      # Managed MySQL (Aiven) rejects tables without a primary key; some migrations create them
+      - key: MYSQL_INIT_COMMAND
+        value: SET SESSION sql_require_primary_key=0
       - key: DB_CONNECTION
         value: mysql
       # Set to "false" after the first deploy and after changing the admin password
