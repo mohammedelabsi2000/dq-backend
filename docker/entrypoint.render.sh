@@ -25,6 +25,10 @@ php artisan view:cache
 
 php artisan migrate --force
 
+# QuranSeeder fetches every verse from a remote API and inserts row by row, which
+# outlasts the platform's deploy timeout; load the same reference data from a dump
+php artisan tinker --execute="if (!DB::table('quran_surahs')->exists()) { foreach (file(database_path('data/quran.sql')) as \$line) { if (trim(\$line) !== '') { DB::unprepared(\$line); } } echo 'Quran data loaded'; }"
+
 # The seeders are idempotent, but UserSeeder resets the admin password every run
 if [ "$RUN_SEEDERS" = "true" ]; then
     php artisan db:seed --force
