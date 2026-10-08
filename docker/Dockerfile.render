@@ -1,0 +1,68 @@
+# Production Dockerfile for free container hosting (Render and similar)
+
+FROM php:8.3-fpm-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    curl \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+    pdo_mysql \
+    mysqli \
+    intl \
+    mbstring \
+    opcache \
+    pcntl \
+    zip \
+    gd \
+    && rm -rf /var/cache/apk/*
+
+# PHP production config
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/php.render.ini /usr/local/etc/php/conf.d/zz-render-overrides.ini
+
+# Nginx config (the listen port is filled in by the entrypoint from $PORT)
+COPY docker/nginx.render.conf /etc/nginx/nginx.render.conf.template
+
+# Supervisor config
+COPY docker/supervisord.conf /etc/supervisord.conf
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copy composer files first for caching
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+
+# Copy application code
+COPY . .
+
+# Generate autoload (without dev dependencies)
+RUN composer dump-autoload --optimize --no-dev
+
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Create nginx pid/log dirs
+RUN mkdir -p /run/nginx /var/log/nginx
+
+EXPOSE 10000
+
+# Entrypoint caches config, runs migrations, then starts the services
+COPY docker/entrypoint.render.sh /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]

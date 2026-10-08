@@ -1,0 +1,11 @@
+.git
+.github
+.env
+.env.backup
+.env.testing
+vendor
+node_modules
+storage/logs/*.log
+public/storage
+tests
+supervisord.pid
