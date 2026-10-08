@@ -6,6 +6,7 @@ use App\Models\Constant;
 use App\Models\Level;
 use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class StudentResource extends JsonResource
 {
@@ -65,8 +66,8 @@ class StudentResource extends JsonResource
             // الاعتماد
             'is_approved' => $this->is_approved,
             'approval' => [
-                'is_approved'      => $this->is_approved,
-                'status'           => $this->when(
+                'is_approved' => $this->is_approved,
+                'status' => $this->when(
                     $this->relationLoaded('approvalRequest'),
                     fn() => $this->approvalRequest?->status?->label()
                 ),
@@ -134,10 +135,10 @@ class StudentResource extends JsonResource
                 return [
                     'starting_level_id' => $this->pivot->starting_level_id,
                     // 'starting_level' => $this->when($this->pivot->starting_level_id, fn() => new LevelResource(Level::find($this->pivot->starting_level_id))),
-
+    
                     'current_level_id' => $this->pivot->current_level_id,
                     // 'current_level' => $this->when($this->pivot->current_level_id, fn() => new LevelResource(Level::find($this->pivot->current_level_id))),
-
+    
                     'from_date' => $this->pivot->from_date,
                     'to_date' => $this->pivot->to_date,
 
@@ -152,5 +153,15 @@ class StudentResource extends JsonResource
                 ];
             }),
         ];
+    }
+
+    public function simple()
+    {
+        return $this->only(['id', 'full_name',]);
+    }
+
+    public function only(array $columns)
+    {
+        return Arr::only(($this)->resolve(), $columns);
     }
 }

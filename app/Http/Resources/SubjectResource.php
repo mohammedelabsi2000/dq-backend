@@ -6,6 +6,7 @@ use App\Models\Quran\CustomJuz;
 use App\Models\Quran\Juz;
 use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class SubjectResource extends JsonResource
 {
@@ -61,6 +62,7 @@ class SubjectResource extends JsonResource
         ];
     }
 
+<<<<<<< Updated upstream
     private function customJuzs(): array
     {
         $ids = array_map('intval', json_decode($this->custom_juz_id ?? '[]', true) ?: []);
@@ -75,5 +77,15 @@ class SubjectResource extends JsonResource
             fn($id) => ['id' => $id, 'name' => $names[$id] ?? null],
             $ids
         ));
+=======
+    public function simple()
+    {
+        return $this->only(['id', 'title',]);
+    }
+
+    public function only(array $columns)
+    {
+        return Arr::only(($this)->resolve(), $columns);
+>>>>>>> Stashed changes
     }
 }
