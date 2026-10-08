@@ -18,6 +18,13 @@ chmod -R 775 storage bootstrap/cache
 # Uploaded files are served from public/storage
 php artisan storage:link || true
 
+# PHP-FPM workers run as www-data and may not be able to read a mounted secret file
+if [ -n "$MYSQL_ATTR_SSL_CA" ] && [ -f "$MYSQL_ATTR_SSL_CA" ]; then
+    cp "$MYSQL_ATTR_SSL_CA" /etc/ssl/mysql-ca.pem
+    chmod 644 /etc/ssl/mysql-ca.pem
+    export MYSQL_ATTR_SSL_CA=/etc/ssl/mysql-ca.pem
+fi
+
 # Cache with the runtime environment variables
 php artisan config:cache
 php artisan route:cache
