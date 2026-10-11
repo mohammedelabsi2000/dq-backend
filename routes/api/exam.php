@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\TrialExamController;
 use App\Http\Controllers\Api\RecitationExamController;
 use App\Http\Middleware\SetCurrentUserContext;
@@ -7,6 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->prefix('exam')->group(function () {
+    // السرد والاختبار التجريبي في قائمة واحدة (كل صف مميَّز بنوعه)
+    Route::get('exams', [ExamController::class, 'index']);
     Route::apiResource('trial-exams', TrialExamController::class);
-    // Route::apiResource('recitation-exams', RecitationExamController::class);
+    Route::apiResource('recitation-exams', RecitationExamController::class);
 });

@@ -72,19 +72,29 @@ class StudentSubject extends Model
         return $this->belongsTo(LevelTrack::class);
     }
 
-    public function latestRecitationExam()
+    public function recitationExams()
     {
-        return $this->hasOne(RecitationExam::class, 'student_id', 'student_id')
-            ->where('subject_id', $this->subject_id)
-            ->orderBy('attempt_number', 'asc')
-            ->latestOfMany('attempt_number');
+        return $this->hasMany(RecitationExam::class);
     }
 
+    public function trialExams()
+    {
+        return $this->hasMany(TrialExam::class);
+    }
+
+    /**
+     * آخر محاولة سرد تجريبي للطالب في هذه المادة ضمن هذه الخطة
+     */
+    public function latestRecitationExam()
+    {
+        return $this->hasOne(RecitationExam::class)->latestOfMany('attempt_number');
+    }
+
+    /**
+     * آخر محاولة اختبار تجريبي للطالب في هذه المادة ضمن هذه الخطة
+     */
     public function latestTrialExam()
     {
-        return $this->hasOne(TrialExam::class, 'student_id', 'student_id')
-            ->where('subject_id', $this->subject_id)
-            ->orderBy('attempt_number', 'asc')
-            ->latestOfMany('attempt_number');
+        return $this->hasOne(TrialExam::class)->latestOfMany('attempt_number');
     }
 }

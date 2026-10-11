@@ -4,23 +4,38 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Exam\TrialExamResource;
-use App\Models\StudentSubject;
 use App\Models\TrialExam;
+use App\Services\ExamService;
+use App\Services\SubjectProgressService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
+/**
+ * الاختبار التجريبي: يكون بعد النجاح في السرد التجريبي، والنجاح فيه ينقل الطالب لمرحلة الاختبار النهائي.
+ */
 class TrialExamController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected ExamService $exams,
+        protected SubjectProgressService $subjectProgress
+    ) {}
+
+    public function index(Request $request)
     {
         $query = TrialExam::query();
+
+        foreach (['student_id', 'subject_id', 'student_subject_id'] as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, $request->input($filter));
+            }
+        }
 
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => [],
             // 'orderColumn' => 'created_at',
         ]);
 
-        $exams = $query->with(['student', 'subject'])->get();
+        $exams = $query->with(['student', 'subject', 'lastRecitationExam'])->get();
 
         return $this->successWithPagination(
             TrialExamResource::collection($exams),
@@ -30,68 +45,97 @@ class TrialExamController extends Controller
         );
     }
 
+    /**
+     * تسجيل نتيجة الاختبار التجريبي. رقم المحاولة وعلامة النجاح تُحدَّدان تلقائياً.
+     */
     public function store(Request $request)
     {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'mark' => 'nullable|numeric|min:0|max:100',
-            'success_mark' => 'nullable|numeric|min:0|max:100',
-            'attempt_number' => 'required|integer|min:1',
-            'exam_date' => 'nullable|date',
-            'notes' => 'nullable|string',
-        ]);
+        $data = $request->validate([
+            'student_id' => 'required|integer|exists:students,id',
+            'subject_id' => 'required|integer|exists:subjects,id',
+            // يلزم فقط لو كانت المادة للطالب في أكثر من خطة
+            'student_subject_id' => 'nullable|integer',
+            ...$this->resultRules(),
+        ], $this->messages());
 
-        // Create a new TrialExam record
-        $TrialExam = TrialExam::create($validatedData);
+        $resolved = $this->subjectProgress->resolveStudentSubject(
+            (int) $data['student_id'],
+            (int) $data['subject_id'],
+            isset($data['student_subject_id']) ? (int) $data['student_subject_id'] : null
+        );
+
+        if (isset($resolved['error'])) {
+            throw ValidationException::withMessages([$resolved['field'] => $resolved['error']]);
+        }
+
+        $exam = $this->exams->recordTrial(
+            $resolved['student_subject'],
+            collect($data)->only(['mark', 'exam_date', 'notes'])->all()
+        );
 
         return $this->success(
-            $TrialExam,
-            'تم إنشاء الاختبار التجريبي بنجاح',
+            $this->payload($exam),
+            'تم تسجيل الاختبار التجريبي بنجاح',
             201
         );
     }
 
-    public function show(TrialExam $TrialExam)
+    public function show(TrialExam $trialExam)
     {
         return $this->success(
-            $TrialExam->load(['student', 'subject']),
+            $this->payload($trialExam),
             'تفاصيل الاختبار التجريبي',
             200
         );
     }
-    public function update(Request $request, TrialExam $TrialExam)
-    {
-        // Validate the request data
-        $validatedData = $request->validate([
-            'student_id' => 'sometimes|required|exists:students,id',
-            'subject_id' => 'sometimes|required|exists:subjects,id',
-            'mark' => 'nullable|numeric|min:0|max:100',
-            'success_mark' => 'nullable|numeric|min:0|max:100',
-            'attempt_number' => 'sometimes|required|integer|min:1',
-            'exam_date' => 'nullable|date',
-            'notes' => 'nullable|string',
-        ]);
 
-        // Update the TrialExam record
-        $TrialExam->update($validatedData);
+    public function update(Request $request, TrialExam $trialExam)
+    {
+        $data = $request->validate($this->resultRules(), $this->messages());
+
+        $exam = $this->exams->updateTrial($trialExam, $data);
 
         return $this->success(
-            $TrialExam,
+            $this->payload($exam),
             'تم تحديث الاختبار التجريبي بنجاح',
             200
         );
     }
 
-    public function destroy(TrialExam $TrialExam)
+    public function destroy(TrialExam $trialExam)
     {
-        $TrialExam->delete();
+        $this->exams->deleteTrial($trialExam);
 
         return $this->success(
             null,
             'تم حذف الاختبار التجريبي بنجاح',
             200
         );
+    }
+
+    private function resultRules(): array
+    {
+        return [
+            'mark' => 'nullable|numeric|min:0|max:100',
+            'exam_date' => 'nullable|date|before_or_equal:' . now('Asia/Gaza')->toDateString(),
+            'notes' => 'nullable|string',
+        ];
+    }
+
+    private function messages(): array
+    {
+        return [
+            'exam_date.before_or_equal' => 'لا يمكن إدخال تاريخ مستقبلي',
+        ];
+    }
+
+    private function payload(TrialExam $exam): array
+    {
+        $exam->load(['student', 'subject', 'lastRecitationExam', 'studentSubject.subject']);
+
+        return (new TrialExamResource($exam))->resolve() + [
+            // مرحلة الطالب في المادة بعد هذه النتيجة: trial_exam | final_exam | completed
+            'exam_stage' => $exam->studentSubject ? $this->exams->stage($exam->studentSubject) : null,
+        ];
     }
 }
