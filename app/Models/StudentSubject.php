@@ -71,4 +71,20 @@ class StudentSubject extends Model
     {
         return $this->belongsTo(LevelTrack::class);
     }
+
+    public function latestRecitationExam()
+    {
+        return $this->hasOne(RecitationExam::class, 'student_id', 'student_id')
+            ->where('subject_id', $this->subject_id)
+            ->orderBy('attempt_number', 'asc')
+            ->latestOfMany('attempt_number');
+    }
+
+    public function latestTrialExam()
+    {
+        return $this->hasOne(TrialExam::class, 'student_id', 'student_id')
+            ->where('subject_id', $this->subject_id)
+            ->orderBy('attempt_number', 'asc')
+            ->latestOfMany('attempt_number');
+    }
 }
