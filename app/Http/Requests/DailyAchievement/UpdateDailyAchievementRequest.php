@@ -7,6 +7,7 @@ use App\Enums\AchievementType;
 use App\Enums\EvaluationGrade;
 use App\Enums\MemorizationDirection;
 use App\Http\Requests\DQFormRequest;
+use App\Services\ExamService;
 use App\Services\QuranCalculatorService;
 use App\Services\SubjectProgressService;
 
@@ -69,6 +70,16 @@ class UpdateDailyAchievementRequest extends DQFormRequest
                 foreach ($progressFields as $field) {
                     if ($this->has($field) && (string) $this->input($field) !== (string) $achievement->getRawOriginal($field)) {
                         $validator->errors()->add($field, 'لا يمكن تعديل نطاق أو مادة أو نوع أو حالة إنجاز تم تسجيل إنجازات بعده؛ التعديل متاح لآخر إنجاز في المادة فقط');
+                        return;
+                    }
+                }
+            }
+
+            // بعد تسجيل نتيجة السرد التجريبي لا يتغيّر ما حفظه الطالب في المادة
+            if ($achievement->countsInProgress() && app(ExamService::class)->recitationStarted($achievement->student_subject_id)) {
+                foreach ($progressFields as $field) {
+                    if ($this->has($field) && (string) $this->input($field) !== (string) $achievement->getRawOriginal($field)) {
+                        $validator->errors()->add($field, 'لا يمكن تعديل نطاق أو نوع أو حالة إنجاز بعد تسجيل نتيجة السرد التجريبي للمادة');
                         return;
                     }
                 }

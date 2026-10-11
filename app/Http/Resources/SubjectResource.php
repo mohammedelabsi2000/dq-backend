@@ -62,7 +62,6 @@ class SubjectResource extends JsonResource
         ];
     }
 
-<<<<<<< Updated upstream
     private function customJuzs(): array
     {
         $ids = array_map('intval', json_decode($this->custom_juz_id ?? '[]', true) ?: []);
@@ -77,7 +76,8 @@ class SubjectResource extends JsonResource
             fn($id) => ['id' => $id, 'name' => $names[$id] ?? null],
             $ids
         ));
-=======
+    }
+
     public function simple()
     {
         return $this->only(['id', 'title',]);
@@ -86,6 +86,5 @@ class SubjectResource extends JsonResource
     public function only(array $columns)
     {
         return Arr::only(($this)->resolve(), $columns);
->>>>>>> Stashed changes
     }
 }

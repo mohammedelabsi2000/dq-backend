@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ResultStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentSubjec\StudentSubjectRequest;
 use App\Http\Resources\StudentSubjectResource;
 use App\Models\Constant;
 use App\Models\StudentSubject;
+use App\Models\TrialExam;
+use App\Services\ExamService;
 use Illuminate\Http\Request;
 
 class StudentSubjectController extends Controller
@@ -108,7 +111,7 @@ class StudentSubjectController extends Controller
             new StudentSubjectResource($studentSubject)
         );
     }
-    public function update(StudentSubjectRequest $request, StudentSubject $studentSubject)
+    public function update(StudentSubjectRequest $request, StudentSubject $studentSubject, ExamService $exams)
     {
 
         $validated = $request->validated();
@@ -119,6 +122,20 @@ class StudentSubjectController extends Controller
             }
         }
         unset($validated['result_status_key'], $validated['on_previous_pass']);
+
+        // مادة الحفظ لا يُعتمد نجاحها يدوياً: النجاح يكون باجتياز الاختبار التجريبي (بعد السرد التجريبي)
+        $passedId = ResultStatus::Passed->id();
+
+        if (($validated['result_status_id'] ?? null) == $passedId
+            && $studentSubject->result_status_id != $passedId
+            && $exams->requiresExams($studentSubject->subject)
+            && $studentSubject->latestTrialExam?->status() !== TrialExam::PASSED) {
+            return $this->error(
+                'لا يمكن اعتماد نجاح الطالب في مادة حفظ قبل اجتياز السرد التجريبي ثم الاختبار التجريبي',
+                422,
+                ['result_status_key' => ['لم يجتز الطالب الاختبار التجريبي لهذه المادة']]
+            );
+        }
 
         $studentSubject->update($validated);
 

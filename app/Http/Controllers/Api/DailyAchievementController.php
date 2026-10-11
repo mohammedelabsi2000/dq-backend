@@ -15,6 +15,7 @@ use App\Models\DailyAchievement;
 use App\Models\Student;
 use App\Models\StudentSubject;
 use App\Models\Subject;
+use App\Services\ExamService;
 use App\Services\QuranCalculatorService;
 use App\Services\SubjectProgressService;
 use Illuminate\Http\Request;
@@ -24,7 +25,8 @@ class DailyAchievementController extends Controller
 
     public function __construct(
         protected QuranCalculatorService $calculator,
-        protected SubjectProgressService $subjectProgress
+        protected SubjectProgressService $subjectProgress,
+        protected ExamService $exams
     ) {}
 
     public function latestAchievement(Request $request, Student $student)
@@ -178,6 +180,9 @@ class DailyAchievementController extends Controller
         );
 
         $achievement = DailyAchievement::create($data);
+
+        // عند اكتمال حفظ المادة يُنقل الطالب إلى السرد التجريبي
+        $this->syncExamStage($achievement);
         $achievement->load(['student', 'teacher', 'subject']);
 
         return $this->success(
@@ -233,6 +238,7 @@ class DailyAchievementController extends Controller
 
 
         $daily_memorization->update($data);
+        $this->syncExamStage($daily_memorization);
         $daily_memorization->load(['student', 'teacher', 'subject']);
 
         return $this->success(
@@ -250,7 +256,12 @@ class DailyAchievementController extends Controller
             return $this->error('لا يمكن حذف إنجاز تم تسجيل إنجازات بعده؛ الحذف متاح لآخر إنجاز في المادة فقط', 422);
         }
 
+        if ($daily_memorization->countsInProgress() && $this->exams->recitationStarted($daily_memorization->student_subject_id)) {
+            return $this->error('لا يمكن حذف إنجاز بعد تسجيل نتيجة السرد التجريبي للمادة', 422);
+        }
+
         $daily_memorization->delete();
+        $this->syncExamStage($daily_memorization);
 
         return $this->success(
             null,
@@ -295,6 +306,18 @@ class DailyAchievementController extends Controller
     }
 
     /**
+     * مطابقة مرحلة السرد التجريبي مع حالة الحفظ بعد أي تغيير في إنجازات المادة
+     */
+    private function syncExamStage(DailyAchievement $achievement): void
+    {
+        $studentSubject = $achievement->studentSubject()->with('subject')->first();
+
+        if ($studentSubject) {
+            $this->exams->syncRecitationStage($studentSubject);
+        }
+    }
+
+    /**
      * المواد الحالية للطالب مع المتبقي منها (غير المسجّل كإنجاز) لاستخدامها عند إضافة إنجاز يومي
      */
     public function getAvailableSubjects(Request $request, $studentId)
@@ -320,6 +343,7 @@ class DailyAchievementController extends Controller
             ->each(fn($studentSubject) => $studentSubject->setRelation(
                 'progress',
                 $this->subjectProgress->progress($studentSubject, $achievementType, $exceptId)
+                    + ['exam_stage' => $this->exams->stage($studentSubject)]
             ));
 
         return $this->success(

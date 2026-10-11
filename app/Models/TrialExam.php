@@ -10,7 +10,18 @@ class TrialExam extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const PENDING = 'pending';
+    public const PASSED = 'passed';
+    public const FAILED = 'failed';
+
     protected $guarded = [];
+
+    protected $casts = [
+        'mark' => 'float',
+        'success_mark' => 'float',
+        'attempt_number' => 'integer',
+        'exam_date' => 'date',
+    ];
 
     public function student()
     {
@@ -22,18 +33,37 @@ class TrialExam extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    /**
+     * سجل الطالب في المادة (يحدد الخطة/المستوى الذي يتبعه الاختبار)
+     */
+    public function studentSubject()
+    {
+        return $this->belongsTo(StudentSubject::class);
+    }
+
+    /**
+     * آخر محاولة سرد تجريبي للطالب في نفس المادة ونفس الخطة
+     */
     public function lastRecitationExam()
     {
-        return $this->hasOne(RecitationExam::class, 'student_id', 'student_id')
-            ->where('subject_id', $this->subject_id)
-            ->orderByDesc('exam_date')
+        return $this->hasOne(RecitationExam::class, 'student_subject_id', 'student_subject_id')
             ->latestOfMany('attempt_number');
     }
 
-    public function studentSubject()
+    public function hasResult(): bool
     {
-        return $this->hasMany(StudentSubject::class, 'student_id', 'student_id')
-            ->where('subject_id', $this->subject_id)
-            ->orderByDesc('from_date');
+        return $this->mark !== null;
+    }
+
+    /**
+     * بانتظار النتيجة، أو ناجح (العلامة ≥ علامة النجاح)، أو راسب
+     */
+    public function status(): string
+    {
+        if (!$this->hasResult()) {
+            return self::PENDING;
+        }
+
+        return $this->mark >= $this->success_mark ? self::PASSED : self::FAILED;
     }
 }

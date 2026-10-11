@@ -40,6 +40,8 @@ class AvailableSubjectResource extends JsonResource
             'total_ayahs_count' => $progress['total_ayahs_count'],
             'available_ayahs_count' => $progress['available_ayahs_count'],
             'is_completed' => $progress['is_completed'],
+            // مرحلة الطالب في المادة: memorization | trial_recitation | trial_exam | final_exam | completed
+            'exam_stage' => $progress['exam_stage'],
 
             // الجزء الذي يحفظ فيه الطالب حالياً واتجاهه
             'current_juz' => $progress['current_juz'],
