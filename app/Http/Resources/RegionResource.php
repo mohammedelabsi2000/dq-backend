@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Branch;
+use App\Support\LookupCache;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class RegionResource extends JsonResource
@@ -19,7 +21,12 @@ class RegionResource extends JsonResource
             'standard_region_id'  => $this->standard_region_id,
             'name'                => $this->name,
             'notes'               => $this->notes,
-            'branch'              => new BranchResource($this->branch),
+            // إن لم يكن الفرع محمّلاً مسبقاً يُجلب مرة واحدة لكل طلب بدل استعلام لكل صف
+            'branch'              => new BranchResource(
+                $this->relationLoaded('branch')
+                    ? $this->branch
+                    : app(LookupCache::class)->find(Branch::class, $this->branch_id)
+            ),
             'mosques_count'       => $this->whenCounted('mosques'),
             'mosques'             => MosqueResource::collection($this->whenLoaded('mosques')),
         ];

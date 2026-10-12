@@ -56,8 +56,11 @@ class ApprovalRequestResource extends JsonResource
             'role_name' => $requester->relationLoaded('roles')
                 ? $requester->roles->pluck('name')->implode('، ')
                 : null,
+            // إن كانت النطاقات محمّلة مسبقاً (eager) نستخدمها بدل استعلام لكل صف
             'user_scopes' => ScopeResource::collection(
-                $requester->scopes()->whereNull('to_date')->get()
+                ($requester->relationLoaded('scopes')
+                    ? $requester->scopes->whereNull('to_date')
+                    : $requester->scopes()->whereNull('to_date')->get())
                     ->flatMap(fn($scope) => $scope->toHierarchyCollection())
             ),
         ];

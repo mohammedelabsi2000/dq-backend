@@ -54,7 +54,10 @@ class UserController extends Controller
             'orderColumn' => 'created_at',
         ]);
 
-        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles'])->get();
+        $users = $query->with(['mosque', 'mosque.region', 'mosque.region.branch', 'maritalStatus', 'prefix', 'roles.permissions', 'scopes'])->get();
+
+        // تحميل كيانات نطاقات المستخدمين دفعة واحدة بدل استعلام لكل صف
+        app(\App\Support\ScopeCache::class)->prime($users->pluck('scopes')->flatten());
 
         return $this->successWithPagination(
             UserResource::collection($users),
@@ -89,7 +92,10 @@ class UserController extends Controller
             'orderColumn' => 'created_at',
         ]);
 
-        $users = $query->with(['mosque', 'roles'])->get();
+        $users = $query->with(['mosque', 'roles.permissions', 'scopes'])->get();
+
+        // تحميل كيانات نطاقات المستخدمين دفعة واحدة بدل استعلام لكل صف
+        app(\App\Support\ScopeCache::class)->prime($users->pluck('scopes')->flatten());
 
         return $this->successWithPagination(
             UserResource::collection($users),

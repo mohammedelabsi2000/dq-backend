@@ -54,8 +54,11 @@ class UserResource extends JsonResource
                     ])
             ),
 
+            // إن كانت النطاقات محمّلة مسبقاً (eager) نستخدمها بدل استعلام لكل مستخدم
             'user_scopes' => ScopeResource::collection(
-                $this->scopes()->whereNull('to_date')->get()
+                ($this->relationLoaded('scopes')
+                    ? $this->scopes->whereNull('to_date')
+                    : $this->scopes()->whereNull('to_date')->get())
                     ->flatMap(fn($scope) => $scope->toHierarchyCollection())
             ),
 

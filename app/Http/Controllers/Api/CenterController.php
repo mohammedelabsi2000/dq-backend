@@ -54,9 +54,8 @@ class CenterController extends Controller
             });
         }
 
-        if ($request->boolean('with_relations')) {
-            $query->with(['region.branch', 'mosque']);
-        }
+        // CenterResource يعرض المنطقة والفرع والمسجد دائماً، فتُحمَّل مسبقاً بدل استعلام لكل صف
+        $query->with(['region.branch', 'mosque']);
 
         // if ($request->boolean('with_mosque')) {
         //     $query->with('mosque');

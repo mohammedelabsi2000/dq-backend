@@ -2,6 +2,9 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Mosque;
+use App\Models\Region;
+use App\Support\LookupCache;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CenterResource extends JsonResource
@@ -14,15 +17,20 @@ class CenterResource extends JsonResource
      */
     public function toArray($request)
     {
+        // إن لم تكن المنطقة/المسجد محمّلين مسبقاً يُجلبان مرة واحدة لكل طلب بدل استعلام لكل صف
+        $lookup = app(LookupCache::class);
+        $region = $this->relationLoaded('region') ? $this->region : $lookup->find(Region::class, $this->region_id);
+        $mosque = $this->relationLoaded('mosque') ? $this->mosque : $lookup->find(Mosque::class, $this->mosque_id);
+
         return [
             'id' => $this->id,
             'name' => $this->name,
             'notes' => $this->notes,
 
-            'region' => new RegionResource($this->region),
+            'region' => new RegionResource($region),
 
-            'mosque' => $this->mosque
-                ? new MosqueResource($this->mosque)
+            'mosque' => $mosque
+                ? new MosqueResource($mosque)
                 : null,
 
             'gender' => $this->gender,

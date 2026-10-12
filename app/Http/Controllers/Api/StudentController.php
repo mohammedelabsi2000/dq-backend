@@ -53,6 +53,9 @@ class StudentController extends Controller
         $total = $q['count'];
         $students = $query->withStandardRelations()->get();
 
+        // تحميل كيانات نطاقات أولياء الأمور دفعة واحدة بدل استعلام لكل صف
+        app(\App\Support\ScopeCache::class)->prime($students->pluck('guardian.scopes')->flatten()->filter());
+
         return $this->successWithPagination(
             StudentResource::collection($students),
             ['total' => $total, 'skip' => $q['skip'], 'limit' => $q['limit']],

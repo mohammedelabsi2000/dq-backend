@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ScopeCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Permission\Models\Role;
@@ -29,6 +30,13 @@ class UserScope extends Model
         'to_date' => 'date',
     ];
 
+
+    protected static function booted()
+    {
+        // أي تعديل على النطاقات يُبطل الذاكرة المؤقتة للنطاقات داخل نفس الطلب
+        static::saved(fn() => app(ScopeCache::class)->flush());
+        static::deleted(fn() => app(ScopeCache::class)->flush());
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -103,33 +111,35 @@ class UserScope extends Model
     public function toHierarchyCollection(): \Illuminate\Support\Collection
     {
         $result = collect([$this]);
+        // كيانات الهرمية تُجلب مرة واحدة لكل طلب مهما تكررت بين المستخدمين
+        $cache = app(ScopeCache::class);
 
         if ($this->scope_type === 'region') {
-            $region = Region::find($this->scope_id);
+            $region = $cache->entity('region', $this->scope_id);
             if ($region) {
                 $result->push(new self(['scope_type' => 'branch', 'scope_id' => $region->branch_id]));
             }
         }
 
         if ($this->scope_type === 'center') {
-            $center = Center::with('region')->find($this->scope_id);
+            $center = $cache->entity('center', $this->scope_id);
             if ($center) {
                 $result->push(new self(['scope_type' => 'region', 'scope_id' => $center->region_id]));
-                $result->push(new self(['scope_type' => 'branch', 'scope_id' => $center->region->branch_id]));
+                $result->push(new self(['scope_type' => 'branch', 'scope_id' => $cache->entity('region', $center->region_id)?->branch_id]));
             }
         }
 
         if ($this->scope_type === 'halaqa') {
-            $halaqa = Halaqa::find($this->scope_id);
+            $halaqa = $cache->entity('halaqa', $this->scope_id);
             if ($halaqa?->reference_type?->value === 'center') {
-                $center = Center::with('region')->find($halaqa->reference_id);
+                $center = $cache->entity('center', $halaqa->reference_id);
                 if ($center) {
                     $result->push(new self(['scope_type' => 'center', 'scope_id' => $center->id]));
                     $result->push(new self(['scope_type' => 'region', 'scope_id' => $center->region_id]));
-                    $result->push(new self(['scope_type' => 'branch', 'scope_id' => $center->region->branch_id]));
+                    $result->push(new self(['scope_type' => 'branch', 'scope_id' => $cache->entity('region', $center->region_id)?->branch_id]));
                 }
             } elseif ($halaqa?->reference_type?->value === 'region') {
-                $region = Region::find($halaqa->reference_id);
+                $region = $cache->entity('region', $halaqa->reference_id);
                 if ($region) {
                     $result->push(new self(['scope_type' => 'region', 'scope_id' => $region->id]));
                     $result->push(new self(['scope_type' => 'branch', 'scope_id' => $region->branch_id]));

@@ -63,10 +63,13 @@ class Student extends Model
     public static function standardRelations()
     {
         return [
-            'mosque',
+            // العلاقات المتداخلة تُحمَّل مسبقاً لأن الـ Resources تقرؤها لكل صف (المسجد ← المنطقة ← الفرع، ونطاقات ولي الأمر)
+            'mosque.region.branch',
             'maritalStatus',
             'moneyStatus',
-            'guardian',
+            'guardian.mosque.region.branch',
+            'guardian.scopes',
+            'surah',
             'guardianType',
             'prefixName',
             'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),

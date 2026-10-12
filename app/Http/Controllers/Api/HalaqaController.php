@@ -81,7 +81,11 @@ class HalaqaController extends Controller
 
         $query = $q['query'];
         $total = $q['count'];
-        $halaqas = $query->with(['reference', 'type', 'students', 'supervisors.user', 'lastStatus'])->get();
+        // قائمة الطلاب الكاملة لكل حلقة تُحمَّل فقط عند طلبها صراحةً (with_students=1)؛
+        // عدد الطلاب يُحسب ضمن الاستعلام نفسه بدل استعلام لكل حلقة
+        $halaqas = $query->with(['reference', 'type', 'supervisors.user', 'lastStatus'])
+            ->withActiveStudentsCount()
+            ->get();
 
         return $this->successWithPagination(
             HalaqaResource::collection($halaqas),
@@ -216,6 +220,9 @@ class HalaqaController extends Controller
                 ->where('scope_id', $halaqa->id)
                 ->whereNull('to_date')
                 ->update(['to_date' => now()]);
+
+            // التحديث عبر الاستعلام لا يطلق أحداث الموديل، فنفرّغ ذاكرة النطاقات المؤقتة يدوياً
+            app(\App\Support\ScopeCache::class)->flush();
 
             $this->assignTeacherToHalaqa(User::findOrFail($newTeacherId), $halaqa);
         }
