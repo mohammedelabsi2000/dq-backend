@@ -67,7 +67,9 @@ class ApprovalController extends Controller
                 fn($q) =>
                 $q->whereDate('created_at', '<=', $request->input('to_date'))
             )
-            ->with(['requester.roles']);
+            // مقدّم الطلب يُحمّل متجاوزاً GenderVisibilityScope: طلبات الإناث يقدّمها غالباً مشرفون ذكور،
+            // وبدون التجاوز يظهر عمود «مقدّم الطلب» فارغاً لمديرة دائرة الطالبات
+            ->with(['requester' => fn($q) => $q->withoutGlobalScope(GenderVisibilityScope::class)->with('roles')]);
 
         $q = $this->applyFilters($query, [
             'orderColumn' => 'created_at',

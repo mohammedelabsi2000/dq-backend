@@ -126,6 +126,19 @@ class ApprovalRequest extends Model
         if ($user->isGlobalAdmin()) {
             $q = $query;
 
+            // مدير دائرة بلا صلاحية «عرض الجنسين» (قسم الطلاب/الطالبات) ← طلبات جنسه فقط من كل الفروع،
+            // إضافةً إلى الطلبات التي قدّمها هو شخصياً
+            if (!$user->can('gender_visibility')) {
+                $q->where(function ($q) use ($user) {
+                    $q->where('requested_by', $user->id)
+                        ->orWhereHasMorph(
+                            'approvable',
+                            [User::class, Halaqa::class, Student::class],
+                            fn($q) => $q->withTrashed()->where('gender', $user->gender)
+                        );
+                });
+            }
+
             if ($type) $q->where('approvable_type', $type);
             return $q;
         }

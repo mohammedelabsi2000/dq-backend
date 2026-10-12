@@ -255,7 +255,8 @@ class Student extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isGlobalAdmin() && $user->can('gender_visibility')) {
+        // تقييد الجنس يطبّقه GenderVisibilityScope، فلا حاجة لاشتراط gender_visibility هنا
+        if ($user->isGlobalAdmin()) {
             return $query;
         }
 
