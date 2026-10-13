@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->string('name')->comment('اسم اللجنة');
             $table->boolean('is_multi_subject')->default(false)->comment('هل اللجنة لعدة مساقات؟');
-            $table->unsignedBigInteger('standard_committee_id')->nullable()->unique()->after('id');
+            $table->unsignedBigInteger('standard_committee_id')->nullable()->unique();
             $table->foreignId('subject_id')->nullable()->comment('المساق - للجنة المساق الواحد فقط')
                 ->constrained('subjects');
             $table->date('start_date')->comment('تاريخ البدء');
