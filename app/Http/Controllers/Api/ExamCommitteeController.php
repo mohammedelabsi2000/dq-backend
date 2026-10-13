@@ -322,7 +322,7 @@ class ExamCommitteeController extends Controller
             'is_multi_subject.required' => 'حدّد هل اللجنة لعدة مساقات أم لمساق واحد',
             'start_date.required' => 'تاريخ البدء مطلوب',
             'gender.required' => 'فئة اللجنة (طلاب أم طالبات) مطلوبة',
-            'gender.in' => 'فئة اللجنة يجب أن تكون طلاب (male) أو طالبات (female)',
+            'gender.in' => 'فئة اللجنة يجب أن تكون طلاب (ذكر) أو طالبات (أنثى)',
             'subject_id.exists' => 'المساق المحدد غير موجود',
             'branch_id.exists' => 'الفرع المحدد غير موجود',
             'region_id.exists' => 'المحلية المحددة غير موجودة',

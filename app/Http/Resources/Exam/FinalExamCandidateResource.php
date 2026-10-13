@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources\Exam;
 
-use App\Enums\Gender;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -27,7 +26,7 @@ class FinalExamCandidateResource extends JsonResource
                 'id' => $student?->id,
                 'full_name' => $student?->full_name,
                 'identity' => $student?->identity,
-                'gender' => $student?->gender === Gender::Male ? 'male' : 'female',
+                'gender' => $student?->gender?->value,
             ],
 
             'subject' => $this->subject?->only(['id', 'title']),

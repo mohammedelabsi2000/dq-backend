@@ -13,6 +13,7 @@ class ExamCommitteeResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'status' => $this->status,
 
             // لجنة لعدة مساقات، أو لمساق واحد محدد
             'is_multi_subject' => $this->is_multi_subject,
@@ -22,7 +23,7 @@ class ExamCommitteeResource extends JsonResource
             'start_date' => $this->start_date?->format('Y-m-d'),
 
             // الفئة: طلاب أم طالبات
-            'gender' => $this->gender === Gender::Male ? 'male' : 'female',
+            'gender' => $this->gender?->value,
             'gender_label' => $this->gender === Gender::Male ? 'طلاب' : 'طالبات',
 
             'branch_id' => $this->branch_id,
