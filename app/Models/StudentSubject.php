@@ -72,6 +72,37 @@ class StudentSubject extends Model
         return $this->belongsTo(LevelTrack::class);
     }
 
+    /**
+     * تنسيب الطالب في هذه المادة للجنة اختبار نهائي (إن وجد)
+     */
+    public function examCommitteeStudent()
+    {
+        return $this->hasOne(ExamCommitteeStudent::class);
+    }
+
+    /**
+     * المرشحون للاختبار النهائي: ما زالوا يدرسون المادة واجتازوا الاختبار التجريبي.
+     * افتراضياً يُستثنى من نُسِّب للجنة.
+     */
+    public function scopeFinalExamCandidates($query, bool $unassignedOnly = true)
+    {
+        // whereHas('student') يطبّق قاعدة رؤية الجنس: لا يظهر طالب لا يحق للمستخدم رؤيته
+        $query->whereHas('student')
+            ->whereNull('student_subjects.to_date')
+            ->where(function ($q) {
+                $q->whereNull('result_status_id')
+                    ->orWhereHas('resultStatus', fn($q) => $q->where('const_key', 'in_progress'));
+            })
+            // الاختبار الناجح هو دائماً آخر محاولة: لا تُفتح محاولة جديدة بعد النجاح
+            ->whereHas('trialExams', fn($q) => $q->whereColumn('mark', '>=', 'success_mark'));
+
+        if ($unassignedOnly) {
+            $query->whereDoesntHave('examCommitteeStudent');
+        }
+
+        return $query;
+    }
+
     public function recitationExams()
     {
         return $this->hasMany(RecitationExam::class);

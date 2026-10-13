@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Http\Resources\Exam;
+
+use App\Enums\Gender;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * طالب مرشح للاختبار النهائي في مادة (StudentSubject اجتاز الاختبار التجريبي).
+ * يُستخدم لقائمة المرشحين ولقائمة طلاب اللجنة.
+ */
+class FinalExamCandidateResource extends JsonResource
+{
+    public function toArray($request)
+    {
+        $student = $this->student;
+        $mosque = $student?->mosque;
+        $region = $mosque?->region;
+        $trialExam = $this->latestTrialExam;
+        $assignment = $this->examCommitteeStudent;
+
+        return [
+            // المعرّف المستخدم عند التنسيب للجنة
+            'student_subject_id' => $this->id,
+
+            'student' => [
+                'id' => $student?->id,
+                'full_name' => $student?->full_name,
+                'identity' => $student?->identity,
+                'gender' => $student?->gender === Gender::Male ? 'male' : 'female',
+            ],
+
+            'subject' => $this->subject?->only(['id', 'title']),
+            'plan' => $this->level?->plan?->only(['id', 'name']),
+            'level' => $this->level?->only(['id', 'name']),
+
+            'branch' => $region?->branch?->only(['id', 'name']),
+            'region' => $region?->only(['id', 'name']),
+            'mosque' => $mosque?->only(['id', 'name']),
+
+            // نتيجة الاختبار التجريبي التي رشّحته
+            'trial_exam' => $trialExam ? [
+                'id' => $trialExam->id,
+                'mark' => $trialExam->mark,
+                'success_mark' => $trialExam->success_mark,
+                'attempt_number' => $trialExam->attempt_number,
+                'exam_date' => $trialExam->exam_date?->format('Y-m-d'),
+            ] : null,
+
+            // اللجنة المنسَّب لها (null لو لم يُنسَّب بعد)
+            'committee' => $assignment?->committee?->only(['id', 'name']),
+        ];
+    }
+}
