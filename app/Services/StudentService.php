@@ -7,6 +7,7 @@ use App\Models\HalaqaStudent;
 use App\Models\Level;
 use App\Models\Plan;
 use App\Models\PreviousAchievement;
+use App\Models\Scopes\GenderVisibilityScope;
 use App\Models\Student;
 use App\Models\StudentPlan;
 use App\Models\User;
@@ -88,7 +89,12 @@ class StudentService
 
     private function findOrCreateGuardian(string $identity, string $studentName, User $requester = null)
     {
-        $guardian = User::withTrashed()->where('identity', $identity)->first();
+        // ولي الأمر قد يكون من الجنس الآخر (الأم مثلاً)، فلا يطبَّق عليه GenderVisibilityScope؛
+        // وإلا لن يُعثر عليه وستفشل محاولة إنشائه من جديد بتكرار البريد/الهوية
+        $guardian = User::withoutGlobalScope(GenderVisibilityScope::class)
+            ->withTrashed()
+            ->where('identity', $identity)
+            ->first();
 
         if (!$guardian) {
             $idQueryServices = new IdQueryServices();

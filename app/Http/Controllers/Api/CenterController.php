@@ -24,7 +24,8 @@ class CenterController extends Controller
         $this->authorize('viewAny', Center::class);
         $query = Center::query()->visibleTo(auth()->user());
 
-        if (auth()->user()->hasPermissionTo('centers.restore')) {
+        // المراكز المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('centers.restore')) {
             $query = $query->withTrashed();
         }
 

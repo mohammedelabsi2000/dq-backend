@@ -155,7 +155,9 @@ class Student extends Model
 
     public function guardian()
     {
-        return $this->belongsTo(User::class, 'guardian_id', 'identity');
+        // ولي الأمر يظهر مع الطالب حتى لو كان من الجنس الآخر (الأم مثلاً)
+        return $this->belongsTo(User::class, 'guardian_id', 'identity')
+            ->withoutGlobalScope(GenderVisibilityScope::class);
     }
 
     public function halaqaEnrollments()
