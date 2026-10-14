@@ -11,6 +11,7 @@ use App\Models\StudentSubject;
 use App\Models\TrialExam;
 use App\Services\ExamService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentSubjectController extends Controller
 {
@@ -137,20 +138,48 @@ class StudentSubjectController extends Controller
             );
         }
 
-        $studentSubject->update($validated);
+        // التجميد والاجتياز ينقلان الطالب للمساق التالي في مساره:
+        // المجتاز يُعتبر منجزاً، والمجمّد يبقى مطلوباً في الخطة (لا يُحتسب منجزاً) حتى يُلغى تجميده ويُنجز
+        $frozenId = ResultStatus::Frozen->id();
+        $newStatusId = $validated['result_status_id'] ?? null;
 
-        /* $studentSubject->load([
-            'student',
-            'subject',
-            'level',
-            'resultStatus',
-            'teacher',
-        ]); */
+        // التجميد وإلغاؤه والاجتياز لكل منها صلاحية، أياً كانت الواجهة التي غيّرت الحالة
+        if ($newStatusId && $newStatusId != $studentSubject->result_status_id) {
+            $required = match (true) {
+                (int) $newStatusId === $frozenId, (int) $studentSubject->result_status_id === $frozenId => 'student_subjects.freeze',
+                (int) $newStatusId === $passedId => 'student_subjects.pass',
+                default => null,
+            };
 
-        
+            if ($required && !$request->user()->can($required)) {
+                return $this->error('غير مصرح - لا تملك صلاحية ' . ($required === 'student_subjects.freeze' ? 'تجميد المساق' : 'اجتياز المساق'), 403);
+            }
+        }
+        $movesOn = $newStatusId && $newStatusId != $studentSubject->result_status_id
+            && in_array((int) $newStatusId, [$passedId, $frozenId], true);
+
+        if ($movesOn && (int) $newStatusId === $passedId) {
+            $today = now('Asia/Gaza')->toDateString();
+            $validated['grade_date'] ??= $studentSubject->grade_date?->toDateString() ?? $today;
+            $validated['to_date'] ??= $studentSubject->to_date?->toDateString() ?? $today;
+        }
+
+        $next = DB::transaction(function () use ($studentSubject, $validated, $movesOn, $exams) {
+            $studentSubject->update($validated);
+
+            return $movesOn ? $exams->enrollInNextSubject($studentSubject) : null;
+        });
+
+        $message = 'تم تحديث مساق الطالب';
+        if ($movesOn) {
+            $message = $next
+                ? "تم تحديث حالة المساق، وانتقل الطالب إلى مساق \"{$next->subject?->title}\""
+                : 'تم تحديث حالة المساق، ولا يوجد مساق تالٍ في هذا المسار';
+        }
 
         return $this->success(
-            new StudentSubjectResource($studentSubject)
+            new StudentSubjectResource($studentSubject),
+            $message
         );
     }
     public function destroy(StudentSubject $studentSubject)

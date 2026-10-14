@@ -77,7 +77,35 @@ class StudentSubject extends Model
      */
     public function examCommitteeStudent()
     {
-        return $this->hasOne(ExamCommitteeStudent::class);
+        return $this->activeCommitteeAssignment();
+    }
+
+    /**
+     * كل تنسيبات الطالب في هذه المادة للجان (بما فيها لجان سابقة رسب أو غاب فيها)
+     */
+    public function examCommitteeStudents()
+    {
+        return $this->hasMany(ExamCommitteeStudent::class);
+    }
+
+    /**
+     * التنسيب الحالي: لجنة لم تصل نتيجة الطالب منها بعد
+     */
+    public function activeCommitteeAssignment()
+    {
+        return $this->hasOne(ExamCommitteeStudent::class)
+            ->whereNotExists(function ($q) {
+                $q->selectRaw(1)
+                    ->from('final_exams')
+                    ->whereColumn('final_exams.student_subject_id', 'exam_committee_students.student_subject_id')
+                    ->whereColumn('final_exams.exam_committee_id', 'exam_committee_students.exam_committee_id')
+                    ->whereNull('final_exams.deleted_at');
+            });
+    }
+
+    public function finalExams()
+    {
+        return $this->hasMany(FinalExam::class);
     }
 
     /**
@@ -96,8 +124,9 @@ class StudentSubject extends Model
             // الاختبار الناجح هو دائماً آخر محاولة: لا تُفتح محاولة جديدة بعد النجاح
             ->whereHas('trialExams', fn($q) => $q->whereColumn('mark', '>=', 'success_mark'));
 
+        // من رسب أو غاب في لجنة سابقة يعود مرشحاً؛ المستثنى فقط من ينتظر نتيجة لجنته الحالية
         if ($unassignedOnly) {
-            $query->whereDoesntHave('examCommitteeStudent');
+            $query->whereDoesntHave('activeCommitteeAssignment');
         }
 
         return $query;

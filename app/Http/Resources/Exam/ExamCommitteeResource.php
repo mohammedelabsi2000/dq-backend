@@ -13,7 +13,18 @@ class ExamCommitteeResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            // تسمية الحالة (مسودة، أو تسمية حالة الدفعة في الجودة) ومفتاحها في الجودة
             'status' => $this->status,
+            'quality_status' => $this->quality_status,
+            'exam_datetime' => $this->exam_datetime?->format('Y-m-d H:i'),
+            'teacher_id' => $this->teacher_id,
+            'teacher' => $this->whenLoaded('teacher', fn() => $this->teacher ? ['id' => $this->teacher->id, 'full_name' => $this->teacher->full_name ?: $this->teacher->name, 'identity' => $this->teacher->identity] : null),
+            // تُعدَّل اللجنة وطلابها قبل الاعتماد أو بعد رفض الجودة فقط
+            'is_editable' => $this->resource->isEditable(),
+            'standard_committee_id' => $this->standard_committee_id,
+            'sent_at' => $this->sent_at?->toDateTimeString(),
+            'status_updated_at' => $this->status_updated_at?->toDateTimeString(),
+            'quality_notes' => $this->quality_notes,
 
             // لجنة لعدة مساقات، أو لمساق واحد محدد
             'is_multi_subject' => $this->is_multi_subject,

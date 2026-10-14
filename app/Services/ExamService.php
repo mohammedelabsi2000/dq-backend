@@ -17,8 +17,8 @@ use Illuminate\Validation\ValidationException;
  * مسار الطالب في المادة بعد الحفظ:
  *   الحفظ (الإنجاز اليومي) ← السرد التجريبي ← الاختبار التجريبي ← الاختبار النهائي ← اعتماد نجاح المادة والانتقال للمادة التالية.
  *
- * الاختبار النهائي لم يُنفَّذ بعد: النجاح في الاختبار التجريبي ينقل الطالب لمرحلة final_exam فقط،
- * واعتماد المادة والانتقال للتالية (completeSubject) سيُستدعى من الاختبار النهائي.
+ * النجاح في الاختبار التجريبي ينقل الطالب لمرحلة final_exam، فيُنسَّب للجنة تُرسل للجودة.
+ * نتيجة الاختبار النهائي تصل من الجودة (QualityService)، وعند النجاح يُستدعى completeSubject.
  *
  * كل اختبار مرتبط بسجل الطالب في المادة (StudentSubject) فكل خطة مستقلة عن الأخرى.
  * حدود النجاح (الأخطاء/التنبيهات المسموحة وعلامة النجاح) تُنسخ من المادة عند إنشاء السجل.
@@ -349,7 +349,7 @@ class ExamService
 
     /**
      * اعتماد نجاح الطالب في المادة ونقله للمادة التالية في مساره.
-     * يُستدعى عند اجتياز الاختبار النهائي (لم يُنفَّذ بعد).
+     * يُستدعى عند وصول نجاح الطالب في الاختبار النهائي من الجودة.
      */
     public function completeSubject(StudentSubject $studentSubject, ?float $grade, ?string $date = null): ?StudentSubject
     {
@@ -388,8 +388,8 @@ class ExamService
                 ->latest('id')
                 ->first();
 
-            // مادة أنجزها الطالب في هذا المستوى (مثلاً معادلة): ننتقل لما بعدها
-            if ($existing && (int) $existing->result_status_id === ResultStatus::Passed->id()) {
+            // مادة أنجزها الطالب في هذا المستوى (مثلاً معادلة)، أو مجمّدة له: ننتقل لما بعدها
+            if ($existing && in_array((int) $existing->result_status_id, [ResultStatus::Passed->id(), ResultStatus::Frozen->id()], true)) {
                 continue;
             }
 

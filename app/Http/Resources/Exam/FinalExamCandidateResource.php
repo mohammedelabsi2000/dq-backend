@@ -16,7 +16,8 @@ class FinalExamCandidateResource extends JsonResource
         $mosque = $student?->mosque;
         $region = $mosque?->region;
         $trialExam = $this->latestTrialExam;
-        $assignment = $this->examCommitteeStudent;
+        $assignment = $this->activeCommitteeAssignment;
+        $finalExam = $this->relationLoaded('finalExams') ? $this->finalExams->sortByDesc('attempt_number')->first() : null;
 
         return [
             // المعرّف المستخدم عند التنسيب للجنة
@@ -46,8 +47,19 @@ class FinalExamCandidateResource extends JsonResource
                 'exam_date' => $trialExam->exam_date?->format('Y-m-d'),
             ] : null,
 
-            // اللجنة المنسَّب لها (null لو لم يُنسَّب بعد)
+            // اللجنة المنسَّب لها وتنتظر نتيجته (null لو لم يُنسَّب، أو وصلت نتيجته)
             'committee' => $assignment?->committee?->only(['id', 'name']),
+
+            // نتيجة الاختبار النهائي كما وصلت من الجودة (في قائمة طلاب اللجنة فقط)
+            'final_exam' => $this->when($this->relationLoaded('finalExams'), fn() => $finalExam ? [
+                'id' => $finalExam->id,
+                'mark' => $finalExam->mark,
+                'success_mark' => $finalExam->success_mark,
+                'result' => $finalExam->result,
+                'attempt_number' => $finalExam->attempt_number,
+                'exam_date' => $finalExam->exam_date?->format('Y-m-d'),
+                'notes' => $finalExam->notes,
+            ] : null),
         ];
     }
 }

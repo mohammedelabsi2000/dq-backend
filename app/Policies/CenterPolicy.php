@@ -46,6 +46,7 @@ class CenterPolicy
 
     private function isVisible(User $user, Center $center): bool
     {
-        return Center::visibleTo($user)->where('id', $center->id)->exists();
+        // withTrashed: الاستعادة تفحص سجلاً محذوفاً
+        return Center::visibleTo($user)->withTrashed()->where('id', $center->id)->exists();
     }
 }

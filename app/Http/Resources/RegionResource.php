@@ -18,6 +18,7 @@ class RegionResource extends JsonResource
     {
         return [
             'id'                  => $this->id,
+            'deleted_at' => $this->deleted_at?->toDateTimeString(),
             'standard_region_id'  => $this->standard_region_id,
             'name'                => $this->name,
             'notes'               => $this->notes,

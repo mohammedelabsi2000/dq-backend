@@ -30,7 +30,8 @@ class HalaqaController extends Controller
 
         $query = Halaqa::query()->visibleTo(auth()->user())->where('is_approved', true);
 
-        if (auth()->user()->hasPermissionTo('halaqas.restore')) {
+        // المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('halaqas.restore')) {
             $query = $query->withTrashed();
         }
 

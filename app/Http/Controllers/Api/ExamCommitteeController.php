@@ -10,6 +10,7 @@ use App\Models\ExamCommittee;
 use App\Models\ExamCommitteeStudent;
 use App\Models\Region;
 use App\Models\StudentSubject;
+use App\Services\QualityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -25,8 +26,10 @@ class ExamCommitteeController extends Controller
         'subject',
         'level.plan',
         'latestTrialExam',
-        'examCommitteeStudent.committee',
+        'activeCommitteeAssignment.committee',
     ];
+
+    private const LOCKED_MESSAGE = 'لا يمكن تعديل اللجنة أو طلابها بعد اعتمادها وإرسالها للجودة';
 
     // ========================
     // اللجان
@@ -50,12 +53,16 @@ class ExamCommitteeController extends Controller
             $query->where('is_multi_subject', $request->boolean('is_multi_subject'));
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, [
             'searchColumns' => ['name', 'exam_location'],
             'orderBy' => $request->input('order_by', 'desc'),
         ]);
 
-        $committees = $query->with(['subject', 'branch', 'region'])->get();
+        $committees = $query->with(['subject', 'branch', 'region', 'teacher'])->get();
 
         return $this->successWithPagination(
             ExamCommitteeResource::collection($committees),
@@ -87,6 +94,8 @@ class ExamCommitteeController extends Controller
 
     public function update(Request $request, ExamCommittee $committee)
     {
+        $this->ensureEditable($committee);
+
         $data = $this->validated($request, $committee);
 
         // تغيير الفئة أو المساق قد يجعل الطلاب المنسَّبين غير مطابقين للجنة
@@ -110,6 +119,8 @@ class ExamCommitteeController extends Controller
 
     public function destroy(ExamCommittee $committee)
     {
+        $this->ensureEditable($committee);
+
         if ($committee->committeeStudents()->exists()) {
             return $this->error('لا يمكن حذف لجنة منسَّب لها طلاب؛ أزل الطلاب أولاً', 422);
         }
@@ -119,6 +130,51 @@ class ExamCommitteeController extends Controller
         return $this->success(
             null,
             'تم حذف اللجنة بنجاح',
+            200
+        );
+    }
+
+    /**
+     * اعتماد اللجنة = إنشاء دفعة في الجودة. بعدها تُقفل اللجنة (وتُفتح إن رفضت الجودة الدفعة).
+     */
+    public function approve(Request $request, ExamCommittee $committee, QualityService $quality)
+    {
+        $this->ensureEditable($committee);
+
+        if (!$committee->committeeStudents()->exists()) {
+            return $this->error('لا يمكن اعتماد لجنة بلا طلاب؛ نسّب الطلاب أولاً', 422);
+        }
+
+        try {
+            $quality->sendCommittee($committee, $request->user());
+        } catch (\RuntimeException $e) {
+            return $this->error($e->getMessage(), 502);
+        }
+
+        return $this->success(
+            $this->payload($committee),
+            'تم اعتماد اللجنة وإرسالها للجودة',
+            200
+        );
+    }
+
+    /**
+     * زر التحديث: جلب حالة الدفعة وعلامات الطلاب من الجودة.
+     * الناجح تُعتمد مادته وينتقل للتالية، والراسب يعود لقائمة المرشحين.
+     */
+    public function syncQuality(ExamCommittee $committee, QualityService $quality)
+    {
+        try {
+            $summary = $quality->syncCommittee($committee);
+        } catch (\RuntimeException $e) {
+            return $this->error($e->getMessage(), 502);
+        }
+
+        $message = "تم التحديث من الجودة: الحالة \"{$summary['status']}\"، نتائج جديدة {$summary['created']}، بانتظار العلامة {$summary['pending']}";
+
+        return $this->success(
+            ['committee' => $this->payload($committee), 'summary' => $summary],
+            $message,
             200
         );
     }
@@ -209,9 +265,12 @@ class ExamCommitteeController extends Controller
     public function students(ExamCommittee $committee)
     {
         $query = StudentSubject::whereHas('student')
-            ->whereHas('examCommitteeStudent', fn($q) => $q->where('exam_committee_id', $committee->id));
+            ->whereHas('examCommitteeStudents', fn($q) => $q->where('exam_committee_id', $committee->id));
 
         [$query, $skip, $limit, $total] = $this->applyFiltersA($query, ['search' => '', 'orderBy' => 'asc', 'orderColumn' => 'student_subjects.id']);
+
+        // نتيجة الطالب في هذه اللجنة كما وصلت من الجودة
+        $query->with(['finalExams' => fn($q) => $q->where('exam_committee_id', $committee->id)]);
 
         return $this->successWithPagination(
             FinalExamCandidateResource::collection($query->with(self::CANDIDATE_RELATIONS)->get()),
@@ -226,6 +285,8 @@ class ExamCommitteeController extends Controller
      */
     public function assignStudents(Request $request, ExamCommittee $committee)
     {
+        $this->ensureEditable($committee);
+
         $data = $request->validate([
             'student_subject_ids' => 'required|array|min:1',
             'student_subject_ids.*' => 'integer|distinct',
@@ -234,8 +295,11 @@ class ExamCommitteeController extends Controller
         ]);
 
         $ids = collect($data['student_subject_ids'])->map(fn($id) => (int) $id);
-        $studentSubjects = StudentSubject::with(['student', 'subject', 'examCommitteeStudent.committee'])->findMany($ids)->keyBy('id');
+        $studentSubjects = StudentSubject::with(['student', 'subject', 'activeCommitteeAssignment.committee'])->findMany($ids)->keyBy('id');
         $candidateIds = StudentSubject::finalExamCandidates(false)->whereIn('id', $ids)->pluck('id');
+        // الجودة لا تقبل نفس الطالب مرتين في الدفعة (لجنة عدة مساقات): طالب واحد = مساق واحد في اللجنة
+        $committeeStudentIds = $committee->committeeStudents()->pluck('student_id');
+        $seenStudents = [];
         $errors = [];
 
         foreach ($ids as $index => $id) {
@@ -244,7 +308,9 @@ class ExamCommitteeController extends Controller
 
             $error = match (true) {
                 !$studentSubject || !$studentSubject->student => "سجل المادة رقم {$id} غير موجود",
-                (bool) $studentSubject->examCommitteeStudent => "الطالب {$name} منسَّب مسبقاً للجنة \"{$studentSubject->examCommitteeStudent->committee?->name}\"",
+                (bool) $studentSubject->activeCommitteeAssignment => "الطالب {$name} منسَّب مسبقاً للجنة \"{$studentSubject->activeCommitteeAssignment->committee?->name}\"",
+                $committee->committeeStudents()->where('student_subject_id', $id)->exists() => "الطالب {$name} اختُبر سابقاً في هذه اللجنة",
+                $committeeStudentIds->contains($studentSubject->student_id) || in_array($studentSubject->student_id, $seenStudents) => "الطالب {$name} منسَّب لهذه اللجنة في مساق آخر؛ الطالب يدخل اللجنة بمساق واحد",
                 !$candidateIds->contains($id) => "الطالب {$name} ليس مرشحاً للاختبار النهائي في هذا المساق (لم يجتز الاختبار التجريبي)",
                 $studentSubject->student->gender !== $committee->gender => "الطالب {$name} لا يطابق فئة اللجنة",
                 !$committee->is_multi_subject && (int) $studentSubject->subject_id !== (int) $committee->subject_id => "مساق الطالب {$name} يختلف عن مساق اللجنة",
@@ -253,6 +319,8 @@ class ExamCommitteeController extends Controller
 
             if ($error) {
                 $errors["student_subject_ids.{$index}"] = $error;
+            } else {
+                $seenStudents[] = $studentSubject->student_id;
             }
         }
 
@@ -280,6 +348,8 @@ class ExamCommitteeController extends Controller
 
     public function removeStudent(ExamCommittee $committee, StudentSubject $studentSubject)
     {
+        $this->ensureEditable($committee);
+
         $assignment = $committee->committeeStudents()->where('student_subject_id', $studentSubject->id)->first();
 
         if (!$assignment) {
@@ -299,6 +369,13 @@ class ExamCommitteeController extends Controller
     // Helpers
     // ========================
 
+    private function ensureEditable(ExamCommittee $committee): void
+    {
+        if (!$committee->isEditable()) {
+            throw ValidationException::withMessages(['committee' => self::LOCKED_MESSAGE]);
+        }
+    }
+
     /**
      * التحقق من بيانات اللجنة. عند التعديل تُدمج القيم المُرسلة مع القيم الحالية.
      */
@@ -316,6 +393,7 @@ class ExamCommitteeController extends Controller
             'region_id' => ['nullable', 'integer', 'exists:regions,id'],
             'proposed_exam_date' => ['nullable', 'date'],
             'exam_location' => ['nullable', 'string', 'max:255'],
+            'teacher_id' => ['nullable', 'integer', 'exists:users,id'],
             'notes' => ['nullable', 'string'],
         ], [
             'name.required' => 'اسم اللجنة مطلوب',
@@ -329,7 +407,7 @@ class ExamCommitteeController extends Controller
         ]);
 
         $data = array_merge(
-            $committee ? $committee->only(['name', 'is_multi_subject', 'subject_id', 'start_date', 'branch_id', 'region_id', 'proposed_exam_date', 'exam_location', 'notes']) : [],
+            $committee ? $committee->only(['name', 'is_multi_subject', 'subject_id', 'start_date', 'branch_id', 'region_id', 'teacher_id', 'proposed_exam_date', 'exam_location', 'notes']) : [],
             $input
         );
 
@@ -372,7 +450,7 @@ class ExamCommitteeController extends Controller
     private function payload(ExamCommittee $committee): ExamCommitteeResource
     {
         return new ExamCommitteeResource(
-            $committee->fresh()->load(['subject', 'branch', 'region'])->loadCount('committeeStudents')
+            $committee->fresh()->load(['subject', 'branch', 'region', 'teacher'])->loadCount('committeeStudents')
         );
     }
 }

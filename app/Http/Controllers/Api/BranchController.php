@@ -18,7 +18,8 @@ class BranchController extends Controller
 
         $query = Branch::query()->visibleTo(auth()->user());
 
-        if (auth()->user()->hasPermissionTo('branches.restore')) {
+        // المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('branches.restore')) {
             $query = $query->withTrashed();
         }
 

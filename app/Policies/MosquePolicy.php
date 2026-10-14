@@ -71,7 +71,8 @@ class MosquePolicy
 
     private function isVisible($user, Mosque $mosque): bool
     {
-        return Mosque::visibleTo($user)->where('id', $mosque->id)->exists();
+        // withTrashed: الاستعادة تفحص سجلاً محذوفاً
+        return Mosque::visibleTo($user)->withTrashed()->where('id', $mosque->id)->exists();
     }
 
     /**

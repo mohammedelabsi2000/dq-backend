@@ -53,15 +53,15 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
 
     // Geographical hierarchy management (Regions -> Branches -> [Centers & Mosques] -> Halaqas)
     Route::apiResource('branches', BranchController::class);
-    Route::post('branches/{branch}/restore', [BranchController::class, 'restore']);
+    Route::post('branches/{branch}/restore', [BranchController::class, 'restore'])->withTrashed();
     Route::apiResource('regions', RegionController::class);
-    Route::post('regions/{region}/restore', [RegionController::class, 'restore']);
+    Route::post('regions/{region}/restore', [RegionController::class, 'restore'])->withTrashed();
     Route::apiResource('mosques', MosqueController::class);
-    Route::post('mosques/{mosque}/restore', [MosqueController::class, 'restore']);
+    Route::post('mosques/{mosque}/restore', [MosqueController::class, 'restore'])->withTrashed();
     Route::apiResource('centers', CenterController::class);
-    Route::post('centers/{center}/restore', [CenterController::class, 'restore']);
+    Route::post('centers/{center}/restore', [CenterController::class, 'restore'])->withTrashed();
     Route::apiResource('halaqas', HalaqaController::class);
-    Route::post('halaqas/{halaqa}/restore', [HalaqaController::class, 'restore']);
+    Route::post('halaqas/{halaqa}/restore', [HalaqaController::class, 'restore'])->withTrashed();
 
     // Sponsors (الكفلاء) management
     Route::apiResource('sponsors', SponsorController::class);
@@ -91,7 +91,7 @@ Route::middleware(['auth:sanctum', SetCurrentUserContext::class])->group(functio
         Route::post('import', [StudentController::class, 'import']);
         Route::post('import-with-relations', [StudentController::class, 'importWithRelations']);
         Route::get('{student}/images', [ImageController::class, 'studentImages']);
-        Route::post('{student}/restore', [StudentController::class, 'restore']);
+        Route::post('{student}/restore', [StudentController::class, 'restore'])->withTrashed();
     });
 
     // Halaqa students assignment

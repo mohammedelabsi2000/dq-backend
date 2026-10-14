@@ -46,6 +46,7 @@ class StudentPolicy
 
     private function isVisible(User $user, Student $student): bool
     {
-        return Student::visibleTo($user)->where('id', $student->id)->exists();
+        // withTrashed: الاستعادة تفحص سجلاً محذوفاً
+        return Student::visibleTo($user)->withTrashed()->where('id', $student->id)->exists();
     }
 }

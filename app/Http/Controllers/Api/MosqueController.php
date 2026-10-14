@@ -24,7 +24,8 @@ class MosqueController extends Controller
 
         $query = Mosque::query()->visibleTo(auth()->user());
 
-        if (auth()->user()->hasPermissionTo('mosques.restore')) {
+        // المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('mosques.restore')) {
             $query = $query->withTrashed();
         }
 

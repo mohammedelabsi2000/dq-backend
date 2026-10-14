@@ -64,7 +64,8 @@ class HalaqaPolicy
 
     private function isVisible(User $user, Halaqa $halaqa): bool
     {
-        return Halaqa::visibleTo($user)->where('id', $halaqa->id)->exists();
+        // withTrashed: الاستعادة تفحص سجلاً محذوفاً
+        return Halaqa::visibleTo($user)->withTrashed()->where('id', $halaqa->id)->exists();
     }
 
     private function isReferenceInScope(User $user, string $referenceType, int $referenceId): bool

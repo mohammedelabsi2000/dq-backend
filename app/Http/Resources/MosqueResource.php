@@ -18,6 +18,7 @@ class MosqueResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'deleted_at' => $this->deleted_at?->toDateTimeString(),
             'name' => $this->name,
             'notes' => $this->notes,
             // 'region'        => new RegionResource($this->region),

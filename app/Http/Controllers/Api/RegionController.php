@@ -22,7 +22,8 @@ class RegionController extends Controller
         $this->authorize('viewAny', Region::class);
         $query = Region::query()->visibleTo(auth()->user());
 
-        if (auth()->user()->hasPermissionTo('regions.restore')) {
+        // المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('regions.restore')) {
             $query = $query->withTrashed();
         }
 
