@@ -89,9 +89,9 @@ class StudentPlan extends Model
     public function setAsMain(): void
     {
         static::where('student_id', $this->student_id)
-              ->where('id', '!=', $this->id)
-              ->active()
-              ->update(['is_main' => false]);
+            ->where('id', '!=', $this->id)
+            ->active()
+            ->update(['is_main' => false]);
 
         $this->update(['is_main' => true]);
     }
@@ -120,9 +120,9 @@ class StudentPlan extends Model
 
         $this->update([
             'to_date' => $date,
-            'status'  => $status,
+            'status' => $status,
             'is_main' => false,
-            'notes'   => $notes ?? $this->notes,
+            'notes' => $notes ?? $this->notes,
         ]);
 
         // لو كانت الخطة الرئيسية وأُغلقت، عيّن أقدم خطة نشطة أخرى كرئيسية تلقائياً
@@ -134,5 +134,19 @@ class StudentPlan extends Model
 
             $nextPlan?->update(['is_main' => true]);
         }
+    }
+
+    public function studentLevels()
+    {
+        return $this->hasMany(
+            StudentLevel::class,
+            'student_id',
+            'student_id'
+        )->whereHas('level', function ($query) {
+            $query->whereColumn(
+                'levels.plan_id',
+                'student_plans.plan_id'
+            );
+        });
     }
 }

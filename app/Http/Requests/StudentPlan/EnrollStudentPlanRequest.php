@@ -29,6 +29,17 @@ class EnrollStudentPlanRequest extends DQFormRequest
     {
         $validator->after(function ($validator) {
 
+            // منع التنسيب لخطة ليس لها مستويات (الخطة المستهدفة هي خطة المسار إن وجدت وإلا plan_id)
+            $routePlan = $this->route('plan');
+            $targetPlanId = $routePlan instanceof Plan ? $routePlan->id : ($routePlan ?? $this->input('plan_id'));
+
+            if ($targetPlanId && !\App\Models\Level::where('plan_id', $targetPlanId)->exists()) {
+                $validator->errors()->add(
+                    'plan_id',
+                    'لا يمكن تنسيب الطلاب لهذه الخطة لأنها لا تحتوي على أي مستويات'
+                );
+            }
+
             // منع التحاق الطلاب بنفس الخطة مرتين وهي لا تزال نشطة
             if ($this->filled('student_ids') && $this->filled('plan_id')) {
                 $alreadyActiveInSamePlan = StudentPlan::whereIn('student_id', $this->student_ids)

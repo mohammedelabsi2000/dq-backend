@@ -24,7 +24,8 @@ class CenterController extends Controller
         $this->authorize('viewAny', Center::class);
         $query = Center::query()->visibleTo(auth()->user());
 
-        if (auth()->user()->hasPermissionTo('centers.restore')) {
+        // المراكز المحذوفة لا تظهر إلا عند طلبها صراحةً (with_trashed=1) لمن يملك صلاحية الاستعادة
+        if ($request->boolean('with_trashed') && auth()->user()->hasPermissionTo('centers.restore')) {
             $query = $query->withTrashed();
         }
 
@@ -54,9 +55,8 @@ class CenterController extends Controller
             });
         }
 
-        if ($request->boolean('with_relations')) {
-            $query->with(['region.branch', 'mosque']);
-        }
+        // CenterResource يعرض المنطقة والفرع والمسجد دائماً، فتُحمَّل مسبقاً بدل استعلام لكل صف
+        $query->with(['region.branch', 'mosque']);
 
         // if ($request->boolean('with_mosque')) {
         //     $query->with('mosque');

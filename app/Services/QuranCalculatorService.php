@@ -12,6 +12,14 @@ class QuranCalculatorService
      */
     public function calculateAyahsCount(int $fromSurah, int $fromAyah, int $toSurah, int $toAyah): int
     {
+        // نطاق تنازلي (من سورة متأخرة إلى سورة سابقة): مجموع مقاطعه
+        if ($fromSurah > $toSurah) {
+            return array_sum(array_map(
+                fn($segment) => $this->calculateAyahsCount(...$segment),
+                $this->segments($fromSurah, $fromAyah, $toSurah, $toAyah)
+            ));
+        }
+
         if ($fromSurah === $toSurah) {
             return ($toAyah - $fromAyah) + 1;
         }
@@ -37,6 +45,14 @@ class QuranCalculatorService
      */
     public function calculatePagesCount(int $fromSurah, int $fromAyah, int $toSurah, int $toAyah): float
     {
+        // نطاق تنازلي (من سورة متأخرة إلى سورة سابقة): مجموع مقاطعه
+        if ($fromSurah > $toSurah) {
+            return round(array_sum(array_map(
+                fn($segment) => $this->calculatePagesCount(...$segment),
+                $this->segments($fromSurah, $fromAyah, $toSurah, $toAyah)
+            )), 2);
+        }
+
         $firstVerse = Ayah::where('surah_id', $fromSurah)
                                 ->where('number', $fromAyah)
                                 ->first();
@@ -67,9 +83,12 @@ class QuranCalculatorService
     /**
      * التحقق من صحة نطاق الآيات المُدخل
      *
+     * في التنازلي تسير السور من الأخيرة للأولى والآيات داخل السورة من أولها،
+     * فالنهاية تكون في نفس السورة أو في سورة سابقة.
+     *
      * @return array<string, string> أخطاء بصيغة [field => message]، فاضية لو كل شيء سليم
      */
-    public function validateRange(int $fromSurah, int $fromAyah, int $toSurah, int $toAyah): array
+    public function validateRange(int $fromSurah, int $fromAyah, int $toSurah, int $toAyah, bool $descending = false): array
     {
         $errors = [];
 
@@ -88,10 +107,41 @@ class QuranCalculatorService
             $errors['to_ayah'] = 'رقم الآية يتجاوز عدد آيات السورة المحددة';
         }
 
-        if ($fromSurah > $toSurah || ($fromSurah === $toSurah && $fromAyah > $toAyah)) {
-            $errors['to_surah'] = 'نقطة النهاية يجب أن تكون بعد نقطة البداية';
+        $wrongSurahOrder = $descending ? $fromSurah < $toSurah : $fromSurah > $toSurah;
+
+        if ($wrongSurahOrder || ($fromSurah === $toSurah && $fromAyah > $toAyah)) {
+            $errors['to_surah'] = $descending
+                ? 'نقطة النهاية يجب أن تكون بعد نقطة البداية حسب الترتيب التنازلي (نفس السورة أو سورة سابقة)'
+                : 'نقطة النهاية يجب أن تكون بعد نقطة البداية';
         }
 
         return $errors;
+    }
+
+    /**
+     * تقسيم النطاق إلى مقاطع متصلة بترتيب المصحف، كل مقطع [من سورة، من آية، إلى سورة، إلى آية].
+     *
+     * النطاق التصاعدي مقطع واحد. النطاق التنازلي (مثل: الفلق 3 ← الإخلاص 2) يعني:
+     * بقية سورة البداية، ثم السور التي بينهما كاملة، ثم سورة النهاية من أولها حتى آية النهاية.
+     *
+     * @return array<int, array{0:int,1:int,2:int,3:int}>
+     */
+    public function segments(int $fromSurah, int $fromAyah, int $toSurah, int $toAyah): array
+    {
+        if ($fromSurah <= $toSurah) {
+            return [[$fromSurah, $fromAyah, $toSurah, $toAyah]];
+        }
+
+        $versesCount = Surah::pluck('verses_count', 'id');
+
+        $segments = [[$toSurah, 1, $toSurah, $toAyah]];
+
+        if ($fromSurah - $toSurah > 1) {
+            $segments[] = [$toSurah + 1, 1, $fromSurah - 1, (int) $versesCount[$fromSurah - 1]];
+        }
+
+        $segments[] = [$fromSurah, $fromAyah, $fromSurah, (int) $versesCount[$fromSurah]];
+
+        return $segments;
     }
 }

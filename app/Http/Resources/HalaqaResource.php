@@ -29,6 +29,7 @@ class HalaqaResource extends JsonResource
 
         return [
             'id' => $this->id,
+            'deleted_at' => $this->deleted_at?->toDateTimeString(),
 
             'name' => $this->name,
             'location' => $this->location,
@@ -75,9 +76,10 @@ class HalaqaResource extends JsonResource
                 'supervisors',
                 fn() => $this->supervisors->first()?->user
             ),
+            // active_students_count يأتي من withActiveStudentsCount() في استعلام القائمة؛ وإلا يُحسب باستعلام مستقل
             'students_count' => $this->when(
-                $this->relationLoaded('studentEnrollments') || $this->relationLoaded('students'),
-                fn() => $this->studentsCount()
+                isset($this->active_students_count) || $this->relationLoaded('studentEnrollments') || $this->relationLoaded('students'),
+                fn() => $this->active_students_count ?? $this->studentsCount()
             ),
 
             'approval' => $this->when(

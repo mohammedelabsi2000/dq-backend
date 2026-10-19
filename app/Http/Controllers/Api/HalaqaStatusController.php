@@ -28,7 +28,7 @@ class HalaqaStatusController extends Controller
             'orderColumn' => 'sort_order',
         ]);
 
-        $halaqaStatuses = $query->get();
+        $halaqaStatuses = $query->with('sponsorshipType')->get();
 
         return $this->successWithPagination(
             HalaqaStatusResource::collection($halaqaStatuses),

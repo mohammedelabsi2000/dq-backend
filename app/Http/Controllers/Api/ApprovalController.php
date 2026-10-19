@@ -8,8 +8,10 @@ use App\Http\Resources\ApprovalRequestResource;
 use App\Models\ApprovalRequest;
 use Illuminate\Http\Request;
 use App\Models\Halaqa;
+use App\Models\Scopes\GenderVisibilityScope;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\ScopeCache;
 use App\Http\Traits\ApiResponser;
 
 class ApprovalController extends Controller
@@ -66,10 +68,9 @@ class ApprovalController extends Controller
                 fn($q) =>
                 $q->whereDate('created_at', '<=', $request->input('to_date'))
             )
-            ->with([
-                'approvable' => fn($morphTo) => $morphTo->morphWith([User::class => ['roles']]),
-                'requester.roles',
-            ]);
+            // مقدّم الطلب يُحمّل متجاوزاً GenderVisibilityScope: طلبات الإناث يقدّمها غالباً مشرفون ذكور،
+            // وبدون التجاوز يظهر عمود «مقدّم الطلب» فارغاً لمديرة دائرة الطالبات
+            ->with(['requester' => fn($q) => $q->withoutGlobalScope(GenderVisibilityScope::class)->with(['roles', 'scopes'])]);
 
         $q = $this->applyFilters($query, [
             'orderColumn' => 'created_at',
@@ -78,6 +79,19 @@ class ApprovalController extends Controller
 
         $requests = $q['query']->get();
 
+        // نحمّل الكيانات المرتبطة (approvable) يدوياً متجاوزين GenderVisibilityScope: هذا القيد
+        // مخصص لمنع تصفح سجلات الجنس الآخر بشكل عام، وليس لإخفاء طلب المستخدم نفسه الذي قدّمه هو
+        // (مثال شائع: مشرف ذكر يضيف طالباً وليّ أمره أمّه، فيُنشأ للأم حساب/طلب اعتماد من جنس أنثى).
+        $this->loadApprovablesWithoutGenderScope($requests);
+
+        // تحميل كيانات نطاقات مقدّمي الطلبات والمستخدمين المطلوب اعتمادهم دفعة واحدة بدل استعلام لكل صف
+        app(ScopeCache::class)->prime(
+            $requests->pluck('requester.scopes')
+                ->merge($requests->where('approvable_type', 'user')->pluck('approvable.scopes'))
+                ->flatten()
+                ->filter()
+        );
+
         return $this->successWithPagination(
             ApprovalRequestResource::collection($requests),
             ['total' => $q['count'], 'skip' => $q['skip'], 'limit' => $q['limit']],
@@ -85,7 +99,44 @@ class ApprovalController extends Controller
         );
     }
 
-    
+    /**
+     * يحمّل علاقة approvable (Student/User/Halaqa) لكل طلب اعتماد يدوياً، متجاوزاً
+     * GenderVisibilityScope عمداً: رؤية المستخدم لطلباته التي قدّمها بنفسه لا يجب أن
+     * تُحجب بسبب جنس الكيان المرتبط (مثال: ولي أمر أنثى أضافه مشرف ذكر).
+     *
+     * @param \Illuminate\Support\Collection<int, ApprovalRequest> $requests
+     */
+    private function loadApprovablesWithoutGenderScope($requests): void
+    {
+        $modelsByType = [
+            'user'    => User::class,
+            'halaqa'  => Halaqa::class,
+            'student' => Student::class,
+        ];
+
+        foreach ($requests->groupBy('approvable_type') as $type => $group) {
+            $modelClass = $modelsByType[$type] ?? null;
+
+            if (!$modelClass) {
+                continue;
+            }
+
+            $query = $modelClass::withTrashed()
+                ->withoutGlobalScope(GenderVisibilityScope::class)
+                ->whereIn('id', $group->pluck('approvable_id')->unique());
+
+            if ($modelClass === User::class) {
+                $query->with(['roles.permissions', 'scopes', 'mosque.region.branch']);
+            }
+
+            $entities = $query->get()->keyBy('id');
+
+            foreach ($group as $approvalRequest) {
+                $approvalRequest->setRelation('approvable', $entities->get($approvalRequest->approvable_id));
+            }
+        }
+    }
+
     public function approve(Request $request, ApprovalRequest $approvalRequest)
     {
         $this->authorize('approve', $approvalRequest);

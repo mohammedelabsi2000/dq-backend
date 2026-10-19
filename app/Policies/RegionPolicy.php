@@ -46,6 +46,7 @@ class RegionPolicy
 
     private function isVisible(User $user, Region $region): bool
     {
-        return Region::visibleTo($user)->where('id', $region->id)->exists();
+        // withTrashed: الاستعادة تفحص سجلاً محذوفاً
+        return Region::visibleTo($user)->withTrashed()->where('id', $region->id)->exists();
     }
 }

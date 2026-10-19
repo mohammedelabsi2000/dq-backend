@@ -8,7 +8,7 @@ use App\Http\Requests\Plan\UpdatePlanRequest;
 use App\Http\Requests\StudentPlan\EnrollStudentPlanRequest;
 use App\Http\Requests\StudentPlan\UpdateStudentPlanRequest;
 use App\Http\Resources\PlanResource;
-use App\Http\Resources\StudentPlanResource;
+use App\Http\Resources\PlanStudentResource;
 use App\Models\Level;
 use App\Enums\PlanType;
 use App\Models\Plan;
@@ -235,7 +235,7 @@ class PlanController extends Controller
         $studentPlans = $query->first();
 
         return $this->successWithPagination(
-            new StudentPlanResource($studentPlans),
+            new PlanStudentResource($studentPlans),
             ['total' => $studentPlans->students->count(), 'skip' => 0, 'limit' => 10],
             'success',
             200
@@ -293,6 +293,12 @@ class PlanController extends Controller
             $student->plans()->syncWithPivotValues(
                 [$plan->id],
                 $data,
+                false
+            );
+            
+            $student->levels()->syncWithPivotValues(
+                [$startingLevelId],
+                ['from_date' => $validated['from_date']],
                 false
             );
         }
@@ -386,7 +392,7 @@ class PlanController extends Controller
         $plan->load('students');
 
         return $this->success(
-            new StudentPlanResource($plan),
+            new PlanStudentResource($plan),
             'تم تحديث الخطة بنجاح',
             200
         );

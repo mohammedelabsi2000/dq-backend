@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ResultStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentSubjec\StudentSubjectRequest;
 use App\Http\Resources\StudentSubjectResource;
+use App\Models\Constant;
 use App\Models\StudentSubject;
+use App\Models\TrialExam;
+use App\Services\ExamService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentSubjectController extends Controller
 {
@@ -30,9 +35,53 @@ class StudentSubjectController extends Controller
 
     public function store(StudentSubjectRequest $request)
     {
-        $studentSubject = StudentSubject::create(
-            $request->validated()
-        );
+        $data = $request->safe()->except(['on_previous_pass', 'result_status_key']);
+        $decision = $request->input('on_previous_pass');
+
+        if ($request->filled('result_status_key')) {
+            $resultStatusId = Constant::where('const_key', $request->input('result_status_key'))->value('id');
+            if ($resultStatusId) {
+                $data['result_status_id'] = $resultStatusId;
+            }
+        }
+
+        // الطالب نجح في هذه المادة سابقاً: يُنبَّه المستخدم ليقرر الإعادة أو الإعفاء
+        $previousPass = isset($data['student_id'], $data['subject_id'])
+            ? StudentSubject::previousPass($data['student_id'], $data['subject_id'])
+            : null;
+
+        if ($previousPass && !$decision) {
+            return $this->error(
+                'الطالب أنجز هذا المساق سابقاً. حدّد القرار في الحقل on_previous_pass: إعادة (retake) أو إعفاء (exempt)',
+                409,
+                null,
+                [
+                    'requires_decision' => true,
+                    'options' => ['retake', 'exempt'],
+                    'previous_student_subject' => new StudentSubjectResource($previousPass),
+                    'previous_plan' => $previousPass->level?->plan?->only(['id', 'name']),
+                ]
+            );
+        }
+
+        // إعفاء (معادلة): يُسجَّل ناجحاً مباشرة مع نسخ الدرجة من السجل السابق
+        if ($previousPass && $decision === 'exempt') {
+            $today = now('Asia/Gaza')->toDateString();
+            $note = 'معادلة من مساق أنجزه الطالب سابقاً'
+                . ($previousPass->level?->plan ? ' في خطة "' . $previousPass->level->plan->name . '"' : '')
+                . " (سجل رقم {$previousPass->id})";
+
+            $data = array_merge($data, [
+                'result_status_id' => $previousPass->result_status_id,
+                'grade' => $previousPass->grade,
+                'grade_date' => $previousPass->grade_date?->toDateString() ?? $today,
+                'from_date' => $data['from_date'] ?? $today,
+                'to_date' => $data['to_date'] ?? $today,
+                'notes' => trim(($data['notes'] ?? '') . "\n" . $note),
+            ]);
+        }
+
+        $studentSubject = StudentSubject::create($data);
 
         $studentSubject->load([
             'student',
@@ -63,22 +112,74 @@ class StudentSubjectController extends Controller
             new StudentSubjectResource($studentSubject)
         );
     }
-    public function update(StudentSubjectRequest $request, StudentSubject $studentSubject)
+    public function update(StudentSubjectRequest $request, StudentSubject $studentSubject, ExamService $exams)
     {
-        $studentSubject->update(
-            $request->validated()
-        );
 
-        $studentSubject->load([
-            'student',
-            'subject',
-            'level',
-            'resultStatus',
-            'teacher',
-        ]);
+        $validated = $request->validated();
+        if (isset($validated['result_status_key'])) {
+            $resultStatus = Constant::where('const_key', $validated['result_status_key'])->first();
+            if ($resultStatus) {
+                $validated['result_status_id'] = $resultStatus->id;
+            }
+        }
+        unset($validated['result_status_key'], $validated['on_previous_pass']);
+
+        // مادة الحفظ لا يُعتمد نجاحها يدوياً: النجاح يكون باجتياز الاختبار التجريبي (بعد السرد التجريبي)
+        $passedId = ResultStatus::Passed->id();
+
+        if (($validated['result_status_id'] ?? null) == $passedId
+            && $studentSubject->result_status_id != $passedId
+            && $exams->requiresExams($studentSubject->subject)
+            && $studentSubject->latestTrialExam?->status() !== TrialExam::PASSED) {
+            return $this->error(
+                'لا يمكن اعتماد نجاح الطالب في مادة حفظ قبل اجتياز السرد التجريبي ثم الاختبار التجريبي',
+                422,
+                ['result_status_key' => ['لم يجتز الطالب الاختبار التجريبي لهذه المادة']]
+            );
+        }
+
+        // التجميد والاجتياز ينقلان الطالب للمساق التالي في مساره:
+        // المجتاز يُعتبر منجزاً، والمجمّد يبقى مطلوباً في الخطة (لا يُحتسب منجزاً) حتى يُلغى تجميده ويُنجز
+        $frozenId = ResultStatus::Frozen->id();
+        $newStatusId = $validated['result_status_id'] ?? null;
+
+        // التجميد وإلغاؤه والاجتياز لكل منها صلاحية، أياً كانت الواجهة التي غيّرت الحالة
+        if ($newStatusId && $newStatusId != $studentSubject->result_status_id) {
+            $required = match (true) {
+                (int) $newStatusId === $frozenId, (int) $studentSubject->result_status_id === $frozenId => 'student_subjects.freeze',
+                (int) $newStatusId === $passedId => 'student_subjects.pass',
+                default => null,
+            };
+
+            if ($required && !$request->user()->can($required)) {
+                return $this->error('غير مصرح - لا تملك صلاحية ' . ($required === 'student_subjects.freeze' ? 'تجميد المساق' : 'اجتياز المساق'), 403);
+            }
+        }
+        $movesOn = $newStatusId && $newStatusId != $studentSubject->result_status_id
+            && in_array((int) $newStatusId, [$passedId, $frozenId], true);
+
+        if ($movesOn && (int) $newStatusId === $passedId) {
+            $today = now('Asia/Gaza')->toDateString();
+            $validated['grade_date'] ??= $studentSubject->grade_date?->toDateString() ?? $today;
+            $validated['to_date'] ??= $studentSubject->to_date?->toDateString() ?? $today;
+        }
+
+        $next = DB::transaction(function () use ($studentSubject, $validated, $movesOn, $exams) {
+            $studentSubject->update($validated);
+
+            return $movesOn ? $exams->enrollInNextSubject($studentSubject) : null;
+        });
+
+        $message = 'تم تحديث مساق الطالب';
+        if ($movesOn) {
+            $message = $next
+                ? "تم تحديث حالة المساق، وانتقل الطالب إلى مساق \"{$next->subject?->title}\""
+                : 'تم تحديث حالة المساق، ولا يوجد مساق تالٍ في هذا المسار';
+        }
 
         return $this->success(
-            new StudentSubjectResource($studentSubject)
+            new StudentSubjectResource($studentSubject),
+            $message
         );
     }
     public function destroy(StudentSubject $studentSubject)

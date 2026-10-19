@@ -63,10 +63,13 @@ class Student extends Model
     public static function standardRelations()
     {
         return [
-            'mosque',
+            // العلاقات المتداخلة تُحمَّل مسبقاً لأن الـ Resources تقرؤها لكل صف (المسجد ← المنطقة ← الفرع، ونطاقات ولي الأمر)
+            'mosque.region.branch',
             'maritalStatus',
             'moneyStatus',
-            'guardian',
+            'guardian.mosque.region.branch',
+            'guardian.scopes',
+            'surah',
             'guardianType',
             'prefixName',
             'halaqas' => fn($q) => $q->withPivot(['from_date', 'to_date', 'enrollment_status_id']),
@@ -152,7 +155,9 @@ class Student extends Model
 
     public function guardian()
     {
-        return $this->belongsTo(User::class, 'guardian_id', 'identity');
+        // ولي الأمر يظهر مع الطالب حتى لو كان من الجنس الآخر (الأم مثلاً)
+        return $this->belongsTo(User::class, 'guardian_id', 'identity')
+            ->withoutGlobalScope(GenderVisibilityScope::class);
     }
 
     public function halaqaEnrollments()
@@ -184,8 +189,50 @@ class Student extends Model
 
     public function plans()
     {
+        // return $this->hasMany(StudentPlan::class);
         return $this->belongsToMany(Plan::class, 'student_plans')
             ->withPivot(['is_main', 'status', 'starting_level_id', 'current_level_id', 'from_date', 'to_date', 'notes']);
+    }
+
+    public function studentPlans()
+    {
+        return $this->hasMany(StudentPlan::class);
+    }
+
+    public function levels()
+    {
+        /**
+         * plans
+         */
+        return $this->belongsToMany(Level::class, StudentLevel::class, 'student_id', 'level_id')
+            ->withPivot(['from_date', 'to_date', 'notes']);
+    }
+
+    public function studentLevels()
+    {
+        return $this->hasMany(StudentLevel::class);
+    }
+
+    public function unrelatedPlans()
+    {
+        return Plan::whereDoesntHave('studentPlans', function ($query) {
+            $query->where('student_id', $this->id);
+        });
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(
+            Subject::class,
+            StudentSubject::class,
+            'student_id',
+            'subject_id'
+        )->withPivot(['level_id', 'result_status_id', 'grade', 'from_date', 'to_date','grade_date', 'teacher_id', 'notes']);
+    }
+
+    public function studentSubjects()
+    {
+        return $this->hasMany(StudentSubject::class);
     }
 
     public function startingLevel()
@@ -213,7 +260,8 @@ class Student extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isGlobalAdmin() && $user->can('gender_visibility')) {
+        // تقييد الجنس يطبّقه GenderVisibilityScope، فلا حاجة لاشتراط gender_visibility هنا
+        if ($user->isGlobalAdmin()) {
             return $query;
         }
 
@@ -252,6 +300,11 @@ class Student extends Model
             )->pluck('id');
 
 
+
+            // إذا لم توجد حلقات في المركز، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
 
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 
@@ -313,6 +366,11 @@ class Student extends Model
 
 
 
+            // إذا لم توجد حلقات في المنطقة، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
+
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 
                 if ($halaqaIds->isNotEmpty()) {
@@ -370,6 +428,11 @@ class Student extends Model
             })->pluck('id');
 
 
+
+            // إذا لم توجد حلقات في الفرع، لا يعرض أي طلاب
+            if ($halaqaIds->isEmpty()) {
+                return $query->whereRaw('1 = 0');
+            }
 
             return $query->where(function ($q) use ($halaqaIds, $mosqueIds) {
 

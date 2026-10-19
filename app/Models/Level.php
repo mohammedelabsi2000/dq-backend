@@ -56,4 +56,42 @@ class Level extends Model
             ->withPivot('weight', 'order', 'id')
             ->withTimestamps();
     }
+
+    public function studentLevels()
+    {
+        return $this->hasMany(StudentLevel::class);
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'student_levels',
+            'level_id',
+            'student_id'
+        );
+    }
+
+    public function studentSubjects()
+    {
+        return $this->hasMany(StudentSubject::class);
+    }
+
+    // public function subjects()
+    // {
+    //     return $this->belongsToMany(
+    //         Subject::class,
+    //         'level_track_subjects',
+    //         'level_track_id',
+    //         'subject_id'
+    //     );
+    // }
+    public function subjects()
+    {
+        $levelTrackIds = $this->levelTracks()->pluck('id');
+
+        return Subject::whereHas('levelTracks', function ($q) use ($levelTrackIds) {
+            $q->whereIn('level_tracks.id', $levelTrackIds);
+        });
+    }
 }

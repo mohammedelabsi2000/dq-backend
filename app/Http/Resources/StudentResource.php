@@ -5,7 +5,9 @@ namespace App\Http\Resources;
 use App\Models\Constant;
 use App\Models\Level;
 use App\Models\Quran\Surah;
+use App\Support\LookupCache;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class StudentResource extends JsonResource
 {
@@ -65,8 +67,8 @@ class StudentResource extends JsonResource
             // الاعتماد
             'is_approved' => $this->is_approved,
             'approval' => [
-                'is_approved'      => $this->is_approved,
-                'status'           => $this->when(
+                'is_approved' => $this->is_approved,
+                'status' => $this->when(
                     $this->relationLoaded('approvalRequest'),
                     fn() => $this->approvalRequest?->status?->label()
                 ),
@@ -82,7 +84,9 @@ class StudentResource extends JsonResource
             'completed_juz' => $this->memorized_juz ?? null,
             'completed_juz_array' => $this->completed_juz ? array_map('intval', explode(',', $this->completed_juz)) : null,
             'surah_id' => $this->surah_id ?? null,
-            'last_surah_label' => Surah::find($this->surah_id)?->name_ar,
+            'last_surah_label' => ($this->relationLoaded('surah')
+                ? $this->surah
+                : app(LookupCache::class)->find(Surah::class, $this->surah_id))?->name_ar,
             'end_aya' => $this->end_aya ?? null,
             'memorization_direction' => $this->memorization_direction?->value,
             'memorization_direction_label' => $this->memorization_direction?->label(),
@@ -97,7 +101,7 @@ class StudentResource extends JsonResource
                         'to_date' => $halaqa->pivot->to_date,
                         'enrollment_status_id' => $halaqa->pivot->enrollment_status_id,
                         'enrollment_status' => $halaqa->pivot->enrollment_status_id ?
-                            Constant::find($halaqa->pivot->enrollment_status_id)?->name : null,
+                            app(LookupCache::class)->find(Constant::class, $halaqa->pivot->enrollment_status_id)?->name : null,
                     ];
                 });
             }),
@@ -105,7 +109,7 @@ class StudentResource extends JsonResource
             'from_date' => $this->pivot?->from_date,
             'to_date' => $this->pivot?->to_date,
             'enrollment_status' => new ConstantResource(
-                Constant::find($this->pivot?->enrollment_status_id)
+                app(LookupCache::class)->find(Constant::class, $this->pivot?->enrollment_status_id)
             ),
 
             'current_halaqa' => $this->whenLoaded('halaqas', function () {
@@ -116,7 +120,7 @@ class StudentResource extends JsonResource
                         'name' => $current->name,
                         'from_date' => $current->pivot->from_date,
                         'enrollment_status' => $current->pivot->enrollment_status_id ?
-                            Constant::find($current->pivot->enrollment_status_id)?->name : null,
+                            app(LookupCache::class)->find(Constant::class, $current->pivot->enrollment_status_id)?->name : null,
                     ];
                 }
                 return null;
@@ -134,10 +138,10 @@ class StudentResource extends JsonResource
                 return [
                     'starting_level_id' => $this->pivot->starting_level_id,
                     // 'starting_level' => $this->when($this->pivot->starting_level_id, fn() => new LevelResource(Level::find($this->pivot->starting_level_id))),
-
+    
                     'current_level_id' => $this->pivot->current_level_id,
                     // 'current_level' => $this->when($this->pivot->current_level_id, fn() => new LevelResource(Level::find($this->pivot->current_level_id))),
-
+    
                     'from_date' => $this->pivot->from_date,
                     'to_date' => $this->pivot->to_date,
 
@@ -152,5 +156,15 @@ class StudentResource extends JsonResource
                 ];
             }),
         ];
+    }
+
+    public function simple()
+    {
+        return $this->only(['id', 'full_name',]);
+    }
+
+    public function only(array $columns)
+    {
+        return Arr::only(($this)->resolve(), $columns);
     }
 }

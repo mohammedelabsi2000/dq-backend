@@ -3,6 +3,7 @@
 namespace App\Enums;
 
 use App\Contracts\HasLabelAndCode;
+use App\Helpers\ConstantHelper;
 use App\Models\Center;
 use App\Models\Region;
 
@@ -38,5 +39,10 @@ enum SubjectType: string implements HasLabelAndCode
     {
         $locale = auth()->user()?->locale ?? app()->getLocale();
         return $this->labels()[$locale] ?? $this->labels()['ar'];
+    }
+
+    public function id(): int
+    {
+        return ConstantHelper::getConstantIdByKey('subject_type', $this->value);
     }
 }

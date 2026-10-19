@@ -2,29 +2,98 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AchievementType;
+use App\Enums\SubjectType;
+use App\Enums\TrackEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DailyAchievement\StoreDailyAchievementRequest;
 use App\Http\Requests\DailyAchievement\UpdateDailyAchievementRequest;
+use App\Http\Resources\AvailableSubjectResource;
 use App\Http\Resources\DailyAchievementResource;
 use App\Http\Resources\StudentResource;
 use App\Models\DailyAchievement;
 use App\Models\Student;
+use App\Models\StudentSubject;
+use App\Models\Subject;
+use App\Services\ExamService;
 use App\Services\QuranCalculatorService;
+use App\Services\SubjectProgressService;
 use Illuminate\Http\Request;
 
 class DailyAchievementController extends Controller
 {
 
     public function __construct(
-        protected QuranCalculatorService $calculator
+        protected QuranCalculatorService $calculator,
+        protected SubjectProgressService $subjectProgress,
+        protected ExamService $exams
     ) {}
+
+    public function latestAchievement(Request $request, Student $student)
+    {
+        $this->authorize('viewAny', DailyAchievement::class);
+
+
+        $studentSubjects = Subject::whereIn('subject_type_id', [
+            SubjectType::Memorization->id(),
+            SubjectType::LimitedMemorization->id()
+        ])->whereHas('studentSubjects', function ($query) use ($student) {
+            $query->where('student_id', $student->id)
+                ->whereHas('levels', function ($query) {
+                    $query->whereHas('levelTracks', function ($query) {
+                        $query->where('track_id', TrackEnum::Memorization->id());
+                    });
+                });
+        })->get();
+
+        $studentSubjectIds = $studentSubjects->pluck('id')->toArray();
+
+        $latestAchievements = DailyAchievement::where('student_id', $student->id)
+            ->whereIn('subject_id', $studentSubjectIds)
+            ->orderBy('date', 'desc')
+            ->get()
+            ->groupBy('subject_id')
+            ->map(function ($achievements) {
+                return $achievements->first();
+            });
+
+        // subject {data,latestAchievement}
+        $studentSubjectsWithLatestAchievements = $studentSubjects->map(function ($subject) use ($latestAchievements) {
+            return [
+                ...$subject->toArray(),
+                'latest_achievement' => $latestAchievements->get($subject->id),
+            ];
+        });
+
+        return $this->success(
+            $studentSubjectsWithLatestAchievements,
+            'success',
+            200
+        );
+    }
+
+    public function lastAchievement(Request $request, Student $student)
+    {
+        $this->authorize('viewAny', DailyAchievement::class);
+
+        $latestAchievement = DailyAchievement::where('student_id', $student->id)
+            ->orderBy('date', 'desc')
+            ->first();
+
+        return $this->success(
+            new DailyAchievementResource($latestAchievement),
+            'success',
+            200
+        );
+    }
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', DailyAchievement::class);
 
         $query = DailyAchievement::query()
             ->visibleTo(auth()->user())
-            ->with(['student', 'teacher']);
+            ->with(['student', 'teacher', 'subject']);
 
         // Filter by student
         if ($request->has('student_id')) {
@@ -34,6 +103,11 @@ class DailyAchievementController extends Controller
         // Filter by teacher
         if ($request->has('teacher_id')) {
             $query->byTeacher($request->teacher_id);
+        }
+
+        // Filter by subject
+        if ($request->has('subject_id')) {
+            $query->bySubject($request->subject_id);
         }
 
         // Filter by date
@@ -98,8 +172,18 @@ class DailyAchievementController extends Controller
             $data['to_ayah']
         );
 
+        // اتجاه الحفظ هو اتجاه الجزء الذي سُجّل فيه الإنجاز حسب إعدادات المادة في خطة الطالب
+        $data['memorization_direction'] = $this->subjectProgress->directionAt(
+            StudentSubject::with('subject')->findOrFail($data['student_subject_id']),
+            $data['from_surah'],
+            $data['from_ayah']
+        );
+
         $achievement = DailyAchievement::create($data);
-        $achievement->load(['student', 'teacher']);
+
+        // عند اكتمال حفظ المادة يُنقل الطالب إلى السرد التجريبي
+        $this->syncExamStage($achievement);
+        $achievement->load(['student', 'teacher', 'subject']);
 
         return $this->success(
             new DailyAchievementResource($achievement),
@@ -112,7 +196,7 @@ class DailyAchievementController extends Controller
     {
         $this->authorize('view', $dailyAchievement);
 
-        $dailyAchievement->load(['student', 'teacher']);
+        $dailyAchievement->load(['student', 'teacher', 'subject']);
 
         return $this->success(
             new DailyAchievementResource($dailyAchievement),
@@ -127,28 +211,35 @@ class DailyAchievementController extends Controller
 
         $data = $request->validated();
 
-          // إعادة حساب عدد الآيات والصفحات لو تغيّر نطاق السور/الآيات
+        // إعادة حساب عدد الآيات والصفحات لو تغيّر نطاق السور/الآيات
         $rangeChanged = $request->filled('from_surah') || $request->filled('from_ayah')
-                     || $request->filled('to_surah') || $request->filled('to_ayah');
- 
+            || $request->filled('to_surah') || $request->filled('to_ayah');
+
         if ($rangeChanged) {
             $fromSurah = $data['from_surah'] ?? $daily_memorization->from_surah;
-            $fromAyah  = $data['from_ayah']  ?? $daily_memorization->from_ayah;
-            $toSurah   = $data['to_surah']   ?? $daily_memorization->to_surah;
-            $toAyah    = $data['to_ayah']    ?? $daily_memorization->to_ayah;
- 
+            $fromAyah = $data['from_ayah'] ?? $daily_memorization->from_ayah;
+            $toSurah = $data['to_surah'] ?? $daily_memorization->to_surah;
+            $toAyah = $data['to_ayah'] ?? $daily_memorization->to_ayah;
+
             $data['ayahs_count'] = $this->calculator->calculateAyahsCount(
-                $fromSurah, $fromAyah, $toSurah, $toAyah
+                $fromSurah,
+                $fromAyah,
+                $toSurah,
+                $toAyah
             );
- 
+
             $data['pages_count'] = $this->calculator->calculatePagesCount(
-                $fromSurah, $fromAyah, $toSurah, $toAyah
+                $fromSurah,
+                $fromAyah,
+                $toSurah,
+                $toAyah
             );
         }
 
-        
+
         $daily_memorization->update($data);
-        $daily_memorization->load(['student', 'teacher']);
+        $this->syncExamStage($daily_memorization);
+        $daily_memorization->load(['student', 'teacher', 'subject']);
 
         return $this->success(
             new DailyAchievementResource($daily_memorization),
@@ -160,7 +251,17 @@ class DailyAchievementController extends Controller
     {
         $this->authorize('delete', $daily_memorization);
 
+        // الحذف لآخر إنجاز في المادة فقط حتى لا تتكوّن فجوة في ترتيب الحفظ
+        if ($daily_memorization->hasLaterAchievements()) {
+            return $this->error('لا يمكن حذف إنجاز تم تسجيل إنجازات بعده؛ الحذف متاح لآخر إنجاز في المادة فقط', 422);
+        }
+
+        if ($daily_memorization->countsInProgress() && $this->exams->recitationStarted($daily_memorization->student_subject_id)) {
+            return $this->error('لا يمكن حذف إنجاز بعد تسجيل نتيجة السرد التجريبي للمادة', 422);
+        }
+
         $daily_memorization->delete();
+        $this->syncExamStage($daily_memorization);
 
         return $this->success(
             null,
@@ -168,16 +269,17 @@ class DailyAchievementController extends Controller
         );
     }
 
-    public function studentAchievements(Request $request, $studentId)
+    public function studentAchievements(Request $request, Student $student)
     {
         $this->authorize('viewAny', DailyAchievement::class);
 
-        $student = Student::findOrFail($studentId);
+        // $student = Student::findOrFail($studentId);
+        $studentId = $student->id;
 
         $query = DailyAchievement::query()
             ->byStudent($studentId)
             ->visibleTo(auth()->user())
-            ->with(['teacher']);
+            ->with(['teacher', 'subject']);
 
         // Filter by date range
         if ($request->has('from_date') && $request->has('to_date')) {
@@ -199,6 +301,54 @@ class DailyAchievementController extends Controller
             $data,
             ['total' => $total],
             'success',
+            200
+        );
+    }
+
+    /**
+     * مطابقة مرحلة السرد التجريبي مع حالة الحفظ بعد أي تغيير في إنجازات المادة
+     */
+    private function syncExamStage(DailyAchievement $achievement): void
+    {
+        $studentSubject = $achievement->studentSubject()->with('subject')->first();
+
+        if ($studentSubject) {
+            $this->exams->syncRecitationStage($studentSubject);
+        }
+    }
+
+    /**
+     * المواد الحالية للطالب مع المتبقي منها (غير المسجّل كإنجاز) لاستخدامها عند إضافة إنجاز يومي
+     */
+    public function getAvailableSubjects(Request $request, $studentId)
+    {
+        $this->authorize('viewAny', DailyAchievement::class);
+
+        Student::findOrFail($studentId);
+
+        $request->validate([
+            'achievement_type' => ['nullable', 'string', 'in:' . implode(',', AchievementType::getValues())],
+            'except_id' => ['nullable', 'integer'],
+        ]);
+
+        if ($this->subjectProgress->activePlans($studentId)->isEmpty()) {
+            return $this->success([], 'لا توجد خطة نشطة لهذا الطالب', 200);
+        }
+
+        $achievementType = $request->input('achievement_type') ?: AchievementType::NEW_MEMORIZATION->value;
+        $exceptId = $request->input('except_id') ? (int) $request->input('except_id') : null;
+
+        // ربط كل مادة بالمتبقي منها للطالب عبر علاقة وهمية
+        $studentSubjects = $this->subjectProgress->currentStudentSubjects($studentId)
+            ->each(fn($studentSubject) => $studentSubject->setRelation(
+                'progress',
+                $this->subjectProgress->progress($studentSubject, $achievementType, $exceptId)
+                    + ['exam_stage' => $this->exams->stage($studentSubject)]
+            ));
+
+        return $this->success(
+            AvailableSubjectResource::collection($studentSubjects),
+            'تم جلب المواد المتاحة بنجاح',
             200
         );
     }

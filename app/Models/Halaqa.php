@@ -79,6 +79,7 @@ class Halaqa extends Model
         return $this->belongsToMany(Student::class, 'halaqa_students')
             ->withPivot(['id', 'from_date', 'to_date', 'enrollment_status_id'])
             ->wherePivotNull('deleted_at')
+            ->where('students.is_approved', true)
             ->withTimestamps();
         // ->using(HalaqaStudent::class);
     }
@@ -140,10 +141,24 @@ class Halaqa extends Model
     //         ->orWhere('to_date', '>=', now())
     //         ->count();
     // }
+    /**
+     * نفس حساب studentsCount() لكن ضمن استعلام القائمة نفسه (active_students_count) بدل استعلام لكل حلقة
+     */
+    public function scopeWithActiveStudentsCount(Builder $query): Builder
+    {
+        return $query->withCount(['studentEnrollments as active_students_count' => function ($q) {
+            $q->whereHas('student', fn ($q) => $q->where('is_approved', true))
+                ->where(function ($q) {
+                    $q->whereNull('to_date')
+                        ->orWhere('to_date', '>=', now());
+                });
+        }]);
+    }
+
     public function studentsCount()
     {
         return $this->studentEnrollments()
-            ->whereHas('student')  // ← يستثني المحذوفين تلقائياً
+            ->whereHas('student', fn ($q) => $q->where('is_approved', true))  // ← يستثني المحذوفين وغير المعتمدين
             ->where(function ($q) {
                 $q->whereNull('to_date')
                     ->orWhere('to_date', '>=', now());

@@ -7,6 +7,7 @@ use App\Models\HalaqaStudent;
 use App\Models\Level;
 use App\Models\Plan;
 use App\Models\PreviousAchievement;
+use App\Models\Scopes\GenderVisibilityScope;
 use App\Models\Student;
 use App\Models\StudentPlan;
 use App\Models\User;
@@ -88,7 +89,12 @@ class StudentService
 
     private function findOrCreateGuardian(string $identity, string $studentName, User $requester = null)
     {
-        $guardian = User::withTrashed()->where('identity', $identity)->first();
+        // ولي الأمر قد يكون من الجنس الآخر (الأم مثلاً)، فلا يطبَّق عليه GenderVisibilityScope؛
+        // وإلا لن يُعثر عليه وستفشل محاولة إنشائه من جديد بتكرار البريد/الهوية
+        $guardian = User::withoutGlobalScope(GenderVisibilityScope::class)
+            ->withTrashed()
+            ->where('identity', $identity)
+            ->first();
 
         if (!$guardian) {
             $idQueryServices = new IdQueryServices();
@@ -213,6 +219,55 @@ class StudentService
             'from_date' => now()->toDateString(),
             'is_main' => true,
             'status' => 'active',
+        ]);
+
+        // إنشاء سجل التحاق الطالب بالمستوى
+        \App\Models\StudentLevel::create([
+            'student_id' => $student->id,
+            'level_id' => $startingLevel->id,
+            'from_date' => now()->toDateString(),
+        ]);
+
+        // إسناد المواد تلقائياً للطالب في المستوى الأول
+        $this->autoAssignSubjectsToLevel($student, $startingLevel);
+    }
+
+    /**
+     * إسناد المواد تلقائياً للطالب في مستوى معين
+     */
+    private function autoAssignSubjectsToLevel(Student $student, Level $level): void
+    {
+        // الحصول على أول مسار في المستوى
+        $levelTrack = \App\Models\LevelTrack::where('level_id', $level->id)
+            ->orderBy('id')
+            ->first();
+
+        if (!$levelTrack) {
+            return;
+        }
+
+        // الحصول على أول مادة في هذا المسار
+        $levelTrackSubject = \App\Models\LevelTrackSubject::where('level_track_id', $levelTrack->id)
+            ->orderBy('id')
+            ->first();
+
+        if (!$levelTrackSubject) {
+            return;
+        }
+
+        // الإسناد التلقائي لا يوجد فيه مستخدم يقرر، فلو كان الطالب ناجحاً في المادة سابقاً
+        // تُسند عادية مع ملاحظة ليراجعها المشرف (إعادة أو إعفاء)
+        $previousPass = \App\Models\StudentSubject::previousPass($student->id, $levelTrackSubject->subject_id);
+
+        // إسناد أول مادة فقط للطالب
+        \App\Models\StudentSubject::create([
+            'student_id' => $student->id,
+            'subject_id' => $levelTrackSubject->subject_id,
+            'level_id' => $level->id,
+            'from_date' => now()->toDateString(),
+            'notes' => $previousPass
+                ? "تنبيه: الطالب أنجز هذا المساق سابقاً (سجل رقم {$previousPass->id}) - يُراجَع للإعادة أو الإعفاء"
+                : null,
         ]);
     }
 }

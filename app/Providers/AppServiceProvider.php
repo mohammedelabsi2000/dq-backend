@@ -19,7 +19,11 @@ use Illuminate\Support\Facades\Schema;
 use App\Observers\AuditObserver;
 use App\Observers\DailyAchievementObserver;
 use App\Support\CurrentUserContext;
+use App\Support\LookupCache;
+use App\Support\ScopeCache;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Pagination\Paginator;
 
 use Illuminate\Support\Facades\File;
@@ -38,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(CurrentUserContext::class);
+        $this->app->scoped(ScopeCache::class);
+        $this->app->scoped(LookupCache::class);
     }
 
     /**
@@ -54,6 +60,20 @@ class AppServiceProvider extends ServiceProvider
         $this->registerAuditMacro();
         $this->registerAuditObservers();
         $this->configureMorphMap();
+        $this->configureScopeCache();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scope & Lookup Caches (عمرها طلب واحد فقط)
+    |--------------------------------------------------------------------------
+    */
+    protected function configureScopeCache(): void
+    {
+        Event::listen(RequestHandled::class, function () {
+            $this->app->make(ScopeCache::class)->flush();
+            $this->app->make(LookupCache::class)->flush();
+        });
     }
 
     /*

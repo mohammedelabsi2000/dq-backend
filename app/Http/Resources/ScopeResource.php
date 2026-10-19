@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Support\ScopeCache;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ScopeResource extends JsonResource
@@ -14,29 +15,8 @@ class ScopeResource extends JsonResource
      */
     public function toArray($request)
     {
-        $name = null;
-
-        switch ($this->scope_type) {
-            case 'branch':
-                $branch = \App\Models\Branch::find($this->scope_id);
-                $name = $branch?->name;
-                break;
-
-            case 'region':
-                $region = \App\Models\Region::find($this->scope_id);
-                $name = $region?->name;
-                break;
-
-            case 'center':
-                $center = \App\Models\Center::find($this->scope_id);
-                $name = $center?->name;
-                break;
-
-            case 'halaqa':
-                $halaqa = \App\Models\Halaqa::find($this->scope_id);
-                $name = $halaqa?->name;
-                break;
-        }
+        // الكيان يُجلب مرة واحدة لكل طلب مهما تكرر في الصفوف
+        $name = app(ScopeCache::class)->entity($this->scope_type, $this->scope_id)?->name;
 
         return [
             'type' => $this->scope_type,

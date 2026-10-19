@@ -15,34 +15,12 @@ class PlanStudentResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->id,
-            'plan_id' => $this->plan_id,
-            'student_id' => $this->student_id,
-            'assignment_type' => $this->assignment_type?->label(),
-            'criteria' => $this->criteria,
+            'plan' => new PlanResource($this),
 
-            // بيانات الطالب المرتبط
-            'student' => $this->whenLoaded('student', function () {
-                return [
-                    'id' => $this->student->id,
-                    'name' => $this->student->name,
-                    'dob' => $this->student->dob,
-                    'branch_id' => $this->student->branch_id,
-                    'region_id' => $this->student->region_id,
-                    'last_memorized' => $this->student->last_memorized,
-                ];
-            }),
+            'students' => StudentResource::collection($this->students),
 
-            // التواريخ
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+            // 'student_ids' => $this->students->pluck('id'),
 
-            // روابط مفيدة
-            'links' => [
-                'self' => url("/api/plan-assignments/{$this->id}"),
-                'plan' => url("/api/plans/{$this->plan_id}"),
-                'student' => url("/api/students/{$this->student_id}"),
-            ],
         ];
     }
 }

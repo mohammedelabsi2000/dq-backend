@@ -119,6 +119,23 @@ class PermissionSeeder extends Seeder
             ['name' => 'daily_achievements.update', 'title' => 'تعديل إنجاز يومي'],
             ['name' => 'daily_achievements.delete', 'title' => 'حذف إنجاز يومي'],
             ['name' => 'gender_visibility', 'title' => 'عرض الجنسين'],
+            // السرد التجريبي والاختبار التجريبي
+            ['name' => 'exams.show', 'title' => 'عرض الاختبارات'],
+            ['name' => 'exams.create', 'title' => 'إضافة اختبار'],
+            ['name' => 'exams.update', 'title' => 'إدخال وتعديل نتيجة الاختبار'],
+            ['name' => 'exams.delete', 'title' => 'حذف نتيجة الاختبار'],
+            // الاختبار النهائي ولجانه
+            ['name' => 'final_exam_candidates.show', 'title' => 'عرض المرشحين للاختبارات النهائية'],
+            ['name' => 'exam_committees.show', 'title' => 'عرض لجان الاختبارات'],
+            ['name' => 'exam_committees.create', 'title' => 'تشكيل لجنة اختبار'],
+            ['name' => 'exam_committees.update', 'title' => 'تعديل لجنة اختبار'],
+            ['name' => 'exam_committees.delete', 'title' => 'حذف لجنة اختبار'],
+            ['name' => 'exam_committees.assign_students', 'title' => 'تنسيب الطلاب للجنة وإزالتهم'],
+            ['name' => 'exam_committees.approve', 'title' => 'اعتماد اللجنة وإرسالها للجودة'],
+            ['name' => 'exam_committees.sync_quality', 'title' => 'تحديث حالة اللجنة وعلاماتها من الجودة'],
+            // مساقات الطالب
+            ['name' => 'student_subjects.freeze', 'title' => 'تجميد مساق الطالب وإلغاء تجميده'],
+            ['name' => 'student_subjects.pass', 'title' => 'اجتياز مساق الطالب'],
             // ['name' => 'student_plans.show', 'title' => 'عرض خطط الطلاب'],
             // ['name' => 'student_plans.create', 'title' => 'تسجيل طالب في خطة'],
             // ['name' => 'student_plans.update', 'title' => 'تعديل خطة طالب'],

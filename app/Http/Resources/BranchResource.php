@@ -16,6 +16,7 @@ class BranchResource extends JsonResource
     {
         return [
             'id'                    => $this->id,
+            'deleted_at' => $this->deleted_at?->toDateTimeString(),
             'standard_branch_id'    => $this->standard_branch_id,
             'name'                  => $this->name,
             'notes'                 => $this->notes,

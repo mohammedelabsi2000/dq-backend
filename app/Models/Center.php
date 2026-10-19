@@ -53,9 +53,18 @@ class Center extends Model
         $centerIds = $user->getScopeIds('center');
         $halaqaIds = $user->getScopeIds('halaqa');
 
-        // محفظ حلقة ← لا يرى أي مركز
+        // محفظ حلقة ← يرى مركز حلقته فقط (إن كانت حلقته مرتبطة بمركز، وإلا فلا شيء)
         if ($halaqaIds->isNotEmpty()) {
-            return $query->whereRaw('1 = 0');
+            $centerIdsFromHalaqa = Halaqa::whereIn('id', $halaqaIds)
+                ->select('reference_type', 'reference_id')
+                ->get()
+                ->filter(fn ($h) => $h->reference_type?->value === 'center')
+                ->pluck('reference_id')
+                ->unique();
+
+            return $centerIdsFromHalaqa->isEmpty()
+                ? $query->whereRaw('1 = 0')
+                : $query->whereIn('id', $centerIdsFromHalaqa);
         }
 
         // مدير مركز ← مراكزه فقط

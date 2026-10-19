@@ -33,6 +33,7 @@ class StudentSubjectResource extends JsonResource
             ),
 
             'result_status_id' => $this->result_status_id,
+            // 'result_status_label' => $this->whenLoaded('resultStatus', fn() => $this->resultStatus?->name),
             'result_status' => new ConstantResource(
                 $this->whenLoaded('resultStatus')
             ),

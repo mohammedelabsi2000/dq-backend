@@ -6,6 +6,7 @@ use App\Http\Requests\DQFormRequest;
 use App\Models\Center;
 use App\Models\Region;
 use App\Rules\GenderVisibilityRule;
+use Illuminate\Validation\Rule;
 
 class StoreCenterRequest extends DQFormRequest
 {
@@ -27,7 +28,14 @@ class StoreCenterRequest extends DQFormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            // اسم المركز لا يتكرر في نفس المنطقة لنفس الجنس
+            'name' => [
+                'required', 'string', 'max:255',
+                Rule::unique('centers', 'name')
+                    ->where('region_id', $this->input('region_id'))
+                    ->where('gender', $this->input('gender'))
+                    ->whereNull('deleted_at'),
+            ],
             'region_id' => 'required|exists:regions,id',
             'mosque_id' => 'nullable|exists:mosques,id',
             'notes' => 'nullable|string',
@@ -39,6 +47,7 @@ class StoreCenterRequest extends DQFormRequest
     {
         return [
             'name.required' => 'اسم المركز مطلوب',
+            'name.unique' => 'يوجد مركز بنفس الاسم في هذه المنطقة لنفس الجنس',
             'region_id.required' => 'يجب اختيار المنطقة',
             'region_id.exists' => 'المنطقة المحددة غير موجودة',
             'mosque_id.exists' => 'المسجد المحدد غير موجود',

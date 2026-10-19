@@ -5,6 +5,7 @@ namespace App\Concerns;
 use App\Models\Center;
 use App\Models\Halaqa;
 use App\Models\UserScope;
+use App\Support\ScopeCache;
 use Illuminate\Support\Collection;
 
 trait HasVisibilityScope
@@ -16,7 +17,7 @@ trait HasVisibilityScope
     
     public function isGlobalAdmin(): bool
     {
-        return $this->scopes()->active()->doesntExist();
+        return app(ScopeCache::class)->activeScopeIds($this)->isEmpty();
     }
 
     /**
@@ -52,13 +53,8 @@ trait HasVisibilityScope
             }
         }*/
 
-        $scopeIds = $this->scopes()
-            ->where('scope_type', $type)
-            ->active()
-            ->pluck('scope_id')
-            ->unique();    // ← مهم لأن نفس الـ scope قد يتكرر عبر أدوار مختلفة
-
-        return $scopeIds;
+        // النطاقات النشطة تُجلب مرة واحدة لكل طلب (فريدة، لأن نفس الـ scope قد يتكرر عبر أدوار مختلفة)
+        return app(ScopeCache::class)->activeScopeIds($this)->get($type, collect());
     }
 
     /**
@@ -92,11 +88,14 @@ trait HasVisibilityScope
             ->where('scope_type', $scopeType)
             ->where('scope_id', $scopeId)
             ->delete();
+
+        // الحذف عبر الاستعلام لا يطلق أحداث الموديل، فنفرّغ الذاكرة المؤقتة يدوياً
+        app(ScopeCache::class)->flush();
     }
 
     public function syncScopes(array $scopes): void
     {
-        UserScope::where('user_id', $this->id)->delete();
+        $this->clearScopes();
 
         foreach ($scopes as $scope) {
             $this->assignScope($scope['type'], $scope['id']);
@@ -106,5 +105,7 @@ trait HasVisibilityScope
     public function clearScopes(): void
     {
         UserScope::where('user_id', $this->id)->delete();
+
+        app(ScopeCache::class)->flush();
     }
 }

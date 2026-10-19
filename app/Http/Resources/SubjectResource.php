@@ -6,6 +6,7 @@ use App\Models\Quran\CustomJuz;
 use App\Models\Quran\Juz;
 use App\Models\Quran\Surah;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class SubjectResource extends JsonResource
 {
@@ -16,7 +17,8 @@ class SubjectResource extends JsonResource
             // 'track_id'    => $this->track_id,
             'subject_type_id' => $this->subject_type_id,
             'custom_juz_id' => json_decode($this->custom_juz_id),
-            // 'custom_juz_labels' => CustomJuz::find(json_decode($this->custom_juz_id))->pluck('name')->toArray(),
+            // أجزاء المادة مع أسمائها، بنفس ترتيب custom_juz_id
+            'custom_juzs' => $this->customJuzs(),
             'memorization_direction' => $this->memorization_direction,
             // 'memorization_direction_label' => $this->memorization_direction?->label,
 
@@ -47,6 +49,42 @@ class SubjectResource extends JsonResource
             'errors_count' => $this->errors_count,
             'standard_pass_mark' => $this->standard_pass_mark,
             'standard_subject_id' => $this->standard_subject_id,
+            // ترتيب ووزن المساق داخل مسار المستوى (تظهر فقط عند تحميل المساق عبر المسار)
+            'order' => $this->when(isset($this->pivot->order), fn() => $this->pivot->order),
+            'weight' => $this->when(isset($this->pivot->weight), fn() => (float) $this->pivot->weight),
+            // اتجاه المادة والأجزاء المخصَّص لهذه الخطة (null = اتجاه المادة الافتراضي)
+            'plan_memorization_direction' => $this->when(isset($this->pivot->level_track_id), fn() => $this->pivot->memorization_direction),
+            'juz_directions' => $this->when(isset($this->pivot->level_track_id), fn() => (object) (json_decode($this->pivot->juz_directions ?? '', true) ?: [])),
+            'student_subject' => $this->when(
+                $this->relationLoaded('currentStudentSubject') && $this->currentStudentSubject,
+                fn() => new StudentSubjectResource($this->currentStudentSubject)
+            ),
         ];
+    }
+
+    private function customJuzs(): array
+    {
+        $ids = array_map('intval', json_decode($this->custom_juz_id ?? '[]', true) ?: []);
+
+        if (!$ids) {
+            return [];
+        }
+
+        $names = CustomJuz::without(['start_surah', 'end_surah'])->whereIn('id', $ids)->pluck('name', 'id');
+
+        return array_values(array_map(
+            fn($id) => ['id' => $id, 'name' => $names[$id] ?? null],
+            $ids
+        ));
+    }
+
+    public function simple()
+    {
+        return $this->only(['id', 'title',]);
+    }
+
+    public function only(array $columns)
+    {
+        return Arr::only(($this)->resolve(), $columns);
     }
 }
